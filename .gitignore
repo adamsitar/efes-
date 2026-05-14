@@ -1,6 +1,12 @@
 # Build harness output
 fdp.source/COMPILE.LOG
 
+# Demo runtime data (mutated whenever any FDP program starts up — IO.PAS:165
+# appends a "System initialized" line, etc.). Tracked by mistake in the
+# initial snapshot; restored once and ignored from here on.
+fdp.demo/idd/ERR.LOG
+fdp.demo/idd/CRT.WIN
+
 # BPC build artifacts (regenerable; case-insensitive to catch .TPU/.tpu/.Tpu etc.)
 # Note: gitignore only affects untracked files, so .TPU files already in the
 # initial snapshot stay tracked and their modifications still register.
