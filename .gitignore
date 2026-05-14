@@ -3,9 +3,13 @@ fdp.source/COMPILE.LOG
 
 # Demo runtime data (mutated whenever any FDP program starts up — IO.PAS:165
 # appends a "System initialized" line, etc.). Tracked by mistake in the
-# initial snapshot; restored once and ignored from here on.
+# initial snapshot; restored once and untracked.
 fdp.demo/idd/ERR.LOG
 fdp.demo/idd/CRT.WIN
+
+# BP IDE / DOSBox state files (e.g., W000.WIN at fdp.source root).
+# Show up in unpredictable locations after a build run.
+fdp.source/W*.WIN
 
 # BPC build artifacts (regenerable; case-insensitive to catch .TPU/.tpu/.Tpu etc.)
 # Note: gitignore only affects untracked files, so .TPU files already in the
