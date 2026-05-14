@@ -1,2 +1,10 @@
 # Build harness output
 fdp.source/COMPILE.LOG
+
+# BPC build artifacts (regenerable; case-insensitive to catch .TPU/.tpu/.Tpu etc.)
+# Note: gitignore only affects untracked files, so .TPU files already in the
+# initial snapshot stay tracked and their modifications still register.
+fdp.source/**/*.[Tt][Pp][Uu]
+fdp.source/**/*.[Ee][Xx][Ee]
+fdp.source/**/*.[Mm][Aa][Pp]
+fdp.source/**/*.[Oo][Vv][Rr]
