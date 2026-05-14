@@ -1,0 +1,4 @@
+@echo off
+E:
+cd \FDP\OPL
+D:\BPC.EXE APP\OPL.PAS /GD > E:\COMPILE.LOG
