@@ -1,0 +1,277 @@
+{ ---------------------
+   DB
+  ---------------------
+}
+ procedure _codeDBB_FPLC (FPL: PDcFPL; buff: PDB_buff; head: PDB_head); far;
+     var   size: int;
+           s,t: string;
+           i: int;
+     begin
+       with FPL^ do
+         begin
+
+          { data
+          }
+           s:= '';
+           add_s(@idn[0],sizeof(idn), s,t);
+
+           add_s(@ssr[0],sizeof(ssr), s,t);
+           add_s(@ssr0[0],sizeof(ssr0), s,t);
+
+           add_s(@_8a,sizeof(_8a), s,t);
+           add_s(@_8b,sizeof(_8b), s,t);
+
+           add_s(@typ[0],sizeof(typ), s,t);
+
+           add_s(@com_[0],sizeof(com_), s,t);
+           add_s(@ssr_[0],sizeof(ssr_), s,t);
+
+           add_s(@rych,sizeof(rych), s,t);
+           add_s(@rych_,sizeof(rych_), s,t);
+
+           add_s(@vys,sizeof(vys), s,t);
+           add_s(@vys1,sizeof(vys1), s,t);
+           add_s(@vys1_a,sizeof(vys1_a), s,t);
+           add_s(@vysO,sizeof(vysO), s,t);
+           add_s(@vysO_a,sizeof(vysO_a), s,t);
+           add_s(@vysH,sizeof(vysH), s,t);
+
+           add_s(@start,sizeof(start), s,t);
+           add_s(@start_,sizeof(start_), s,t);
+           add_s(@prist,sizeof(prist), s,t);
+
+           add_s(@inf[0],sizeof(inf), s,t);
+
+           add_s(@date,sizeof(date), s,t);
+           add_s(@eet,sizeof(eet), s,t);
+
+           add_s(@stt[0],sizeof(stt), s,t);
+
+           add_s(@cor_,sizeof(cor_), s,t);
+           add_s(@sec,sizeof(sec), s,t);
+           add_s(@TRG,sizeof(TRG), s,t);
+           add_s(@RDP,sizeof(RDP), s,t);
+           add_s(@LAM,sizeof(LAM), s,t);
+           add_s(@przn,sizeof(przn), s,t);
+
+           {$IFDEF PVO}
+            add_s(@rec_cas,sizeof(rec_cas), s,t);
+           {$ENDIF}
+
+           {$IFDEF RVSM}
+            add_s(@_80,sizeof(_80), s,t);
+            add_s(@_81[0],sizeof(_81), s,t);
+           {$ENDIF}
+
+           str_toDBstr_(s,buff^[db_cFPL_data]);
+
+          { trat
+          }
+           s:= '';
+           add_s(@bodov,sizeof(bodov), s,t);
+           for i:= 0 to minimum(max_bod_string,bodov)-1 do add_s(@trat[i],sizeof(trat[i]), s,t);
+           str_toDBstr_(s,buff^[db_cFPL_15_1]);
+           s:= '';
+           for i:= minimum(max_bod_string,bodov) to bodov-1 do add_s(@trat[i],sizeof(trat[i]), s,t);
+           str_toDBstr_(s,buff^[db_cFPL_15_2]);
+
+          { ine udaje, pri kazdej zmene upravit i
+               "_codeDBB_FPLCrec"
+          }
+           s:= '';
+           add_s(@rec,sizeof(rec), s,t);
+           str_toDBstr_(s,buff^[db_cFPL_ine])
+         end;
+     end;
+
+
+ procedure _decodeDBB_FPLC (buff: PDB_buff; FPL: PDcFPL; head: PDB_head); far;
+     var   size : int;
+           s,t : string;
+           i : int;
+           p : pchars;
+     begin
+       with FPL^ do
+         begin
+
+          { data
+          }
+           s:= DBstr_to_str_(buff^[db_cFPL_data]); p:= @s[1];
+           get_s(p, @idn[0],sizeof(idn));
+
+           get_s(p, @ssr[0],sizeof(ssr));
+           get_s(p, @ssr0[0],sizeof(ssr0));
+
+           get_s(p, @_8a,sizeof(_8a));
+           get_s(p, @_8b,sizeof(_8b));
+
+           get_s(p, @typ[0],sizeof(typ));
+
+           get_s(p, @com_[0],sizeof(com_));
+           get_s(p, @ssr_[0],sizeof(ssr_));
+
+           get_s(p, @rych,sizeof(rych));
+           get_s(p, @rych_,sizeof(rych_));
+
+           get_s(p, @vys,sizeof(vys));
+           get_s(p, @vys1,sizeof(vys1));
+           get_s(p, @vys1_a,sizeof(vys1_a));
+           get_s(p, @vysO,sizeof(vysO));
+           get_s(p, @vysO_a,sizeof(vysO_a));
+           get_s(p, @vysH,sizeof(vysH));
+
+           get_s(p, @start,sizeof(start));
+           get_s(p, @start_,sizeof(start_));
+           get_s(p, @prist,sizeof(prist));
+
+           get_s(p, @inf[0],sizeof(inf));
+
+           get_s(p, @date,sizeof(date));
+           get_s(p, @eet,sizeof(eet));
+
+           get_s(p, @stt[0],sizeof(stt));
+
+           get_s(p, @cor_,sizeof(cor_));
+           get_s(p, @sec,sizeof(sec));
+           get_s(p, @TRG,sizeof(TRG));
+           get_s(p, @RDP,sizeof(RDP));
+           get_s(p, @LAM,sizeof(LAM));
+           get_s(p, @przn,sizeof(przn));
+
+           {$IFDEF PVO}
+            get_s(p, @rec_cas,sizeof(rec_cas));
+           {$ENDIF}
+
+           {$IFDEF RVSM}
+            get_s(p,@_80,sizeof(_80));
+            get_s(p,@_81[0],sizeof(_81));
+           {$ENDIF}
+
+          { trat
+          }
+           s:= DBstr_to_str_(buff^[db_cFPL_15_1]); p:= @s[1];
+           get_s(p, @bodov,sizeof(bodov));
+           for i:= 0 to minimum(max_bod_string,bodov)-1 do get_s(p, @trat[i],sizeof(trat[i]));
+
+           s:= DBstr_to_str_(buff^[db_cFPL_15_2]); p:= @s[1];
+           for i:= minimum(max_bod_string,bodov) to bodov-1 do get_s(p, @trat[i],sizeof(trat[i]));
+
+          { prevzatie spravy
+          }
+           s:= DBstr_to_str_(buff^[db_cFPL_ine]); p:= @s[1];
+           get_s(p, @rec,sizeof(rec));
+         end;
+     end;
+
+
+ procedure _codeDBT_FPLC(FPL: PDcFPL; buff: PDB_buff; head: PDB_head); far;
+     var   v : word; v_,v_a : char;
+           s : string;
+
+     function code_15i(_od,_do: int): string;
+        var   s : string;
+              i : int;
+        begin
+          s:= '';
+          for i:= _od to _do do with FPL^,FPL^.trat[i] do
+              s:= s + icao_NXIT + code_l4_bod_(kod, h,m, vys,vysOB,vysab, v,v_,v_a);
+          code_15i:= s
+        end;
+
+     begin
+       with FPL^ do
+         begin
+           str_toDBstr(              code_7_FPLC(FPL)
+                        + icao_ARR + code_l4_8(_8a,_8b, true)
+                        + icao_ARR + code_l4_9(typ,false)
+                        + icao_ARR + code_l4_10(com_,ssr_) {code_l4_10(com_)}
+                        + icao_ARR + code_l4_13(start.kod, start.h,start.m, start_.h,start_.m, true)
+                        + icao_ARR + code_14_FPLC(FPL)
+                        + icao_ARR + code_16_FPLC(FPL)
+                        + icao_ARR + code_18_FPLC(FPL)
+                        + icao_ARR + code_19_FPLC(FPL),
+                       buff^[db_cFPL_data]
+                      );
+
+           v:= vys; v_:= vysOB; v_a:= ' ';
+           str_toDBstr(  code_l4_rych_vys(rych,rych_,vys,vysOB,0,false)
+                       + icao_NXIT + code_15i(0,minimum(max_bod_string,bodov)-1),
+                         buff^[db_cFPL_15_1]
+                      );
+           str_toDBstr(  code_15i(minimum(max_bod_string,bodov),bodov-1),
+                         buff^[db_cFPL_15_2]
+                      );
+
+           s:=                                inttostr(FPL^.cor_,1,1)
+                {$IFDEF SECTORS} + icao_ARR + cstr(FPL^.sec and ($FF xor s_on),0) {$ENDIF}
+                {$IFDEF NET}     + icao_ARR + rectostr(FPL^.rec)                  {$ENDIF}
+                ;
+           str_toDBstr(s,buff^[db_cFPL_ine])
+         end
+     end;
+
+ procedure _decodeDBT_FPLC(buff: PDB_buff; FPL: PDcFPL; head: PDB_head); far;
+     var   s,t : string;
+           v : word; v_,v_a : char;
+           i : int;
+
+     procedure decode_15i(s: string);
+         var   i,k : int;
+         begin
+           k:= GetStrItems(s,[icao_NXIT]);
+           with FPL^ do
+             begin
+               i:= 0; while (i<k) and (bodov<max_bod_FPLC) do
+                 begin
+                   decode_l4_bod_ (GetStr(s,i+1,[icao_NXIT]),
+                                   trat[bodov].kod, trat[bodov].h,trat[bodov].m,
+                                   trat[bodov].vys, v_, trat[bodov].vysab,
+                                   v,v_,v_a
+                                  );
+                   inc(bodov);
+                   inc(i)
+                 end
+             end
+         end;
+
+     begin
+       fillchar(FPL^,sizeof(FPL^),0);
+
+       with FPL^ do
+         begin
+           s:= DBstr_to_str (buff^[db_cFPL_data]);
+
+           decode_7_FPLC  (getstr(s,1,[icao_ARR]), FPL);
+           decode_l4_8    (getstr(s,2,[icao_ARR]), _8a,_8b);
+           typ:=          (getstr(s,3,[icao_ARR]));
+           decode_l4_10   (getstr(s,4,[icao_ARR]), com_,ssr_);
+           decode_l4_13   (getstr(s,5,[icao_ARR]), start.kod,start.h,start.m, start_.h,start_.m);
+           decode_14_FPLC (getstr(s,6,[icao_ARR]), FPL);
+           decode_16_FPLC (getstr(s,7,[icao_ARR]), FPL);
+           decode_18_FPLC (getstr(s,8,[icao_ARR]), FPL);
+           decode_19_FPLC (getstr(s,9,[icao_ARR]), FPL);
+
+           s:= DBstr_to_str (buff^[db_cFPL_15_1]);
+           t:= getstr(s,1,[icao_NXIT]);
+           decode_l4_rych_vys (t, rych,rych_, vys,v_);
+           s:= copy(s,length(t)+1,length(s)-length(t));
+
+           bodov:= 0; v:= vys; v_:= v_; v_a:= ' ';
+           decode_15i(s);
+
+           s:= DBstr_to_str (buff^[db_cFPL_15_2]);
+           decode_15i(s);
+
+           s:= DBstr_to_str (buff^[db_cFPL_ine]);
+           FPL^.cor_:= getint(s,1,[icao_ARR]);
+           i:= 2;
+           {$IFDEF SECTORS}
+             t:= cut_(getstr(s,i,[icao_ARR]));
+             FPL^.sec:= scis(t,1,length(t)) and ($FF xor s_on);
+             inc(i);
+           {$ENDIF}
+           {$IFDEF NET}
+             strtorec(getstr(s,i,[icao_ARR]), FPL^.rec);
+           {$ENDIF}
+       end;
+     end;

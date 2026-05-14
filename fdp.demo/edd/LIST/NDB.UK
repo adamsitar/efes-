@@ -1,0 +1,361 @@
+; -------------------------------
+;  Ukraina En-route points
+; -------------------------------
+
+  ABABO          ; 48 29 06  36 32 00
+  ABRAD          ; 50 36 00  26 09 00
+  ABROK          ; 51 19 00  28 48 00
+  ABSIN          ; 45 54 00  33 45 00
+  AKONA          ; 44 13 00  34 47 00
+  AKROS          ; 48 26 00  31 05 00
+  AL             ; 44 40 30  34 23 54  ; Alushta         (AL)
+  ANGOL          ; 42 57 00  29 00 00
+  ANIRI          ; 51 45 00  25 43 00
+  ARDOK          ; 43 30 00  34 32 00
+  ARZAN          ; 46 00 00  33 35 00
+  ATNOS          ; 46 06 06  30 06 42
+  AU             ; 48 34 00  34 28 00  ; Auly            (AU)
+
+  BABEN          ; 50 15 00  32 15 00
+  BADON          ; 48 44 12  27 02 06
+  BAGAN          ; 42 15 00  33 35 00  ;
+  BAKNA          ; 46 29 00  31 33 00
+  BALIN          ; 48 52 00  26 40 00
+  BANAR          ; 50 32 30  27 15 18
+  BANIT          ; 46 37 06  31 32 00
+  BATON          ; 47 48 00  39 44 00
+  BEDAN          ; 49 13 00  39 34 00
+  BELOL          ; 49 42 00  39 01 00
+  BERDA          ; 46 24 00  37 15 36
+  BE             ; 49 25 48  24 54 12  ; Berezhany       (BE)
+  BETEG          ; 45 11 00  36 23 00
+  BB             ; 49 38 36  24 16 54  ; Bibrka          (BB)
+  BIDAR          ; 44 35 00  35 00 00
+
+  EA             ; 47 58 00  39 44 00  ; Biriukove       (EA)
+  BG             ; 50 37 42  30 53 30  ; Bohdanivka      (BG)
+  BL             ; 45 38 00  28 40 00
+
+  BORAS          ; 51 28 00  29 35 18
+  BRATY          ; 47 57 00  31 37 00
+  BN             ; 49 26 30  23 25 18  ; Bronytsia       (BN)
+
+  BUGOR          ; 52 18 00  32 37 06
+  BUGAZ          ; 46 04 00  30 26 00
+  BUKOV          ; 47 57 06  25 57 30
+  BULAP          ; 50 20 42  30 53 42
+
+  BULIG          ; 47 58 00  36 13 00
+  BURDA          ; 46 49 00  36 46 00
+
+  CH             ; 50 27 00  28 42 00  ; Cherniakhiv     (CH)
+  CY             ; 50 04 00  31 24 00  ; Chervonyi       (CY)
+
+  DA             ; 50 51 42  31 14 36  ; Danivka         (DA)
+  DANKA          ; 48 57 00  35 04 00
+  DW             ; 48 30 00  39 51 00
+  DEKAD          ; 48 57 00  33 22 00
+  DENAK          ; 46 08 42  30 53 30
+  DENUS          ; 43 15 00  36 30 00
+  DERAN          ; 49 16 00  27 26 00
+  DIBED          ; 49 53 18  23 03 30
+  DIBRO          ; 51 42 00  26 07 00
+  DIRAK          ; 42 50 00  34 07 06
+  DM             ; 45 28 42  35 03 18  ; Dmytrivka       (DM)
+  DOBOR          ; 48 24 48  22 41 00
+  DO             ; 45 23 00  33 22 00  ; Dobrushyn       (DO)
+  DK             ; 47 47 36  37 37 54  ; Dokuchaievsk    (DK)
+  DOMEK          ; 48 04 00  37 44 00
+  DOMNA          ; 43 48 00  29 30 00
+
+  EKTIN          ; 48 32 00  32 17 00
+  ELDOP          ; 48 03 00  33 13 00
+  ERBIS          ; 51 04 18  35 19 48
+  ERKAD          ; 48 12 00  33 34 00
+
+  FAROS          ; 44 30 00  30 07 00
+  FASAD          ; 47 33 18  38 18 48
+  FAZAN          ; 50 22 00  36 14 12
+  FORMA          ; 50 21 18  35 41 54
+  FUROR          ; 47 50 00  39 40 30
+
+  GAMAN          ; 45 01 12  36 34 06
+  GAWOL          ; 47 57 36  39 42 00
+  GAWOR          ; 49 15 00  28 37 00
+  GIGAR          ; 44 06 00  34 09 42
+  GINDA          ; 43 38 00  29 20 00
+  GOLIN          ; 47 31 00  34 21 00
+  GONED          ; 47 54 00  39 00 00
+  GONUS          ; 46 40 00  32 30 00
+  GOPAK          ; 48 47 36  25 36 30
+  GREKA          ; 44 20 36  36 31 30
+  GRENK          ; 45 46 00  28 42 00
+  GUKMA          ; 44 20 00  30 00 00
+  GE             ; 49 50 00  31 51 00  ; Helømiaziv      (GE)
+
+  HIMIK          ; 49 21 00  26 56 00
+  HORTA          ; 47 52 00  35 19 00
+
+  IBROK          ; 44 03 00  32 24 00
+  INGUR          ; 45 00 00  32 45 00
+  INTEK          ; 44 09 30  34 30 36
+  IRMAL          ; 45 19 24  28 49 12
+  IVF            ; 48 53 00  24 41 00  ; Ivano-Frankivsk (IVF)
+  IZMAL          ; 45 24 00  28 50 00
+
+  KH             ; 46 48 00  33 30 00  ; Kakhovka        (KH)
+  KL             ; 49 39 30  25 08 30  ; Kalynivka       (KL)
+
+  LS             ; 48 41 36  26 36 24  ; Kamianetsø-     (LS)
+  ;                                      Podiløskyi
+
+  KA             ; 49 45 00  31 27 00  ; Kaniv           (KA)
+
+  KAZAT          ; 49 43 00  28 50 00
+  KEDON          ; 48 11 42  39 56 36
+  KEDUB          ; 50 24 00  30 27 00
+
+  KEFIR          ; 48 25 00  28 51 54
+  KEMES          ; 46 48 00  34 55 00
+  KEMUN          ; 48 23 48  36 51 00
+  KERTA          ; 43 45 00  30 22 00
+  KESAM          ; 47 46 00  32 50 00
+
+  HW             ; 48 34 00  31 26 00  ; Khmiliove       (HW)
+  HT             ; 48 11 00  23 20 00  ; Khust           (HT)
+
+  KIMBA          ; 43 45 00  36 30 00
+  KIROW          ; 48 38 00  38 38 00
+  KIWOK          ; 46 29 00  29 49 00
+  KOKUP          ; 49 44 00  23 49 00
+  KOLYK          ; 51 23 00  31 38 00
+  KM             ; 46 16 00  35 01 00  ; Komisarivka     (KM)
+
+  KORAT          ; 43 15 00  29 00 00
+  KORES          ; 50 37 00  27 09 00
+  KORNA          ; 49 26 00  31 15 00
+  KOROG          ; 45 22 00  36 25 00
+  KORUN          ; 50 26 00  29 24 00
+  KOSAK          ; 46 19 00  31 32 00
+  KO             ; 50 56 48  30 58 42  ; Koshany         (KO)
+  KOSNA          ; 48 28 00  31 25 00
+  KOTUR          ; 45 41 00  33 09 00
+  KW             ; 49 55 00  35 33 00  ; Koviahy         (KW)
+  KOWAR          ; 51 29 00  31 38 00
+  KK             ; 48 18 12  37 12 00  ; Krasno-armiisk  (KK)
+
+  GR             ; 49 23 00  35 27 00  ; Krasnohrad      (GR)
+
+  LS             ; 48 11 00  38 55 00  ; Krasnyi Luch    (LS)
+
+  KRIHA          ; 48 22 00  34 28 00
+  KUBIR          ; 47 22 00  36 39 00
+  KUBOK          ; 50 19 00  36 49 42
+  KUROK          ; 50 17 06  36 35 18
+  KUZUK          ; 50 41 48  25 20 42
+
+  LABOG          ; 49 42 48  32 19 00
+  LADIK          ; 49 21 00  35 05 48
+  LAKTA          ; 51 27 00  30 17 00
+  LANIL          ; 45 18 00  35 46 00
+  LANPA          ; 49 37 30  26 01 06
+  LASKA          ; 47 51 06  39 45 54
+  LENKA          ; 46 22 00  33 32 00
+  LETOR          ; 50 46 00  30 48 00
+  LIMAN          ; 42 50 00  32 07 00
+  LISKA          ; 46 19 24  30 45 24
+  LB             ; 45 38 00  34 56 00  ; Liubymivka      (LB)
+  LT             ; 50 42 12  30 23 42  ; Liutizh         (LT)
+  LOKAR          ; 47 48 24  29 34 24
+  LOMIK          ; 44 21 24  34 28 06
+  LONLA          ; 48 20 00  22 19 00
+  LUCIK          ; 50 41 00  25 29 00
+  LUGAT          ; 48 25 00  39 23 00
+
+  LUGIR          ; 49 48 42  23 57 18
+  LUKIR          ; 45 30 00  33 15 00
+  LURIK          ; 48 16 00  25 58 00
+
+  LUTOS          ; 45 40 54  31 14 12
+  LI             ; 49 22 00  36 13 00  ; Lykhacheve      (LI)
+
+  MABAT          ; 51 14 00  30 26 48
+  MAGOR          ; 44 45 00  34 03 36
+  MAKUN          ; 43 50 00  34 11 00
+  MALBE          ; 48 49 30  22 22 36
+  MAPTA          ; 50 23 00  28 17 00
+  MASOL          ; 49 58 06  38 34 06
+  MATEG          ; 49 56 00  36 17 00
+
+  MATOR          ; 48 43 00  37 37 00
+  MILKY          ; 48 57 00  31 15 00
+  MG             ; 47 09 00  36 17 00
+  MO             ; 48 27 00  27 50 00  ; Mohyliv-Podiløskyi  (MO)
+  MOKAD          ; 46 46 36  31 21 00
+  MUKUN          ; 49 16 00  32 40 00
+
+  NS             ; 48 12 00  35 09 00
+
+  MYKOL          ; 47 02 00  36 52 00
+
+  NL             ; 44 58 00  33 37 12  ; Mykolaivka      (NL)
+
+  NADIR          ; 43 50 30  34 34 30
+  NALEG          ; 50 18 48  36 29 06
+  NALEM          : 47 57 00  39 48 30
+  NASOK          ; 47 07 00  38 05 00
+  NE             ; 48 58 00  28 51 00  ; Nemyriv         (NE)
+  NIKIG          ; 49 25 00  32 00 00
+  NIKOD          ; 49 01 06  35 50 00
+  NIKRA          ; 49 24 00  39 31 00
+  NILAR          ; 46 17 00  32 39 00
+  NOGRO          ; 48 23 00  32 39 00
+  NORAN          ; 42 49 00  30 00 00
+  NOWIK          ; 48 18 00  31 32 00
+
+  ODRAL          ; 47 04 00  37 27 00
+  OGLAR          ; 51 44 00  25 53 00
+  OGONA          ; 45 45 00  35 07 00
+  OKBAT          ; 46 47 00  33 03 00
+  OLEKA          ; 50 24 00  34 44 00
+  OLENA          ; 48 57 00  27 13 00
+  OLYKA          ; 50 44 00  25 48 00
+  ORLAN          ; 43 51 00  35 05 00
+  OWIDA          ; 49 23 00  32 41 00
+
+  PADKA          ; 46 10 00  35 13 00
+  PALER          ; 45 09 12  36 32 42
+  PALTA          ; 49 34 00  34 23 00
+  PARIK          ; 51 16 00  36 04 00
+  PA             ; 46 42 00  31 54 00  ; Parutyne        (PA)
+  PW             ; 47 44 54  37 13 30  ; Pavlivka        (PW)
+  PEGAS          ; 45 54 18  31 46 36
+  PEKIT          ; 49 18 48  33 37 00
+  PENAK          ; 42 44 00  34 03 00
+  PERAL          ; 45 45 00  34 35 00
+  PEREG          ; 48 49 00  24 12 00
+  PERUN          ; 44 26 00  32 08 00
+  PESON          ; 47 03 00  31 55 00
+  PETRA          ; 48 18 00  38 53 00
+  PI             ; 49 52 00  31 08 00  ; Pii             (PI)
+  PIKAK          ; 44 09 00  34 22 00
+  PILAS          ; 46 45 00  35 40 00
+  PIMEN          ; 52 16 30  32 40 24
+  PS             ; 48 12 00  28 52 00  ; Pishchanka      (PS)
+  PISOK          ; 50 40 48  29 40 00
+  POBAN          ; 50 22 06  31 50 30
+  POGER          ; 49 33 00  29 11 00
+  POLKA          ; 49 04 06  25 59 30
+  POLOS          ; 49 40 00  27 54 00
+  POROG          ; 48 07 42  39 53 30
+  PR             ; 48 19 30  37 41 24  ; Pravdivka       (PR)
+
+  RABEN          ; 44 00 00  33 10 00
+  RAHMA          ; 47 48 00  33 14 00
+  RALAP          ; 47 27 00  34 48 00
+  RALOS          ; 49 09 00  35 36 00
+  RS             ; 50 13 00  33 53 00  ; Rashivka        (RS)
+  RASIL          ; 45 22 00  31 28 00
+  RASPU          ; 46 41 00  37 25 36
+  REMBO          ; 46 25 36  30 40 42
+
+  REMKA          ; 42 32 00  36 30 00
+  RENAT          ; 44 02 00  36 30 24
+  REPAH          ; 50 51 00  35 26 00
+  RILSU          ; 50 09 36  31 49 30
+  RITET          ; 46 46 00  32 53 00
+  RIZMA          ; 51 03 00  36 51 30
+  ROKOT          ; 48 51 00  36 50 00
+  ROMOR          ; 43 56 00  29 10 00
+  ROTMA          ; 49 08 00  31 41 00
+  RUDON          ; 42 57 00  30 00 00
+  RUKOL          ; 44 12 42  34 09 12
+  RUMUK          ; 48 01 36  23 20 36
+
+  SABAB          ; 47 36 00  33 56 00
+  SADKO          ; 48 05 00  30 33 00
+  SAFRA          ; 42 47 00  33 15 00
+  SEDUL          ; 43 41 00  36 30 00
+  SM             ; 52 12 00  32 33 00  ; Semenivka       (SM)
+  SR             ; 48 32 00  22 31 00  ; Serednie        (SR)
+  SEZON          ; 49 55 24  38 03 36
+  SFERA          ; 50 26 48  36 01 48
+  SW             ; 50 11 00  27 03 00  ; Shepetivka      (SW)
+  SH             ; 47 24 00  30 17 00  ; Shyriaieve      (SH)
+  SIFON          ; 46 57 00  38 10 00
+  SILAR          ; 43 17 00  32 55 00
+  SITNA          ; 49 03 00  31 33 00
+  SK             ; 46 08 00  32 55 00  ; Skadovsøk       (SK)
+  SKALA          ; 44 59 18  33 03 54
+  SOLNU          ; 49 17 48  25 23 54
+  SL             ; 50 11 00  29 34 00  ; Soloviivka      (SL)
+  SOLRO          ; 48 06 06  39 37 42
+  SONEP          ; 45 02 18  33 58 54
+  SORNA          ; 51 08 48  31 13 18
+  SV             ; 49 24 00  31 05 00  ; Stebliv         (SV)
+
+  STENA          ; 49 44 24  39 22 00
+  STOWA          ; 51 24 00  31 09 00
+  SUBAN          ; 45 11 12  32 06 12
+  SUMKA          ; 50 52 00  34 46 00
+  SUROK          ; 46 36 00  32 06 00
+
+  TAGAN          ; 45 30 00  33 24 00
+  TAKON          ; 48 36 12  23 11 18
+  TALIK          ; 42 15 00  33 46 00
+  TAMAK          ; 47 51 24  39 13 06
+  TARAS          ; 48 25 00  22 15 00
+  TARKA          ; 45 51 54  31 06 00
+
+  KR             ; 50 36 00  29 17 00  ; Tchervono-birka (KR)
+
+  LE             ; 44 50 00  34 15 00  ; Tchervono-lissia(LE)
+
+  TEOFA          ; 49 50 00  26 25 00
+  TERNA          ; 49 32 00  25 42 00
+  TERNY          ; 48 08 00  33 33 00
+  TESLA          ; 45 48 30  31 33 24
+  TIMOS          ; 48 21 00  35 06 00
+  TIRIS          ; 48 39 06  22 15 48
+  TITAG          ; 45 46 00  33 30 00
+  TOBON          ; 49 58 06  30 25 00
+  TM             ; 47 49 00  34 44 00  ; Tomakivka       (TM)
+  TOMOR          ; 50 16 00  28 44 00
+  TP             ; 48 57 00  34 47 00  ; Topchyne        (TP)
+  TOROS          ; 48 31 06  39 51 48
+  TR             ; 51 07 00  30 46 00  ; Tpypilia
+  TUMUK          ; 48 41 00  25 30 00
+  TURBA          ; 46 41 54  29 46 30
+
+  UGLED          ; 48 04 18  39 20 00
+  UKSAT          ; 50 30 42  27 45 54
+  ULGOT          ; 45 35 00  30 54 00
+  USTIL          ; 50 50 00  24 06 30
+  UG             ; 48 38 00  22 15 00  ; Uzhhorod        (UG)
+
+
+  KU             ; 49 07 00  33 28 00  ; Velyka Kahnovka (KU)
+
+  BW             ; 48 33 00  31 52 00  ; Velyka Viska    (BW)
+
+  DE             ; 50 01 00  26 02 00  ; Velyki          (DE)
+                                       ; Dederkaly
+
+  VI             ; 48 56 00  23 03 00  ; Verkhnie        (VI)
+                                       ; Vysotsøke
+  WM             ; 51 27 00  26 08 00  ; Volodymyretsø   (WM)
+
+  VILAN          ; 43 15 00  36 30 00
+
+  WERES          ; 48 52 00  38 06 00
+  WEROD          ; 48 54 00  38 32 00
+  WOLOD          ; 50 45 30  24 47 42
+
+  JA             ; 50 15 00  31 47 00  ; Yahotyn         (JA)
+  JL             ; 44 29 06  34 08 12  ; Yalta           (JL)
+
+  ZABAD          ; 52 00 00  25 42 00
+  ZANOS          ; 50 04 30  38 13 36
+  ZAWAL          ; 48 26 00  38 50 00
+  ZL             ; 49 48 12  24 54 12  ; Zolochiv        (ZL)
+  ZU             ; 48 00 00  38 15 00  ; Zuhres          (ZU)

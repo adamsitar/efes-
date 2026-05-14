@@ -1,0 +1,36 @@
+{
+  DB pracuje s internym bufferom typu TDB_buff=array[0..riadkov] of string.
+  (De)Kodovacia procedura k nemu pristupuje cez adresu p=@TDB_buff[1],
+  pricom ho pretypuje na S[1..riadkov] of string[znakov], kde S[0] = kluc.
+  Kododovacia procedura moze vyuzit max $FF-2 byte pre zapis polozky.
+
+  Ak budem upravovat na dlzku polozky<>dlz_desc upravit Reset,Rewrite...
+  ... optimalne by bolo prisposonit dlzku hlavicky dlzke zaznamu ...
+  ... kluc je zapisany v tvare ZAC_KEY+KLUC+KON_KEY, ak je NIL
+
+  Obmedzenie: data_item v TDB vo funkciach citaj a hladaj je naplnena
+              datami. Ak vstupuje s alokovanymi polozkami (Pchar), su
+              prepisane a pamat sa neodalokuje.
+
+  Doplnit:
+
+    a) prehladanie podla kluca alebo obsahu
+    b) doplnenie druheho kluca - kde su meniace sa polozky: status a potvrdenie
+
+
+  Zatial som nenastavoval semaphory do objektu DB, pocitam s kontrolou zvonku...
+
+
+  Poznamky :
+  ---------
+
+    !1. V 0.poli V/V buffera je vzdy jeho dlzka, rozdiel medzi nou a realnou dlzkou
+        je zarovnany medzerami
+
+    !2. Dlzka dat je maximalne sizeof(buff)-2, pretoze do poslednych dvoch byte
+        sa kvoli citatelnosti zapisu kbCR+kbLF
+
+    !3. Vo funkciach pre "zapis a citanie" sa nastavuje ochrana DB
+        pred porusenim "ReadOnly", ak nahodou nezapisuje/nenacitava korektne,
+        zrusit ochranu a znova otestovat
+}

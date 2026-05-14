@@ -1,0 +1,35 @@
+
+{ --------
+   10
+  --------
+}
+ function code_l4_10_ (_10a,_10b: string; _7b10b: char): string;
+    begin
+      if _AFIL_10 then
+         begin
+           if cut_(_10a)='' then
+              {$IFDEF ATCA} _10a:= eqp_STD
+              {$ELSE}       _10a:= eqp_NONE
+              {$ENDIF};
+           if cut_(_10b)='' then
+              if _7b10b<>' ' then _10b:= _7b10b
+              else {$IFDEF ATCA}  _10b:= mod_A
+                   {$ELSE}        _10b:= mod_N
+                   {$ENDIF};
+         end;
+      code_l4_10_:= _10a+icao_NXT+_10b;
+      _AFIL_10:= true
+    end;
+
+ function code_l4_10 (_10a,_10b: string): string;
+    begin
+      code_l4_10:= code_l4_10_(_10a,_10b, ' ')
+    end;
+
+ procedure decode_l4_10 (_10: string; var _10a,_10b: string);
+     begin
+       {_10:= mtks_rus_to_lat(_10);}
+       _10a:= copy(getstr(_10,1,[icao_NXT]),1,kod_10a);
+       _10b:= copy(getstr(_10,2,[icao_NXT]),1,kod_10b);
+     end;
+

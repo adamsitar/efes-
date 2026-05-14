@@ -1,0 +1,1580 @@
+;"ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
+;" íàèõ à éÅéáçÄóÖçàÖ íàèÄ ÇéáÑìòçéÉé ëìÑçÄ
+;"ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
+
+; "ƒƒƒƒ
+; " Ä
+; "ƒƒƒƒ
+
+   Äç2       Ä≠-2        / AN2
+   Äç2å      Ä≠-2å       / AN2
+   Äç8       Ä≠-8
+   Äç12      Ä≠-12       / AN12
+   Äç22      Ä≠-22       / AN22
+   Äç24      Ä≠-24       / AN24
+   Äç26      Ä≠-26       / AN26
+   Äç38      Ä≠-38       / AN28
+   Äç28      Ä≠-28       / AN28
+   Äç30      Ä≠-30       / AN30
+   Äç72      Ä≠-72       / AN72
+   Äç74      Ä≠-74       / AN74
+   Ä124      Ä≠-124      / AN2R
+   Ä225      Ä≠-225      / AN5M
+
+
+; "ƒƒƒƒ
+; " Ç
+; "ƒƒƒƒ
+
+   Ç03       Ç-3
+
+
+; "ƒƒƒƒ
+; " à
+; "ƒƒƒƒ
+
+   àã14      à´-14
+   àã18      à´-18
+   àã62      à´-62
+   à62å      à´-62å
+   àã76      à´-76
+   à76í      à´-76í
+   àã86      à´-86
+   àã96      à´-96
+
+
+; "ƒƒƒƒ
+; " ä
+; "ƒƒƒƒ
+
+   äÄ11      ä†-11       / KA11
+   äÄ26      ä†-26       / KA26
+   äÄ32      ä†-32       / KA32
+   ä126      ä†-126
+
+
+; "ƒƒƒƒ
+; " ã
+; "ƒƒƒƒ
+
+   ã410      ã-410       / O410
+   ã610      ã-610       / O610
+
+
+; "ƒƒƒƒ
+; " å
+; "ƒƒƒƒ
+
+   åà1       å®-1        / MI1
+   åà2       å®-2        / MI2
+   åà4       å®-4        / MI4
+   åà6       å®-6        / MI6
+   åà8       å®-8        / MI8
+   åà10      å®-10       / MI10
+   åà17      å®-17       / MI17
+   åà24      å®-24       / MI24
+   åà26      å®-26       / MI26
+   åà29      å®-29       / MI29
+
+
+; "ƒƒƒƒ
+; " ü
+; "ƒƒƒƒ
+
+   üä18      ü™-18       / YK18
+   üä40      ü™-40       / YK40
+   üä42      ü™-42       / YK42
+
+   íì34      í„-134      / TU34
+   í34Ä      í„-134Ä     / TU34
+   í34Å      í„-134Å     / TU34
+   íì54      í„-154      / TU54
+   í54ë      í„-154ë     / TU54
+   í54å      í„-154å     / TU54
+   í204      í„-204      / TUP4
+
+
+
+;"ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
+;" AIRCRAFT CODES BY ICAO
+;"ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
+
+; "ƒƒƒƒ
+; " A
+; "ƒƒƒƒ
+
+  A1/M
+  A109/L      A109/109A/109All
+  A10A/L
+  A204/L      AB 204/B
+  A205/L      AB 205/A-1
+  A206/L      AB 206B/1
+  A212/L      AB212
+  A22J/L      C22J
+  A26/M
+  A3/M
+  A37/L
+  A4/M
+  A412/L      AB12/Griffon
+  A47G/L      AB47G/G-2/G-2A/G-2A1/G-3B1/G-4/G-4A
+  A47J/L      AB47J/J-2A/J-3/J-3B-1
+  A5/M
+  A6/M
+  A61/L       AS61/AS61N1 Silver/AS61R/ASH3F/H
+  A7/M
+
+  AA1/L       Yankee AA-1B/C
+  AA5/L       Cheetah AA-5/A/B
+  AA5A/L
+  AA7/L
+
+  AB11/L      Model 115, 115BS
+  AB15/L      Model 150 RV, AG
+  AB18/L      Model 180 RV,RVR,AG
+
+  AC10/L      Darter 100/150
+  AC12/L      AeroCommander 112
+  AC14/L      Commander 114
+  AC20/L      Commander 200
+  AC21/M      Jet Commander
+  AC2A/L      Commander 112A
+  AC2T/L      Commander 112TC
+  AC50/L      Commander 500
+  AC52/L      Commander 520
+  AC56/L      Commander 560
+  AC60/L      Grand Commander 680
+  AC68/L      Super Commander 68OS
+  AC69/L      Jet Prop Commander
+  AC6T/L      Turbo Commander 690 C
+  AC72/L      Air Cruiser
+  AC84/L      Jet Commander 840/980/1000
+  AC85/L      Aero Commander 686
+  AC90/L
+  AC95/L      Aero Commander 695
+
+  AD3/L       FL3
+  AD5/L       LM5
+  AD7/L       LM7
+  ADSF/L
+
+  AE11/L      D-11A
+
+  AF22/L      AS 202/15 BRAVO/15-1
+  AF23/L      AS202/18A/18A1/18A2/18A3/18A4
+
+  AG9B/L      A9B/A9B-M Quail
+
+  AH1/L
+  AH1S/L
+
+  AI02/L
+  AI03/L
+  AI11/L      AISA I-11B
+  AI15/L      AISA I-115
+  AIOU/L
+
+  AJ25/M      IAI 1125 Astra
+  AJET/L
+
+  AL3/L       RF 3/4
+  ALIZ/L
+  AM14/L      Nibbio F14
+  AM19/L      Scricciolo P19/R/TR
+  AM8L/L      F8L, Series 1 and 2/F8L-A, Series 2
+
+  AN12/M      AN-12/AN-12BP
+  AN2/L       AN-2
+  AN8/M       AN-8                / ?
+  AN22/H      AN-22 Antheus
+  AN24/M      AN-24
+  AN26/M      AN-26/AN26B
+  AN28/L      AN-28
+  AN38/L      AN-38
+  AN2M/L      AN-2M
+  AN3/L       AN-3
+  AN30/M      AN-30
+  AN32/M      AN-32
+  AN4R/H      AN-124 Ruslan
+  AN5M/H      AN-225 Mriya
+  AN72/M      AN-72
+  AN74/M      AN-74
+
+  AO8         F8L, Series 3
+  AO8L/L
+
+  AP1P/M      Pregnant Guppy
+  AP25/M      Super Gruppy
+  AP2S/M
+  AP3M/M      Mini Guppy
+  AP45/M      Super Turbine Guppy
+  AP52/M      Guppy
+
+  AR11/L      Aeronca Chief/Super,Chief
+  AR15/L      Aeronca Sedan
+  AR58/L      Aeronca Champion
+  ASPO/L      Super Acro Sport
+
+  AT26/L
+  AT3/L       DHC-3/PZL-3S Otter
+  AT42/M      ATR 42
+  AT72/M      ATR 72
+  AT98/M
+  ATLA/M
+  ATOA/L
+
+  AU23/L
+  AU24/L
+  AY22/M
+
+
+; "ƒƒƒƒ
+; " B
+; "ƒƒƒƒ
+
+  B1/H
+  B105/L      Model 105
+  B200/L
+  B206/L
+  B24E/L
+  B25/M
+  B26/M
+  B52/H
+  B57/M
+  B66/M
+
+  B707/H      707-100/200/300/400 Series
+  B720/M      Stratoliner 720
+  B727/M      727, All Series
+  B72S/M      720B
+  B737/M      737-100/200 Series
+  B73F/M      737-400
+  B73S/M      737-300
+  B73V/M      737-500
+  B747/H      747-100/200/300 Series
+  B74F/H      747-400
+  B74S/H      747 SP
+  B75/L       Stearman
+  B757/M      757, All Series
+  B767/H      767, All Series
+  B777/H
+
+  BA10        BAe 125 Series 1000
+  BA11/M      One-Eleven, All  Series
+  BA31/L      Jetstream 31
+  BA32/L      Jetstream 32
+  BA41/L      Jetstream 41
+  BA46/M      BAe 146-100/200/300, RJ Series
+  BASS/L
+  BATP/M      ATP, Advanced, Turboprop
+  BC31/L      Buecker BUE 131/Lerche R
+  BC81/L      Buecker BUE 181 B-1
+  BD33/L      Buecker BUE 133D-1
+
+  BE02/M      Beech 1900/C
+  BE10/L      King Air 100 A
+  BE17/L      Stagger Wing 17
+  BE18/L      Twin Beech 18
+  BE19/L      Sport 19
+  BE1B/L      King Air 100 B
+  BE20/L      Super King Air 200, Huron
+  BE23/L      Sundowner23, Musketeer 23
+  BE24/L      Sierra 24
+  BE2H/L      Super King Air 200HDC
+  BE30/L      Super King Air 300
+  BE33/L      Bonanza 33
+  BE35/L      Bonanza 35
+  BE36/L      Bonanza 36
+  BE38/L
+  BE3B/L      Super King Air 350
+  BE3L/L      Super King Air 300LW
+  BE40/M
+  BE45/L      Mentor
+  BE50/L      Twin Bonanza 50
+  BE55/L      Baron 55/Cochise
+  BE56/L
+  BE58/L      Baron 58
+  BE60/L      Duke 60
+  BE65/L      Queen Air 65/70
+  BE76/L      Duchess 76
+  BE77/L      Skipper 77
+  BE80/L      Queen Air 80
+  BE88/L      Super Queen Air 88
+  BE8S/L      Super H18
+  BE90/L      King Air C90, E90
+  BE95/L      Travelair 95
+  BE99/L      Airliner C99
+  BE9F/L      Beech F90
+  BEST/L      Starship, Model 2000
+
+  BH04/L      Iroquois 204
+  BH05/L      Iroquois 205
+  BH06/L      JetRanger/LongRanger/Sea Ranger
+  BH09        Huey Cobra 209
+  BH12/L      Iroquois 212
+  BH14/L      Biglifter
+  BH22/L      Model 222
+  BH41/L      Model 412
+  BH47/L      Sioux/Trooper (47G/47J)
+  BHST/L      Super Transport 214ST
+
+  BI03/L
+  BI30/L      HN-300C
+  BI50/L      NH-500D/MD
+  BIO3        CP 301C Scintex
+  BJ31/L      Buecker BUE 131, Jugmann
+  BJ40/L      Beech Jet 400
+  BK2/L       Brokaw Bullet
+  BL14/L      Cruisemaster 14-19
+  BL26/L      Viking
+  BL28/L      Scout
+  BL30/L      Decathlon
+  BL31/L      Turbo-Viking
+
+  BM02/L      Blume BL 502,BL 503
+  BN2/L       BN-2A/B Islander/Defender
+  BN2T/L      BN-2T Turbine, Islander
+  BN3/L       BN-2A MK III, Trislander
+  BO07/L      Boelkow 207 207T
+  BO08/L      Boelkow BO 208C, Junior
+  BR31/M
+  BRIT/M
+  BROU/L
+  BS3A/L      CP 301 S
+  BS3S/L      CP 301S "Smaragd"
+  BSK6/L      KA 6/Stihl
+  BSK7/L      K 7/Stihl
+  BSK8/L      K 8B/Stihl
+  BSLS/L      L-Spatz III Stihl/55 Stihl
+  BT10/L      Airedale A109
+  BT12/L      Pup B121
+  BT18/L      Husky A113 (D5/180)
+  BT20/L      Basset/B206
+  BT6/L       Terrier A61
+  BU20/M      Bushmaster 2000
+  BUC/M
+
+
+; "ƒƒƒƒ
+; " C
+; "ƒƒƒƒ
+
+  C1/L
+  C10/L
+  C109/M
+  C117/M
+  C118/M
+  C119/M
+  C12/L
+  C120/L      Cessna 120
+  C121/M
+  C123/M
+  C124/M
+  C130/M
+  C131/M
+  C133/M
+  C135/H
+  C137/H
+  C14/L       Cessna 140
+  C140/M
+  C141/H
+  C142/L
+  C150/L      Cessna 150
+  C152/L      Cessna 152
+  C170/L      Cessna 170
+  C172/L      Skyhawk 172/Cutlass/Mescalero
+  C175/L      Skylark 175
+  C177/L      Cardinal 177
+  C180/L      Skywagon 180
+  C182/L      Skylane 182/RG, Turbo  Skylane/RG
+  C185/L      Skywagon 185
+  C188/L      AGWagon/AGTruck/AGHusky 188
+  C190/L      Cessna 190
+  C195/L      Cessna 195
+  C1KA/M      C2/M
+
+  C205/L      Super Skywagon/Super Skylane
+  C206/L      Stationair 6/Turbo Stationair 6
+  C207/L      Stationair/Turbo Stationair 7/8
+  C208/L      Caravan I
+  C20A/M
+  C21/M
+  C210/L      Centurion/II
+
+  C303/L      Crusader 303
+  C304/L
+  C305/L      Bird Dog 305/321
+  C310/L      Cessna 310/T310
+  C320/L      Skyknight 320
+  C335/L      Cessna 335
+  C336/L      Skymaster 336
+  C337/L      Super Skymaster 337
+  C340/L      Cessna 340
+
+  C401/L      Cessna 401
+  C402/L      Cessna 402
+  C404/L      Titan 404
+  C406/L
+  C411/L      Cessna 411
+  C414/L      Chancellor 414
+  C421/L      Golden Eagle 421
+  C425/L      Corsair/Conquest I-425
+  C441/L      Conquest II-441
+  C45/L
+  C46/M
+  C47/M
+
+  C5/H
+  C500/L      Citation I
+  C501/L      Citation I-SP
+  C525        Citationjet 525
+  C54/M
+  C550/L      Citation II-S2
+  C551/L      Citation II-SP
+  C560/M      Citation V
+  C5A/H
+  C650/M      Citation III
+  C9/M
+  C95/L
+  C97/M
+
+  CCB4/L
+  CD22/L      Nomad N22/22B, Floatmaster/Missionmaster
+  CD24/L      Nomad N24/24A, Searchmaster B/L
+  CE43/L      CE43
+  CE44/L      CE44
+
+  CH10/L      Champion Citabria
+  CH40/L      Champion Lancer 402
+  CH47/M
+  CH5/L       Champion
+  CH7/L       Traveler
+  CH8/L       Challenger
+  CH9/L       Champion Citabria 7ECA
+  CHCH/L      Christen Eagle II
+
+  CI1/L
+  CI2/L       S-2/A/B/S
+  CIA1/L
+  CL21/M      CL215
+  CL22/M
+  CL2T        Canadian CL215T
+  CL44/M      Yukon/CL44
+  CL4M/L      North Star DC4M/ Argonaut
+  CL60/M      Challenger CL600/61
+  CL65/M      Regional Jet
+  CL66/M      CL66
+  CL84/L      Dynavert CL84
+
+  CM48/L      Model 480,Twin, Navion/CTN-A/B/C/D
+  CN35/M      CN 235
+  CNBR/M
+  CONC/H      Concorde
+  CP10/L      CAP 10/10B
+  CP14/M
+  CP20/L      CAP 20/20L
+  CP21/L      CAP 21
+  CP23/L      CAP 230
+  CS01/L      C-101BB/BB-02/BB-03/CC/EB Aviojet
+  CS07/L      Azor 207
+  CS12/M      212/200 Aviocar
+  CT50/L      Crane/Bobcat
+
+  CV13/L
+  CV14/M      Canso/Catalina
+  CV24/M      Convair 240
+  CV34/M      Convair 340, Liner, Samaritain
+  CV44/M      Convair 440
+  CV58/M      Convair 580
+  CV60/M      Convair 600
+  CV64/M      Convair 640
+  CV88/M      Convair 880
+  CV99/M      Coronado 990
+  CW20/M      Commando
+
+
+; "ƒƒƒƒ
+; " D
+; "ƒƒƒƒ
+
+  D128/L      Dornier 128-6
+  D228/L      Dornier 228-100/200
+  D328/M      D 328
+  D329/M      D 329
+  DA01/M      Mercure 100
+  DA10/M      Falcon 10
+  DA20/M      Falcon 20FJF/20C/20D/20E/20F
+  DA21/M      Falcon 20G/20GF, Mystere Falcon 200
+  DA50/M      Falcon 50
+  DA90/M      Falcon 900
+  DC10/H      DC-10, All Series
+  DC3/M       DC-3/Dakota/Skytrain
+  DC3S/M      Super DC-3
+  DC4/M       Skymaster
+  DC6/M       DC-6/B, Liftmaster
+  DC6B/M
+  DC7/M       DC-7/7B
+  DC7C/M      Speedfreighter
+  DC8/H       DC-8, All Series
+  DC8S/H      Super DC-8, All Series
+  DC9/M       DC-9-20/30/40/50, Nightingale/Skytrain II
+  DG40/L      DG-400
+
+  DH1/L       Chipmunk DHC-1
+  DH2/L       Beaver DHC-2
+  DH2T/L      Turbo Beaver DHC-2
+  DH3/L       Otter DHC-3
+  DH4/M       Caribou DHC-4
+  DH5/M       Buffalo DHC-5/5D/5E
+  DH6/L       Twin Otter DHC-6,  All Series
+  DH7/M       DASH 7 DHC-7
+  DH8/M       DASH 8 DHC-8
+  DH82/L      Tiger Moth 82A
+  DH83        DASH 8 300 Series
+  DHC7/M
+  DHC8/M
+  DHST        Turbo Firecat
+  DJIN/L
+
+  DO27/L      DO 27, All Series
+  DO28/L      DO 28 A, B
+  DO81/L
+  DO82/L
+  DO8D/L      DO 28 D
+
+  DR10/L      DR 100, 105, 1050, 1051
+  DR22/L      DR 200, 221
+  DR25/L      DR 250, 253
+  DR30/L      DR 315, 300/108
+  DR32/L      DR 300/125, 300/120
+  DR34/L      DR 340, 300/140
+  DR36/L      DR 360
+  DR38/L      DR 380, 300/180R
+  DR40/L      DR 400/2+2
+  DR42/L      DR 400/125, 400/120,400/120A
+  DR44/L      DR 400/140, 400/140B
+  DR46/L      DR 400/160
+  DR48/L      DR 400/180, 400/180R
+
+  DV20        DV 20 Katana
+  DVON/L
+
+
+; "ƒƒƒƒ
+; " E
+; "ƒƒƒƒ
+
+  E1/M
+  E110/L      Bandeirante EMB-110
+  E111/L      Bandeirante EMB-111/A/AS/MS
+  E120/M      Brasilia EMB-120/HH/RT
+  E121/L      Xingu EMB-121/A/A1
+  E135/H
+  E14/L
+  E2/M
+  E200/L      Ipanema EMB-200/200A
+  E201/L      Ipanema EMB-201/201A
+  E25/L
+  E312/L      Tucano EMB-312/A/G1/G2
+  E326/L      Xavante EMB-326 GB
+  E3A/H
+  E4A/H
+  E6/H
+  E710/L      Carioca EMB-710/C/D
+  E711/L      Corisco EMB-711A/B/C/T/ST
+  E712/L      Tupi EMB-712
+  E720/L      Minuano EMB-720/C/D
+  E721/L
+  E810/L      Seneca EMB-810/C/D
+  E820/L      Navajo EMB-820/C
+  E9/L
+
+  EA30/H      Airbus A300
+  EA31/H      Airbus A310
+  EA32/M      Airbus A320
+  EA33        Airbus A330
+  EA34/H      Airbus A340
+  EA6B/M
+
+  EC02        ECH-02 Namcu
+  EC51        ECH-51 Pillan
+  ECV2/L      VP 2E
+  EH28/L      Falcon F-28/a/c/F
+  EH80/L      Shark 280 C/F
+  EM47/L      CH-47C
+  ET21        Sertanejo EMB-721/C/D
+  ETAR/L
+
+
+; "ƒƒƒƒ
+; " F
+; "ƒƒƒƒ
+
+  F02         Aircoupe A2
+  F1/M
+  F10/M
+  F100/L
+  F101/M
+  F102/L
+  F104/M
+  F105/L
+  F106/L
+  F11/L
+  F111/M
+  F14/M
+  F15/M
+  F16/M
+  F18/M
+  F4/M
+  F5/M
+  F8/M
+  F84/L
+  F86/L
+  F8L/L       Falco
+  F9/L
+
+  FA11/L      Husky F11
+  FA20/L
+  FA22/M      Model F227
+  FA25/L      Heliporter/Peacemaker
+  FA27/M      Friendship F27
+  FA28/M
+  FA3/L
+  FA4/L
+  FA62/L      Cornell
+  FA71/L      Model 71
+  FA78/M      Flying Box Car
+  FB10/L      Centennial 100
+  FB11/M
+  FB2/L       FBA-2C
+  FE20/L      ASW 20, All Series
+
+  FH04/L
+  FH20/L      FA 200-160/180AO
+  FH2B/L      KM 2B/T3
+  FH30/L      FA 300
+  FI56/L      FI 156 Storch
+  FJTR/L      FJ Sky-Trac
+
+  FK10/M      Fokker 100 (F.28 Mk.0100)
+  FK11/L      Instructor S 11
+  FK27/M      Friendship F 27
+  FK28/M      Fellowship F 28
+  FK50/M      Fokker 50 (F.27 Mk.050), Mk.2s Enforcer
+  FK60        Fokker 60 (F.27 Mk.060)
+  FK70/M      Fokker 70 (F.28 Mk.070)
+
+  FLAM/L
+  FLS6        Sprint 160
+  FO2/L
+  FOUG/L
+  FRDH/L      Doppelraab/Hankur 1
+  FS14/L      ASK 14/KM 29
+  FSK8/L      K 8B/KM 48
+  FT04/L
+  FT46/L      G 46
+  FT91/L      G 91
+  FT94/L      G 91 Y
+  FTO4        F 104S
+  FW49/L      FW P 149D
+  FXJ/L       F 600
+
+
+; "ƒƒƒƒ
+; " G
+; "ƒƒƒƒ
+
+  G134/M      Mohawk
+  G159/M      Gulfstream I
+  G164/L      Ag-Cat
+  G2/M        Gulfstream II
+  G21/L       Goose/Super Goose
+  G3/M        Gulfstream III
+  G4/M        Gulfstream IV
+  G44/L       Widgeon/Super Widgeon
+  G64/M       Albatross
+  G73/M       Mallard
+  G89/M       Tracker
+  G93/L       Cougar G93
+
+  GA2         GA 200
+  GA20/L      F 20 Pegaso
+  GA2C/L      F 20 TP Condor
+  GA5D/L      F 15 F Delfino
+  GA5P/L      F 15 E Picchio
+  GA60/L      F 600 TP Canguro
+  GA7/L       Cougar GA-7
+  GA84/L      Commander Jet Prop 840/900/980/1000
+  GAN1/M
+  GAN2/M
+
+  GC1/L       Swift
+  GL20/L      Glassair II TD/FT/RG
+  GL25/L      Glassair III
+  GNAT/L
+  GR09/L      G 109/109B
+  GR15/L      G 115/115A
+  GS20/L      PIK-20E2F
+  GY10/L      Gardan GY 100
+
+
+; "ƒƒƒƒ
+; " H
+; "ƒƒƒƒ
+
+  H13/L
+  H139/L
+  H19/L
+  H2/L
+  H23/L
+  H3/L
+  H315/L      Gaviao HB 315
+  H34/L
+  H350/L      Esquilo HB 350 B
+  H355/L      Esquilo II-HB-355F
+  H36/L
+  H37/M
+  H43/L
+  H46/L
+  H47/M
+  H52/L
+  H53/M
+  H54/M
+  H55/L
+  H57/L
+  H58/L
+  H6/L
+  H60/L
+  H64A/L
+
+  HA20/L      Saeta HA200
+  HA22/L      Super Seata HA220
+  HAR/M
+  HAST/M
+  HAWK/M
+  HB42/L      Model B-2A/B-2B
+  HB43/L      Model 305
+  HD34/L      HD 34
+
+  HE25/L      H-250 Courier Mark II
+  HE29/L      H-Super Courier
+  HE35/L      H-395 Super Courier
+  HE39/L      H-391 Courier
+  HE55/L      H-550/A Stallion
+  HE58/M      H-580 Twin Courier
+  HE63/L      H-634
+  HF20/M      HFB 320 Hansa Jet
+  HG18/L      2/180 Gyroplane
+  HH12/L      Raven
+  HH3/L       L3/SL3
+  HH4/L       L4/SL4
+  HI27/L      HI 27 Acrostar MK II
+  HK3/L       Drover DHA-3
+  HK36/L      HK 36 Super Dimona
+  HK60/L      Huskie 600-3/5
+  HL11/L      FH-1100A
+  HL12/L      UH-12E/E4
+  HL2T/L      UH-12ET/ET4
+
+  HN15/L      SA 315B Lama
+  HN16/L      HJT-16 Kiram MK I/II
+  HN31/L      Basat H-A-31
+  HN32/L      Alouette III(Chetak)
+  HN74/M      HS-748(M)
+  HNAJ/L      Ajeet
+  HO36/L      H 36 Dimona
+
+  HP7/M       Herald HPR-7-200/7-400
+  HR10/L      HR 100/200/, 100/200B
+  HR11/L      HR 100/210, 100/210D
+  HR15/L      HR 100/250TR
+  HR16/L      HR 200/160
+  HR18/L      HR 100/285 Tiara, 100/285C
+  HR20/L      HR 200/100, 200/100S
+  HR22/L      HR 200/120, 200/120B
+
+  HS04/L      Dove 104
+  HS06/M
+  HS14/L      Heron 114
+  HS21/M
+  HS25/M      HS 125 Series 400/600/700,BAe 125, Series 800
+  HS65/M
+  HS74/M      HS 748/2B, Andover
+  HS8/L       Rapide 89
+
+  HU1B/L
+  HU30/L      Model 300
+  HU50/L      Model 500/C/D/E/M
+  HU53/L      Model 530F/M
+  HU64/L      AH-64 Apache
+  HUNT/L
+  HV07/L      Sea Knight 107
+  HV34/L      Chinook 114/234/414
+  HW5/L       Model 500 (Waro)
+
+
+; "ƒƒƒƒ
+; " I
+; "ƒƒƒƒ
+
+  IA46/L
+  IA50/L
+  IA51/L
+  IA58/L
+  IC16/L      IAR-316B Alouette III
+  IC23/L      IAR-823
+  IC25/L      IAR-825TP Triumf
+  IC27/L      IAR-827A
+  IC28/L      IAR-28MA
+  IC30/L      IAR-330 Puma
+  IC8M/L      IS-28M2/M2A
+
+  IL14/M      IL-14
+  IL18/M      IL-18
+  IL62/H      IL-62/IL-62M/MK
+  IL76/H      IL-76/IL-76M/MD/T/TD
+  IL86/H      IL-86
+  IL96/H      IL-96
+  ILL4/M      IL-114
+
+
+; "ƒƒƒƒ
+; " J
+; "ƒƒƒƒ
+
+  J31/L
+  JAG1/M
+  JAGR/M
+  JC21/M      IAI 1121 Jetcommander
+  JU52/M      Junkers JU 52/3M
+
+
+; "ƒƒƒƒ
+; " K
+; "ƒƒƒƒ
+
+  KA11/L      K 11
+  KA16/L      K16X
+  KA25/L      KA-25
+  KA26/M      KA-26
+  KA32/L      KA-32T/32C
+
+  KAK1/L      AK-1
+
+  KC10/H
+  KC35/H
+  KC97/M
+
+  KFIR/M
+
+  KH07/L      KV107II/KV107IIA/Vertol
+  KH17/L      BK 117, All Series
+  KH2/L       47G2/Bell
+  KH2A/L      47G2A/Bell
+  KH4/L       47G3B-KH4/Bell
+  KH6D/L      369D/500D
+
+  KL07/L      Klemm KL 107A/107B/107C
+  KL25/L      KL 25D
+  KL35/L      KL 35D/35D-160
+  KM2/L
+  KN15/L      ASW 15BR
+  KODO/L      Doppelraab IV 017
+  KREZ/L      Vari-Eze
+
+
+; "ƒƒƒƒ
+; " L
+; "ƒƒƒƒ
+
+  L101/H      Tri-Star, All Series
+  L14/M       Hudson
+  L164/M      Starliner
+  L18/M       Lodestar
+  L188/M      Electra
+  L19/L
+  L295/M      Jetstar II
+  L329/M      Jetsar
+  L382/M      Hercules
+  L42/L
+  L49/M       Super Constellation
+  L6/L
+  L610/M
+  L649/M      Constellation 649
+  L749/M      Constellation 749
+  L8C/L
+
+  LA04/L      LA-4/A/B
+  LA25/L      LA-250 Renegade/Sea Fury
+  LA2T/L      LA-250 Turbo Renegade/Turbo Sea Fury
+  LA42/L      LA-4-200 Buccaneer
+
+  LARK/L      Lark
+  LC20/L      Lancair 235/320/360
+  LC30/L      Lancair IV
+  LF05/L      LFU 205
+  LK21        LK-21 Sluka
+  LK3         LK-3 Nova
+  LLBM/L      L-13 Blanik M
+  LM1/L
+  LM2/L
+
+  LR21/L
+  LR23/L      Learjet 23
+  LR24/M      Learjet 24
+  LR25/M      Learjet 25
+  LR28/M      Learjet 28
+  LR29/M      Learjet 29
+  LR31/M      Learjet 31
+  LR35/M      Learjet 35
+  LR36/M      Learjet 36
+  LR54/M      Learjet 54
+  LR55/M      Learjet 55
+  LR60        Learjet 60
+  LRF/L       Lear Fan 2100
+
+  LTNG/M
+  LV8/L       F8L, Series 4
+  LW15/L      L-13/Blanik WD 15
+
+
+; "ƒƒƒƒ
+; " M
+; "ƒƒƒƒ
+
+  M202/M      Martin 202
+  M272        Canberra
+  M404/M      Martin 404
+  MB08/L      Boelkow Junior
+  MB09/L      BO 209, S Monsun
+  MBH5/L      BO 105A/C/D/S
+  MBK7/L      MBB BK 117A-1
+
+  MC32/L      MB326
+  MC39/L      MB339A/C/K/X
+  MC3C/L      AM3C
+  MC41/L      M416
+  MC6/L       AL60
+  MC6B/L      AL60B2
+  MC6C/L      AL60C5
+  MC6F/L      AL60F5
+  MC8/L       MB308/G
+
+  MD11/H      MD-11
+  MD80/M      MD-80/81/82/83/87/88
+  MD87/M
+  MDH5/L      BO 105LS A-1/a-3
+  MDK7/L      MBB BK 117A-3/A-4, 117B-1
+
+  ME08/L      ME 108B/108D-1
+  ME09/L      ME 109G-6
+  MF15/L      SAAB MFI 15 Safari
+  MF17/L
+  MF9/L       SAAB MFI 9/9B
+  MF9B/L
+  MF9S/L
+  MFDM/L      Doppelraab IV MSR
+  MG21/M
+  MG23/M
+  MH61/L      S61/Sikorsky
+  MHF1/M      F1
+  MHT2/M      T2/T2A
+
+  MI10/L      MI 10/MI 10K
+  MI17/M
+  MI2/L       MI 2
+  MI24/M      MI 24
+  MI26/L      MI 26
+  MI29/L
+  MI4/M       MI 4
+  MI6/M       MI 6
+  MI8/M       MI 8
+  MIR2/M
+  MIR3/M
+  MIR4/M
+  MIR5/M
+
+  MJ20/L      Microjet 200B
+  ML4/L       M-4 Strata-Rocket
+  ML5/L       M-5 Lunar-Rocket, Star-Rocket, Patroller
+  ML6/L       M-6 235 Super-Rocket
+
+  MO10/L      Cadet
+  MO20/L      Mark 20
+  MO21/L      Mark 21/Mooney Ranger
+  MO22/L      Mark 22
+  MO2J/L      Mooney 201/M20J
+  MO2K/L      Mooney 231/M20K
+
+  MRC/M
+  MT53/L      FL 53
+  MT54/L      FL 54
+  MT55/L      FL 55 BM, Series 4
+
+  MU2/L       MU-2
+  MU20/L      MU-2/MU-2B-36
+  MU23/L      MUE 23
+  MU24/L      MU-2B-40 Solitaire
+  MU26/L      MU-2B-60 Marquise
+  MU3/M       Diamond 1/1A
+  MU30/L      MU-300
+
+  MW53/L      HD 153 A,B
+  MW56/L      HD 156 A
+  MY12/L      MY 102 Tornado
+  MY20/L      Meyers 200
+  MYS4/L
+  MYV2/L      MY 102 V2
+
+
+; "ƒƒƒƒ
+; " N
+; "ƒƒƒƒ
+
+  N145/L      Navion
+  N265/M      Sabreliner 265
+  N6/L        Texan
+  N62/L       N 62 Eaglet
+  NA1/L       Rangemaster
+  NA16/L      Twin Navion
+  NAS2/M      Super Puma AS 332
+  NB05/M      BOELKOW BO 105
+  NB12/L      Bell 412
+  NC12/M      CASA 212
+  ND16/M      Transall C160
+  ND26/M      NORD 262/A/B/C/D, Super Broussard 260
+  NE51/L      Regente N-591-290, N-591-360
+  NE52/L      Regente ELO N-592-420
+  NE56/L      Paulistinha P56, P56B, P56B-1, P56C, P56C-1
+  NE61/L      Universal N-621
+  NE82/L      Caraja NE-821
+  NIM/M
+  NL1/L
+  NL1T/L
+  NO4/L       Norseman MK IV
+  NO5/L       Norseman MK V
+  NO6/L       Norseman MK VI
+  NORD/M
+  NSA0/L
+  NSAO        Puma SA 330
+  NSTR/M
+  NU10/L      Gelatik PZL 104
+
+
+; "ƒƒƒƒ
+; " O
+; "ƒƒƒƒ
+
+  O1/L
+  O13/L       L-13 SW
+  O14/L       Avia 14-32
+  O142/L      Zlin Z-142
+  O143        Zlin Z-143L
+  O145/L      Aero 145
+  O2/L
+  O200/L      Morava L 200
+  O226/L      Trener Z 126/226
+  O242/L      Zlin Z-242L
+  O29/L       Delfin L 29
+  O326/L      Trener-Master Z 326
+  O37/L       Cmelak/Bumble-Bee, Z 37
+  O37T/L      Cmelak Turbo Z 137 T
+  O39/L       Albaros L 39
+  O40/L       Meta-Sokol L 40
+  O410/L      Turbolet L-410, L-410 A, UVP, UVP-E
+  O42/L       Zlin Z-42
+  O43/L       Zlin Z-43
+  O45S/L      Super Aero
+  O50/L       Zlin Z-50 L, LS/LX, M
+  O526/L      Trener Z 526
+  O59/L       Aero L 59
+  O60/L       Brygadyr L60
+  O610/M      L 610, L 610 G
+
+  OA7/L       EA7 Optica
+  OH6D/L
+  OT10/L      Ximango AMT-100
+  OV1/M
+  OV10/M
+
+
+; "ƒƒƒƒ
+; " P
+; "ƒƒƒƒ
+
+  P136/L      P 136
+  P140/M
+  P148/L      P 148
+  P149/L      P 149
+  P166/L      P 166/166B Portofino/166C/M/S/166-DL2
+  P16T/L      P 166-DL3/DL3 MAR
+  P180/L      P 180 Avanti
+  P2/M
+  P2J/M
+  P3/M
+  P3C/M
+  P4/M
+  P51/L
+  P808/L      PD 808/526
+  P95/L
+
+  PA11/L      Cub Special
+  PA12/L      Super Cruiser
+  PA14/L      Family Cruiser
+  PA15/L      Vagabond Trainer
+  PA16/L      Clipper
+  PA17/L      Vagabond
+  PA18/L      Super Cub
+  PA2/L       Cub Trainer
+  PA20/L      Pacer
+  PA22/L      Tri-Pacer, Colt
+  PA23/L      Apache
+  PA24/L      Comanche
+  PA25/L      Pawnee
+  PA28/L      Cherokee, Archer, Dakota, Warrior
+  PA3/L       Cub Trainer 3
+  PA30/L      Twin Comanche
+  PA31/L      Chieftain, Mojave, Navajo, T-1020
+  PA32/L      Cherokee Six, Lance, Saratoga
+  PA34/L      Seneca III PA34-220T
+  PA36/L      Brave
+  PA38/L      Tomahawk
+  PA39/L
+  PA41/L      CheyenneI, 400
+  PA42/L      Ceynee III/IV, 400LS
+  PA44/L      Seminole
+  PA46/L      Magister CM 170, Malibu
+  PA5/L       Cruiser
+  PA60/L      Aero Star 600/700
+  PARO/L      Cherokee Arrow IV
+  PASE/L      Seneca II
+  PAT1/L
+  PAT4/L      T1040
+  PAYE/L      Cheyenee II
+  PAZT/L      Aztec
+
+  PB57/L      P57
+  PBY5/M
+  PC15/L      F15/F15E/F15A/F15B, Picchio
+  PE50/L
+  PE66/L
+  PI51        Model A-1 Huskey
+  PI52        S-1/D/E/S/T Special
+
+  PL6/L       Porter PC-6
+  PL6A/L      Turbo Porter PC-6/A, PC-6/A-H1, PC-6/A2-H2
+  PL6B/L      Turbo Porter PC-6/B-H2, PC-6/B2-H2,PC-6/TB-H4
+  PL6C/L      Turbo Porter PC-6/C-H2, PC-6/C1-H2
+  PL7/L       Turbo Trainer PC-7
+  PL9/L       Turbo Trainer PC-9, PC-9/A
+
+  PN42/L      P64B-Oscar 200
+  PN4B/L      P64B3-Oscar B3
+  PN57/L
+  PN59/L      P59
+  PN64/L      P64-Oscar
+  PN66/L      P66B-Oscar 100
+  PN68/L      P68B/P68C/P68C-TC, Victor/P68, Observer/ P68R
+  PN6B/L      P66B-Oscar 150
+  PN6C/L      P66C/P66C-160 Charlie/ P66T
+  PN70/L      P70
+  PN8T/L      AP68TP-300
+  PNBB/L      P64B3-Oscar B-1155
+
+  PO11/L      PZL-110 Koliber
+  PO18/L      M-18/18A Dromader
+  PO6T/L      PZL-106 Kruk AT/BT
+  POA2/L      AN2 Antek R/T
+  POG1/L      PZL-101 Gawron
+  POI1/L      TS-11 Iskra Bis A/B/C/D/DF
+  POK6/L      PZL-106 Kruk A/AR/AS/B/BR/BS
+  POM2/L      MI2 Swidnik
+  POW3/L
+  POW4/L      PZL-104 Wilga 35A/35H/35P/80
+
+  PR07/L
+  PR08/L
+  PR24/L      Fletcher FU24-954
+  PR60/L
+  PRO7        CT/4A/4B Airtrainer
+  PRO8        Cresco 08-600
+  PROV/L
+
+  PS2/L       G2-A Galeb
+  PS4/L       G4 Super Galeb
+  PUEL/L      Elster B/C
+  PUMR/L      Motorraab V3
+  PZ84/M      Potez 840/841/842
+
+
+; "ƒƒƒƒ
+; " R
+; "ƒƒƒƒ
+
+  R100/L      R 1180T, 1180TD
+  R200/L      R 2160, 2160D, 2100, 2100A, 2112
+  R22B/L
+  R300/L      R 3000, 3100, 3120, 3140
+  RA06/L      F406
+  RA37/L      F337/FT337/FTA337/FTB337
+  RA50/L      F150/FA150/FRA150/F152
+  RA72/L      F15J/MDC, F172/FR172/FRA172/FRB172
+  RA77/L      F177RG
+  RA82/L      F182/FR182
+  RATL/L      ATL
+
+  RF6B/L      RF6B
+  RF9/L       RF9
+  RH22/L      Robinson R22
+  ROKR/L      Kraehe II, III, IV
+  RS03/L      RW3 P65, P75
+  RSF4/L      FT 400
+  RSF6/L      FT 600
+  RSV2/L      RW3-V2
+  RU90/L      R 90
+  RV01/L      IAI 101/201 Arava
+  RV02/L
+  RV3/L       RV-3
+  RV4/L       RV-4
+  RV6/L       RV-6/RV-6A
+  RVO2        IAI 102/202 Arava
+  RY21/L      Eagle 21
+  RY40/L      Turbo-Executive
+  RY65/L      Model 65/Rocket
+
+
+; "ƒƒƒƒ
+; " S
+; "ƒƒƒƒ
+
+  S10/L       Diplomate ST 10
+  S2/M
+  S210/M      Caravelle III/VI/10/11/12
+  S235/L      Rallye 235
+  S313/L      Alouette II SE 313, 3130
+  S315/L      Lama SA 315
+  S316/L      Alouette III SE 316, 3160
+  S318/L      Alouette Astazou, SA  318 C
+  S319/L      Alouette III SA 319
+  S321/M      Super Frelon SA 321
+  S324        Gazelle SA 341/342
+  S330/L
+  S332/M      Super Puma AS 332
+  S341/L
+  S342/L
+  S350/L      Ecureuil AS 350
+  S351/L      Ecureuil AS 351
+  S355/L      Ecureuil AS 355
+  S360/L      Dauphin SA 360
+  S365/L
+  S366/L      Dauphin SA 365/SA 366
+  S3A/M
+  S60/L       Marquis BS 60/60A
+  S601/M      SN 601 Corvette
+  S760/M      Paris MS 760
+  S80/L       Horizon GY 80
+  S880/L      Rallye MS 880/881/883/887, Rallye 100S/100ST
+  S885/L      Super Rallye MS 885/886/887
+  S890/L      Rallye 180T/180T-D/180TS
+  S892/L      Rallye Commodore MS 982, Rallye 150T
+  S893/L      MS 893
+  S894/L      Rallye Minerva MS 894
+  S89B/L      MS 890B
+
+  SA30/L      Model 300C
+  SA33        Model 330
+  SA37/L      SGM 2-37
+  SA60/L      Ag-Cat B-Plus/450/600
+  SATB/L      Ag-Cat Turbine
+  SB05/M      SAAB 105
+  SB14/L      ASW 15BM
+
+  SB20/M      SAAB 2000
+  SB32/L      SAAB 32 Lansen
+  SB35/M      SAAB 35 Draken
+  SB37/M      SAAB 37 Viggen
+  SB39        SAAB 39 Gripen
+  SB7L        SB7L-235 Seeker
+  SB91/L      SAAB 91 Safir
+
+  SC01/L      SC 01/B
+  SC2/L
+  SC3/L       SA-3/100/1200 Bulldog
+  SC30/L      CP 301A(Stark) Emeraude
+  SC5/M
+  SD5/L       Skyship 500
+  SD6/L       Skyship 600
+
+  SE12/L      K 12
+  SE14/L      ASK 14
+  SE16/L      ASK16/16B/V1
+  SE25/L      ASH 25E
+
+  SF23/L      SF 23A/A-1/B/C
+  SF24/L      SF 24A/B Motorspatz I
+  SF25/L      SF 25,All Series
+  SF26/L
+  SF27/L      SF 27M-A
+  SF28/L      SF 28A Tandem Falke
+  SF34/M      SF 340
+  SFP4/L
+  SFP5/L
+  SFP6/L
+  SFP7/L
+  SFRL/M
+
+  SG23/L      Siat 223A-1/K-1/V Flamingo
+
+  SH27/L
+  SH31        Shorts S312 Tucano
+  SH33/M      Shorts 330-200/UTT/Sherpa
+  SH36/M      Shorts 360
+  SH5/M       Belfast SC 5/10
+  SH7/L       Shorts SC7 Skyvan 3/3M
+  SHAR/M
+  SHC2/M
+
+  SIDB/L      Doppelraab/Boemora
+
+  SK50/L      SK51/L     S-51
+  SK52/L      S-52
+  SK55/L      S-55 Chickasaw
+  SK56/M      S-56 Mojave
+  SK58/L      S-58 Choctaw/Seahorse
+  SK59/L      S-59
+  SK60/M
+  SK61/M      S-61A/B/R Sea King
+  SK62/L      S-62
+  SK64/M      S-64 Skycrane
+  SK65/M      S-65 Sea Stallion/ Super Stallion
+  SK70/M      S-70 BlackHawk/Night, Hawk/SeaHawk
+  SK76/M      S-76, S-76 Mark II
+
+  SL8/L       Observer/Luscombe
+
+  SM11/L      S211
+  SM19/L      SM 1019/A/B
+  SM20/L      F260/B/C/D
+  SM21/L      S210
+  SM25/L      F205 18/F
+  SM26/L      SF260 AM/B/C/MB/MC/ML/MP/MS/MT/MZ/SW/W
+  SM28/L      S208/MIA/208A
+  SM2R/L      S205 20/R
+  SM52/L      S205 22R
+  SM5F/L      S205 20/F
+  SM5R/L      S205 18/R
+  SM5T/L      S205 MT
+  SM60/L      SF600 TP/Canguro
+  SM6T/L      SF260 TP
+  SMB2/L
+  SN4/L       Mousguetaire/Abeille, D140
+  SN5/L       Mascaret D150
+
+  SO1/L       SAI 1001
+  SO4/L       F4
+  SO7/L       F7
+  SODA/L      Doppelraab ACOG 1
+  SOCH/L      Christen Eagle II
+
+  SP80/L      RS 180
+  SPF4        RF 4/4D
+  SPF5        RF 5/5B
+  SPF6        RF 6
+  SPF7        RF 7
+  SPM1/L      SFS 31
+
+  SR71/M
+  SS6A/L      Milan GS 6A, Nimbus-2M/-3DT/-3MR/-3T
+  SSCP/L      CP 301/A/D/E Emeraude
+  SSDI/L      Discus BT
+  SSJM/L      Janus BM/CM
+  SSVM/L      Ventus BT/CT
+  ST27/L      Saunders ST27
+  ST75/L      Voyager 105/108
+  ST77/L      Reliant (Vultee)
+  STRK/L
+
+  SU22/M
+  SU25/M
+
+  SV4/L       SH4
+  SW2/L       Merlin IIA/B,III/B/C, IVA
+  SW3/M       Merlin IVC, Metro III
+  SW4/L       Metro II/A
+  SY6M/L      T67M Firefly
+
+
+; "ƒƒƒƒ
+; " T
+; "ƒƒƒƒ
+
+  T1/L
+  T114/L
+  T12/M
+  T122/L      Uirapuru A-122SA/122B
+  T134/L
+  T2/M
+  T23/L
+  T25/L
+  T27/L
+  T28/L
+  T29/L
+  T3/L
+  T33/L
+  T34/L
+  T35/L
+  T37/M
+  T38/M
+  T39/M
+  T4/L
+  T41/L
+  T42/L
+  T43A/M
+  T44/L
+  T5/L
+  T6/L
+  T7/L
+
+  TA02/L
+  TA40/L
+  TB09/L      Tampico TB-9
+  TB10/L      Tobago TB-10
+  TB20/L      Trinidad TB-20
+  TB21/L      Trinidad TB-21
+  TB30/L      Epsilon TB-30
+  TB70/L
+  TBM7        TMB 700
+  TBTU/L      Turbulent D/D-V4/D-1
+  TC15/L      F-15A Tourist
+  TC19/L      F-19 Sportsman
+  TC20/L      F-20A Topper
+  TC21/L      F-21
+  TEPI/L      Piccolo
+  TICH/L      Christen Eagle II
+  TN12/L      Transavia PL-12/PL-12U/PL-12T-300A Skyfarmer
+  TP21/L      Thorp T211
+  TR1/L       Trigull
+  TS60/L      Aero Star
+
+  TU34/M      TU-134/134A/B
+  TU54/M      TU-154/154A/B/B2/C/M
+  TUP4/M      TU-204
+
+
+; "ƒƒƒƒ
+; " U
+; "ƒƒƒƒ
+
+  U10/L
+  U11/L
+  U16/M
+  U17/L
+  U2/M
+  U21/L
+  U21A/L
+  U21F/L
+  U3/L
+  U36A/M
+  U4/L
+  U42/L
+  U60/L       Utva 60
+  U65P/L      Utva 65
+  U66/L       Utva 66
+  U7/L
+  U75/L       Utva 75
+  U8D/L
+  U8E/L
+  U8F/L
+  U9/L
+  UD11/L      Jodel D-11-85
+  UH1/L
+  UH60/L
+  US1A/M
+
+
+; "ƒƒƒƒ
+; " V
+; "ƒƒƒƒ
+
+  VA17/L      Taifun 17 E, E II
+  VAKI/L      Kiwi
+  VC10/H      VC10-1100
+  VC11/M
+  VC15/H
+  VC4/M
+  VC7/M       Viscount VC2-700
+  VC8/M       Viscount VC2-800
+  VC9/M
+  VCTR/M
+  VF14/M      VFW 614
+  VG21/L      Kachina 2150A
+  VIXN/M
+  VK30/L      Cirrus
+  VL70/L      Valmet L70 Miltriner
+  VL90/L      Valmet L90 TP Redigo
+  VLCN/M
+  VT10/L      Airtourer
+  VT11/L      Aircruirser
+  VW10/L      Vowi 10
+  VZ10/L      Vari EZE/Long EZ
+
+
+; "ƒƒƒƒ
+; " W
+; "ƒƒƒƒ
+
+  WA11/L      Jodel D112
+  WA12/L      Jodel D120
+  WA40/L      Wassmer 40/40A/40B
+  WA41/L      Wassmer 41
+  WA42/L      Wassmer 421/235, 421/250
+  WA51/L      Wassmer 51/51A
+  WA52/L      Wassmer 52
+  WA54/L      Wassmer 54
+  WA80/L      Wassmer 80
+  WA81/L      Wassmer 81
+  WAHO/L      Homisse 1
+  WH25/L      WLAC-1
+  WIZK/L      Zaunkoenig
+  WLCM/M      Commando MK 1/2/24
+  WLG1/M
+  WLG2/M
+  WLL/M       Lynx, All Marks
+  WLSC/L      Scout A.H. MK I
+  WLSK/M      Sea King H.A.S., All Marks
+  WLW1/L
+  WLW2/L
+  WLWP/L      Wasp H.A.S. MK I
+  WLX1/L      Wessex H.A.S. MK I/III
+  WLX2/M      Wessex HCC MK II/IV, HU MK V, Wessex 60
+  WNDM/L      Doppelraab IV/VM
+  WSDE/L      Doppelraab Exraab V
+  WSP1/L      SP1-WM
+  WSW/L       Westwind III
+  WW23/M      IAI 1123 Westwind
+  WW24/M      IAI 1124/1124A, Westwind
+
+; "ƒƒƒƒ
+; " X
+; "ƒƒƒƒ
+
+  X32/L
+  X35/M
+  X37/M
+
+
+; "ƒƒƒƒ
+; " Y
+; "ƒƒƒƒ
+
+  YK18/L      YAK-18/18A/18PM/18T
+  YK40/M      YAK-40
+  YK42/M      YAK-42
+  YK50/L      YAK-50
+  YK52/L      YAK-52
+
+
+; "ƒƒƒƒ
+; " Z
+; "ƒƒƒƒ
+
+  ZZZZ        Other type not included in this list

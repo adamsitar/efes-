@@ -1,0 +1,29 @@
+   
+22:04ú03 þ System initialized on 17.3.2026, 22:04.03
+22:04ú03 þ time = 1
+22:04ú03 þ AIRBASE = 100
+22:04ú03 þ OBSOLETE PRIORITY    = yes   ; povodne vytvorene mapy s neoptimalizovanymi prioritami
+22:04ú03 þ DRAW MARKED SYMBOLS  = yes   ; symboly sa nacitaju len z popisanych sybolov
+22:04ú03 þ LDM0      = 23
+22:04ú03 þ LDM1      = 21
+22:04ú03 þ LDM2      = 20
+22:04ú03 þ AIP-C     = 27
+22:04ú03 þ AIP-M     = 27
+22:04ú03 þ AIP-A     = 24
+22:04ú03 þ OB        = 24
+22:04ú03 þ SP        = 22
+22:04ú03 þ REP1      = 22
+22:04ú03 þ REP2      = 22
+22:04ú03 þ NDB1      = 22
+22:04ú03 þ NDB2      = 22
+22:04ú03 þ VOR       = 22
+22:04ú03 þ VOR/DME1  = 22
+22:04ú03 þ VOR/DME2  = 22
+22:04ú03 þ edit FPLc = yes ; povolenie editacie civilneho stripu
+22:04ú03 þ edit FPLm = yes ; povolenie editacie vojenskeho a ineho stripu
+22:04ú03 þ FUA -24H = disabled;  Planovanie priesorov je ohranicene limitmi 24/6 hodin vopred
+22:04ú03 þ FUA -1H  = enabled;   Vynimky, ktore nemusia byt planovane a schvalovane 24 hodin vopred
+22:04ú03 þ LIMIT FUA -1H = 60;
+22:04ú03 þ -1H = TSA06
+22:04ú03 þ -1H = TSA06
+22:04ú03 þ utc = 9902031100

@@ -1,0 +1,282 @@
+
+# *******************************************************
+# *							*
+# *	Borland Pascal Runtime Library			*
+# *	MAKE script					*
+# *							*
+# *	Copyright (C) 1988,92 Borland International	*
+# *							*
+# *******************************************************
+
+
+# Base directory determined either by BP environment variable, or
+# the constant supplied here.
+!if !$d(BP)
+BP = \BP
+!endif
+
+# Set up macros for all required directories
+RTL    = $(BP)\rtl
+LIB    = $(RTL)\lib
+INC    = $(RTL)\inc
+BIN    = $(RTL)\bin
+TPU    = $(BIN)\tpu
+TPW    = $(BIN)\tpw
+TPP    = $(BIN)\tpp
+TV     = $(RTL)\tv
+TVBIN  = $(BIN)\tv
+OWL    = $(RTL)\owl
+OWLBIN = $(BIN)\owl
+W31    = $(RTL)\win31
+W31BIN = $(BIN)\win31
+COMMON = $(RTL)\common
+
+# Define the tools to use, based on DEBUG define
+!if $d(DEBUG)
+TASM = tasm -t -w- -z -zd
+BPC  = bpc -$d+,l+
+!else
+TASM = tasm -t -w- -z
+BPC  = bpc -$d-,l-
+!endif
+
+# Define different options for BPC
+BPCD = $(BPC) -t -cd -e$(TPU) -q
+BPCW = $(BPC) -t -cw -e$(TPW) -q -$g-
+BPCP = $(BPC) -t -cp -e$(TPP) -q
+
+.asm.obj:
+ $(TASM) -e -i$(INC) $*,$*.obj
+
+.asm.obw:
+ $(TASM) -e -i$(INC) -d_Windows_ $*,$*.obw
+
+.asm.obp:
+ $(TASM) -e -i$(INC) -d_DPMI_ $*,$*.obp
+
+rtl: rtldos rtlwin rtldpmi tv owl win31
+
+rtldos: $(BIN)\turbo.tpl $(TPU)\strings.tpu $(TPU)\windos.tpu
+
+rtlwin: $(BIN)\tpw.tpl
+
+rtldpmi: $(BIN)\tpp.tpl
+
+tv: $(TVBIN)\buildtv.exe
+
+owl: $(OWLBIN)\buildowl.exe
+
+win31: $(W31BIN)\build31.exe
+
+$(BIN)\turbo.tpl: \
+$(TPU)\system.tpu $(TPU)\overlay.tpu $(TPU)\crt.tpu $(TPU)\dos.tpu \
+$(TPU)\printer.tpu
+ cd $(TPU)
+ copy /b system.tpu+overlay.tpu+crt.tpu+dos.tpu+printer.tpu $(BIN)\turbo.tpl
+ cd $(RTL)
+
+$(BIN)\tpw.tpl: \
+$(TPW)\system.tpw $(TPW)\strings.tpw $(TPW)\wintypes.tpw \
+$(TPW)\winprocs.tpw $(TPW)\win31.tpw $(TPW)\winapi.tpw $(TPW)\windos.tpw \
+$(TPW)\wincrt.tpw $(TPW)\winprn.tpw
+ cd $(TPW)
+ copy /b system.tpw+strings.tpw+wintypes.tpw+winprocs.tpw+win31.tpw $(BIN)\tpw.tpl
+ copy /b $(BIN)\tpw.tpl+winapi.tpw+windos.tpw+wincrt.tpw+winprn.tpw $(BIN)\tpw.tpl
+ cd $(RTL)
+
+$(BIN)\tpp.tpl: \
+$(TPP)\system.tpp $(TPP)\crt.tpp $(TPP)\dos.tpp $(TPP)\printer.tpp \
+$(TPP)\strings.tpp $(TPP)\windos.tpp $(TPP)\winapi.tpp
+ cd $(TPP)
+ copy /b system.tpp+crt.tpp+dos.tpp+printer.tpp+strings.tpp+windos.tpp+winapi.tpp $(BIN)\tpp.tpl
+ cd $(RTL)
+
+$(TPU)\system.tpu: sys\system.tps sys\system.pas \
+sys\main.obj sys\errc.obj sys\varh.obj sys\long.obj sys\heap.obj \
+sys\strh.obj sys\seth.obj sys\fp48.obj sys\f48h.obj sys\f48f.obj \
+sys\f87h.obj sys\rand.obj sys\dint.obj sys\df48.obj sys\df87.obj \
+sys\sint.obj sys\sf48.obj sys\sf87.obj sys\tctl.obj sys\tgpc.obj \
+sys\tchr.obj sys\tstr.obj sys\tbol.obj sys\tint.obj sys\tf48.obj \
+sys\tf87.obj sys\tfun.obj sys\fctl.obj sys\ffun.obj sys\fdir.obj \
+sys\memh.obj sys\pars.obj sys\dirh.obj sys\char.obj sys\ei86.obj \
+sys\ei87.obj sys\objh.obj sys\tfio.obj sys\dmth.obj sys\tpch.obj \
+sys\cint.obj sys\cf48.obj sys\cf87.obj sys\last.obj sys\lovf.obj \
+$(LIB)\em86.obj $(LIB)\em87.obj
+ cd sys
+ $(BPCD) -o$(LIB) system
+ cd ..
+
+$(TPW)\system.tpw: sys\system.tps sys\system.pas \
+sys\wapp.obw sys\wlib.obw sys\wend.obw sys\errc.obw sys\varh.obj \
+sys\long.obj sys\wmem.obw sys\strh.obj sys\seth.obj sys\fp48.obj \
+sys\f48h.obj sys\f48f.obj sys\rand.obj sys\dint.obj sys\wx87.obw \
+sys\df48.obj sys\df87.obw sys\sint.obj sys\sf48.obj sys\sf87.obj \
+sys\tctl.obw sys\tgpc.obw sys\tchr.obw sys\tstr.obw sys\tbol.obw \
+sys\tint.obw sys\tf48.obw sys\tf87.obw sys\tfun.obw sys\fctl.obw \
+sys\ffun.obj sys\fdir.obw sys\memh.obj sys\wpar.obw sys\dirh.obw \
+sys\char.obj sys\we87.obw sys\objh.obw sys\dmth.obj sys\tpch.obw \
+sys\cint.obw sys\cf48.obw sys\cf87.obw sys\tfio.obj sys\lovf.obj \
+sys\wi87.obw $(LIB)\wf87.obj
+ cd sys
+ $(BPCW) -o$(LIB) system
+ cd ..
+
+$(TPP)\system.tpp: sys\system.tps sys\system.pas \
+sys\dapp.obp sys\errc.obp sys\varh.obj sys\long.obj sys\dlib.obp \
+sys\strh.obj sys\seth.obj sys\fp48.obj sys\f48h.obj sys\f48f.obj \
+sys\f87h.obp sys\rand.obj sys\dint.obj sys\df48.obj sys\df87.obj \
+sys\sint.obj sys\sf48.obj sys\sf87.obj sys\tctl.obj sys\tgpc.obj \
+sys\tchr.obj sys\tstr.obj sys\tbol.obj sys\tint.obj sys\tf48.obj \
+sys\tf87.obj sys\tfun.obj sys\fctl.obj sys\ffun.obj sys\fdir.obj \
+sys\memh.obj sys\pars.obj sys\dirh.obj sys\char.obj sys\ei86.obp \
+sys\ei87.obp sys\objh.obj sys\tfio.obj sys\dmth.obj sys\tpch.obj \
+sys\cint.obj sys\cf48.obj sys\cf87.obj sys\wmem.obp sys\dend.obp \
+sys\lovf.obj $(LIB)\em86.obp $(LIB)\em87.obp
+ cd sys
+ $(BPCP) -o$(LIB) system
+ cd ..
+
+$(TPU)\overlay.tpu: $(TPU)\system.tpu ovr\overlay.pas ovr\overlay.obj \
+ovr\overems.obj
+ cd ovr
+ $(BPCD) overlay
+ cd ..
+
+$(TPU)\crt.tpu: $(TPU)\system.tpu crt\crt.pas crt\crt.obj
+ cd crt
+ $(BPCD) crt
+ cd ..
+
+$(TPP)\crt.tpp: $(TPP)\system.tpp crt\crt.pas crt\crt.obp
+ cd crt
+ $(BPCP) crt
+ cd ..
+
+$(TPU)\dos.tpu: $(TPU)\system.tpu dos\dos.pas \
+dos\vers.obj dos\intr.obj dos\time.obj dos\cbrk.obj \
+dos\verf.obj dos\disk.obj dos\fatr.obj dos\ftim.obj \
+dos\find.obj dos\ptim.obj dos\vect.obj dos\swap.obj \
+dos\keep.obj dos\exec.obj dos\srch.obj dos\expn.obj \
+dos\splt.obj dos\envs.obj dos\envv.obj
+ cd dos
+ $(BPCD) dos
+ cd ..
+
+$(TPP)\dos.tpp: $(TPP)\system.tpp dos\dos.pas \
+dos\vers.obj dos\intr.obp dos\time.obj dos\cbrk.obj \
+dos\verf.obj dos\disk.obj dos\fatr.obj dos\ftim.obj \
+dos\find.obj dos\ptim.obj dos\vect.obj dos\swap.obp \
+dos\keep.obj dos\exec.obj dos\srch.obj dos\expn.obj \
+dos\splt.obj dos\envs.obj dos\envv.obj
+ cd dos
+ $(BPCP) dos
+ cd ..
+
+$(TPU)\printer.tpu: $(TPU)\system.tpu prt\printer.pas
+ cd prt
+ $(BPCD) printer
+ cd ..
+
+$(TPP)\printer.tpp: $(TPP)\system.tpp prt\printer.pas
+ cd prt
+ $(BPCP) printer
+ cd ..
+
+$(TPU)\strings.tpu: $(TPU)\system.tpu str\strings.pas
+ cd str
+ $(BPCD) strings
+ cd ..
+
+$(TPW)\strings.tpw: $(TPW)\system.tpw str\strings.pas
+ cd str
+ $(BPCW) strings
+ cd ..
+
+$(TPP)\strings.tpp: $(TPP)\system.tpp str\strings.pas
+ cd str
+ $(BPCP) strings
+ cd ..
+
+$(TPW)\wintypes.tpw: $(TPW)\system.tpw win\wintypes.pas
+ cd win
+ $(BPCW) wintypes
+ cd ..
+
+$(TPW)\winprocs.tpw: $(TPW)\system.tpw $(TPW)\wintypes.tpw win\winprocs.pas
+ cd win
+ $(BPCW) winprocs
+ cd ..
+
+$(TPW)\win31.tpw: $(TPW)\system.tpw $(TPW)\wintypes.tpw \
+$(TPW)\winprocs.tpw win\win31.pas
+ cd win
+ $(BPCW) win31
+ cd ..
+
+$(TPU)\windos.tpu: $(TPU)\system.tpu $(TPU)\strings.tpu win\windos.pas
+ cd win
+ $(BPCD) windos
+ cd ..
+
+$(TPW)\windos.tpw: $(TPW)\system.tpw $(TPW)\strings.tpw \
+$(TPW)\wintypes.tpw $(TPW)\winprocs.tpw win\windos.pas
+ cd win
+ $(BPCW) windos
+ cd ..
+
+$(TPP)\windos.tpp: $(TPP)\system.tpp $(TPP)\strings.tpp win\windos.pas
+ cd win
+ $(BPCP) windos
+ cd ..
+
+$(TPW)\winapi.tpw: $(TPW)\system.tpw win\winapi.pas
+ cd win
+ $(BPCW) winapi
+ cd ..
+
+$(TPP)\winapi.tpp: $(TPP)\system.tpp win\winapi.pas
+ cd win
+ $(BPCP) winapi
+ cd ..
+
+$(TPW)\wincrt.tpw: $(TPW)\system.tpw $(TPW)\wintypes.tpw \
+$(TPW)\winprocs.tpw $(TPW)\windos.tpw win\wincrt.pas
+ cd win
+ $(BPCW) wincrt
+ cd ..
+
+$(TPW)\winprn.tpw: $(TPW)\system.tpw $(TPW)\wintypes.tpw \
+$(TPW)\winprocs.tpw $(TPW)\windos.tpw win\winprn.pas
+ cd win
+ $(BPCW) winprn
+ cd ..
+
+$(TVBIN)\buildtv.exe: $(TV)\format.obj $(TV)\sysint.obj $(TV)\sysint.obp \
+$(TV)\app.pas $(TV)\colorsel.pas $(TV)\dialogs.pas $(TV)\drivers.pas \
+$(TV)\editors.pas $(TV)\histlist.pas $(TV)\memory.pas $(TV)\menus.pas \
+$(TV)\msgbox.pas $(TV)\outline.pas $(TV)\stddlg.pas $(TV)\textview.pas \
+$(TV)\views.pas $(TV)\buildtv.pas $(COMMON)\objects.pas \
+$(COMMON)\validate.pas
+ cd tv
+ $(BPC) -cd -m -e$(TVBIN) -u$(COMMON);$(RTL)\str -$F+,X+,I-,S- buildtv
+ $(BPC) -cp -m -e$(TVBIN) -u$(COMMON);$(RTL)\str -$F-,X+,I-,S- buildtv
+ cd ..
+
+$(OWLBIN)\buildowl.exe: $(OWL)\bwcc.pas  \
+$(OWL)\odialogs.pas $(OWL)\omemory.pas $(OWL)\oprinter.pas \
+$(OWL)\owindows.pas $(OWL)\ostddlgs.pas $(OWL)\ostddlgs.res \
+$(OWL)\ostdwnds.pas $(OWL)\ostdwnds.res $(OWL)\custcntl.pas \
+$(OWL)\buildowl.pas $(COMMON)\validate.pas $(COMMON)\objects.pas
+ cd owl
+ $(BPC) -cw -m -e$(OWLBIN) -u$(COMMON) -$F+,S- buildowl
+ cd ..
+
+$(W31BIN)\build31.exe: $(W31)\commdlg.pas $(W31)\ddeml.pas \
+$(W31)\dlgs.pas $(W31)\lzexpand.pas $(W31)\mmsystem.pas \
+$(W31)\ole.pas $(W31)\shellapi.pas $(W31)\stress.pas \
+$(W31)\toolhelp.pas $(W31)\ver.pas $(W31)\colordlg.pas \
+$(W31)\cpl.pas $(W31)\print.pas $(W31)\wfext.pas
+  cd win31
+  $(BPC) -cw -m -e$(W31BIN) -$F+,S- build31
+  cd ..
+

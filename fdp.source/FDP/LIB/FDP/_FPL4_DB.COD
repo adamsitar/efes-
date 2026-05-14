@@ -1,0 +1,212 @@
+
+ procedure code_FPL4data_to_FDR (const FPL: DFPL4; var FDR: DFDR);
+     var   s,t,u : string;
+           h,m   : byte;
+           bres  : bool;
+     begin
+       fillchar (FDR,sizeof(FDR),0);
+       FDR.idn := decode_l4_7a(FPL._7);
+
+       decode_l4_9 (FPL._9, s,t,u);
+       if u<>'' then FDR.typ:= t+icao_NXT+u
+       else FDR.typ:= t;
+
+       decode_l4_13(FPL._13, FDR.dep.kod, FDR.dep.h,FDR.dep.m, h,m);
+
+       FDR.eet := FPL.eet;
+       FDR.vys := FPL.vys;
+       FDR.vys_:= FPL.vys_;
+       FDR.exi := FPL.exi;
+
+       decode_l4_16(FPL._16, FDR.dep.h,FDR.dep.m, FDR.arr.kod,FDR.arr.h,FDR.arr.m, h,m, s);
+
+       FDR.date:= FPL.date;
+       FDR.stat:= FPL.stat;
+
+       if (FPL.src=0) and (FPL._18<>nil) then fplsrc_decode(FPL._18,FDR.src)
+       else FDR.src:= FPL.src;
+
+       {FDR.data:= REG.... az pri aktivacii}
+     end;
+
+ procedure code_FDRdata_to_FPL4  (const FDR: DFDR;  var FPL: DFPL4);
+     begin
+       FPL.eet := FDR.eet;
+       FPL.vys := FDR.vys;
+       FPL.vys_:= FDR.vys_;
+       FPL.exi := FDR.exi;
+
+       FPL.date:= FDR.date;
+       FPL.stat:= FDR.stat;
+
+       FPL.src := FDR.src;
+     end;
+
+
+{ ---------------------
+  DB
+  ---------------------
+}
+{ pri kazdej zmene vyhladat poznamku "_decodeDBB_FDR_XY"
+}
+ procedure __codeDBB_FPL4_FDR (FPL: PFPL4; FDR: PFDR; buff: PDB_buff; head: PDB_head);
+     var   s,t : string;
+     begin
+       s:= '';
+       add_s(@FPL^.rec, sizeof(FPL^.rec), s,t);
+
+       with FDR^ do
+         begin
+           add_s(@date,sizeof(date),s,t);
+           add_s(@stat,sizeof(stat),s,t);
+           add_s(@eet, sizeof(eet), s,t);
+           add_s(@exi, sizeof(exi), s,t);
+           add_s(@vys_,sizeof(vys_),s,t);
+           add_s(@vys, sizeof(vys), s,t);
+           add_s(@src, sizeof(src), s,t);
+
+           add_s(@dep, sizeof(dep), s,t);
+           add_s(@arr, sizeof(arr), s,t);
+
+           add_s(@typ, sizeof(typ), s,t);
+           add_s(@idn, sizeof(idn), s,t);
+         end;
+       str_toDBstr_(s,buff^[db_fpl4_ine])
+     end;
+
+
+ procedure __decodeDBB_FPL4_FDR(buff: PDB_buff; FPL: PFPL4; FDR: PFDR; head: PDB_head); far;
+     var   s : string;
+           p : pchars;
+     begin
+       fillchar(FDR^,sizeof(FDR^),0);
+      { nepocita sa tu s alokovanymi polozkami !
+      }
+       s:= DBstr_to_str_ (buff^[db_fpl4_ine]);
+       p:= @s[1];
+       get_s(p, @FPL^.rec, sizeof(FPL^.rec));
+
+       with FDR^ do
+         begin
+           get_s(p, @date, sizeof(date));
+           get_s(p, @stat, sizeof(stat));
+           get_s(p, @eet,  sizeof(eet));
+           get_s(p, @exi,  sizeof(exi));
+           get_s(p, @vys_, sizeof(vys_));
+           get_s(p, @vys,  sizeof(vys));
+           get_s(p, @src,  sizeof(src));
+
+           get_s(p, @dep,  sizeof(dep));
+           get_s(p, @arr,  sizeof(arr));
+
+           get_s(p, @typ,  sizeof(typ));
+           get_s(p, @idn,  sizeof(idn));
+         end;
+     end;
+
+
+{ pri kazdej zmene upravit i "_decodeDBB_FPL4_FDR"...
+  a vyhladat poznamku "_decodeDBB_FPL4_XY"
+}
+ procedure _codeDBB_FPL4(FPL: PFPL4; buff: PDB_buff; head: PDB_head);
+     var   size : int;
+           s,t,u : string;
+           FDR : DFDR;
+     begin
+       with FPL^ do
+         begin
+          { data : 7,8,9,10, 13,14,16,17, 5
+          }
+           s:= '';
+           add_s(@_7[0], sizeof(_7), s,t);
+
+           add_s(@_8 [0],sizeof(_8),  s,t);
+           add_s(@_9 [0],sizeof(_9),  s,t);
+           add_s(@_10[0],sizeof(_10), s,t);
+
+           add_s(@_13[0],sizeof(_13), s,t);
+           add_s(@_14[0],sizeof(_14), s,t);
+           add_s(@_16[0],sizeof(_16), s,t);
+
+           u:= strpas(_17);
+           add_s(@u[0],1+length(u), s,t);
+
+           u:= strpas(_5);
+           add_s(@u[0],1+length(u), s,t);
+
+           str_toDBstr_(s,buff^[db_fpl4_data]);
+
+          { trat: 15
+          }
+           str_toDBstr(code_line_i(FPL^._15,1,3),buff^[db_fpl4_15_1]);
+           str_toDBstr(code_line_i(FPL^._15,4,6),buff^[db_fpl4_15_2]);
+
+          { pozn: 18,19,20
+          }
+           str_toDBstr(code_line_i(FPL^._18,1,3),buff^[db_fpl4_18_1]);
+           str_toDBstr(code_line_i(FPL^._18,4,6),buff^[db_fpl4_18_2]);
+           str_toDBstr(code_line_i(FPL^._19,1,3),buff^[db_fpl4_19]);
+           str_toDBstr(code_line_i(FPL^._20,1,3),buff^[db_fpl4_20]);
+
+          { Ine udaje, pri kazdej zmene upravit i
+               "_decodeDBB_FPL4_FDR"
+               "_codeDBB_FPL4rec"
+
+            Toto spomalenie pri individualnych zapisoch prinesie
+            naopak zrychlenie spracovania pri celkovom nacitavani
+          }
+           code_FPL4data_to_FDR (FPL^,FDR);
+           __codeDBB_FPL4_FDR(FPL,@FDR,buff,head);
+         end;
+     end;
+
+
+ procedure _decodeDBB_FPL4(buff: PDB_buff; FPL: PFPL4; head: PDB_head);
+     var   s,t,u : string;
+           p : pchars;
+           i : int;
+           FDR : DFDR;
+     begin
+       fillchar(FPL^,sizeof(FPL^),0);
+       with FPL^ do
+         begin
+          { data : 7,8,9,10, 13,14,16,17, 5;
+               pri zmene opravit
+               "_decodeDBB_FPL4_FDR"
+          }
+           s:= DBstr_to_str_ (buff^[db_fpl4_data]); p:= @s[1];
+
+           get_s(p, @_7[0],sizeof(_7));
+
+           get_s(p, @_8[0], sizeof(_8));
+           get_s(p, @_9[0], sizeof(_9));
+           get_s(p, @_10[0],sizeof(_10));
+
+           get_s(p, @_13[0],sizeof(_13));
+           get_s(p, @_14[0],sizeof(_14));
+           get_s(p, @_16[0],sizeof(_16));
+
+           get_s_x(p, u,sizeof(u)-1);
+           _17:= strpasnew(u);
+
+           get_s_x(p, u,sizeof(u)-1);
+           _5:= strpasnew(u);
+
+          { trat: 15
+          }
+           _15:= decode_line_i (DBstr_to_str(buff^[db_fpl4_15_1]), _15,[]);
+           _15:= decode_line_i (DBstr_to_str(buff^[db_fpl4_15_2]), _15,[]);
+
+          { pozn : 18,19,20
+          }
+           _18:= decode_line_i (DBstr_to_str(buff^[db_fpl4_18_1]), _18,[]);
+           _18:= decode_line_i (DBstr_to_str(buff^[db_fpl4_18_2]), _18,[]);
+           _19:= decode_line_i (DBstr_to_str(buff^[db_fpl4_19]), _19,[]);
+           _20:= decode_line_i (DBstr_to_str(buff^[db_fpl4_20]), _20,[]);
+
+          { ine udaje
+          }
+           __decodeDBB_FPL4_FDR (buff,FPL,@FDR,head);
+           code_FDRdata_to_FPL4 (FDR,FPL^);
+         end;
+     end;

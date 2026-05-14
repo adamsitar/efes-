@@ -1,0 +1,37 @@
+  function print_ZAM(ZAM: PZAM): bool;
+     const max_s = 16;
+     var   s : array[0..max_s-1] of string;
+           i,p,r : int;
+           b : bool;
+     begin
+       s[0]:= _PRN_TAB + icao_STD + code_ZAM_data(ZAM);
+       s[1]:= _PRN_TAB + icao_ARR + code_ZAM_19(ZAM,false);
+       r:= init_pole_to_print (s,max_s,2,ZAM^.pozn,true);
+       b:= print_strs(PortNo,@s,r);
+       if b then for p:= 0 to 0 do print_str(PortNo,kbNL);
+       print_ZAM:= b
+     end;
+
+  procedure print_ZAMs(ZAMs: Pptrs; top: pointer; title: string); far;
+      var   i: int;
+      begin
+        if print_head(PortNo, title) then
+           begin
+             i:= 0;
+             while (i<=int(top^)) and print_ZAM(ZAMs^[i]) do
+               begin
+                 CheckProcesses;
+                 inc(i)
+               end
+           end
+      end;
+
+
+{$IFDEF MAPY} {$IFNDEF MAPY_1.0}
+
+  function  new_GP_ZAM(ZAM: PZAM): PTMapOb; far;
+      begin
+        new_GP_ZAM:= new_GP_KruhPriestor(ZAM^.kod,polomer_ZAM)
+      end;
+
+{$ENDIF} {$ENDIF}

@@ -1,0 +1,110 @@
+{ testy na zmenu
+}
+ function zmeneny_bod(B1,B2: TOB): bool;
+    begin
+      zmeneny_bod:= (B1.kod<>B2.kod) or (B1.h<>B2.h) or (B1.m<>B2.m) or (B1.vys<>B2.vys)
+    end;
+
+ function zmenena_trat_FPLc(FPLp,FPL: PDcFPL; var od_bodu: int): bool;
+    var   prepocet : bool;
+          i : int;
+    begin
+      if (FPLp<>nil) and (cut_(FPLp^.idn)<>'') then
+         begin
+           prepocet:=     (FPL^.start.kod<>FPLp^.start.kod)
+                       or (FPL^.start.h<>FPLp^.start.h)
+                       or (FPL^.start.m<>FPLp^.start.m)
+
+                       or (FPL^.prist.kod<>FPLp^.prist.kod)
+                       or (FPL^.prist.h<>FPLp^.prist.h)
+                       or (FPL^.prist.m<>FPLp^.prist.m)
+                      ;
+
+           if not prepocet  then
+              begin
+                i:= 0;
+                while    (i<FPLp^.bodov)
+                     and (i<FPL^.bodov)
+                     and (not zmeneny_bod(FPLp^.trat[i],FPL^.trat[i]))
+                do inc(i);
+                prepocet:=    (i<FPL^.bodov)
+                           or (FPL^.bodov<>FPLp^.bodov)
+                           or (FPL^.rych<>FPLp^.rych)
+                           or (FPL^.rych_<>FPLp^.rych_)
+              end;
+
+           if (i<FPL^.bodov) then od_bodu:= i else od_bodu:= 0
+         end
+      else begin
+             od_bodu:= 0;
+             prepocet:= true
+           end;
+
+      zmenena_trat_FPLc:= prepocet
+    end;
+
+
+ {$IFDEF SECTORS}
+  function zmenena_trat_v_sektore_FPLc(FPLp,FPL: PDcFPL): bool;
+     var   res : bool;
+           i : int;
+           F1,F2: DcFPL;
+     begin
+       F1:= FPLp^; F2:= FPL^; { aby som neprepisal nimi vlastnene hodnoty }
+       sektor_FPLc(@F1);
+       sektor_FPLc(@F2);
+
+      { zmenil sa pocet bodov sektore ?
+      }
+       res:= (F1.Bn-F1.B1<>F2.Bn-F2.B1);
+
+      { pocet bodov je rovnaky, zmenili sa parametre na bodoch ?
+      }
+       if not res then
+          begin
+            i:= 0;
+            while
+                  (i<F1.Bn-F1.B1)
+              and (not zmeneny_bod(F1.trat[F1.B1+i],F2.trat[F2.B1+i]))
+            do inc(i);
+            res:= i<F1.Bn-F1.B1
+          end;
+       zmenena_trat_v_sektore_FPLc:= res
+     end;
+ {$ENDIF}
+
+{ testuju sa len parametre,
+  ktore sa tlacia
+}
+ function zmenene_udaje_FPLc(FPLp,FPL: PDcFPL; dep_arr,v_sektore: bool): bool;
+    var   od_bodu  : int;
+          res,res2 : bool;
+    begin
+      res:=    (FPLp=nil)
+            or (cut_(FPLp^.idn)='')
+
+            or (      dep_arr
+                 and (    (FPL^.start.kod<>FPLp^.start.kod)
+                       or (FPL^.start.h  <>FPLp^.start.h)   or (FPL^.start.m <>FPLp^.start.m)
+                       or (FPL^.start_.h <>FPLp^.start_.h)  or (FPL^.start_.m<>FPLp^.start_.m)
+
+                       or (FPL^.prist.kod<>FPLp^.prist.kod)
+                       or (FPL^.prist.h  <>FPLp^.prist.h)   or (FPL^.prist.m <>FPLp^.prist.m)
+                     )
+               )
+
+            or (FPL^.vys<>FPLp^.vys)
+
+            or (FPLp^.inf<>FPL^.inf)
+            or (FPLp^.ssr<>FPL^.ssr);
+
+     {$IFDEF SECTORS}
+       if not res then
+          res:=    (     v_sektore  and zmenena_trat_v_sektore_FPLc(FPLp,FPL))
+                or ((not v_sektore) and zmenena_trat_FPLc(FPLp,FPL, od_bodu));
+     {$ELSE}
+       if not res then res:= zmenena_trat_FPLc(FPLp,FPL, od_bodu);
+     {$ENDIF}
+
+      zmenene_udaje_FPLc:= res
+    end;

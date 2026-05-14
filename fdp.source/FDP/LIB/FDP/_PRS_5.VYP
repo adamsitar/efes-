@@ -1,0 +1,140 @@
+  function syntax_PRS (PRS,PRSp: PPRS;
+                       var res: string; var ires: int;
+                       kontrola_rozsahov: bool;
+                       form: PFDP_AForm
+                      ): bool;
+
+     var   v1,v2     : word;
+           v1_,v2_   : char;
+           r0,r1,r2  : real;
+
+           schvaleny,
+           aktivovany,
+           neschvalovany : bool;
+
+           s: string;
+
+     function potvrdena_vynimka: bool;
+        begin
+          {$IFDEF AMC}
+           if (form<>nil) and (form^.Ask(ires,msgWARNING,res+' '+msgCORRECT)=ansAno) then
+              begin
+                ires:= -1; res:= ''
+              end;
+          {$ENDIF}
+          potvrdena_vynimka:= res=''
+        end;
+
+     label X;
+
+     begin
+       syntax_PRS:= false;
+       ires:= -1; res:= '';
+
+       { kod priestoru
+       }
+         if PRS^.kod='' then begin ires:= l4_err(a_FUA,'',it_KOD,0, res); goto X end;
+
+       { datum a doba platnosti
+       }
+         with PRS^ do
+           if    ((not CheckDate(zac.rok,zac.mes,zac.den,false)) or (not CheckTime(zac.h,zac.m,zac.s)))
+              or ((not CheckDate(kon.rok,kon.mes,kon.den,false)) or (not CheckTime(kon.h,kon.m,kon.s)))
+              or (DTtoSec(zac.rok,zac.mes,zac.den,zac.h,zac.m,zac.s)>=DTtoSec(kon.rok,kon.mes,kon.den,kon.h,kon.m,kon.s))
+              then begin
+                     ires:= l4_err(a_L4,'',it_ZAC,103,res);
+                     goto X
+                   end;
+
+
+       { povolene spracovanie ?
+       }
+         if not moze_byt_plan_podany(PRS,PRSp, res,ires, form, neschvalovany) then goto X;
+
+       { pouzite vysky
+       }
+         if PRS^.vys1<>'' then
+           begin
+             if not decode_l4_vyss(PRS^.vys1, v1, v1_, nil) then
+                begin ires:= l4_err(a_L4,PRS^.vys1,it_VYS1,err_l4444_vyska_chyba,res); goto X end
+           end
+         else PRS^.vys1:= vys_GND;
+         if PRS^.vys2<>'' then
+           begin
+             if not decode_l4_vyss(PRS^.vys2, v2, v2_, nil) then
+                begin ires:= l4_err(a_L4,PRS^.vys2,it_VYS2,err_l4444_vyska_chyba,res); goto X end
+           end
+        else PRS^.vys2:= vys_UNL;
+
+        if get_altM (v1_,v1) >= get_altM (v2_,v2) then
+           begin ires:= l4_err(a_FUA,PRS^.vys1+icao_NXIT+PRS^.vys2,it_VYS1,1, res); goto X end;
+
+
+       { Neboli zmenene parametre planu mimo povodne schvaleny rozsah ?
+       }
+         schvaleny  := (PRSp<>nil) and __is_stat(PRSp^.stat,cnst_acc);
+         aktivovany := (PRSp<>nil) and __is_stat(PRSp^.stat,cnst_stat_act);
+
+         if     (kontrola_rozsahov)
+            and ((form=nil) or (not form^.arch))
+            {and (PRSp<>nil)}
+            and (not neschvalovany)
+            and ( aktivovany
+                 {$IFDEF A-A} or schvaleny {$ENDIF}
+                 {$IFDEF AMC} or (schvaleny and (not plan_pred_poslednym_schvalenim (PRS))) {$ENDIF}
+                ) then
+            begin
+            {$IFDEF FUA}
+              { zmena vysky moze len okresat povodne rozmedzie
+              }
+              if (PRS^.vys1p<>'') and (decode_l4_vys_M(PRS^.vys1p) > decode_l4_vys_M(PRS^.vys1)) then
+                 begin
+                   ires:= l4_err(a_FUA,PRS^.kod,it_VYS1,20, res);
+                   if not potvrdena_vynimka then goto X;
+                 end;
+
+              if (PRS^.vys2p<>'') and (decode_l4_vys_M(PRS^.vys2p) < decode_l4_vys_M(PRS^.vys2)) then
+                 begin
+                   ires:= l4_err(a_FUA,PRS^.kod,it_VYS2,21, res);
+                   if not potvrdena_vynimka then goto X;
+                 end;
+
+                if (PRS^.zacp.rok<>0) and (PRS^.konp.rok<>0) then
+                   begin
+                   { skutocny cas aktivacie nemoze byt pred planovanym
+                   }
+                     with PRS^.zacp do r0:= DTtoSec(rok,mes,den,h,m,s);
+                     with PRS^.zac  do r2:= DTtoSec(rok,mes,den,h,m,s);
+                     if (r2<r0) then
+                        begin
+                          ires:= l4_err(a_FUA,PRS^.kod,it_ZAC,22, res);
+                          if not potvrdena_vynimka then goto X;
+                        end;
+
+                   { oprava nemoze predlzit cas ukoncenia
+                   }
+                     with PRS^.konp do r1:= DTtoSec(rok,mes,den,h,m,s);
+                     with PRS^.kon  do r2:= DTtoSec(rok,mes,den,h,m,s);
+                     if (r1<r2) then
+                        begin
+                          ires:= l4_err(a_FUA,PRS^.kod,it_KON,24, res);
+                          if not potvrdena_vynimka then goto X;
+                        end;
+
+                     if r2<r0 then
+                        begin
+                          ires:= l4_err(a_FUA,PRS^.kod,it_KON,23, res);
+                          goto X;
+                        end;
+                   end;
+            {$ENDIF}
+            end;
+
+
+       { Vsetky polozky su v poriadku, plan sa odosle na spracovanie
+       }
+       if (form<>nil) and (PRS^.dap.rok=0) then with PRS^.dap do datum_init (PRS^.dap, day,month,year, hour,min,sec);
+       format_PRS(PRS);
+
+       X: syntax_PRS:= (res='') and (ires=-1);
+     end;

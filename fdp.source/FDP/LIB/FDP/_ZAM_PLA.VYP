@@ -1,0 +1,16 @@
+ function stav_ZAM(ZAM: PZAM; cas: real; var zmena: bool): TPoz;
+    var   npoz : Tpoz;
+    begin
+      with ZAM^ do npoz:= platny_plan(cas, zac,kon, stat, dT_propose_ZAM,dT_unactive_ZAM,dT_deactive_ZAM);
+      zmena:= npoz<>ZAM^.poz;
+      ZAM^.poz:= npoz;
+      stav_ZAM:= npoz
+    end;
+
+ function est_ZAM(ZAM: PZAM): bool;
+    var   zmena: bool;
+    begin
+      est_ZAM:= stav_ZAM(ZAM, absTime, zmena) in poz_est_ZAM
+    end;
+
+

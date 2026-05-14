@@ -1,0 +1,130 @@
+{$IFDEF PRN_SERVER}
+
+  function print_mFPL(FPL: PDmFPL): bool;
+     begin
+       send_mFPL(FPL, STRIPPRNaddress, false);
+       print_mFPL:= true
+     end;
+
+{$ELSE}
+  function print_mFPL(FPL: PDmFPL): bool;
+     const max_s = 16;
+     var   s : array[0..max_s-1] of string;
+           t : string;
+           i,p,r : int;
+           b : bool;
+          {$IFDEF DEBUG}
+           f: text;
+          {$ENDIF}
+     begin
+
+       if prn_FPLM_ICAO then
+          begin
+            s[0]:= _PRN_TAB + icao_STD + code_FPLM_7(FPL) + icao_ARR + code_FPLM_8(FPL);
+            s[1]:= _PRN_TAB + icao_ARR + code_FPLM_9(FPL) + icao_ARR + code_FPLM_10(FPL);
+            s[2]:= _PRN_TAB + icao_ARR + code_FPLM_13(FPL);
+            r:= 3;
+          end
+       else begin
+              s[0]:= _PRN_TAB +            code_FPLM_7(FPL) + icao_ARR + code_FPLM_8(FPL)
+                              + icao_ARR + code_FPLM_9(FPL) + icao_ARR + code_FPLM_10(FPL)
+                              + icao_ARR + code_FPLM_13(FPL)
+                              + icao_ARR + code_FPLM_16(FPL)
+                              + icao_ARR + l4_format_s(FPL^.vu);
+
+              t:= ''; for i:= 0 to max_ulohy_FPLm-1 do t:= t + FPL^.ulohy[i] + icao_NXIT;
+              s[0]:= s[0] + icao_NXT + t;
+
+              r:= 1;
+            end;
+
+       s[r]:= _PRN_TAB + icao_ARR + code_FPLM_15_FL(FPL);
+       p:= get_data_lines_i_(FPL^.trat);
+       if p>0 then
+          begin
+            s[r]:= s[r] + icao_NXIT + get_line_i(FPL^.trat,1);
+            i:= 2; while (i<p) and (r<max_s) do
+              begin
+                inc(r);
+                s[r]:= _PRN_TAB + icao_NXIT+get_line_i(FPL^.trat,i);
+                inc(i)
+              end;
+          end;
+       inc(r);
+
+       if prn_FPLM_ICAO and (r<max_s) then
+          begin
+            s[r]:= _PRN_TAB + icao_ARR + code_FPLM_16(FPL);
+            inc(r)
+          end;
+
+       if r<max_s then
+          begin
+            s[r]:= _PRN_TAB + icao_ARR + get_line_i(FPL^.pozn,1);
+            inc(r);
+            p:= get_data_lines_i_(FPL^.pozn);
+            i:= 2; while (i<p) and (r<max_s) do
+              begin
+                s[r]:= _PRN_TAB + icao_NXIT + get_line_i(FPL^.trat,i);
+                inc(r);
+                inc(i)
+              end;
+           end;
+
+       if prn_FPLM_ICAO and (r<max_s) then
+          begin
+            s[r]:= _PRN_TAB + icao_ARR + code_FPLM_19(FPL,false) + icao_END;
+            inc(r)
+          end;
+
+      {$IFDEF DEBUG}
+       assign(f,'1.bak');
+       rewrite(f);
+       for i:= 0 to r-1 do writeln(f,s[i]);
+       close(f);
+      {$ENDIF}
+
+       b:= print_strs(PortNo,@s,r);
+       if b then for p:= 0 to 0 do print_str(PortNo,kbNL);
+       print_mFPL:= b
+     end;
+{$ENDIF}
+
+
+  {procedure print_FPLs (FPLs: PmFPLs; top: pointer; title: string);
+      var   i: int;
+      begin
+        if print_head(PortNo, title) then
+           begin
+             i:= 0;
+             while (i<=int(top^)) and print_mFPL(FPLs^[i]) do
+               begin
+                 Check;
+                 inc(i)
+               end
+           end
+      end;}
+
+  procedure print_mFPLs(FPLs: Pptrs; top: pointer; title: string);
+      var   i: int;
+      begin
+        i:= 0; while (i<1) and print_str(PortNo,_CR+_LF) do inc (i);
+        if i<1 then Exit;
+        if not print_head(PortNo, _PRN_TAB+title+_CR+_LF) then Exit;
+        if not print_str(PortNo,_CR+_LF) then Exit;
+
+        i:= 0; while (i<=int(top^)) and print_mFPL(FPLs^[i]) do
+          begin
+            CheckProcesses;
+            inc(i)
+          end;
+        if i>=int(top^) then print_str(PortNo, kbNL)
+      end;
+
+
+ {$IFDEF KRL}
+  procedure print_KRLs (FPLs: Pptrs; top: pointer; title: string);
+      begin
+        print_mFPLs(FPLs,top,title)
+      end;
+ {$ENDIF}

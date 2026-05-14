@@ -1,0 +1,16 @@
+function O_ASOC._code_ACT (var FPL: DFPL4): pchar;
+   var   pch : pchar;
+         s   : string;
+   begin
+     pch:= inherited _code_ACT (FPL);
+     {$IFDEF LZ}  { Reklamacia ASSOC z 22.XI.2000 }
+       if FPL._18<>nil then
+          begin
+            s:= icao_ARR + '18'+icao_NXT;
+            pch:= StrNPCopy(pch,s,true,false);
+            pch:= StrNCopy(pch,FPL._18,true,false);
+          end;
+     {$ENDIF}
+     _code_ACT:= pch
+   end;
+

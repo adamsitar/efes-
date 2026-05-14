@@ -1,0 +1,3 @@
+{$IFDEF DEBUG}
+
+{$ENDIF}

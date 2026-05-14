@@ -1,0 +1,488 @@
+
+{ ==============================================================================
+   Dekodovanie _15 - vyska, rychlost, trat
+  ------------------------------------------------------------------------------
+
+   Trat podla predpisu L4444 - pravidla :
+
+   povinne polozky :
+    a) rychlost+vyska
+    b) pozadovana cestovna hladina
+
+   podla potreby :
+    c1) standartna odletova trat -> moze byt nasledovana c3 alebo c4
+    c2) trat LPS (ATS) -> (do 7 znakov) -> moze byt nasledovana LEN c3 alebo c4
+    c3) vyznamny bod trate -> (do 11 znakov, 4905N01920E or 49N019E)
+    c4) vyznamny bod trate/RychlostHladina
+    c5) oznacenie rte_DESC
+    c6) cestovne stupanie (C), napr C/OKI/M078F330F350PLUS
+    c7) standartna priletova trat
+
+  תתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתת
+}
+
+{ ------------------------------------------------------------------------------
+   rozdekodovanie trate do bodov
+  תתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתת
+
+  Zakladna vlastnost algoritmu vychadza z ustanovenia c2) po ATS nasleduje c3)
+  alebo c4) (BOD opustenia/napojenia sa z/na trat/e);
+
+  Pozn. Program tuto uzitocnu vlastnost umoznuje rosirit v zavislosti
+  na nastaveni _15_RxR_ENABLE umoznujuce nasledovanie dalsej trate, ak
+  obe maju jednoznacny priesecnik, alebo ich vzdialenosti...
+
+  Algoritmus : R-trat, B-bod, N-nic (zaciatok alebo koniec),
+               vzdy si pamata predchadzajuci spracovany bod,
+               ak to nie je popis na trati.
+               Preskakovanie DESC...
+
+      B       -> vlozi bod
+
+      R       -> (B1) pozrie, predchadzajuci bod "bod0" je dekodovany :
+                  a) N    : vstupny bod trate R (alebo chyba) [_15_IO_ENABLE]
+                            ak je zemsur/azimut, najde sa najblizsi bod R a B...
+                  b) B    : musi lezat na R ,
+                  c) R    : -
+
+
+                 (B2) pozrie, co je nasledujuci bod trate i+1
+                  a) CMNT : -> i+1 ִִִִִִִִִִִִִִִִִִִִִÙ (vlozi sa pred B2)
+                  b) N    : vystupny bod trate R (alebo chyba) [_15_IO_ENABLE]
+                  c) B    : BמR, vsetky pody od posledneho bodu az po B [_15_ALL_ENABLE]
+                  d) Ri   : jednoznacny RxRi [_15_RxR_ENABLE]
+
+                 z toho urci smer a body, vlozi body medzi (B1 a B2 vcitane)
+  תתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתת
+}
+
+{ תתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתת
+   Hlavna fcia pre rozklad trate do bodov
+  תתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתת
+}
+
+ function _dekodovanie_na_body (const FPL  : DFPL4;
+                                var   FDR  : DFDR;
+
+                                const f15T : pchar;
+                                var   f15B : pchar;
+
+                                var  dd    : TFDR_decoded_data;
+                                var res    : string;
+                                var ires   : int
+                               ): int;
+
+    var   is_mzp,
+          is_d,
+          is_dct        : bool;
+
+          kods,kodB,
+          bodp,kodsp,              { posledny nacitany bod }
+          bod0,                    { prvy bod na trati     }
+
+          _dep,_arr,
+          tarr,tdep,
+
+          cmnt,
+
+          k1,k2 : string;
+
+          Rp   : TRTE;            { posledna trat         }
+          R,R1 : TRTE;
+          B,B1 : TsBod;
+
+          kod_1,kod1, kod_dct : string;
+          ind_1,ind1, ind_dct : int;
+
+          ry            : single;
+          v,v2          : word;
+          r_,v_,v_a,v2_ : char;
+
+          i,j,k,l,
+          pocet         : int;
+
+          pb : byte;
+
+          _check_en     : bool;
+
+
+   { תתתתתתתתתתתתתתתתתתתתתתתת
+      Pomocne funkcie
+     תתתתתתתתתתתתתתתתתתתתתתתת
+   }
+
+   {
+   }
+    function vyber_kod_bodu(kods: string): string;
+       var   B : TsBod;
+             ry : single; v,v2  : word; r_,v_,v_a,v2_ : char;
+             is_mzp : bool; tarr,tdep : string;
+             ires  : int; res   : string;
+       begin
+         if decode_OB(kods,'', B, ry,r_,v,v_,v_a,v2,v2_, is_mzp,tarr,tdep, false,res,ires) then vyber_kod_bodu:= B.kod
+         else vyber_kod_bodu:= ''
+       end;
+
+
+   { nacitanie dalsieho bodu/trate letoveho planu;
+     komentare sa odlozia
+   }
+    function read_kod (cmnt_en: bool; pocet: int; var ind: int; var kods: string; var cmnt: string): string;
+       var   is_d: bool;
+             k1: string;
+       begin
+         is_dct:= false;
+         cmnt:= ''; kods:= '';
+         if ind<=pocet then
+           repeat
+           {  odfiltrovanie komentarov :
+              pozrie, co je nasledujuci bod trate  i+1
+              a) CMNT : -> i+1 ִִִִִִִִִִִִִִִִִִִִִÙ
+              (cmnt sa vlozi sa pred B2)
+           } kods := GetPStr(f15T,ind,[icao_NXIT]);
+             k1   := getstr(kods,1,[icao_NXT]);
+             is_d := is_DESC(kods);
+             if is_d then
+                begin
+                  is_dct:= k1=rte_DCT;
+                  if not (is_dct and cmnt_en) then
+                     begin
+                       cmnt:= cmnt+kods+icao_NXIT;
+                       kods:= ''
+                     end
+                end;
+             inc(ind);
+           until (not is_d) {or cmnt_en} or (ind>k);
+         read_kod:= kods
+       end;
+
+
+    procedure add_f15B (kods: string; var f15B : pchar; var kodsp, bodp: string);
+        var   bod : string;
+              p   : pchar;
+              l   : int;
+        begin
+          bod:= vyber_kod_bodu(kods); {getstr(kods,1,[icao_NXT]);}
+
+          if bod<>'' then
+             begin
+             { dvakrat rovnaky bod za sebou ?
+             } if kodsp=kods then Exit;
+
+             { je na druhom bode specifikacia ?
+             } if is_OB_eq(bod,bodp) then
+                  begin
+                    {if (length(kods)>length(kodsp)) then
+                       begin
+                         l:= (strlen(f15B)-length(kodsp))+1;
+                         GetMem(p,l); FillChar(p^,l,' ');
+                         Move(f15B[0],p[0],l-1);
+                         p[l-1]:= #0;
+                         StrDispose(f15B);
+                         f15B:= p
+                       end
+                    else Exit;}
+                  end;
+
+               kodsp := kods;
+               bodp  := bod;
+             end;
+
+          if f15B<>nil then kods:= icao_NXIT+kods;
+          f15B:= StrNPCopy(f15B,kods,true,true)
+        end;
+
+
+    label X;
+
+   { תתתתתתתתתתתתתתתתתתתתתתתת
+      Hlavna funkcia
+     תתתתתתתתתתתתתתתתתתתתתתתת
+   }
+    begin
+       res:= ''; ires:= 0;
+      _check_en:= dd.check_en; {dd.check_en:= true;}
+
+      bod0:= '';
+      bodp:= '';
+      kodsp:= '';
+      fillchar(Rp,sizeof(Rp),0);
+      is_dct:= false;
+
+      _dep:= najdi_dep(FPL,FDR);
+      _arr:= najdi_arr(FPL,FDR);
+
+      { תתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתת
+        1.bod na trati na riadenom uzemi a cas na nom urcia
+        vychodzi udaj pre prepocet casoveho profilu letu
+         - a) letisko startu a cas vletu
+         - b) 1.bod a cas EET pretiahnutia hranice;
+              zo zaciatku sa stotoznuje cas eet s casom na bode,
+              neskor by sa malo vypocitat vzdialenost prieniku
+              trate s hranicou a bodu
+        תתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתת
+      }
+
+      if is_OB(_dep,B,false) then
+         begin
+           BOD_to_OBxy(B,dd.eet);
+           dd.eet.h:= dd.dep.h;
+           dd.eet.m:= dd.dep.m;
+         end;
+
+      if is_OB(_arr,B,false) then
+         begin
+           BOD_to_OBxy(B,dd.exi);
+           dd.exi.h:= dd.arr.h;
+           dd.exi.m:= dd.arr.m;
+         end;
+
+      i:= 1; pocet:= GetPStrItems(f15T,[icao_NXIT]);
+
+      repeat
+        {$IFNDEF DEBUG} CheckProcesses; {$ENDIF}  { hnusne pomala funkcia }
+
+        kod_1:= ''; kod1:= '';
+        ind_1:= -1; ind1:= -1;
+
+        read_kod(true, pocet,i,kods,cmnt);        { prave dekodovany bod/trat/poznamka }
+        if (kods='') then break;
+
+
+        if not is_RTE(getstr(kods,1,[icao_NXT]),R) then
+
+       { ==========================================
+         a) zaradenie bodu alebo popisu trate...
+         ------------------------------------------
+       }
+          begin
+            decode_OB(kods,'', B, ry,r_,v,v_,v_a,v2,v2_, is_mzp,tarr,tdep, dd.check_en,res,ires);
+            if (res<>'') and dd.check_en then goto X;
+
+           { Aby sa mohol zmenit smer letu medzi dvoma tratami LPS na definovanom
+             bode, ktory nie je ich priesecnikom, musi byt pouzity popis "DCT".
+             V tom pripade je mozne az do uvedenia dalsej trasy v plane
+             znova prejst na bod inej trate.
+           }
+
+            if     (not is_dct)                                      { nebol priznak DCT  }
+               and (bod0<>'')
+               and (B.kod<>'')                                       { vstupny bod urceny }
+               and ((kodsp<>'')  and (not is_VOR_or_ZS (kodsp,B1)))  { bod je vyjadreny ako VOR/ZS }
+               and (                 (not is_VOR_or_ZS (B.kod,B1)))  { bod je vyjadreny ako VOR/ZS }
+               and (patria_body_na_trat(kodsp,B.kod)=-1)
+               and (     (Rp.kod<>'')
+                     and (patri_bod_na_trat(B.kod,Rp, @kod_dct,ind_dct, res)<0)
+                     and (najblizsi_bod_trate(B.kod,Rp, _15_BxR_ENABLE)<0)
+                   )
+                   then
+               begin
+                 if _15_DCT_POINTS and dd.check_en then
+                    begin
+                      res:= bodp+' '+B.kod;
+                      if (Rp.kod<>'') then
+                         begin
+                           ires:= err_15c_body_roznych_trati_bez_dct;
+                           res:= res+' ['+R.kod+']'
+                         end
+                      else ires:= err_15c_ocakavane_dct;
+                      ires:= l4_err(a_15c,'',i_15c,ires, res)
+                    end;
+                 if (res<>'') and dd.check_en then goto X
+               end;
+
+            if is_dct then fillchar(Rp,sizeof(Rp),0);
+
+            if (FDR.eet.kod='') then
+               begin
+                 BOD_to_OBxy(B,dd.eet);
+                 if is_mzp then gettimestr(dd.eet.h,dd.eet.m,pb,tarr)
+               end;
+
+            add_f15B (kods,f15B,kodsp,bodp);
+            if (bod0='') then bod0:= B.kod;
+
+            continue
+          end
+
+       { ==========================================
+         b) zaradenie bodov prislusnej casti trate
+         ------------------------------------------
+       }
+        else Rp:= R;
+
+
+       { ---------------------------------------
+         b1) urcenie predchadzajuceho bodu
+             "B1", aby bolo mozne trat nan
+             napojit
+         תתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתת
+       }
+        if bod0='' then
+           begin
+           { Plan letu zacina tratou :
+             a) startuje z daneho uzemia   - najblizsi bod trate ku letisku v smere letu
+             b) prilieta z nejakieho smeru - urcenie smeru priletu a vstupneho bodu
+           }
+             if is_OB(_dep,B,false) then
+                begin
+                  if najdi_najblizsi_bod_ku_trati(_dep,true, R, kod_1,ind_1, res)<0 then
+                     l4_err(a_15c,R.kod+'->'+_dep,i_15c,err_15c_trat_daleko_od_dep, res)
+                end
+             else najdi_vst_hranicny_bod_trate(_dep,R, kod_1,ind_1, res);
+             if ind_1<0 then if dd.check_en then goto X;
+             bod0:= kod_1
+           end
+        else begin
+              { b) B : BמR ? or zemsur/azimut<_15_XYxR
+              }
+               if patri_bod_na_trat(bodp,R, @kod_1,ind_1, res)<0 then if dd.check_en then goto X;
+             end;
+
+              { c) R: nenastane
+              }
+
+       {if res<>'' then if dd.check_en then goto X;}
+
+       { ---------------------------------------
+         b3) najdenie nasledujuceho bodu trate
+             "B2"
+         תתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתת
+       }
+        cmnt:= '';
+        read_kod(false, pocet,i,kod1,cmnt);  { nasledujuci bod v plane }
+
+        if (i>=pocet) and ((kod1='') {or (bodl=kod1)}) then
+           begin
+            { b) N : znama trat na konci, najdenie vystupneho bodu trate R
+            }
+             if is_OB(_arr,B,false) then
+                begin
+                  if najdi_najblizsi_bod_ku_trati (_arr,true, R, kod1,ind1, res)<0 then
+                     l4_err(a_15c,R.kod+'->'+_arr,i_15c,err_15c_trat_daleko_od_arr, res)
+                end
+             else najdi_vyst_hranicny_bod_trate(_arr,{bod0,}R, kod1,ind1, res);
+             if ind_1<0 then if dd.check_en then goto X
+           end
+
+        else if not is_RTE(kod1,R1) then
+           begin
+            { c) B : BמR ? or zemsur/azimut<_15_XYxR
+            }
+             if patri_bod_na_trat(kod1,R, nil{kod1},ind1, res)<0 then if dd.check_en then goto X
+           end
+
+        else begin
+              { d) Ri : jednoznacny RxRi ?
+              }
+               if najdi_priesecnik_trati(R,R1, kod1,ind1, res)<0 then if dd.check_en then goto X;
+               dec(i); { musi urcit este trasu na poslednej trati }
+               Rp:= R
+             end;
+
+        if res<>'' then if dd.check_en then goto X;
+
+
+       { ---------------------------------------
+          3. Vlozenie bodov trate medzi B1 a B2
+         תתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתת
+
+         B1 je dany kod_1,ind_1  // _1 ק -1
+         B2 je dany kod1,ind1,
+
+         ind_1 a ind1 musia byt nastavene, potom
+
+         15B (+ B1       \ B1 ak B1=bodp
+              - B2       \ B2
+              + cmnt<>''
+              + B2
+
+       }
+        if (ind_1>-1) then
+           begin
+             add_f15B (kod_1, f15B, kodsp,bodp);
+             add_f15B (R.rte^[ind_1].kod, f15B, kodsp,bodp)
+           end;
+
+        if (ind_1>-1) and (ind1>-1) then
+           begin
+             if ind_1<ind1 then l:= 1 else l:= -1;
+             k:= 0; j:= ind_1+l;
+             while ((l=1) and (j<ind1)) or ((l=-1) and (j>ind1)) do
+               begin
+                 add_f15B(R.rte^[j].kod, f15B, kodsp,bodp);
+                 inc(j,l); inc(k)
+               end
+           end;
+
+        if (cmnt<>'') then add_f15B(cmnt,f15B, kodsp,bodp);
+
+        if (ind1>-1) then
+           begin
+            { tato kontrola nie je zdvojena, nezaradime bod, ktory nasleduje a mozno i s popisom }
+             if not is_OB_eq(R.rte^[ind1].kod,vyber_kod_bodu(kod1)) then add_f15B(R.rte^[ind1].kod, f15B, kodsp,bodp);
+             add_f15B(kod1, f15B, kodsp,bodp)
+           end;
+
+      until i>pocet;
+
+      if f15B=nil then
+         begin
+           ires:= l4_err(a_15c,'',i_15c,err_15c_nenajdena_trat_cez_fir, res);
+           if dd.check_en then goto X
+         end;
+
+      X:
+
+      dd.check_en:= _check_en;
+      if (res<>'') and (ires=0) then ires:= i_15c;
+      _dekodovanie_na_body:= ires;
+    end;
+
+
+{ -----------------------------------------------
+   kontrola, ci trat letu bola dekodovana uplne,
+   t.j. ci je medzi vnutrostatnymi letiskami,
+   resp. hranicnymi bodmi
+  תתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתת
+}
+ function _uplna_trat(const FPL : DFPL4;
+                      var   FDR : DFDR;
+
+                      var  dd   : TFDR_decoded_data;
+                      var  res  : string;
+                      var  ires : int
+                      ): int;
+    var   B : TsBod;
+
+    begin
+     { Kontrola, ci trat bola dekodovana spravne
+     }
+      if dd.check_en then
+         begin
+           with FDR do
+            if     (dep.kod<>arr.kod)
+               and (bodov>1)
+               and (rte^[0].x = rte^[bodov-1].x)
+               and (rte^[0].y = rte^[bodov-1].y) then
+                   ires:= l4_err(a_15c,'',i_15c,err_15c_kolecko, res);
+          end;
+
+      if dd.check_en and _15_UPLNA_TRAT then
+         begin
+          { Zacina trat na letisku v riadenej oblasti alebo na vstupnom bode ?
+          }
+           {if (not dd.isDEP) or ((FDR.bodov>0) and (is_iobod(FDR.rte^[0].kod)>-1)) then opravene 14.11.99}
+           if (not dd.isDEP) and ((FDR.bodov=0) or (is_iobod(FDR.rte^[0].kod)=-1)) then
+              ires:= l4_err(a_15c,FDR.rte^[0].kod,i_15c,err_15c_trat_nezacina_vo_fir, res)
+
+          { Konci trat na letisku v riadenej oblasti alebo na vystupnom bode ?
+          }
+           {else if (not dd.isARR) or ((FDR.bodov>0) and (is_iobod(FDR.rte^[FDR.bodov-1].kod)>-1)) then -//- }
+           else if (not dd.isARR) and ((FDR.bodov=0) or (is_iobod(FDR.rte^[FDR.bodov-1].kod)=-1)) then
+                ires:= l4_err(a_15c,FDR.rte^[FDR.bodov-1].kod,i_15c,err_15c_trat_nekonci_vo_fir, res)
+         end;
+
+      if (res<>'') and (ires=0) then ires:= i_15c;
+      _uplna_trat:= ires
+    end;

@@ -1,0 +1,207 @@
+{ תתתתתתתתתתתתתתתתתת
+   FPL
+  תתתתתתתתתתתתתתתתתת
+}
+function O_L4444._code_FPL (var FPL: DFPL4): pchar;
+   var   pch: pchar;
+   begin
+     with FPL do pch:= StrPasNew
+       (
+                    _7
+        +icao_ARR + _8
+        +icao_ARR + _9
+        +icao_ARR + _10
+        +icao_ARR + _13
+        +icao_ARR
+       );
+     pch:= StrNCopy(pch,FPL._15,true,false);
+     pch:= StrNPCopy(pch,icao_ARR+FPL._16+icao_ARR, true,true);
+     if FPL._18<>nil then pch:= StrNCopy(pch,FPL._18, true,false)
+     else pch:= StrNPCopy(pch,'0', true,true);
+     _code_FPL:= pch
+   end;
+
+
+function O_L4444.send_FPL(var FPL: DFPL4; key: string; typ: TNETtyp): bool;
+   var   pch: pchar;
+   begin
+      pch:= _code_FPL(FPL);
+      send_FPL:= pch<>nil;
+      if pch<>nil then
+         begin
+           send_data(NODE_REMOTE, hd_ICAO[msFPL],'','', pchars(pch),strlen(pch), key,typ);
+           StrDispose(pch)
+         end
+   end;
+
+
+{ תתתתתתתתתתתתתתתתתת
+   CHG
+  תתתתתתתתתתתתתתתתתת
+}
+function O_L4444._code_CHG (var FPL: DFPL4): pchar;
+   var   pch: pchar;
+   begin
+     with FPL do pch:= StrPasNew
+       (
+                    getstr(_7,1,[icao_NXT])
+        +icao_ARR + copy(_13,1,kod_AP)
+        +icao_ARR + copy(_16,1,kod_AP)
+        +icao_ARR
+       );
+     pch:= StrNCopy(pch,FPL._22,true,false);
+     _code_CHG:= pch
+   end;
+
+function O_L4444.send_CHG(var FPL: DFPL4; key: string; typ: TNETtyp): bool;
+   var   pch: pchar;
+   begin
+      pch:= _code_CHG(FPL);
+      send_CHG:= pch<>nil;
+      if pch<>nil then
+         begin
+           send_data(NODE_REMOTE, hd_ICAO[msCHG],'','', pchars(pch),strlen(pch), key,typ);
+           StrDispose(pch)
+         end
+   end;
+
+
+{ תתתתתתתתתתתתתתתתתת
+   DLA
+  תתתתתתתתתתתתתתתתתת
+}
+function O_L4444._code_DLA(var FPL: DFPL4): pchar;
+   var   pch: pchar;
+   begin
+     with FPL do pch:= StrPasNew
+       (            getstr(_7,1,[icao_NXT])
+        +icao_ARR + _13
+        +icao_ARR + copy(_16,1,kod_AP)
+       );
+     _code_DLA:= pch
+   end;
+
+function O_L4444.send_DLA(var FPL: DFPL4; key: string; typ: TNETtyp): bool;
+   var   pch: pchar;
+   begin
+      pch:= _code_DLA(FPL);
+      send_DLA:= pch<>nil;
+      if pch<>nil then
+         begin
+           send_data(NODE_REMOTE, hd_ICAO[msDLA],'','', pchars(pch),strlen(pch), key,typ);
+           StrDispose(pch)
+         end
+   end;
+
+
+{ תתתתתתתתתתתתתתתתתת
+   CNL
+  תתתתתתתתתתתתתתתתתת
+}
+function O_L4444._code_CNL(var FPL: DFPL4): pchar;
+   var   pch: pchar;
+   begin
+     with FPL do pch:= StrPasNew
+       (            getstr(_7,1,[icao_NXT])
+        +icao_ARR + copy(_13,1,kod_AP)
+        +icao_ARR + copy(_16,1,kod_AP)
+       );
+     _code_CNL:= pch
+   end;
+
+function O_L4444.send_CNL(var FPL: DFPL4; key: string; typ: TNETtyp): bool;
+   var   pch: pchar;
+   begin
+      pch:= _code_CNL(FPL);
+      send_CNL:= pch<>nil;
+      if pch<>nil then
+         begin
+           send_data(NODE_REMOTE, hd_ICAO[msCNL],'','', pchars(pch),strlen(pch), key,typ);
+           StrDispose(pch)
+         end
+   end;
+
+
+{ תתתתתתתתתתתתתתתתתת
+   ALR
+  תתתתתתתתתתתתתתתתתת
+}
+
+function copy_pch(var pch: pchar; _odd: string; _it: pchar): pchar;
+   var   d : pchars; c: int;
+   begin
+     d:= pchars(_it); c:= strlen(_it)-1;
+     while (c>0) and (d^[c] in [' ',kbCR,kbLF,kbCR_,kbLF_]) do dec(c);
+     if c>0 then
+        begin
+          c:= c+1; getmem(d,c+1); move(_it^,d^[0],c); d^[c]:= NULL;
+        end
+     else begin
+            c:= 1; getmem(d,c+1); d^[0]:= '0'; d^[1]:= NULL;
+          end;
+     if _odd<>'' then pch:= StrNPCopy(pch,_odd, true,true);
+     pch:= StrNCopy(pch,pchar(d), true,false);
+     freemem(d,c+1);
+     copy_pch:= pch
+   end;
+
+
+function O_L4444._code_ALR (var FPL: DFPL4): pchar;
+   var   pch : pchar;
+         s   : string;
+   begin
+     with FPL do
+       begin
+         pch:= nil;
+
+         pch:= copy_pch(pch, '',FPL._5);
+
+         if send_empty_l4_arr then
+            begin
+              pch:= StrNPCopy(
+                    pch,
+
+                    +icao_ARR + _7
+                    +icao_ARR + format_s(_8)
+                    +icao_ARR + format_s(_9)
+                    +icao_ARR + format_s(_10)
+                    +icao_ARR + format_s(_13),
+                    true,true
+                   );
+
+             pch:= copy_pch(pch, icao_ARR,FPL._15);
+             pch:= StrNPCopy(pch,icao_ARR+format_s(FPL._16), true,true);
+             pch:= copy_pch(pch, icao_ARR,FPL._18);
+             pch:= copy_pch(pch, icao_ARR,FPL._19);
+             pch:= copy_pch(pch, icao_ARR,FPL._20)
+           end
+         else begin
+                s:=  icao_ARR + _7;
+                if delchar(_8,[icao_NXT,icao_NXIT])  <>'' then s:= s + icao_ARR + cut_(_8);
+                if delchar(_9,[icao_NXT,icao_NXIT])  <>'' then s:= s + icao_ARR + cut_(_9);
+                if delchar(_10,[icao_NXT,icao_NXIT]) <>'' then s:= s + icao_ARR + cut_(_10);
+                if delchar(_13,[icao_NXT,icao_NXIT]) <>'' then s:= s + icao_ARR + cut_(_13);
+                pch:= StrNPCopy(pch,s,true,true);
+
+                if FPL._15<>nil then pch:= copy_pch(pch, icao_ARR,FPL._15);
+                if delchar(_16,[icao_NXT,icao_NXIT])<>'' then pch:= StrNPCopy(pch,icao_ARR+cut_(FPL._16), true,true);
+                if FPL._18<>nil then pch:= copy_pch(pch, icao_ARR,FPL._18);
+                if FPL._19<>nil then pch:= copy_pch(pch, icao_ARR,FPL._19);
+                if FPL._20<>nil then pch:= copy_pch(pch, icao_ARR,FPL._20)
+              end
+       end;
+
+     _code_ALR:= pch
+   end;
+
+function O_L4444.send_ALR(var FPL: DFPL4; key: string; typ: TNETtyp; adr: string): bool;
+   var   pch: pchar;
+   begin
+      pch:= _code_ALR(FPL);
+      send_ALR:= pch<>nil;
+      if pch<>nil then
+         begin
+           send_data (adr, tlgSS,hd_ALR,'', pchars(pch), strlen(pch), key,typ);
+           StrDispose(pch)
+         end
+   end;

@@ -1,0 +1,81 @@
+{$I ..\lib\mnu\_nodes.h}
+
+
+procedure _menuNODESTAT_init(MMenu: PSubmenu); far;
+    var   i : int;
+    begin
+      m_set_shape(mouse.HODINY);
+      for i:= 0 to NODEpoc-1 do with NODES^[i] do
+        if desc.nd in set_nd_NODE then
+           AddItemToMenu(MMenu,Switch2(strpas(desc.name),@stat.TrasaOK,nil));
+      m_restore_shape
+    end;
+
+function _NODESTATmenu(item,title: string): PSubMenu;
+   var   NODESTATmenu : PSubMenu;
+   begin
+     NODESTATmenu:= SubMenu(item, OptMenu_S(title,hlpmnuSYSTEM_NET_LAST,cmNil{NODES_NASTAVENIE},(MaxY-100) div 20,nil),nil);
+     NODESTATmenu^.PMenu_init:= @_menuNODESTAT_init;
+     _NODESTATmenu:= NODESTATmenu
+   end;
+
+
+procedure _menuNODEINIT_init(MMenu: PSubmenu); far;
+    var   i : int;
+    begin
+      m_set_shape(mouse.HODINY);
+      for i:= 0 to NODepoc-1 do with NODES^[i] do
+        if desc.nd in set_nd_NODE then
+           AddItemToMenu(MMenu,Switch2(strpas(desc.name),@stat.InitEn,nil));
+      m_restore_shape
+    end;
+
+function _NODEINITmenu(item,title: string): PSubMenu;
+   var   NODEINITmenu : PSubMenu;
+   begin
+     NODEINITmenu:= SubMenu(item, OptMenu_S(title,hlpmnuSYSTEM_NET_INIT,cmDefault,(MaxY-100) div 20,nil),nil);
+     NODEINITmenu^.PMenu_init:= @_menuNODEINIT_init;
+     _NODEINITmenu:= NODEINITmenu
+   end;
+
+
+procedure mnuNODEOPT_init(MMenu: PSubmenu); far;
+    var   smnu : TPItems;
+          i,items,ihk,nl : int;
+    begin
+      items:= 0; ihk:= 0; nl:= 0;
+
+      smnu[items]:= Switch2('~'+hk(ihk) + NIVYP, @INIT_VYP,nil);
+      inc(items);
+
+      smnu[items]:= SwitchI('~'+hk(ihk) + NIINT, @INIT_INT,tit_sec,INIT_INT_lo,INIT_INT_hi,nil);
+      inc(items);
+
+      smnu[items]:= SwitchI('~'+hk(ihk) + NIPOCET, @INIT_POCET,'',INIT_POCET_lo,INIT_POCET_hi,nil);
+      inc(items);
+
+      for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i])
+    end;
+
+
+procedure mnuNET_init(MMenu: PSubmenu); far;
+    var   smnu  : TPItems;
+          sbmnu : PSubMenu;
+          i,items,nl : int;
+    begin
+      items:= 0; nl:= 0;
+
+      smnu[items]:= SubMenuInitialized(_NODESTATmenu(NSTAT,NSTAT_),nil);
+      inc(items);
+
+      smnu[items]:= SubMenuInitialized(_NODEINITmenu(NINIT,NINIT_),nil);
+      inc(items);
+
+      add_newline(nl,items,smnu);
+      sbmnu:= SubMenu(' '+cut_(NIVYP)+'... ',OptMenu_S(delchar(NIVYP,['~']), hlpmnuSYSTEM_NET_OPT, cmDefault,15,nil),nil);
+      sbmnu^.PMenu_init:= @mnuNODEOPT_init;
+      smnu[items]:= SubMenuInitialized(sbmnu,nil);
+      inc(items);
+
+      for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i])
+    end;

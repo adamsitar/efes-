@@ -1,0 +1,61 @@
+ procedure codeDB_SSR (ssr: p_ssr_record; buff: PDB_buff; head: PDB_head); far;
+     var   size: int;
+           s,t,u: string;
+           i: int;
+     begin
+       s:= '';
+       with ssr^ do
+         begin
+           add_s(@code[0],sizeof(code), s,t);
+           {add_s(@fir[0] ,sizeof(fir), s,t);}
+           add_s(@user   ,sizeof(user), s,t);
+           add_s(@last   ,sizeof(last), s,t);
+           u:= strpas(flight);
+           add_s(@u[0],1+length(u), s,t);
+         end;
+       str_toDBstr_(s,buff^[0]);
+     end;
+
+
+ procedure decodeDB_SSR (buff: PDB_buff; ssr: p_ssr_record; head: PDB_head); far;
+     var   s,t,u : string;
+           p : pchars;
+           i : int;
+     begin
+       fillchar(ssr^,sizeof(ssr^),0);
+       s:= DBstr_to_str_(buff^[0]); p:= @s[1];
+       with ssr^ do
+         begin
+           get_s(p, @code[0],sizeof(code));
+           {get_s(p, @fir[0] ,sizeof(fir) );}
+           get_s(p, @user   ,sizeof(user));
+           get_s(p, @last   ,sizeof(last));
+           get_s_x(p, u,sizeof(u)-1);
+           flight:= strpasnew(u)
+         end;
+     end;
+
+
+ function codekey_SSR(ssr: p_ssr_record): string; far;
+    begin
+      if ssr<>nil then codekey_SSR:= ssr^.code
+      else codekey_SSR:= ''
+    end;
+
+
+ function codeERR_SSR (ires: int; code,flight,res: string): string;
+    begin
+      codeERR_SSR:=   ZAC_SPR + cstr(ires,2)
+                    + ODD_SPR + code
+                    + ODD_SPR + flight
+                    + ODD_SPR + res
+                    + KON_SPR
+    end;
+
+ procedure decodeERR_SSR (error: string; var ires: int; var code,flight,res: string);
+    begin
+      ires   := getint(error,1,setLET_1_1);
+      code   := getstr(error,2,setLET_1_1);
+      flight := getstr(error,3,setLET_1_1);
+      res    := getstr(error,4,setLET_1_1);
+    end;

@@ -1,0 +1,83 @@
+{ ---------------------
+  dekodovanie trasy
+  ---------------------
+}
+{$IFDEF DEBUG}
+ {$I _FPL0.vyp}  {-> v module _FPL_def }
+{$ENDIF}
+
+ function  decode_trat_FPLM
+
+               (FPL: PDmFPL;
+
+                var trat: POBxys; var bodov: int;
+
+                err_exit       : bool;   { ukonci pri chybe                    }
+                uplna_trat     : bool;   { i so startom a pristatim            }
+                prist_prepocet : bool    { prepocet casu pristatia podla trate }
+               ): string;
+
+    var    _OBs  : POBxys;
+           size : word;
+           _bodov : int;
+           res  : string;
+
+    begin
+      decode_trat_FPLM:= '';
+      size:= max_OB*sizeof(TOBxy);
+      trat:= nil; bodov:= 0;
+      if (size*2 >= MaxAvail) then Exit;
+
+      New(_OBs); fillchar(_OBs^,sizeof(_OBs^),0);
+      _bodov:= 0;
+      res:= _decode_FPL0_15
+                (FPL^.trat,
+                 FPL^.start,FPL^.prist,
+                 _OBs^,_bodov,
+                 FPL^.rych,FPL^.rych_,
+                 FPL^.vys,FPL^.vys_,
+                 FPL^.date,
+                 true,false, err_exit,uplna_trat,prist_prepocet
+                );
+      if (res='') and (_bodov>0) then
+         begin
+           bodov:= _bodov; size:= sizeof(TOBxy)*bodov;
+           GetMem(trat, size);
+           Move(_OBs^,trat^,size);
+         end
+      else decode_trat_FPLM:= res;
+      _bodov:= max_OB;
+      Dispose(_OBs);
+    end;
+
+ procedure zrus_trat_FPLM (var trat: POBxys; var bodov: int);
+     begin
+       FreeMem(trat,bodov*sizeof(TOBxy));
+       trat:= nil; bodov:= 0
+     end;
+
+
+ function _cinnost_v_priestore(FPL: PDmFPL): string;
+    var   i,ires : int;
+          tsa,s,t : string;
+          Ai : TpArea;
+    begin
+      tsa:= '';
+      for i:= 1 to GetPStrItems(FPL^.trat,ODD_BODOV) do
+        begin
+          s:= cut_(getPstr(FPL^.trat,i,ODD_BODOV));
+          {$IFDEF A36YKA} s:= mtks_rus_to_lat(s) {$ENDIF};
+          t:= getstr(s,1,ODD_BODU);
+          if not is_AREA_FPL0 (t,s,Ai,ires) then continue;
+          if ires>-1 then t:= Ai.kod
+          else t:= getstr(s,2,ODD_BODU);
+          if tsa<>'' then tsa:= tsa + icao_NXIT;
+          tsa:= tsa + t
+        end;
+      _cinnost_v_priestore:= tsa
+    end;
+
+ function _let_do_priestoru(FPL: PDmFPL): bool;
+    begin
+      _let_do_priestoru:= _cinnost_v_priestore(FPL)<>''
+    end;

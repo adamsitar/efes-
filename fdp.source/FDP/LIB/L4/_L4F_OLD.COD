@@ -1,0 +1,13 @@
+{ תתתתתתתתתתתתתתתתתת
+   ACT
+  תתתתתתתתתתתתתתתתתת
+}
+{$IFNDEF FPLM_DISABLED}
+ function O_L4_FDP.send_ACTm(var FPLm: DmFPL): bool;
+    var   FPL : PFPL4;
+    begin
+      new_FPL4_(nil,FPL);
+      send_ACTm:=  _code_FPLm(FPLm,FPL^) and send_ACT(FPL^,codekey_FPLM(@FPLm),spr_FPLM);
+      disp_FPL4_(FPL)
+    end;
+{$ENDIF}

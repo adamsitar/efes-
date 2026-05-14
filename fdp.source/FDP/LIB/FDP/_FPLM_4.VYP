@@ -1,0 +1,152 @@
+{ ----------------------------
+  trat
+  ----------------------------
+}
+
+ function zmenena_trat_FPLm(FPLp,FPL: PDmFPL; cas_dep,cas_arr,vyska: bool): bool;
+    var   prepocet : bool;
+    begin
+      if (FPLp<>nil) and (cut_(FPLp^.idn)<>'') then
+         begin
+           prepocet:=     (FPL^.rych_<>FPLp^.rych_)
+                       or (FPL^.rych <>FPLp^.rych)
+
+                       or (FPL^.start.kod<>FPLp^.start.kod)
+                       or (     cas_dep
+                           and (    (FPL^.start.h<>FPLp^.start.h)
+                                 or (FPL^.start.m<>FPLp^.start.m)
+                               )
+                          )
+
+                       or (FPL^.prist.kod<>FPLp^.prist.kod)
+                       or (     cas_arr
+                           and {(    (FPL^.prist.h<>FPLp^.prist.h)
+                                 or (FPL^.prist.m<>FPLp^.prist.m)
+                               )}
+                               (  Abs(TimeToSec(FPL^.prist.h,FPL^.prist.m,0)-TimeToSec(FPL^.start.h,FPL^.start.m,0))
+                                <>Abs(TimeToSec(FPLp^.prist.h,FPLp^.prist.m,0)-TimeToSec(FPLp^.start.h,FPLp^.start.m,0))
+                               )
+                          )
+
+                       or (     vyska
+                           and  (   (get_altM (FPL^.vys_,FPL^.vys)   <> get_altM (FPLp^.vys_,FPLp^.vys))
+                                 or (get_altM (FPL^.vys2_,FPL^.vys2) <> get_altM (FPLp^.vys2_,FPLp^.vys2))
+                                )
+                          )
+
+                       or (not eq_lines(FPL^.trat,FPLp^.trat))
+         end
+      else prepocet:= true;
+      zmenena_trat_FPLm:= prepocet
+    end;
+
+
+
+{ ----------------------------
+  priradenie planu na sektory
+  ----------------------------
+}
+
+ function _prelet_cez_LSRLP(FPL: PDmFPL; LSRLP: string): bool;
+    var   bres: bool;
+    begin
+    { Urci, ci let prechadzal cez TMA/CTR daneho LSRLP,
+      alebo ci tam mal MZP
+    }
+      bres:=    eq_airbase (FPL^.start.kod,LSRLP)
+             or eq_airbase (FPL^.prist.kod,LSRLP)
+             or _ma_prelet_cez_LSRLP (FPL,LSRLP)
+             or _ma_MZP_na_LSRLP     (FPL,LSRLP);
+      _prelet_cez_LSRLP:= bres;
+    end;
+
+ function _ma_prelet_cez_LSRLP(FPL: PDmFPL; LSRLP: string): bool;
+    var   ma,is,err : bool;
+          Bi : TsBod;
+          i : int;
+    begin
+      ma:= false;
+      i:= _LKmind(LSRLP);
+      if i>-1 then LK_m^.read(i,Bi);
+      if (i>-1) and (Bi.ine.sector<>nil) then
+         begin
+           is:= FPL^.trat_<>nil;
+           if not is then decode_trat_FPLM(FPL, FPL^.trat_,FPL^.bodov, false,true,false);
+           with PsectorOB(Bi.ine.sector)^ do
+             ma:=     _trat_cez_sektor(mapa,nazov,v0,v1,
+                                       FPL^.trat_, FPL^.bodov,
+                                       @suradnice_a_vyska_tratOBxy,
+                                       err
+                                      )
+                  and (not err);
+           if not is then zrus_trat_FPLM (FPL^.trat_,FPL^.bodov);
+         end;
+      _ma_prelet_cez_LSRLP:= ma
+    end;
+
+{ sada a startuje z letiska
+}
+ function _ma_MZP_na_LSRLP(FPL: PDmFPL; LSRLP: string): bool;
+    var   ma    : bool;
+          i,m   : int;
+          t,s,u : string;
+    begin
+      ma:= false; i:= 0; m:= GetPStrItems(FPL^.trat,ODD_BODOV);
+      while (not ma) and (i<m) do
+        begin
+          s := uni_str(getPstr(FPL^.trat,i+1,ODD_BODOV));
+          u := getstr(s,1,ODD_BODU);
+          ma:= (pos(fpl_MZP,s)<>0) and (eq_airbase(u,LSRLP) {or podriadene_letisko(u)});
+          inc(i)
+        end;
+      _ma_MZP_na_LSRLP:= ma
+    end;
+
+
+{ Vrati pocet bodov s MZP.
+  Predtym bolo 0 - bez MZP,
+               1 - s MZP,
+               definovane casy MZP,
+               2 - zvysok
+}
+ function _ma_MZP(trat: pchar): byte;
+    var   i,m  : int;
+          mzp  : byte;
+          s    : string;
+    begin
+      mzp:= 0; i:= 0; m:= GetPStrItems(trat,ODD_BODOV);
+      while (i<m) do
+        begin
+          s:= uni_str(getPstr(trat,i+1,ODD_BODOV));
+          if pos(fpl_MZP,s)<>0 then inc(mzp);
+          inc(i)
+        end;
+      _ma_MZP:= mzp
+    end;
+
+
+ function __plan_pre_pracovisko(FPL: PDmFPL; aktivne: bool): bool;
+    begin
+      __plan_pre_pracovisko:=  {$IFDEF AIRBASE}
+                                   (aktivne and __is_stat(FPL^.stat, cnst_stat_actived))
+
+                                or _plan_pre(FPL^.let)
+                                or _plan_pre(FPL^.start.kod)
+                                or _plan_pre(FPL^.prist.kod)
+                                or _prelet_cez_LSRLP(FPL, this_airbase)
+
+                                (*or (    (__is_stat(FPL^.stat, cnst_stat_actived))
+                                    and (   _plan_pre(FPL^.prist.kod)
+                                         or _prelet_cez_LSRLP(FPL, this_airbase)
+                                        )
+                                   )
+                                *)
+                              {$ELSE}
+                                true
+                              {$ENDIF}
+    end;
+
+ function _plan_pre_pracovisko(FPL: PDmFPL): bool;
+    begin
+      _plan_pre_pracovisko:= __plan_pre_pracovisko(FPL, true)
+    end;

@@ -1,0 +1,172 @@
+{
+  Aby som minimalizoval cas kodovania a nacitania dat,
+  vyhol som sa funkciam odfiltrujucim riadiace znaky (icao_NXIT)
+  a pocitam s pevnoou polohou riadku a jeho zaciatku,
+  pri kodovani pchar na celu polozku sa pridava ' ' a pri dekodovani ubera ' '
+  Predpoklada sa, ze pchar-y su odalokovane.
+}
+
+{ ------------------------
+   kodovanie/de...
+  תתתתתתתתתתתתתתתתתתתתתתתת
+}
+
+ function code_FPL4_(FPL: PFPL4): string;
+    begin
+      with FPL^ do
+        begin
+          code_FPL4_:=      format_s(_7)
+               + icao_ARR + format_s(_8)
+               + icao_ARR + format_s(_9)
+               + icao_ARR + format_s(_10)
+
+               + icao_ARR + format_s(_13)
+               + icao_ARR + format_s(_14)
+               + icao_ARR + format_s(_16)
+               + icao_ARR + format_s(strpas(_17));
+        end
+    end;
+
+ procedure decode_FPL4_(s: string; FPL: PFPL4);
+     var   t : string;
+     begin
+       fillchar(FPL^,sizeof(FPL^),0);
+       with FPL^ do
+         begin
+           _7 := cut_(getstr(s,1,odd_ICAO));
+           _8 := cut_(getstr(s,2,odd_ICAO));
+           _9 := cut_(getstr(s,3,odd_ICAO));
+           _10:= cut_(getstr(s,4,odd_ICAO));
+
+           _13:= cut_(getstr(s,5,odd_ICAO));
+           _14:= cut_(getstr(s,6,odd_ICAO));
+           _16:= cut_(getstr(s,7,odd_ICAO));
+           _17:= strpasnew(cut_(getstr(s,8,odd_ICAO)))
+         end
+     end;
+
+
+ function code_FPL4_19_(FPL: PFPL4): string;
+    var   s,t : string;
+    begin
+      s :=  rmk_DATE + icao_NXT + code_l4_date (FPL^.date);
+
+      with FPL^.eet do t:= icao_NXIT + rmk_EET + icao_NXT + code_l4_14 (kod, h,m, vys,vysOB, vys,vysOB,vysab);
+      s:=  s + t;
+      with FPL^ do s:=  s + icao_NXIT + hd_FL + icao_NXT + code_l4_vys(vys,vys_);
+      with FPL^.exi do t:= icao_NXIT + rmk_EXI + icao_NXT + code_l4_14 (kod, h,m, vys,vysOB, vys,vysOB,vysab);
+      s:= s + t;
+
+      s:= s + icao_NXIT + rmk_FDP  + icao_NXT + format_s(FPL^.stat)
+            + icao_NXIT + rmk_SRC  + icao_NXT + cstr(FPL^.src,1);
+
+      code_FPL4_19_:= s;
+    end;
+
+
+ procedure decode_FPL4_19_(s: string; FPL: PFPL4);
+     var   t : string;
+           v_: char;
+     begin
+       s:= s+NULL;
+
+       decode_l4_date (_item_18_(@s[1],rmk_DATE,1),FPL^.date);
+
+       t:= _item_18_a(@s[1],rmk_EET);
+       with FPL^.eet do decode_l4_14 (t, kod, h,m, vys,v_, true, vys,v_,vysab);
+
+       decode_l4_vys(_item_18_(@s[1],hd_FL,1), FPL^.vys,FPL^.vys_);
+
+       t:= _item_18_a(@s[1],rmk_EXI);
+       with FPL^.exi do decode_l4_14 (t, kod, h,m, vys,v_, true, vys,v_,vysab);
+
+       FPL^.stat:= cut_(_item_18_(@s[1],rmk_FDP,1));
+       FPL^.src:= getint(_item_18_(@s[1],rmk_SRC,1),1,[icao_NXIT]);
+     end;
+
+
+ { -----------------------------
+    kodovanie podla vzoru 4444,
+    hlavne funkcie
+   -----------------------------
+ }
+ function code_l4_FPL4_ (FPL: PFPL4): pchar;
+    var   pch,p0 : pchar;
+          s : string;
+
+    procedure add_p0(p0: pchar);
+        var   p : pchar;
+        begin
+          pch:= StrNPCopy(pch,icao_ARR,true,true);
+          p:= pch;
+          p0:= l4_format_p(p0);
+          pch:= StrNCopy(pch, p0,true,false);
+          inc(p,1);
+          ReplChar0(p,[icao_ARR],'_',false);
+        end;
+
+    begin
+      s:= strpas(FPL^._17);
+      pch:= StrPasNew (  icao_STD + hd_FPL
+                       + icao_ARR + format_s(FPL^._7)
+                       + icao_ARR + l4_format_s(FPL^._8)
+                       + icao_ARR + l4_format_s(FPL^._9)
+                       + icao_ARR + l4_format_s(FPL^._10)
+                       + icao_ARR + l4_format_s(FPL^._13)
+                       + icao_ARR + l4_format_s(FPL^._14)
+                       + icao_ARR + l4_format_s(FPL^._16)
+                       + icao_ARR + l4_format_s(strpas(FPL^._17))
+                      );
+
+      add_p0(FPL^._15);
+      add_p0(FPL^._18);
+      add_p0(FPL^._19);
+      add_p0(FPL^._20);
+      add_p0(FPL^._5);
+
+      pch:= StrNPCopy (pch,  icao_ARR + code_FPL4_19_(FPL)
+                           + icao_END,true,true
+                      );
+
+      code_l4_FPL4_:= pch
+    end;
+
+ function  decode_l4_FPL4_ (data: pchars; size: TNETdlz; FPL: PFPL4): string;
+    var    p,m   : pchar;
+           i,k   : word;
+           s     : string;
+
+    function get_p0(pos: int): pchar;
+       var   pch: pchar;
+       begin
+         pch:= get_strs0(data,size, pos,pos,[icao_ARR]);
+         pch:= ReplChar0(pch,['_'],icao_ARR,false);
+         if strcomp(pch,rmk_NIL)=0 then strdispose(pch);
+         get_p0:= pch;
+       end;
+
+    begin
+      decode_l4_FPL4_:= '';
+      fillchar (FPL^,sizeof(FPL^),0);
+
+      frame_l4_pkt (data,size, s);
+
+      FPL^._7 := cut_ (get_str(data,size,2,[icao_ARR],sizeof(FPL^._7)-1));
+      FPL^._8 := decode_l4_s (get_str(data,size,3,[icao_ARR],sizeof(FPL^._8) -1),true);
+      FPL^._9 := decode_l4_s (get_str(data,size,4,[icao_ARR],sizeof(FPL^._9) -1),true);
+      FPL^._10:= decode_l4_s (get_str(data,size,5,[icao_ARR],sizeof(FPL^._10)-1),true);
+      FPL^._13:= decode_l4_s (get_str(data,size,6,[icao_ARR],sizeof(FPL^._13)-1),true);
+      FPL^._14:= decode_l4_s (get_str(data,size,7,[icao_ARR],sizeof(FPL^._14)-1),true);
+      FPL^._16:= decode_l4_s (get_str(data,size,8,[icao_ARR],sizeof(FPL^._16)-1),true);
+
+      FPL^._17:= get_p0(9);
+      FPL^._15:= get_p0(10);
+      FPL^._18:= get_p0(11);
+      FPL^._19:= get_p0(12);
+      FPL^._20:= get_p0(14);
+      FPL^._5 := get_p0(13);
+
+      decode_FPL4_19_(get_str(data,size,15,[icao_ARR],sizeof(s)-1), FPL);
+
+      format_FPL4_(FPL);
+    end;

@@ -1,0 +1,171 @@
+{ ---------------------
+  FPL4
+  ---------------------
+}
+ procedure code_RPL_to_FPL4_ (const RPL: DRPL; var FPL: DFPL4; code_15: bool);
+
+     var   s,t,u : string;
+           h,m,y : byte;
+           bres,isrv,istr : bool;
+           i,j,p : int;
+
+           minkmh,maxkmh: single;
+           minS,maxS: word;
+           rych: single; rychv: single; rych_: char; sr: string; rres: bool;
+           vys: word;    vys_: char;  sv: string; vres: bool;
+
+           B1,B2 : TsBod;
+           o1,o2 : TOBxy;
+           t1,t2 : real;
+
+           pch : pchar;
+
+     begin
+       fillchar(FPL,sizeof(FPL),0);
+
+       FPL._3:= hd_FPL;
+
+       FPL._7:= RPL._7a;
+
+       FPL._8:= IFR_let+PRAV_DOPRAVNY_LET;
+
+       FPL._9:= RPL._9b; if cut_(RPL._9c)<>''then FPL._9:= FPL._9 + icao_NXT + RPL._9c;
+       _code_9_by8643(FPL._9,false);
+
+       FPL._10:= eqp_STD+icao_NXT+mod_C;
+
+       FPL._13:= RPL._13a+RPL._13b;
+
+       FPL._16:= RPL._16a+RPL._16b;
+
+      { - zisti, ci je priradena rychlost a vyska,
+        - je mozne priradit trat ?
+      }
+       if code_15 then
+          begin
+            p:= getPstritems(RPL._15,[icao_NXIT]);
+            s:= getPstr (RPL._15,1,[icao_NXIT]);
+            bres:= decode_l4_rych_vys_ (s, rych,rych_,sr,rres, vys,vys_,sv,vres);
+
+            isrv:= false;
+            istr:= false;
+
+            if rpl_assign_15 and (p=2+ord(bres)) then
+               begin
+                 o1.kod:= getPstr (RPL._15,1+ord(bres),[icao_NXIT]);
+                 o2.kod:= getPstr (RPL._15,2+ord(bres),[icao_NXIT]);
+                 if     get_OB_XYM(o1.kod,o1)
+                    and get_OB_XYM(o2.kod,o2)
+                    and _prirad_trat_FPL4 (o1.kod,o2.kod,u,t,nil)
+                     then
+                    begin
+                      istr:= true;
+                      if (not bres) then
+                         begin
+                           _9b_rychvys_fl (FPL._9,t, o1.kod,o2.kod, rych,rych_, vys,vys_);
+                           isrv:= true;
+                         end
+                    end
+               end;
+
+            if (not bres) and (not isrv) then
+               begin
+                 _9b_rychvys (FPL._9,true, rych,rych_,minkmh,maxkmh, vys,vys_,minS,maxS);
+                 isrv:= true;
+               end;
+
+            if (not bres) and (isrv) then
+               begin
+                 s:= code_l4_rych_vys (rych,rych_, vys,vys_, 0,false) + icao_NXIT;
+                 FPL._15:= strpasnew(s)
+               end;
+
+            if istr then FPL._15:= StrNPCopy (FPL._15,t,true,true)
+            else begin
+                   pch:= RPL._15; { kvoli hlavicke }
+                   FPL._15:= StrNCopy (FPL._15,pch,true,false);
+                 end;
+          end
+       else FPL._15:= StrNew(RPL._15);
+
+       FPL._18:= StrNew(RPL._18);
+
+       FPL.date:= RPL_DATE
+     end;
+
+
+ function  code_RPL_to_FPL4_FDR_ (const RPL: DRPL; var FPL: DFPL4; check_en: bool; var res: string): int;
+    begin
+      code_RPL_to_FPL4_ (RPL,FPL,true);
+      _fpl4_date_all:= true;
+      _fpl4_15_bxr_en:= true;
+      code_RPL_to_FPL4_FDR_:= _decode_FPL4 (FPL,check_en,res);
+    end;
+
+
+{ fcia je volana len pri generovani FPL na dany den,
+  udaje vypocitane vopred sa len aktualizuju na hodnotu
+  prislusneho "date" oproti hodnote uloznej v rpl.
+}
+{ procedure code_RPLF_to_FPL4 (const RPL: DRPLF; var FPL: DFPL4; date: TDate);
+     var   dr : real;
+     begin
+       new_FPL4(@RPL.FPL,@FPL);
+
+       _inc_18(FPL._18, rmk_RPL  + icao_NXT + code_l4_date_r (day,month, true), 0);
+       _inc_18(FPL._18, rmk_DATE + icao_NXT + code_l4_date (date), 0);
+
+       dr:= DateToSec(date.r,date.m,date.d) - DateToSec(FPL.date.r,FPL.date.m,FPL.date.d);
+       FPL.eet.cas:= FPL.eet.cas + dr;
+       FPL.exi.cas:= FPL.exi.cas + dr;
+
+       FPL.date:= date;
+     end;
+}
+
+ procedure update_date_FPL4 (var FPL: DFPL4; date: TDate);
+     var   dr : real;
+     begin
+       _inc_18(FPL._18, rmk_DATE + icao_NXT + code_l4_date (date), 0);
+       _inc_18(FPL._18, rmk_RPL  + icao_NXT + code_l4_date_r (day,month, true), 0);
+
+       dr:= DateToSec(date.r,date.m,date.d) - DateToSec(FPL.date.r,FPL.date.m,FPL.date.d);
+       FPL.eet.cas:= FPL.eet.cas + dr;
+       FPL.exi.cas:= FPL.exi.cas + dr;
+
+       FPL.date:= date;
+     end;
+
+
+ procedure update_RPL_to_FPL4 (const RPL: DRPLF; var FPL: DFPL4);
+     var   s,it : string;
+           nl   : bool;
+           rych : single; rych_: char;
+           vys  : word;    vys_ : char;
+           t    : real;
+     begin
+      { 14 }
+       if (FPL._14='') then
+          begin
+            FPL._14:= RPL.fpl._14;
+            FPL.eet:= RPL.fpl.eet;
+          end;
+
+      { 15 }
+       if (FPL.src=fplsrc_PLN) then
+          begin
+            strdispose(FPL._15);
+            FPL._15:= strnew(RPL.fpl._15)
+          end;
+
+      { 18 }
+       _dec_18 (FPL._18, rmk_DATE);
+       _dec_18 (FPL._18, rmk_RPL);
+       _inc_18 (FPL._18, rmk_DATE + icao_NXT + code_l4_date (RPL.fpl.date), 0);
+       { je to len formalna uprava, datum sa nemeni... }
+       _inc_18 (FPL._18, rmk_RPL  + icao_NXT + code_l4_date_r (day,month, true), 0);
+
+       FPL.src:= 0; fplsrc_decode (FPL._18, FPL.src);
+     end;
+
+

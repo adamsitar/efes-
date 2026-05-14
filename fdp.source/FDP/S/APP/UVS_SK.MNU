@@ -1,0 +1,4 @@
+ function SERVERmenu_init: PBarMenu;
+    begin
+      SERVERmenu_init:= SERVERmenu_init_
+    end;

@@ -1,0 +1,109 @@
+{$IFDEF PRN}
+
+  function print_FPS_(FPS: PFPS; ind: int): bool;
+     var   s : array[0..5] of string;
+           o,t: string;
+           i,p: int;
+     begin
+       if not _valid_FPS(FPS,nil) then
+          begin
+            print_FPS_:= true;
+            Exit
+          end;
+
+       with FPS^ do
+         begin
+           p:= 0;
+           if prn_FPS_FLO then
+              begin
+                s[p]:= _PRN_TAB;
+                if flo<>nil then t:= cut_3(strpas(flo),kod_FPS_FLO)
+                else t:= '';
+                s[p]:= s[p] + t;
+                inc(p)
+              end;
+
+           s[p]:= _PRN_TAB;
+
+           if ind<>-1 then s[p]:= s[p]+inschar(cstr(ind+1,1)+'.',kod_FPS_NMB,' ',1);
+
+           s[p]:= s[p] +      inschar(fdr.idn,kod_7a,' ',1) + ' '
+                       +  _CS+inschar(fdr.typ,kod_9b+1+kod_9a,' ',1) + ' ';
+
+           s[p]:= s[p] +  code_FDRrte_s (@fdr,false) + '  ';
+
+           s[p]:= s[p] +  inschar(strpas(reg),kod_FPS_REG,' ',1) + ' '
+                       +  inschar(strpas(opr),kod_FPS_OPR,' ',1)  + '   ';
+
+           if dr<>0 then t:= cstr(dr,4)+' km'
+           else if dr_='?' then t:= dr_
+           else t:= '';
+           s[p]:= s[p] + t;
+
+           inc(p);
+         end;
+       print_FPS_:= print_strs(PortNo,@s,p)
+     end;
+
+  function print_FPS(FPS: PFPS): bool; far;
+     begin
+       print_FPS:= print_FPS_(FPS,-1)
+     end;
+
+
+  procedure print_FPSs(FPS: PFPSs; top: pint; title: string); far;
+      var   i: int;
+      begin
+        i:= 0; while (i<1) and print_str(PortNo,_CR+_LF) do inc (i);
+        if i<1 then Exit;
+        if not print_head(PortNo, _PRN_TAB+title+_CR+_LF)     then Exit;
+        if not print_str (PortNo,_PRN_TAB+_CS+tu+_CE+_CR+_LF) then Exit;
+        if not print_str (PortNo,_PRN_TAB+_CS+ti+_CE+_CR+_LF) then Exit;
+        if not print_str (PortNo,_PRN_TAB+_CS+tu+_CE+_CR+_LF) then Exit;
+        if not print_str (PortNo,_CR+_LF) then Exit;
+
+        i:= 0; while (i<=int(top^)) and print_FPS_(FPS^[i],i) do
+          begin
+            CheckProcesses;
+            inc(i)
+          end
+      end;
+
+{$ENDIF}
+
+ (*
+   function print_FPS(FPS: PFPS): bool; far;
+      var   s: array[0..5] of string;
+            o,t: string;
+            i: int;
+      begin
+        with FPS^,FPS^.FPD do
+          begin
+            s[0]:= _LF+_LSi+#10+_CE;
+            s[1]:= _PRN_TAB + strpas(flo);
+
+            o:= strpas(opr); if o<>'' then o:= rmk_OPR+icao_NXT+o+'  ';
+            t:= strpas(reg); if t<>'' then t:= rmk_RMK+icao_NXT+t;
+
+            s[2]:= _PRN_TAB +_ME+_TE+o+t;
+            s[3]:= _PRN_TAB +_TS+_MS
+                      + inschar(idn,kod_IDN,' ',1)+ ' '
+                      + inschar(typ,kod_TYP,' ',1)+ '   '
+                      + _ME+_TE;
+            t:= ''; if cut_(dep)<>'' then t:= dep+TimeToStr(depT.h,depT.m,'');
+            t:= inschar(t,kod_AP+kod_TIME,' ',1);
+            s[3]:= s[2]+t+' ';
+            t:= inschar(bd0+TimeToStr(bd0T.h,bd0T.m,''),kod_NDB+kod_TIME,' ',1);
+            s[3]:= s[2]+t+' ';
+            t:= inschar(bd0+TimeToStr(bdlT.h,bdlT.m,''),kod_NDB+kod_TIME,' ',1);
+            s[3]:= s[2]+t+' ';
+            t:= ''; if cut_(arr)<>'' then t:= dep+TimeToStr(arrT.h,arrT.m,'');
+            t:= inschar(t,kod_AP+kod_TIME,' ',1);
+            s[3]:= s[2]+t+'   ';
+            if dr<>0 then t:= cstr(dr,0)+' km' else t:= dr_;
+            s[3]:= s[2]+t;
+            s[4]:= _LF
+          end;
+        print_FPS:= print_strs(PortNo,@s,5)
+      end;
+  *)

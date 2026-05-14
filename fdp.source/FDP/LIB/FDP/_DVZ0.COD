@@ -1,0 +1,115 @@
+function code0_DVZ_1(DVZ: PDVZ): string;
+   var   s : string;
+   begin
+     with DVZ^ do
+       begin
+         s:=   ZAC_SPR + format_s(pre)
+             + ODD_SPR + format_s(kym)
+             + ODD_SPR + ' '
+
+             + ODD_SPR + code0_utc(zac)
+             + ODD_SPR + code0_utc(kon)
+             + ODD_SPR + code0_utc(od)
+
+             + ODD_SPR + format_s(get_line_i(poziadavka,1))
+             + ODD_SPR + format_s(get_line_i(poziadavka,2))
+       end;
+     code0_DVZ_1:= s
+   end;
+
+function code0_DVZ_2(DVZ: PDVZ): string;
+   var   s : string;
+   begin
+     with DVZ^ do
+       begin
+         s:=   ODD_SPR + format_s(get_line_i(odoslanie,1))
+             + ODD_SPR + format_s(get_line_i(odoslanie,2))
+
+             + ODD_SPR + format_s(get_line_i(zabezpecenie,1))
+
+             + ODD_SPR + DateToStr(date.d,date.m,date.r,0,'')
+             + ODD_SPR + format_s(code0_stat(stat))
+             + KON_SPR;
+         dap.rok:= date.r; dap.mes:= date.m; dap.den:= date.d;
+         GetTimeStr(dap.h,dap.m,dap.s, GetStr(s,11,setLET_1_1));
+       end;
+     code0_DVZ_2:= s
+   end;
+
+
+procedure decode0_DVZ_1(s: string; DVZ: PDVZ);
+   begin
+     fillchar(DVZ^,sizeof(TDVZ),0);
+     with DVZ^ do
+       begin
+       { 1. cast --------------------------------------------- }
+         pre  := getstr(s,1,setLET_1_1);
+         kym  := decode0_utc(getstr(s,2,setLET_1_1));
+         zac  := decode0_utc(getstr(s,4,setLET_1_1));
+         kon  := decode0_utc(getstr(s,5,setLET_1_1));
+         od   := getstr(s,6,setLET_1_1);
+         poziadavka := strpasnew(getstr(s,7,setLET_1_1) + kbNL_ + getstr(s,7,setLET_1_1));
+       end
+   end;
+
+procedure decode0_DVZ_2(s: string; DVZ: PDVZ);
+   begin
+     with DVZ^ do
+       begin
+       { 2. cast --------------------------------------------- }
+         odoslanie := strpasnew(getstr(s,1,setLET_1_1) + kbNL_ + getstr(s,2,setLET_1_1));
+         zabezpecenie := strpasnew(getstr(s,3,setLET_1_1));
+
+         GetDateStr(date.r, date.m,date.d, GetStr(s,4,setLET_1_1), false);
+         stat := decode0_stat(GetStr(s,5,setLET_1_1))
+       end
+   end;
+
+
+{ ---------------------
+  prenos
+  --------------------- }
+
+procedure code0_DVZ(DVZ: PDVZ; var pkt: TNETpkt); far;
+    var   s1,s2 : string; p : word;
+    begin
+      s1:= code0_DVZ_1(DVZ);
+      s2:= code0_DVZ_2(DVZ);
+
+      if not new_NETpkt_data (nil,length(s1)+length(s2), pkt.pkt) then Exit;
+      move(s1[1],pkt.pkt.data^[0],length(s1)); p:= length(s1);
+      move(s2[1],pkt.pkt.data^[p],length(s2))
+    end;
+
+procedure decode0_DVZ(const pkt: TNETpkt; DVZ: PDVZ);
+    var   s  : string;
+          ii : int;
+    begin
+      ii:= pkt_split(pkt.pkt, 8);
+
+      s:= init_str(@pkt.pkt.data^[0],ii);
+      decode0_DVZ_1(s, DVZ);
+
+      s:= init_str(@pkt.pkt.data^[ii],pkt.pkt.dlz-ii+1);
+      decode0_DVZ_2(s, DVZ)
+
+      {$IFDEF NET};
+        rec_data(pkt.ods, DVZ^.rec);
+      {$ENDIF}
+    end;
+
+
+{ ---------------------
+  kluc
+  --------------------- }
+
+procedure decode0key_DVZ(s: string; DVZ: PDVZ); far;
+    begin
+      fillchar(DVZ^,sizeof(DVZ^),0);
+      with DVZ^ do
+        begin
+          pre:= getstr(s,1,setLET_1_1);
+          kym:= getstr(s,2,setLET_1_1);
+          GetDateStr(date.r,date.m,date.d, getstr(s,3,setLET_1_1), false)
+        end
+    end;

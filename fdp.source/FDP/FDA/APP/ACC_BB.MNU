@@ -1,0 +1,146 @@
+{$I ..\lib\mnu\_strips.h}
+
+procedure mnuEST_init(MMenu: PSubmenu); far;
+    var   smnu : TPItems;
+          i,items,nl : int;
+          is : bool;
+          s  : string;
+    begin
+      items:= 0; nl:= 0; is:= false;
+
+      smnu[items]:= Item (mnu_FPL4_EST,cmESTc_strip, nil);
+      inc(items);
+      smnu[items]:= Item (mnu_FPL4_ETO,cmETOc_strip, nil);
+      inc(items);
+      smnu[items]:= Item (mnu_FPL4_CNL,cmCNLc_strip, nil);
+      inc(items);
+
+      add_newline_(2,nl,items,smnu);
+      smnu[items]:= Item(' '+delchar(cut_r(mnu_NAJDI),[cnst_HotKey])+PODLA_SSR, cmSEARCH_SSR, nil);
+      inc(items);
+      smnu[items]:= Item(' '+delchar(cut_r(mnu_NAJDI),[cnst_HotKey])+PODLA_IDN, cmSEARCH_CODE,nil);
+      inc(items);
+      s:= _posledne+cut_(cstr(prehlad_arch_fn_cFPL,2))+_hod;
+      smnu[items]:= Item(UKONCENE+s, cmLOAD_ARCHIV_cFPL, nil);
+      inc(items);
+
+      for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i]);
+    end;
+
+
+const  ESTETO: bool = true;
+
+function FDAmenu_init: PBarMenu;
+
+   var   RPLmenu      : PSubMenu;
+         PLNmenu      : PSubMenu;
+         FPL4menu     : PSubMenu;
+         ESTmenu      : PSubMenu;
+         TLGmenu      : PSubMenu;
+         SPRmenu      : PSubMenu;
+
+         DATAmenu     : PSubMenu;
+         AIPmenu      : PSubMenu;
+
+         OPTIONsmenu  : PSubMenu;
+         MMImenu      : PSubMenu;
+
+         SYSTEMmenu   : PSubMenu;
+
+   begin
+
+     FDAmenu:= New(PBarMenu);
+     FDAmenu_init:= FDAmenu;
+
+     {$IFDEF RPL}
+      RPLmenu:= SubMenu(mnu_RPL, WinMenu(tit_RPL, hlpmnuRPL,nil),nil);
+      RPLmenu^.PMenu_init:= @mnuRPL_init;
+     {$ENDIF}
+
+     {$IFDEF PLN}
+      PLNmenu:= SubMenu(mnu_PLN, WinMenu(tit_PLN, hlpmnuPLN,nil),nil);
+      PLNmenu^.PMenu_init:= @mnuPLN_init;
+     {$ENDIF}
+
+     {$IFDEF FPL4}
+      FPL4menu:= SubMenu(mnu_FPL4, WinMenu(tit_FPL4, hlpmnuFPL4,nil),nil);
+      FPL4menu^.PMenu_init:= @mnuFPL4_init;
+     {$ENDIF}
+
+     {$IFDEF FPL0}
+      ESTmenu:= SubMenu(mnu_EST, WinMenu(tit_EST, hlpmnuESTfunc,nil),nil);
+      ESTmenu^.PMenu_init:= @mnuEST_init;
+     {$ENDIF}
+
+     {$IFDEF TLG}
+      TLGmenu:= SubMenu(mnu_TLG, WinMenu(tit_TLG, hlpmnuTLG,nil),nil);
+      TLGmenu^.PMenu_init:= @mnuTLG_init;
+     {$ENDIF}
+
+     {$IFDEF SPR}
+      SPRmenu:= SubMenu(mnu_SPR, WinMenu(tit_SPR, hlpmnuSPR, nil),nil);
+      SPRmenu^.PMenu_init:= @mnuSPR_init;
+     {$ENDIF}
+
+     DATAmenu:= SubMenu(mnu_UDAJE, WinMenu(tit_UDAJE, hlpmnuPREHLAD,nil),nil);
+     DATAmenu^.PMenu_init:= @mnuPREHLAD_init;
+
+     AIPmenu:= SubMenu(mnu_AIP, AIP_menu,nil);
+
+     MMImenu:= SubMenu (mnu_MMI,WinMenu(tit_MMI,hlpmnuMMI,nil),nil);
+     MMImenu^.PMenu_init:= @mnuMMI_init;
+
+     OPTIONSmenu:= SubMenu(mnu_OPT, WinMenu(tit_OPT,hlpmnuOPTIONS,nil),nil);
+     OPTIONSmenu^.PMenu_init:= @mnuOPTIONS_init;
+
+     SYSTEMmenu:= SubMenu (mnu_SYSTEM, WinMenu(tit_SYSTEM,hlpmnuSYSTEM,nil),nil);
+     SYSTEMmenu^.PMenu_init:= @mnuSYSTEM_init;
+
+
+     FDAmenu^.Init('',
+
+        Item2  ('~ ~FDP/FDA', kbCtrlF1, cmAbout,
+
+        {$IFDEF RPL}
+         SubMenuInitialized(RPLmenu,
+        {$ENDIF}
+
+        {$IFDEF PLN}
+         SubMenuInitialized(PLNmenu,
+        {$ENDIF}
+
+        {$IFDEF FPL4}
+         SubMenuInitialized(FPL4menu,
+        {$ENDIF}
+
+        {$IFDEF FPL0}
+         SubMenuInitialized(ESTmenu,
+        {$ENDIF}
+
+        {$IFDEF TLG}
+         SubMenuInitialized(TLGmenu,
+        {$ENDIF}
+
+        {$IFDEF SPR}
+         SubMenuInitialized(SPRmenu,
+        {$ENDIF}
+
+        SubMenuInitialized(DATAmenu,
+
+        SubMenuInitialized(AIPmenu,
+
+        SubMenuInitialized(OPTIONSmenu,
+
+        SubMenuInitialized(MMImenu,
+
+        SubMenuInitialized(SYSTEMmenu,
+
+        nil) {$IFDEF RPL}  ) {$ENDIF}
+             {$IFDEF PLN}  ) {$ENDIF}
+             {$IFDEF FPL4} ) {$ENDIF}
+             {$IFDEF FPL0} ) {$ENDIF}
+             {$IFDEF TLG}  ) {$ENDIF}
+             {$IFDEF SPR}  ) {$ENDIF}
+             ) ) ) ) )
+        );
+   end;

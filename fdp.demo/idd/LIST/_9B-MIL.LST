@@ -1,0 +1,74 @@
+;"ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ"
+;" €¡seln¡k vojensk˜ch typov "
+;"ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ"
+
+  29  O29/L       L-29        ;  MIL
+  39  O39/L       L-39        ;  MIL
+  59  O59/L       L-59        ;  MIL
+
+  21  MI21/L      MiG-21      ;  MIL
+  23  MI23/L      MiG-23      ;  MIL
+  19  MI29/L      MiG-29      ;  MIL
+
+  22  SU22/M      Su-22       ;  MIL
+  25  SU22/L      Su-25       ;  MIL
+
+  02  MI2/L       Mi-2        ;  MIL
+  48  MI8/M       Mi-8        ;  MIL
+  09  MI9/M       Mi-9        ;  MIL
+  17  MI17/M      Mi-17       ;  MIL
+  28  MI18/M      Mi-18       ;  MIL
+  44  MI24/M      Mi-24       ;  MIL
+
+  12  AN12/M      An-12       ;  MIL
+  30  AN20/M      An-2O       ;  MIL
+  24  AN24/M      An-24       ;  MIL
+  26  AN26/M      An-26       ;  MIL
+
+  14  IL14/M      Il-14       ;  MIL
+  62  IL14/H      Il-62       ;  MIL
+
+  41  O410/M      L-41O       ;  MIL
+  15  O610/M      L-61O       ;  MIL
+
+  40  YK40/M      Jak-4O      ;  MIL
+
+  34  TU34/M      Tu-134      ;  MIL
+  54  TU54/M      Tu-154      ;  MIL
+
+
+;"ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ"
+;" Ciselnik ostatn˜ch typov  "
+;"ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ"
+
+  37  O37/L       Z-37
+  42  O42/L       Z-42, Z-142
+  43  O43/L       Z-43
+  50  O50/L       Z-50
+
+  05  ZZZZ/L      C-2O5,Z-226
+  06  ZZZZ/L      C-3O5,Z-326,Z-526
+
+  35  ZZZZ/L      Wilga-35
+  45  ZZZZ/L      Aero-45
+
+  49  O40/L       L-4O
+  60  O60/L       L-6O
+  20  O200/L      L-2OO
+
+  32  AN2/L       An-2
+
+  65  ZZZZ/L      UltraŒahk‚ lietadlo
+  64  ZZZZ/L      Z vesn˜ klz k s motorom
+  66  ZZZZ/L      Z vesn˜ klz k
+  67  ZZZZ/L      Klz k s motorom
+  69  ZZZZ/L      Klz k
+  68  ZZZZ/L      Bal¢n
+  70  ZZZZ/L      Vzducholoƒ
+
+
+;"ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ"
+;" Ciselnik ICAO             "
+;"ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ"
+
+  ZZZZ            In˜ typ uveden˜ v RMK

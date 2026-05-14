@@ -1,0 +1,119 @@
+5a    ; 5a - Uncorrect describtion of emergency phase
+
+7a-1  ; 7a - Missing aircraft identification
+7a-2  ; 7a - Uncorrect length
+7b-1  ; 7b - SSR code is expected
+
+8a-1  ; Missing array "8"
+8a-2  ; 8 - Uncorrect array length
+8a-3  ; 8a - Unknown flight rules
+8b-1  ; 8b - Unknown type of flight
+
+9a    ; 9 - Error in number of aircraft
+9b    ; 9b - Unknown code of aircraft
+9b-1  ; 9b - Missing code of aircraft
+9c-1  ; 9c - Unkwnown value of wake turbulence cat
+9c-2  ; 9c - Other value of wake turbulence cat
+
+10a-1 ; 10a - Unknown equipment COM,NAV
+10a-2 ; 10a - Equipment "N" means no equipment on board
+10a-3 ; 10a - Unalowed equipment code or codes combination
+10b-1 ; 10b - Missing describtion of equipment SSR
+10b-2 ; 10b - Uncorrect length of equipment SSR array
+10b-3 ; 10b - Uncorrect equipment SSR
+
+13a   ; 13  - Array is not written according to ICAO rules
+13a-1 ; 13a - Departure aerodrome is not written according to ICAO rules
+13a-2 ; 13a - Invalid or missing value/format of estimated departure time
+13a-3 ; 13a - Missing departure aerodrome code
+13b-1 ; 13b - Invalid or missing value/format of real departure time
+
+14a   ; 14a - Unknown input/crossing point
+14b   ; 14b - Invalid or missing value of estimated time
+14c   ; 14c - Invalid or missing value of flight level
+14d   ; 14d - Invalid or missing value of first flight level
+14e   ; 14e - "A"scending or "B"ellow enabled
+
+15a   ; 15a - Invalid or missing value/format of cruising speed (i.e. K0900,N400,M0910)
+15a-1 ; 15a - Speed is to low
+15a-2 ; 15a - Speed is to high
+
+15b   ; 15b - Invalidor missing  value/format of flight level (i.e. F340,S1120,A045,M0900)
+15b-1 ; 15b - Altitude is to low
+15b-2 ; 15b - Altitude is to high
+
+15c-2 ; 15c - Point expected (i.e. C/POINT/K0650F340F360)
+15c-3 ; 15c - Speed expected (i.e. C/POINT/K0650F340F360)
+15c-4 ; 15c - Flight level value expected (i.e. C/POINT/K0650F340F360)
+15c-7 ; 15c - Expected cruise climb (K0760S0965)
+15c-8 ; 15c - Invalid or missing value/format of speed (i.e. K0900,N400,M0910)
+15c-9 ; 15c - Invalid or missing value/format of flight level (i.e. F340,S1120,A045,M0900)
+
+15c-10; 15c - Unknown code of point or route                             ; pri dekodovani neznamy bod medzi znamymi
+15c-11; 15c - Unable to decode known points or routes
+15c-12; 15c - There are no points on the route
+15c-15; 15c - Stopover is not enabled
+
+15c-25; 15c - There is not specified intersection points of routes
+15c-26; 15c - There more possible intersection points of routes
+15c-27; 15c - There is not intersection points of routes
+15c-28; 15c - The point not belong to the route, their distance is to large
+15c-29; 15c - The point not belong  of the route
+15c-30; 15c - Point does'nt belong on the route
+15c-31; 15c - Points does'nt belong to the same route, "DCT" is expected
+15c-32; 15c - Points are to be separated by "DCT"
+
+15c-36; 15c - Departure aerodrome is to far from first point of the route
+15c-37; 15c - Destination aerodrome is to far from route
+15c-38; 15c - Cannot determine input point on route
+15c-39; 15c - Cannot determine output point on route
+15c-40; 15c - Decoded route does'nt begin on aerodrome in or input into controlled area
+15c-41; 15c - Decoded route does'nt end on aerodrome in or output from controlled area
+15c-42; 15c - Internal flight with unknown points on the route
+15c-50; 15c - Cannot determine input or output point of the route
+
+16a   ; 16 - Array is not written according to ICAO rules
+16a-1 ; 16a - Destination aerodrome is not written according to ICAO rules
+16a-2 ; 16a - Invalid or missing value/format  of flight time
+16a-3 ; 13a - Missing arrival aerodrome code
+16b-1 ; 16b - Backup aerodromes are not written according to ICAO rules
+
+18    ; 18 - Other information
+18-1  ; 18 - Another keyword
+18-2  ; 18 - Expected
+18-3  ; 18 - is expected by 18 ("ZZZZ" is used)
+18-4  ;
+
+18-10 ; 18 - Departure aerodrome is not in FIR, there is expected EET/
+18-11 ; 18 - Invalid or missing format/time value of EET
+
+18-20 ; 18 - Invalid or missing date of flight
+18-21 ; 18 - Not actual date of flight
+
+18-50 ; Date of flight requested in format rrmmdd, i.e. 970531
+18-51 ; Last date of flight is before first one
+18-52 ; There is no flight planned during the week
+
+19-1  ; Empty array 19 ("SUPLEMENTARY INFORMATION")
+20-1  ; Empty array 20 ("ALERTING SEARCH AND RESCUE INFORMATION")
+21-1  ; Empty array 21 ("RADIO FAILURE INFORMATION")
+
+ICAO-1 ; Message processing is not enabled
+ICAO-2 ; Array is not written according to ICAO rules or national rules
+
+SSR-1  ; Invalid number of digits or format in ssr code/board number
+SSR-2  ; ssr code allows the octal digits (0-7)
+SSR-3  ; Board number have to contain only digits
+
+SSR-10 ; This ssr code/board number is already used
+
+TLG-1  ; There is no message priority
+TLG-2  ; This priority is not allowed for this message
+
+TLG-3  ; There is no destination address of message
+TLG-4  ; Invalid length of message address [6..8]
+TLG-5  ; To much address (9adr by 6char / 7adr by 8char)
+
+TLG-10 ; Empty array
+TLG-11 ; There is missing or invalid value of date ("DATE/...")
+TLG-12 ; There is missing or invalid value of time ("UTC/...")

@@ -1,0 +1,168 @@
+ function dx_sc_SYN: int; far;
+    begin
+      if pis_SYN_ then dx_sc_SYN:= dx_SYN_
+      else dx_sc_SYN:= dx_SYN
+    end;
+
+ function dy_sc_SYN: int; far;
+    begin
+      dy_sc_SYN:= dy_SYN
+    end;
+
+
+
+ procedure _plan_SYN(x0,y0,x1,y1: int; bk: int; sm: byte; pis_: bool);
+     var   dx, y21,y49: int;
+
+     begin
+       BGIgraph.button(x0,y0,x1,y1,  bk, btSmall, btOFF);
+
+       y21:= y0+21; y49:= y0+49;
+       on_off(x0+4,y0+17,x1-4,y1-4 , bk+clBUTTON_DARK,bk+clBUTTON_LIGHT, btSmall, btOFF);
+       on_off(x0+5,y0+20,x1-5,y0+50, bk+clBUTTON_DARK,bk+clBUTTON_LIGHT, btSmall, btON);
+       on_off(x0+5,y0+53,x1-5,y1-5,  bk+clBUTTON_DARK,bk+clBUTTON_LIGHT, btSmall, btON);
+
+       dx:= 10*ord(pis_);
+       _linevo(x0+61+dx, y21, y49, bk);  inc(dx,10*ord(pis_SYN_));
+       _linevo(x0+118+dx, y21, y49, bk); inc(dx,10*ord(pis_SYN_));
+       _linevo(x0+166+dx, y21, y49, bk); inc(dx,10*ord(pis_SYN_));
+       _linevo(x0+246+dx, y21, y49, bk); inc(dx,10*ord(pis_SYN_));
+       _linevo(x0+282+dx, y21, y49, bk); inc(dx,10*ord(pis_SYN_));
+       _linevo(x0+318+dx, y21, y49, bk); inc(dx,10*ord(pis_SYN_));
+
+       _lineho(x0+5,x1-5, y0+33, bk);
+       _linevo(x0+91,y0+54,y1-5, bk);
+     end;
+
+
+ procedure plan_SYN(SYN: PSYN; x,y: int; b: bool);
+     var   cl_stat,bk: byte;
+     var   dx,dx1,dx2,dx3,dx4,dx5,dx6,dx7, r1,r3: int;
+
+     procedure write_(x,y: int; data: string; _: char);
+         var   cl: byte;
+         begin
+           MoveTo(x,y);
+           if pis_SYN_ then
+              begin
+                case _ of
+                 'N': cl:= white;
+                 'E': cl:= green;
+                 'F': cl:= yellow;
+                 'G': cl:= red;
+                 'H': cl:= black;
+                 else cl:= cl_data
+                end;
+                setcolor(cl);
+                OutText(_);
+                setcolor(cl_data);
+                MoveTo(x+10,y);
+              end;
+           OutText(data);
+         end;
+
+     begin
+       dx := 10*ord(pis_SYN_);
+       dx1:= 10;
+       dx2:= dx + 67;  inc(dx,10*ord(pis_SYN_));
+       dx3:= dx + 124; inc(dx,10*ord(pis_SYN_));
+       dx4:= dx + 171; inc(dx,10*ord(pis_SYN_));
+       dx5:= dx + 253; inc(dx,10*ord(pis_SYN_));
+       dx6:= dx + 288; inc(dx,10*ord(pis_SYN_));
+       dx7:= dx + 325; inc(dx,10*ord(pis_SYN_));
+       r1:= y+4{$IFDEF SPEA}+dy_ch{$ENDIF};
+       r3:= y+39{$IFDEF SPEA}+dy_ch{$ENDIF};
+       with SYN^ do
+         begin
+           bk:= bkPLAN_[b];
+           _plan_SYN(x,y,x+dx_sc_SYN,y+dy_sc_SYN, bk, bk,pis_SYN_);
+           setcolor(cl_data-1);
+          {$IFDEF SPEA}
+           SetBkColor(bk);
+           SetTextStyle(BIT8x8, HorizDir,0);
+          {$ELSE}
+           SetTextStyle(SmallFont, HorizDir,4);
+          {$ENDIF}
+           OutTextXY(x+08 ,r1, inttostr(ident,4,1));
+           OutTextXY(x+46{$IFDEF SPEA}+5{$ENDIF},r1, let + ' ' + strpas(nazov));
+           setcolor(cl_data-3);
+           OutTextXY(x+401+10*ord(pis_SYN_){$IFDEF SPEA}-30{$ENDIF},r1,
+                     datetostr2(date.d,date.m,date.r)+' od '+inttostr(time.h,1,1)+' hod'
+                    );
+           r1:= y+20{$IFDEF SPEA}+2+dy_ch{$ENDIF};
+           OutTextXY(x+dx1,r1,'QNH');
+           OutTextXY(x+dx2,r1,'QFE');
+           OutTextXY(x+dx3,r1,'QMU');
+           OutTextXY(x+dx4,r1,'QAN-QNT');
+           OutTextXY(x+dx5,r1,'QBA');
+           OutTextXY(x+dx6,r1,'n/8');
+           OutTextXY(x+dx7,r1,'QBB');
+           OutTextXY(x+10 ,y+54{$IFDEF SPEA}+10{$ENDIF},{$IFDEF SPEA}'POCASIE'{$ELSE}'STAV PO€ASIA'{$ENDIF});
+           SetTextStyle(DefaultFont, HorizDir,0);
+           setcolor(cl_data);
+
+           write_(x+dx1,r3, qnh,qnh_);
+           write_(x+dx2,r3, qfe,qfe_);
+           write_(x+dx3,r3, qmu,qmu_);
+           write_(x+dx4,r3, qan_qnt,qan_qnt_);
+           write_(x+dx5,r3, qba,qba_);
+           write_(x+dx6,r3, n,n_);
+           write_(x+dx7,r3, strpas(qbb),qbb_);
+
+           write_(x+95,y+57{$IFDEF SPEA}+10{$ENDIF},strpas(stav),stav_);
+         end;
+     end; { draw_SYN }
+
+
+
+ procedure _info_SYN(x0,y0,x1,y1: int; SYN: PSYN); far;
+     begin
+       plan_SYN(SYN, x0+(x1-x0-dx_sc_SYN) shr 1, y0{+winHEIGHT},true)
+     end;
+
+ function info_SYN(SYN: PSYN; title: string): bool;
+     begin
+       if title='' then title:= 'SYNOP '+strpas(SYN^.nazov);
+       info_SYN:= Info(title, @_info_SYN, SYN,dx_sc_SYN+20,dy_SYN+10, nil,0)
+     end;
+
+
+
+
+
+(*
+procedure plan_MET(x0,y0,x1,y1: int; bk: int; sm: byte);
+    var   y21,y49: int;
+    begin y21:= y0+21; y49:= y0+49;
+      BGIgraph.button(x0,y0,x1,y1, bk, btSmall, btOFF);
+      on_off(x0+4,y0+17,x1-4,y1-4, bk+clBUTTON_DARK,bk+clBUTTON_LIGHT, btSmall, btOFF);
+      on_off(x0+5,y0+20,x1-5,y1-5, bk+clBUTTON_DARK,bk+clBUTTON_LIGHT, btSmall, btON);
+      SetColor(bk+clBUTTON_LIGHT);
+      Line(x0+5,  y0+34,  x1-5,  y0+34);
+      SetColor(bk+clBUTTON_DARK);
+      Line(x0+5,  y0+35,  x1-5,  y0+35)
+    end;
+
+procedure draw_MET(MET: PMET; x,y: int; b: bool);
+    var   r1 : int;
+          bk : byte;
+    begin
+      with MET^ do
+        begin
+          bk:= bkFPL[b];
+          plan_MET(x,y,x+dx_MET,y+dy_MET,bk,bk);
+          setcolor(cl_data-1);
+         {$IFNDEF SPEA}
+          SetTextStyle(SmallFont, HorizDir,4);
+         {$ENDIF}
+          OutTextXY(x+ 08 ,r1, inttostr(ident,4,1));
+          OutTextXY(x+ 51 ,r1, let + ' ' + strpas(nazov));
+          setcolor(cl_data-3);
+          OutTextXY(x+344,r1, datetostr2(date.d,date.m,date.r)+' od '+inttostr(time.h,1,1)+' hod');
+          setcolor(cl_data);
+          SetTextStyle(DefaultFont, HorizDir,0);
+          OutTextXY(x+ 10, y+24, strpas(line1));
+          OutTextXY(x+ 10, y+38, strpas(line2));
+        end;
+    end; { draw_MET }
+*)

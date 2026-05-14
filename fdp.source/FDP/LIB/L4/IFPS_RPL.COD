@@ -1,0 +1,207 @@
+
+{ ---------------------
+   EXT/IFPS
+  ---------------------
+
+0 990325 DEST: UKBVZRZX
+0 990325 SNDR: UKKKZDZX
+1 RPL                990328 991025      UKKKZDZX
+2 990329 991025 1000000 AEW101     B732   UKBB 0330 UKHH 0040
+3            BULAP A137 MATEG
+2 990330 991030 0200060 AEW101     B732   UKBB 0400 UKHH 0040
+3            BULAP A137 MATEG
+.
+.
+.
+}
+ const  line_ext_rpl = '2 990101 UNL    1234567 AAA001     B777   UKBB 0330 UKHH 0040';
+
+
+{ ----------------------
+   Dekodovanie
+  ----------------------
+}
+ function _s(s: string; zac,kon: byte): string;
+    begin
+      _s:= cut_(copy(s,zac,kon-zac+1))
+    end;
+
+ function is_IFPS_HEADER_DEST (s: string): bool;
+    begin
+      is_IFPS_HEADER_DEST:=  (s<>'') and (s[record_type]=IFPS_HEADER)
+          and (_s(s,header_identifier,_header_identifier)=header_identifier_DEST)
+    end;
+
+ function is_IFPS_HEADER_SEND (s: string): bool;
+    begin
+      is_IFPS_HEADER_SEND:=  (s<>'') and (s[record_type]=IFPS_HEADER)
+          and (_s(s,header_identifier,_header_identifier)=header_identifier_SNDR)
+    end;
+
+
+ function is_IFPS_RPL_HEADER (s: string): bool;
+    begin
+      is_IFPS_RPL_HEADER:= (s<>'') and (s[record_type]=IFPS_RPL_HEADER)
+          and (_s(s,text_identifier,_text_identifier)=text_identifier_RPL)
+    end;
+
+
+ function is_IFPS_TRAILER (s: string): bool;
+    begin
+      is_IFPS_TRAILER:= (s<>'') and (s[record_type]=IFPS_TRAILER)
+    end;
+
+
+ function is_IFPS_RPL_FLIGHT_INFO (s: string): bool;
+    begin
+      is_IFPS_RPL_FLIGHT_INFO:= (s<>'') and (s[record_type]=IFPS_RPL_FLIGHT_INFO)
+    end;
+
+ function decode_IFPS_RPL_FLIGHT_INFO (s: string; var RPL: DRPL): bool;
+    var   t : string;
+          i,p : int;
+    begin
+     { 2 990330 991030 0200060 AEW101     B732   UKBB 0400 UKHH 0040
+     }
+
+      RPL.zac:= _s(s,valid_from,_valid_from);
+      RPL.kon:= _s(s,valid_until,_valid_until);
+
+      t:= _s(s,days_of_operation,_days_of_operation);
+      p:= minimum(length(t),high(RPL.dni));
+      for i:= 1 to p do RPL.dni[i]:= t[i];
+      for i:= p+1 to high(RPL.dni) do RPL.dni[i]:= '0';
+
+      RPL._7a:= _s(s,aircraft_identification,_aircraft_identification);
+      RPL._7x:= ' ';
+
+      RPL._9b:= _s(s,aircraft_type,_aircraft_type);
+      RPL._9c:= _s(s,wake_turbulency_cat,_wake_turbulency_cat);
+
+      RPL._13a:= _s(s,departure_aerodrome,_departure_aerodrome);
+      RPL._13b:= _s(s,departure_time,_departure_time);
+
+      RPL._16a:= _s(s,destination_aerodrome,_destination_aerodrome);
+      RPL._16b:= _s(s,total_est_elapsed_time,_total_est_elapsed_time);
+
+      RPL.val:= getchar(_s(s,entry_type,entry_type));
+
+      decode_IFPS_RPL_FLIGHT_INFO:= true;
+    end;
+
+
+ function is_IFPS_RPL_ROUTE (s: string): bool;
+    begin
+      is_IFPS_RPL_ROUTE:= (s<>'') and (s[record_type]=IFPS_RPL_ROUTE)
+    end;
+
+ function decode_IFPS_RPL_ROUTE(s: string): string;
+    begin
+      decode_IFPS_RPL_ROUTE:= _s(s,route,_route)
+    end;
+
+
+ function is_IFPS_RPL_REMARKS(s: string): bool;
+    begin
+      is_IFPS_RPL_REMARKS:= (s<>'') and (s[record_type]=IFPS_RPL_REMARKS)
+    end;
+
+ function decode_IFPS_RPL_REMARKS(s: string): string;
+    begin
+      decode_IFPS_RPL_REMARKS:= _s(s,remarks,_remarks)
+    end;
+
+
+ function is_IFPS_RPL_FILE(fn: string): bool;
+    var   t: text;
+          s1,s2,s3: string;
+          is0,is1,is2 : bool;
+    begin
+      assign(t,fn);
+      reset(t);
+      readln(t,s1); readln(t,s2); readln(t,s3);
+      is_IFPS_RPL_FILE:=    (is_IFPS_HEADER_DEST (s1) and is_IFPS_HEADER_SEND (s2))
+                         or (is_IFPS_HEADER_DEST (s2) and is_IFPS_HEADER_SEND (s1))
+                         and is_IFPS_RPL_HEADER (s3);
+      close(t);
+    end;
+
+
+{ ----------------------
+   Kodovanie
+  ----------------------
+}
+ function code_IFPS_HEADER_DEST (dest: string): string;
+    begin
+      code_IFPS_HEADER_DEST:=               IFPS_HEADER
+                              + icao_NXIT + code_l4_date_(year,month,day)
+                              + icao_NXIT + header_identifier_DEST
+                              + icao_NXIT + dest
+    end;
+
+ function code_IFPS_HEADER_SNDR (sndr: string): string;
+    begin
+      code_IFPS_HEADER_SNDR:=               IFPS_HEADER
+                              + icao_NXIT + code_l4_date_(year,month,day)
+                              + icao_NXIT + header_identifier_SNDR
+                              + icao_NXIT + sndr
+    end;
+
+
+ function code_IFPS_RPL_HEADER: string;
+    var   s: string;
+    begin
+      s:=  IFPS_RPL_HEADER + icao_NXIT + text_identifier_RPL;
+      s:=  s + rightchar ('',validity_period-length(s)-1,icao_NXIT);
+      s:=  s + code_l4_date_(0,0,0);
+      s:=  s + rightchar ('',expiry_date-length(s)-1,icao_NXIT);
+      s:=  s + id_no_expiry;
+      code_IFPS_RPL_HEADER:= s
+    end;
+
+
+ function code_IFPS_RPL_FLIGHT_INFO (RPL: DRPL): string;
+    var   s,t : string;
+          i : int;
+    begin
+     { 2 990330 991030 0200060 AEW101     B732   UKBB 0400 UKHH 0040 }
+      s:= IFPS_RPL_FLIGHT_INFO;
+
+      t:= ''; with RPL do for i:= low(dni) to high(dni) do if dni[i]<>' ' then t:= t+dni[i] else t:= t+'0';
+      s:= s + icao_NXIT + RPL.zac
+            + icao_NXIT + RPL.kon
+            + icao_NXIT + t
+            + icao_NXIT + RPL._7a;
+
+      s:= s + rightchar ('',aircraft_type-length(s)-1,icao_NXIT) + RPL._9b;
+      s:= s + rightchar ('',wake_turbulency_cat-length(s)-1,icao_NXIT) + RPL._9c;
+
+      s:= s + rightchar ('',departure_aerodrome-length(s)-1,icao_NXIT) + RPL._13a;
+      s:= s + rightchar ('',departure_time     -length(s)-1,icao_NXIT) + RPL._13b;
+
+      s:= s + rightchar ('',destination_aerodrome -length(s)-1,icao_NXIT) + RPL._16a;
+      s:= s + rightchar ('',total_est_elapsed_time-length(s)-1,icao_NXIT) + RPL._16b;
+
+      s:= s + rightchar ('',entry_type-length(s)-1,icao_NXIT) + RPL.val;
+
+      code_IFPS_RPL_FLIGHT_INFO:= s
+    end;
+
+
+ function code_IFPS_RPL_ROUTE(var RPL: DRPL; ind: int): string;
+    begin
+      code_IFPS_RPL_ROUTE:= IFPS_RPL_ROUTE + icao_NXIT + get_line_i(RPL._15,ind)
+    end;
+
+
+ function code_IFPS_RPL_REMARK(var RPL: DRPL; ind: int): string;
+    begin
+      code_IFPS_RPL_REMARK:= IFPS_RPL_REMARKS + icao_NXIT + get_line_i(RPL._18,ind)
+    end;
+
+
+ function code_IFPS_RPL_TRAIL: string;
+    begin
+      code_IFPS_RPL_TRAIL:= IFPS_TRAILER
+    end;
+

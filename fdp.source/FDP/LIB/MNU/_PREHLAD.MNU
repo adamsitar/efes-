@@ -1,0 +1,404 @@
+{ ------------------
+   Prehlad
+  ˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙
+}
+procedure mnuPPLprehlad_init(MMenu: PSubmenu); far;
+    var   smnu : TPItems;
+          i,items,nl,nls : int;
+          is: bool;
+    begin
+      items:= 0; nl:= 0; nls:= 0; is:= false;
+
+      {$IFDEF PLN}
+       smnu[items]:= Item (PrPLN, cmPREHLAD_PLN_PPL, nil);
+       inc(items);
+      {$ENDIF}
+
+      {$IFDEF FPL4_MENU}
+       smnu[items]:= Item (PrFPL4, cmPREHLAD_FPL4_PPL,nil);
+       inc(items);
+
+       smnu[items]:= Item (PrFPL4D,cmPREHLAD_FPL4D_PPL,nil);
+       inc(items);
+      {$ENDIF}
+
+      {$IFDEF FPL0}
+       if items>0 then inc(nls);
+       {$IFNDEF FPLM_DISABLED}
+       add_newline__(0, nls,nl,items,smnu);
+       inc(nls);
+       {$IFDEF VLASTNE_PLANY}
+        smnu[items]:= SubMenu (cut_r(PrFPLM)+'... ',  WinMenu(PrFPLM,nil,
+                               Item (tit_VLASTNE, cmPREHLAD_mFPL_PPL_nase,
+                               Item (tit_VSETKY , cmPREHLAD_mFPL_PPL,
+                               nil) )
+                              ),nil);
+        inc(items);
+       {$IFDEF KRL}
+        smnu[items]:= SubMenu (cut_r(PrKRL)+'... ', WinMenu(PrKRL,nil,
+                               Item (tit_KRIDLA_NASE,   cmPREHLAD_KRL_PPL_nase,
+                               Item (tit_KRIDLA_INE,    cmPREHLAD_KRL_PPL_ine,
+                               Item (tit_KRIDLA_VSETKY, cmPREHLAD_KRL_PPL,
+                               nil) ) )
+                              ),nil);
+        inc(items);
+       {$ENDIF}
+       {$ELSE}
+        {$IFDEF MATCA}
+         smnu[items]:= Item (PrFPLM, cmPREHLAD_mFPL_PPL, nil);
+         inc(items);
+        {$ELSE}
+         smnu[items]:= Item (PrFPLM, cmPREHLAD_mFPL_PPL, nil);
+         inc(items);
+        {$ENDIF}
+       {$ENDIF}
+      {$ENDIF}
+      {$ENDIF}
+
+      {$IFDEF ZAM}
+       add_newline__(0, nls,nl,items,smnu);
+       smnu[items]:= Item   (PrZAM,  cmPREHLAD_ZAM_PPL,nil);
+       inc(items);
+      {$ENDIF}
+
+      {$IFDEF QGO}
+       add_newline__(0, nls,nl,items,smnu);
+       smnu[items]:= Item   (PrQGO,  cmPREHLAD_QGO_PPL,nil);
+       inc(items);
+      {$ENDIF}
+
+      {$IFDEF DVZ}
+       add_newline__(0, nls,nl,items,smnu);
+       smnu[items]:= Item   (PrDVZ,  cmPREHLAD_DVZ_PPL,nil);
+       inc(items);
+      {$ENDIF}
+
+      {$IFDEF RTZ}
+       add_newline__(0, nls,nl,items,smnu);
+       smnu[items]:= Item   (PrRTZ,  cmPREHLAD_RTZ_PPL,nil);
+       inc(items);
+      {$ENDIF}
+
+      {$IFDEF PRZ}
+       if nls=nl then inc(nls);
+       add_newline__(0, nls,nl,items,smnu);
+       smnu[items]:= Item   (PrPRZ,  cmPREHLAD_PRZ_PPL,nil);
+       inc(items);
+       smnu[items]:= Item   (PrPRN,  cmPREHLAD_PRN_PPL,nil);
+       inc(items);
+      {$ENDIF}
+
+      {$IFDEF PRS}
+       add_newline__(0, nls,nl,items,smnu);
+       smnu[items]:= Item   (PrPRS,  cmPREHLAD_PRS_PPL, nil);
+       inc(items);
+      {$ENDIF}
+
+      {$IFDEF FUA_DATA}
+       smnu[items]:= Item    (AAUP,  cmPREHLAD_AUP_PPL, nil);
+       inc(items);
+       smnu[items]:= Item    (AUUP,  cmPREHLAD_UUP_PPL, nil);
+       inc(items);
+      {$ENDIF}
+
+      for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i]);
+    end;
+
+
+procedure mnuARCHIVprehlad_init(MMenu: PSubmenu); far;
+    var   smnu : TPItems;
+          i,items,nl,nls : int;
+          is: bool;
+    begin
+      items:= 0; nl:= 0; nls:= 0; is:= false;
+
+      {$IFDEF PLN}
+       smnu[items]:= Item (PrPLN, cmPREHLAD_PLN_ARCH, nil);
+       inc(items);
+      {$ENDIF}
+
+      {$IFDEF FPL4_MENU}
+       smnu[items]:= Item (PrFPL4, cmPREHLAD_FPL4_ARCH,nil);
+       inc(items);
+
+       smnu[items]:= Item (PrFPL4D,cmPREHLAD_FPL4D_ARCH,nil);
+       inc(items);
+      {$ENDIF}
+
+
+      {$IFDEF FPL0}
+       if items>0 then inc(nls);
+       add_newline__(0, nls,nl,items,smnu);
+       inc(nls);
+       smnu[items]:= SubMenu (cut_r(ArFPLc)+'... ', WinMenu(ArFPLc_, nil,
+                              Item(ArFPLc24L, cmPREHLAD_cFPL_ARCH0,
+                              Item(ArFPLc24M, cmPREHLAD_cFPL_ARCH1,
+                              nil ) )
+                             ),nil);
+       inc(items);
+       {$IFNDEF FPLM_DISABLED}
+       smnu[items]:= Item    (ArFPLmo, cmPREHLAD_mFPL_ARCH,nil);
+       inc(items);
+       {$IFDEF KRL}
+        smnu[items]:= Item   (PrKRL,   cmPREHLAD_KRL_ARCH,nil);
+        inc(items);
+       {$ENDIF}
+       {$ENDIF}
+      {$ENDIF}
+
+      {$IFDEF ZAM}
+       add_newline__(0, nls,nl,items,smnu);
+       smnu[items]:= Item   (PrZAM,   cmPREHLAD_ZAM_ARCH,nil);
+       inc(items);
+      {$ENDIF}
+
+      {$IFDEF QGO}
+       add_newline__(0, nls,nl,items,smnu);
+       smnu[items]:= Item   (PrQGO,   cmPREHLAD_QGO_ARCH,nil);
+       inc(items);
+      {$ENDIF}
+
+      {$IFDEF DVZ}
+       add_newline__(0, nls,nl,items,smnu);
+       smnu[items]:= Item   (PrDVZ,   cmPREHLAD_DVZ_ARCH,nil);
+       inc(items);
+      {$ENDIF}
+
+      {$IFDEF RTZ}
+       add_newline__(0, nls,nl,items,smnu);
+       smnu[items]:= Item   (PrRTZ,   cmPREHLAD_RTZ_ARCH,nil);
+       inc(items);
+      {$ENDIF}
+
+      {$IFDEF PRZ}
+       if nls=nl then inc(nls);
+       add_newline__(0, nls,nl,items,smnu);
+       smnu[items]:= Item   (PrPRZ,   cmPREHLAD_PRZ_ARCH,nil);
+       inc(items);
+       smnu[items]:= Item   (PrPRZR,  cmPREHLAD_VLIS_ARCH,nil);
+       inc(items);
+       smnu[items]:= Item   (PrPRN,   cmPREHLAD_PRN_ARCH,nil);
+       inc(items);
+      {$ENDIF}
+
+      {$IFDEF PRS}
+       add_newline__(0, nls,nl,items,smnu);
+       smnu[items]:= Item   (PrPRS,   cmPREHLAD_PRS_ARCH,nil);
+       inc(items);
+      {$ENDIF}
+
+      {$IFDEF FUA_DATA}
+       smnu[items]:= Item   (PrAUP,   cmPREHLAD_AUP_ARCH,nil);
+       inc(items);
+       smnu[items]:= Item   (PrUUP,   cmPREHLAD_UUP_ARCH,nil);
+       inc(items);
+      {$ENDIF}
+
+      {$IFDEF MET}
+       if nls=nl then inc(nls);
+       add_newline__(0, nls,nl,items,smnu);
+       smnu[items]:= Item   (PrSYN,   cmPREHLAD_SYN_ARCH,nil);
+       inc(items);
+       (*{$IFDEF MET_RLI}
+        smnu[items]:= Item   (PrMRL, cmPREHLAD_MRL_ARCH, nil);
+        inc(items);
+       {$ENDIF}*)
+      {$ENDIF}
+
+      {$IFDEF SPR}
+       if nls=nl then inc(nls);
+       add_newline__(0, nls,nl,items,smnu);
+       smnu[items]:= Item    (PrSPR,  cmPREHLAD_SPR_ARCH,nil);
+       inc(items);
+       {smnu[items]:= Item   (' ~T~ELEGRAMY ',           cmPREHLAD_SPRL_ARCH,nil);
+        inc(items);}
+      {$ENDIF}
+
+      {IFDEF TLG
+       smnu[items]:= Item    (PrTLG, cmPREHLAD_TLG_ARCH, nil);
+       inc(items);
+      ENDIF}
+
+      {$IFDEF AFTN}
+       {if nls=nl then inc(nls);}
+       add_newline__(0, nls,nl,items,smnu);
+       smnu[items]:= Item (PREHLADAFTN, cmPREHLAD_AFTN,   nil);
+       inc(items);
+      {$ENDIF}
+
+
+      (*{$IFDEF STATISTIKA_OPL}
+       add_newline_(0,nl,items,smnu);
+       smnu[items]:= SubMenu (cut_r(STATISTIKA)+'... ',  WinMenu(delchar(STATISTIKA,['~']),nil,
+                              Item (DENNA_STATISTIKA,   cmDENNA_STATISTIKA_A,
+                              Item (MESACNA_STATISTIKA, cmMESACNA_STATISTIKA_A,
+                              nil) )
+                             ),nil);
+       inc(items);
+      {$ENDIF}*)
+
+      for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i]);
+    end;
+
+
+procedure mnuPREHLAD_init(MMenu: PSubmenu); far;
+    var   smnu  : TPItems;
+          sbmnu : PSubMenu;
+          i,items,nl,nls: int;
+          is : bool;
+    begin
+      items:= 0; nl:= 0; nls:= 0;
+
+      {$IFDEF RPL}
+       smnu[items]:= Item    (PrRPL, cmPREHLAD_RPL, nil);
+       inc(items);
+      {$ENDIF}
+
+      {$IFDEF PLN}
+       smnu[items]:= Item    (PrPLN, cmPREHLAD_PLN, nil);
+       inc(items);
+      {$ENDIF}
+
+      {$IFDEF FPL4_MENU}
+       smnu[items]:= Item (PrFPL4,cmPREHLAD_FPL4,nil);
+       inc(items);
+       sbmnu:= SubMenu(cut_r(PrFPL4D)+'... ', WinMenu(tit_FPL4_PREHLAD,hlp_PREHLAD_FPL4,nil),nil);
+       sbmnu^.PMenu_init:= @mnuFPL4Dprehlad_init;
+       smnu[items]:= SubMenuInitialized(sbmnu,nil);
+       inc(items);
+      {$ENDIF}
+
+      {$IFDEF FPL0}
+       if items>0 then inc(nls);
+       add_newline__(0, nls,nl,items,smnu);
+       inc(nls);
+       smnu[items]:= Item    (AFPLc, cmPREHLAD_cFPL, nil);
+       inc(items);
+       {$IFNDEF FPLM_DISABLED}
+        smnu[items]:= Item    (AFPLm, cmPREHLAD_mFPL, nil);
+        inc(items);
+        {$IFDEF FPLO}
+         smnu[items]:= Item   (AFPLo, cmPREHLAD_oFPL, nil);
+         inc(items);
+        {$ENDIF}
+       {$ENDIF}
+      {$ENDIF}
+
+      {$IFDEF ZAM}
+       add_newline__(0, nls,nl,items,smnu);
+       smnu[items]:= Item    (AZAM,  cmPREHLAD_ZAM, nil);
+       inc(items);
+      {$ENDIF}
+
+      {$IFDEF QGO}
+       add_newline__(0, nls,nl,items,smnu);
+       smnu[items]:= Item    (AQGO, cmPREHLAD_QGO, nil);
+       inc(items);
+      {$ENDIF}
+
+      {$IFDEF DVZ}
+       add_newline__(0, nls,nl,items,smnu);
+       smnu[items]:= Item    (ADVZ, cmPREHLAD_DVZ, nil);
+       inc(items);
+      {$ENDIF}
+
+      {$IFDEF RTZ}
+       add_newline__(0, nls,nl,items,smnu);
+       smnu[items]:= Item    (ARTZ,   cmPREHLAD_RTZ,nil);
+       inc(items);
+      {$ENDIF}
+
+      {$IFDEF PRZ}
+       if nls=nl then inc(nls);
+       add_newline__(0, nls,nl,items,smnu);
+       smnu[items]:= Item    (APRZR, cmPREHLAD_VLIS, nil);
+       inc(items);
+       smnu[items]:= Item    (APRN,  cmPREHLAD_PRN, nil);
+       inc(items);
+      {$ENDIF}
+
+      {$IFDEF PRS}
+       add_newline__(0, nls,nl,items,smnu);
+       smnu[items]:= Item    (APRS, cmPREHLAD_PRS, nil);
+       inc(items);
+      {$ENDIF}
+
+      {$IFDEF FUA_DATA}
+       smnu[items]:= Item    (AAUP,  cmPREHLAD_AUP, nil);
+       inc(items);
+       smnu[items]:= Item    (AUUP,  cmPREHLAD_UUP, nil);
+       inc(items);
+      {$ENDIF}
+
+      {$IFDEF MET}
+       if nls=nl then inc(nls);
+       add_newline__(0, nls,nl,items,smnu);
+       smnu[items]:= Item    (ASYN, cmPREHLAD_SYN, nil);
+       inc(items);
+       (*{$IFDEF MET_RLI}
+        smnu[items]:= Item   (AMRL, cmPREHLAD_MRL, nil);
+        inc(items);
+       {$ENDIF}*)
+      {$ENDIF}
+
+      {$IFDEF SPR}
+       if nls=nl then inc(nls);
+       add_newline__(0, nls,nl,items,smnu);
+       smnu[items]:= Item    (ASPR, cmPREHLAD_SPR_dor, nil);
+       inc(items);
+       {Item    (' DORUÄENê ~T~ELEGRAMY ',                            cmPREHLAD_SPRL_dor, nil);
+       inc(items);
+       }
+      {$ENDIF}
+
+      {IFDEF TLG
+       smnu[items]:= Item    (PrTLG, cmPREHLAD_TLG, nil);
+       inc(items);
+      ENDIF}
+      (*IFDEF AFTN}
+       add_newline__(0, nls,nl,items,smnu);
+       smnu[items]:= Item (PREHLADAFTN, cmPREHLAD_AFTN, nil);
+       inc(items);
+      ENDIF*)
+
+      smnu[items]:= NewLine2(2,nil);
+      inc(items);
+
+      {$IFDEF PPL}
+       sbmnu:= SubMenu (PLANY_NA_DEN,WinMenu(PLANY_NA_DEN_,nil,nil),nil);
+       sbmnu^.PMenu_init:= @mnuPPLprehlad_init;
+       smnu[items]:= SubMenuInitialized(sbmnu,nil);
+       inc(items);
+      {$ENDIF}
+
+      sbmnu:= SubMenu (PLANY_ARCHIV,WinMenu(PLANY_ARCHIV_,nil,nil),nil);
+      sbmnu^.PMenu_init:= @mnuARCHIVprehlad_init;
+      smnu[items]:= SubMenuInitialized(sbmnu,nil);
+      inc(items);
+
+      {$IFDEF STATISTIKA_OPL}
+       add_newline_(0,nl,items,smnu);
+       smnu[items]:= SubMenu (mnu_PRIEBEZNA_STATISTIKA+'... ', WinMenu(tit_PRIEBEZNA_STATISTIKA,nil,
+                              Item (mnu_DENNA_STATISTIKA,   cm_PRIEBEZNA_DENNA_STATISTIKA,
+                              Item (mnu_MESACNA_STATISTIKA, cm_PRIEBEZNA_MESACNA_STATISTIKA,
+                              nil) )
+                             ),nil);
+       inc(items);
+       smnu[items]:= SubMenu (mnu_UZATVORENA_STATISTIKA+'... ', WinMenu(tit_UZATVORENA_STATISTIKA,nil,
+                              Item (mnu_DENNA_STATISTIKA,   cm_UZATVORENA_DENNA_STATISTIKA,
+                              Item (mnu_MESACNA_STATISTIKA, cm_UZATVORENA_MESACNA_STATISTIKA,
+                              nil) )
+                             ),nil);
+       inc(items);
+      {$ENDIF}
+
+      {$IFDEF STATISTIKA_PRELETY}
+       add_newline_(0,nl,items,smnu);
+       smnu[items]:= Item (mnu_DENNA_STATISTIKA_PRELETOV, cm_DENNA_STATISTIKA_PRELETOV, nil);
+       inc(items);
+       smnu[items]:= Item (mnu_ARCHIV_STATISTIKY_PRELETOV, cm_ARCHIV_STATISTIKY_PRELETOV, nil);
+       inc(items);
+      {$ENDIF}
+
+      for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i]);
+    end;

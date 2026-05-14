@@ -1,0 +1,187 @@
+{$IFDEF RDP}
+
+  procedure code0_PRS_RDP(PRS: PPRS; var pkt: TNETpkt); far;
+      var   s,t : string;
+            p,v : word;
+            v_  : char;
+      begin
+        with PRS^ do
+         begin
+           {$IFDEF UKBB}
+             s:= delchar(kod,[' ','-','_']);
+             if copy(s,1,length(FIR))<>FIR then s:= FIR+s;
+           {$ELSE}
+             s:= kod;
+           {$ENDIF}
+           s:= s+NULL;
+
+           s:= s + chr(zac.h) + chr(zac.m);
+           s:= s + chr(kon.h) + chr(kon.m);
+
+           s:= s + ' ';
+           decode_l4_vyss (vys1, v,v_,nil);
+           v:= minimum(get_altM (v_,v),high(v));
+           s:= s + chr(lo(v)) + chr(hi(v));
+
+           decode_l4_vyss (vys2, v,v_,nil);
+           v:= minimum(get_altM (v_,v),high(v));
+           s:= s + chr(lo(v)) + chr(hi(v));
+
+           s:= s + chr(zac.den) + chr(zac.mes) + chr(lo(zac.rok)) + chr(hi(zac.rok));
+           { pridane 13.10 kvoli FUA }
+           s:= s + chr(kon.den) + chr(kon.mes) + chr(lo(kon.rok)) + chr(hi(kon.rok));
+
+           s:= s + chr(dap.den) + chr(dap.mes) + chr(lo(dap.rok)) + chr(hi(dap.rok));
+           s:= s + chr(dap.h) + chr(dap.m) + chr(dap.s);
+
+           s:= s + let+NULL;
+           s:= s + unt+NULL;
+
+          { protokol upresneny na ukbb v aug99, i pre ostatne projekty koncom aug doma
+          }
+           t:= stat;
+           if t=cnst_stat_arr then t:= cnst_finish
+           else if pos(cnst_active,t)>0 then t:= cnst_active
+           else if (t=cnst_dec) or (pos(cnst_cnl,t)>0) then t:= cnst_cnl
+           else if __is_stat(t,cnst_planned) then t:= cnst_acc;
+           s:= s + t;
+         end;
+        new_NETpkt_data (@s[1],length(s), pkt.pkt)
+      end;
+
+
+  procedure code0NX_PRS_RDP(PRS: PPRS; var pkt: TNETpkt); far;
+      var   pch,p : pchar;
+            s, v1,v2, t : string;
+
+      function vysrdp(vys: string): string;
+         var   p,v : word;
+               v_ : char;
+         begin
+           {if vys=vys_VFR then
+              begin
+                decode_l4_vyss (vys, v,v_,nil);
+                vys:= code_l4_vys_ (v,v_,0,false)
+              end;}
+           decode_l4_vyss (vys, v,v_,nil);
+           {if not (v_ in [altFL,altG,altS]) then}
+           {if not (v_ in set_alt) then}
+           if cut_(v_) = '' then
+              vys:= code_l4_vys_ (MtoS(get_altM(v_,v)),altS,0,false);
+           vysrdp:= format_s(vys)
+         end;
+
+      begin
+        pch:= nil;
+        with PRS^ do
+         begin
+           {v1:= vys1; vys1:= vysrdp(vys1);
+           v2:= vys2; vys2:= vysrdp(vys2);}
+           s:= code_PRS_data(PRS);
+           {vys1:= v1;
+           vys2:= v2;}
+
+           t:= stat;
+           if (t=cnst_dec) or (t<>cnst_stat_arr) and (pos(cnst_cnl,t)>0) then t:= cnst_cnl;
+           if __is_stat(t,cnst_planned) then t:= cnst_acc;
+
+           s:=   icao_STD + s
+               + icao_ARR             + format_s(let)
+                          + icao_NXT  + code_l4_datums(dap)
+                          + icao_NXT  + code_l4_date(das)
+                          + icao_NXT  + format_s(t)
+
+               + icao_ARR;
+
+           pch:= strpasnew(s);
+           p:= l4_format_p(PRS^.pozn);
+           pch:= StrNCopy (pch, p,true,false);
+
+           v1:= vys1p; vys1p:= vysrdp(vys1p);
+           v2:= vys2p; vys2p:= vysrdp(vys2p);
+           pch:= StrNPCopy(pch, icao_ARR + format_s(code_PRS_19b(PRS)) + icao_END,true,true);
+           vys1p:= v1;
+           vys2p:= v2;
+         end;
+        new_NETpkt_data (pchars(pch),strlen(pch), pkt.pkt);
+        strdispose(pch)
+      end;
+
+  procedure decode0NX_PRS(const pkt: TNETpkt; PRS: PPRS);
+      var   p : pchar;
+            s,t : string;
+            k : int;
+            data : pchars;
+            size : word;
+
+      {function vysrdp(vys: string): string;
+         var   v  : word;
+               v_ : char;
+               w  : word;
+         begin
+           if decode_l4_vyss (vys, v,v_,nil) then
+              begin
+                w:= get_altM (v_,v);
+                if w=alt_VFR then vys:= vys_VFR
+                else if w=0 then vys:= vys_GND
+                else if w=high(word) then vys:= vys_UNL
+              end;
+           vysrdp:= vys
+         end;}
+
+      begin
+        fillchar(PRS^,sizeof(PRS^),0);
+        data:= pointer(pkt.pkt.data); size:= pkt.pkt.dlz;
+        frame_l4_pkt(data,size, t);
+
+        p:= get_strs0(data,size, 1,4, [icao_ARR]);
+        s:= strpas(p);
+        strdispose(p);
+        decode_PRS_data(s, PRS,t, false);
+
+        s:= get_str(data,size,5,[icao_ARR],sizeof(s)-1);
+        PRS^.let:= getstr(s,1,[icao_NXT]);
+        decode_l4_datums (getstr(s,2,[ICAO_NXT]),PRS^.dap);
+        decode_l4_date   (getstr(s,3,[ICAO_NXT]),PRS^.das);
+        PRS^.stat:= getstr(s,4,[icao_NXT]);
+
+        k:= get_str_items(data,size,[icao_ARR]);
+        p:= get_strs0(data,size, 6,Maximum(6,N(k-1)), [icao_ARR]);
+        PRS^.pozn:= strnew(decode_l4_p(p,true));
+        strdispose(p);
+
+        decode_PRS_19b(get_str(data,size,k,[icao_ARR],sizeof(string)-1),PRS);
+
+        {PRS^.vys1 := vysrdp(PRS^.vys1);
+        PRS^.vys1p:= vysrdp(PRS^.vys1p);
+        PRS^.vys1 := vysrdp(PRS^.vys1);
+        PRS^.vys2p:= vysrdp(PRS^.vys2p);}
+
+        format_PRS(PRS);
+        {$IFDEF NET}
+          rec_data(pkt.ods, PRS^.rec)
+        {$ENDIF}
+      end;
+
+
+  procedure code0_PRS_mess(PRS: PPRS; var pkt: TNETpkt); far;
+      var   s : string;
+      begin
+        with PRS^ do
+         begin
+           {$IFDEF UKBB}
+             s:= delchar(kod,[' ','-','_']);
+             if copy(s,1,length(FIR))<>FIR then s:= FIR+s;
+           {$ELSE}
+             s:= kod;
+           {$ENDIF}
+           s:= s+#0;
+           s:= s + chr(dap.den) + chr(dap.mes) + chr(lo(dap.rok)) + chr(hi(dap.rok));
+           s:= s + chr(dap.h) + chr(dap.m) + chr(dap.s);
+           s:= s + let+#0;
+           s:= s + stat;
+         end;
+        new_NETpkt_data (@s[1],length(s), pkt.pkt)
+      end;
+
+{$ENDIF}

@@ -1,0 +1,195 @@
+  procedure format_cFPL(FPL: PDcFPL);
+      var   z: bool;
+      begin
+        format_cFPL_(FPL);
+        with FPL^ do
+          begin
+            {$IFDEF EDD}
+             smer := fl_dir_alt(vysOB,FPL^.vys);
+            {$ENDIF}
+            poz := stav_cFPL(FPL,absTime,z);
+            fillchar(sur,sizeof(sur),0)
+          end
+      end;
+
+
+{ donastavi datum prijateho stripu,
+  pretoze nie je uvedeny
+}
+ procedure datum_cFPL(var FPLc: DcFPL);
+     var   B   : TsBod;
+           dT  : real;
+           T   : TTime;
+     begin
+       format_cFPL(@FPLc); { urci pocet bodov }
+       {init_date(FPLc.date, year,month,day);}
+
+       with FPLc do
+         begin
+         { Najdenie casu na prvom platnom bode,
+           pretoze vypocty platnosti
+           planu sa odvijaju od neho
+         }
+          if     is_bod(start.kod,B,true)
+             and (TimeToSec(start.h,start.m,0) <> 0 {TimeToSec(prist.h,prist.m,0)}) then
+                 init_time(T, start_.h,start_.m,0)
+          else if bodov>0 then init_time(T, Trat[0].h,Trat[0].m,0)
+          else Exit;
+
+         { Vypocet aktualnosti }
+         { napr. plan o 23 na 00, 01
+         } if (hour > T.h) and (24 - (hour-T.h) <= est_dT_pred) then NextDate(date.r,date.m,date.d);
+
+         { napr. plan o 01 na 23
+         } if (hour < T.h) and (24 - (T.h-hour) <= est_dT_po) then PrevDate(date.r,date.m,date.d)
+         end
+     end;
+
+
+ function stav_cFPL(FPL: PDcFPL; cas: real; var zmena: bool): Tpoz;
+    var   t : real;
+          z : Tpoz;
+          bod : TsBod;
+          r : bool;
+          b : byte;
+          dTdel : real;
+    begin
+      with FPL^ do
+        begin
+          if (FPL^.stt=hd_CNL) then z:= poz_CANCELLED
+
+          else if (FPL^.stt=hd_ARR) then z:= {poz_SEDI} poz_HANGAR
+
+          else if (FPL^.stt<>hd_EST) and (FPL^.stt<>hd_ACT) then z:= poz_PLAN
+
+          else if (cas < Trat[0].cas) then
+             begin
+              { let pred prvym bodom na trati ------------------------------ }
+                na_bod:= 0;
+                if (cas < start.cas) then z:= poz_PROPOSED
+                else {if (cas = DTtoSec(rok,mes,den, start.h,start.m,0) then} z:= poz_LETI {poz_START}
+                     {else p:= poz_LETI}
+             end
+
+          else if (bodov>0) and (cas<Trat[bodov-1].cas) then { na_bod < bodov }
+              { let na trati ----------------------------------------------- }
+                  begin
+                    b:= na_bod; na_bod:= 0;
+                    while (na_bod < bodov-1) and (cas >= Trat[na_bod].cas) do inc(na_bod);
+                    if b<>na_bod then z:= poz_DALSI
+                    else z:= poz_LETI
+                  end
+
+          else begin
+              { za poslednym bodom na trati -------------------------------- }
+                na_bod:= N(bodov-1);
+                if Trat[0].kod <> NO_PL then
+                   begin
+                   { EST --------------------------------------------- }
+                     if (cas < Trat[na_bod].cas) then z:= poz_LETI
+                     else begin
+                            if is_OB(prist.kod,bod,false) and bod.ine.podriadene then t:= prist.cas
+                            else if bodov>0 then
+                              begin
+                                na_bod:= N(bodov-1);
+                                t:= Trat[na_bod].cas
+                              end
+                            else t:= start.cas;
+                            if cas <= t then z:= poz_PRIST
+                            else begin
+                                   dTdel:= dT_deactive_FPLC;
+                                   if cas >= t + dTdel*60
+                                      then z:= poz_HANGAR
+                                      else z:= poz_SEDI
+                                 end;
+                          end
+                   end
+                else begin
+                     { NOPL ------------------------------------------ }
+                       if (start.cas<=prist.cas) and is_OB(prist.kod,bod,false) and bod.ine.podriadene then
+                          begin
+                            t:= prist.cas;
+                            dTdel:= dT_deactive_FPLC
+                          end
+                       else begin
+                              t:= Trat[0].cas;
+                              dTdel:= dT_deactive_FPLC;
+                            end;
+                       if cas >= t + dTdel*60 then z:= poz_HANGAR
+                       else begin
+                              {dTdel:= casPRIST;
+                              if cas >= t + dTdel*60 then z:= poz_PRIST
+                              else} z:= poz_LETI
+                            end;
+                     end
+              end;
+        end;
+
+      zmena:= z<>FPL^.poz;
+      if z=poz_DALSI then z:= poz_LETI;
+      FPL^.poz:= z;
+      stav_cFPL:= z
+    end;
+
+
+ function est_cFPL(FPL: PDcFPL): bool;
+    var   zmena: bool;
+    begin
+      est_cFPL:= stav_cFPL(FPL, absTime, zmena) in poz_est_FPLC
+    end;
+
+ function exi_FPLC (FPL: PFPLC): real;
+    var   bod : TsBod;
+    begin
+      with FPL^ do
+        if Trat[0].kod <> NO_PL then
+           begin
+             if is_OB(prist.kod,bod,false) and bod.ine.podriadene then exi_FPLC:= prist.cas
+             else if bodov>0 then exi_FPLC:= Trat[N(bodov-1)].cas
+             else exi_FPLC:= start.cas
+           end
+        else begin
+               if (start.cas<=prist.cas) and is_OB(prist.kod,bod,false) and bod.ine.podriadene then exi_FPLC:= prist.cas
+               else exi_FPLC:= Trat[0].cas;
+             end
+    end;
+
+
+{ nezapisuje do FPL^.sur
+}
+ function suradnice_cFPL(FPL: PDcFPL; cas: real; var sur: Tsur): Tpoz;
+    var   OB1,OB2 : TOBxy;
+    label L1;
+    begin
+      suradnice_cFPL:= FPL^.poz;
+      sur:= FPL^.sur;
+
+      with FPL^ do case poz of
+        poz_LETI : begin
+                     OB_to_OBxy(Trat[N(na_bod-1)], OB1);
+                     OB_to_OBxy(Trat[na_bod], OB2);
+                   end;
+        poz_START: begin
+                     AP_to_OBxy(start,OB1);
+                     OB_to_OBxy(Trat[0],OB2);
+                   end;
+        poz_PRIST: begin
+                     AP_to_OBxy(prist,OB2);
+                     if not get_OB_XY(OB2.kod, OB2) then goto L1;
+                     if bodov>0 then OB_to_OBxy(Trat[bodov-1], OB1)
+                     else AP_to_OBxy(start,OB1);
+                   end;
+        poz_SEDI,  poz_HANGAR:
+                     begin
+                       L1: suradnice_cFPL:= poz_SEDI;
+                       exit
+                     end
+        else Exit
+      end;
+
+      if (OB1.kod=OB2.kod) or (not get_OB_XY(OB1.kod, OB1)) or (not get_OB_XY(OB2.kod, OB2)) then suradnice_cFPL:= poz_STOJI
+      else begin
+             get_poloha(OB1.x,OB1.y,OB1.casA, OB2.x,OB2.y,OB2.casA, cas, FPL^.rych,FPL^.rych_, FPL^.vys,vysOB, sur.x,sur.y);
+             suradnice_cFPL:= poz_LETI
+           end
+    end;

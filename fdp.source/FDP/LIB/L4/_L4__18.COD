@@ -1,0 +1,194 @@
+{ Funkcia predpoklada, ze pITEM ukazuje na ITEM v poli 18,
+  sluzi pre nacitanie pola /ITEM az po nasledujuce pole /ITEMn
+  alebo koniec p18
+}
+
+ function _item_l4(p18,item: pchar): pchar;
+    var   p : pchar;
+    begin
+      p:= strpos(p18,item);
+      if (p>p18) and (not (p18[p-p18-1] in [icao_NXIT]+setNL+setNL_)) then
+         begin
+         { eliminacia stavu, ked hladany substring sa nachadza
+           v casti ineho, napr. hladam pole 8/... a najde sa
+           v poli 9/03MI8/M
+         }
+           p:= strpos(p,icao_NXIT);
+           if p<>nil then p:= strpos(p,item);
+         end;
+      _item_l4:= p
+    end;
+
+
+ function _item_18_p(p18: pchar; sITEM: string;
+                     ind: int;
+                     var p0,pn: pchar
+                    ): string;
+
+    var   p,p_,item,pITEM : pchar;
+          s : string;
+          i : int;
+          litem : byte;
+
+    begin
+      _item_18_p:= '';
+      p0:= nil; pn:= nil; pITEM:= nil;
+
+     { vyhladanie ukazovatela na zaciatok sekvencie pola
+       item/.... v poradi uvedenom ind-exom (moze ich byt viac)
+     }
+      s:= sITEM+icao_NXT+NULL;
+      item:= @s[1];
+      litem:= strlen(item);
+
+      p:= _item_l4(p18,item); p_:= p;
+      if (p=nil) then Exit;
+
+      if (ind<>1) then
+         begin
+           i:= 2;
+           repeat
+             incptr(pointer(p),litem);
+             p:= _item_l4(p,item);
+             if (ind<0) or (i=ind) then pITEM:= p
+             else if p<>nil then inc(i);
+           until (p=nil) or (pITEM<>nil);
+           if (ind<0) and (pITEM=nil) then pITEM:= p_;
+           if pITEM=nil then Exit
+         end
+      else pITEM:= p;
+
+
+     { odseknutie zaciatku ostatnych poli,
+       zacinaju po mezere, slove a lomke
+     }
+      p:= pITEM; inc(p,litem);
+      s:= GetPStr(p,1,[icao_NXT]);                { ITEM/.... ..... ITEMn/ }
+      if length(s)<strlen(p) then
+         while
+           (s<>'') and (not (s[length(s)] in [icao_NXIT]+setNL+setNL_))
+         do s:= copy(s,1,length(s)-1);
+
+      p0:= pITEM; pn:= p0;
+      if pn[litem]<>'' then
+         begin
+           inc(pn,litem);
+           while (pn^<>icao_NXT) and (pn[1]<>NULL) do inc(pn);
+           if (pn[1]<>NULL) and (pn>p0) then
+              while (not (pn^ in [icao_NXIT]+setNL+setNL_)) do dec(pn)
+         end;
+
+      s:= replchar(cut_(s),setNL+setNL_,icao_NXIT);
+      if s=rmk_NIL then s:= '';
+      _item_18_p:= s
+    end;
+
+ function _item_18_(p18: pchar; ITEM: string; ind: int): string;
+    var   p0,pn : pchar;
+    begin
+      _item_18_:= _item_18_p(p18,ITEM,ind,p0,pn)
+    end;
+
+
+{ vrati prvy clen z retazca ITEM/1 2 3kbNL4
+}
+ function _item_18_i(p18: pchar; ITEM: string; ind,pos: int): string;
+    var   s : string;
+    begin
+      _item_18_i:= getstr(_item_18_(p18,ITEM,ind),pos,[icao_NXIT])
+    end;
+
+
+ function _item_18_a(p18: pchar; ITEM: string): string;
+    var   s : string;
+          p : pchar;
+    begin
+      _item_18_a:= '';
+      s:= ITEM+icao_NXT+NULL;
+      p:= _item_l4(p18,@s[1]);
+      if p=nil then Exit;
+
+      s:= getPstr(p,1,[icao_NXIT]);
+      s:= copy(s,length(ITEM+icao_NXT)+1,length(s)-length(ITEM+icao_NXT));
+      if s='' then Exit;
+      s:= replchar(cut_(s),setNL+setNL_,icao_NXIT);
+      if s=rmk_NIL then s:= '';
+      _item_18_a:= s
+    end;
+
+ function _item_18(p18: pchar; ITEM: string; ind: int): string;
+    var   p18RL: pchar;
+    begin
+     {$IFDEF A36YKA} p18RL:= mtkp_rus_to_lat(p18,true)
+     {$ELSE}         p18RL:= p18
+     {$ENDIF};
+      _item_18:= _item_18_(p18RL, ITEM,ind);
+     {$IFDEF A36YKA} strdispose(p18RL)
+     {$ENDIF}
+    end;
+
+
+
+{ ----------------------------------------
+   Funkcie napisane asi z nudze pre UKBB
+  ----------------------------------------
+}
+procedure _inc_18(var _18: pchar; it: string; smer: byte);
+    var   i : int;
+          p : pchar;
+          s : string;
+    begin
+      if cut_(it)='' then Exit;
+      i:= strlen(_18)-1; while (i>0) and (_18[i] in setNL+setNL_+[icao_NXIT]) do dec(i);
+      if i<strlen(_18) then
+         begin
+           getmem(p,i+1+1); move(_18^,p^,i+1); p[i+1]:= NULL;
+           StrDispose(_18);
+           if cut_(strpas(p))='' then strdispose(p);
+           _18:= p
+         end;
+      s:= getPstr(_18,getPstritems(_18,setNL+setNL_),setNL+setNL_);
+      if _18<>nil then
+        if length(s)+1+length(it) < MTK_2_LINE then it:= icao_NXIT+it
+        else it:= kbNL+it;
+      _18:= StrNPCopy(_18,it,true,true)
+    end;
+
+
+procedure _dec_18(var _18: pchar; ITEM: string);
+    var   p,p18,p0,pn: pchar;
+    begin
+      while (_item_18_p(_18, ITEM, -1, p0,pn)<>'') and (p0<>nil) do
+        begin
+          p18:= _18;
+          while (p18<p0) and (p18[0]=' ') do inc(p18);
+          if p18<p0 then
+             begin
+               getmem(p,p0-p18+1);
+               move(p18^,p^,p0-p18);
+               p[p0-p18]:= NULL
+             end
+          else p:= nil;
+          while (pn[0]=' ') and (pn[0]<>NULL) do inc(pn);
+          if (pn<>nil) and (pn[1]<>NULL) then p:= StrNCopy (p,pn,true,false);
+          strdispose(_18);
+          if cut_(strpas(p))='' then strdispose(p);
+          _18:= p
+        end
+    end;
+
+procedure _update_18(var _18: pchar; ITEM: string; smer: byte);
+    var   it : string;
+    begin
+      it:= _item_18_ (_18,ITEM,1);
+      if (it<>'') then
+         begin
+           { moze skontrolovat obsah X polozky it = ITEM/X
+             a nahradit ho
+             if getstr(ITEM,2,[icao_NXT])<>it then
+                begin
+                end
+           }
+         end
+      else _inc_18 (_18,ITEM,smer)
+    end;

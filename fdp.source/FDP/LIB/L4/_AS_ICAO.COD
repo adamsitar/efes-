@@ -1,0 +1,55 @@
+{$IFDEF FPL0}
+
+  { תתתתתתתתתתתתתתתתתת
+     kodovanie
+    תתתתתתתתתתתתתתתתתת
+  }
+
+ {$IFDEF DEBUG}
+  { I _L4F_9.inc}
+ {$ENDIF}
+
+ {$IFNDEF FPLM_DISABLED}
+
+ { Kodovanie vojenskych planov
+   podla ICAO pre civilny system
+ }
+  function  O_ASOC._code_FPLm(var FPLm: DmFPL; var FPL: DFPL4): bool;
+     var    bod: string;
+            _15,_18, pch: pchar;
+            v_: char;
+            i: int;
+            b: bool;
+     begin
+       {$IFDEF LZ}
+         v_:= FPLm.vys_;
+         if FPLm.vys_ = altG then FPLm.vys_:= altM;
+         pch:= nil;
+         with FPLm do
+           for i:= 1 to GetPStrItems(trat,ODD_BODOV) do
+             begin
+               bod:= cut_(getpstr(trat,i,ODD_BODOV));
+               bod:= cut_(getstr(bod,1,[icao_NXT]));
+               if i>1 then bod:= icao_NXIT+bod;
+               pch:= StrNPCopy(pch,bod, true,true);
+             end;
+         _15:= FPLm.trat; FPLm.trat:= pch;
+         _18:= FPLm.pozn; FPLm.pozn:= nil;
+       {$ENDIF}
+
+       b:= alt_VFR_G; alt_VFR_G:= false;
+       _code_FPLm:= inherited _code_FPLm(FPLm,FPL);
+       alt_VFR_G:= b;
+
+       {$IFDEF LZ}
+         FPL._9:= FPLm.typ;
+         _code_9MIL_by8643(FPL._9);
+         FPLm.vys_:= v_;
+         FPLm.trat:= _15; strdispose(pch);
+         FPLm.pozn:= _18;
+       {$ENDIF}
+     end;
+
+
+ {$ENDIF}
+{$ENDIF}

@@ -1,0 +1,67 @@
+{$IFDEF PRS}
+
+ function  O_L4_FDP._is_to_send_message_PRS(zmeneny: bool; PRS: TPRS): bool;
+   begin
+     _is_to_send_message_PRS:= (strpos(coor_info,inf_PRS)<>nil)
+   end;
+
+ procedure O_L4_FDP._send_message_PRS(head: Thead_ICAO; zmeneny: bool; var PRS: TPRS);
+     begin
+       send_PRS (PRS)
+     end;
+
+
+ function O_L4_FDP._code_PRS (PRS: TPRS): pchar;
+    var   pch : pchar;
+          stat : string;
+    begin
+      pch:= code_l4_PRS__ (@PRS, false,'',true,false);
+      pch:= StrNPCopy(pch, icao_ARR + code_l4_stat_(PRS.stat,PRS.oprava),true,true);
+      _code_PRS:= pch
+    end;
+
+ function O_L4_FDP.send_PRS (var PRS: TPRS): bool;
+    var   p: pchar;
+    begin
+      p:= _code_PRS(PRS);
+      send_PRS:= p<>nil;
+      if p<>nil then
+         begin
+           send_data(NODE_REMOTE, hd_PRS,'','', pchars(p),strlen(p), codekey_PRS(@PRS),spr_PRS);
+           StrDispose(p)
+         end
+    end;
+
+
+ {$IFDEF FUA_DATA}
+
+   procedure O_L4_FDP._send_message__UP(head: Thead_ICAO; zmeneny: bool; var FN: string);
+       var   data : pchars;
+             size : long;
+             _up,cis,ref,adr,res : string;
+             zac,kon : TDatum;
+             val : TDate;
+             spr : TNETtyp;
+       begin
+         if not (    _up_head (FN, nil, _up,cis,ref,adr, zac,kon, val, true,'',res)
+                 and ReadFile (pointer(data),size, FN)
+                ) then Exit;
+         if head=hd_AUP then begin res:= pathAUP; spr:= spr_AUP end
+         else begin res:= pathUUP; spr:= spr_UUP end;
+         send_data(adr,head,'','',data,size, _get_db_up_dfn (val,res,cis),spr);
+         freemem(data,size);
+       end;
+
+   procedure O_L4_FDP._send_message_AUP(head: Thead_ICAO; zmeneny: bool; var FN: string);
+       begin
+         _send_message__UP(hd_AUP,true,FN);
+       end;
+
+   procedure O_L4_FDP._send_message_UUP(head: Thead_ICAO; zmeneny: bool; var FN: string);
+       begin
+         _send_message__UP(hd_UUP,true,FN);
+       end;
+
+ {$ENDIF}
+
+{$ENDIF}

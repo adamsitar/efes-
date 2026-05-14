@@ -1,0 +1,64 @@
+function  SERVERmenu_init: PBarMenu;
+    var   BGUmenu : PSubMenu;
+    begin
+      BGUmenu:= _BGUmenu('~B~GU ');
+
+      SERVERmenu:= New(PBarMenu);
+      SERVERmenu_init:= SERVERmenu;
+      SERVERmenu^.Init('',
+
+
+        Item2('~ ~FDP/S-PRN... ', kbCtrlF1, cmAbout,
+
+
+        SubMenu('~M~PU ', WinMenu('åèì', hlpmnuLIST,
+                Item(' åèì ~T~EXT TEST     F9   ', cmPRN_TEST1,
+                Item(' åèì ~S~TRIP TEST    F10  ', cmPRN_TEST,
+                NewLine(
+                Item(' ST~A~TUS OF ALL ÅÉì/åèì  ', cmPRN_STATUS,
+                nil ) ) ) )
+        ),
+
+
+        SubMenuInitialized(BGUmenu,
+
+
+        SubMenu('~D~ATA', WinMenu('DATA', hlpmnuLIST,
+                Item    (' ÅÉì/åèì ~I~NTERFACE...  ',  cmPREHLAD_INTERFACE,
+                nil )
+        ),
+
+
+        SubMenu('S~Y~STEM', WinMenu('SYSTEM', hlpmnuSYSTEM,
+                Item   (' ~U~TC                ', cmTIMEset,
+                SubMenu(' ~O~PTIONS...         ', OptMenu('OPTIONS', hlpmnuSYSTEM, cmOK,
+                        SwitchI('PRINT DELAY [ms]     ', @BGU_DEL,BGU_DEL_lo,BGU_DEL_hi,
+                        NewLine(
+                        Switch2('~S~CREEN SAVE        ', @ZHASINANIE,
+                        SwitchI('SCREEN SAVE ~P~ERIOD ', @ZHASNI_PO,ZHASNI_PO_lo,ZHASNI_PO_hi,
+                        NewLine2(2,
+                        Switch2('S~O~UND              ', @ZVUK,
+                        Switch2('TIME ~M~ARKER        ', @CASOVE_ZNAMENIE,
+                        Switch2('TIME S~Y~NCHRONIZE   ', @TIME_SYNCHRONIZATION,
+                        nil) ) ) ) ) ) ) )
+                       ),
+                (*
+                SubMenu(' ~D~ISPLAY...         ',OptMenu('Graphics mode',nil, cmGraphModeChanged,
+                        Radio('MODE', @GraphMode, 2,
+                          RadioItem('~1~. VESA (800x600)',
+                          RadioItem('~2~. SVGA (1024x768)',
+                         {$IFDEF _1280x1024}
+                          RadioItem('~3~. TIGA (1280x1024)',
+                         {$ENDIF}
+                          nil) ) {$IFDEF _1280x1024} ) {$ENDIF},
+                        nil)
+                        ),*)
+                Item   (' ~R~EGENERATE Ctrl+ƒ ', cmRefresh,
+                NewLine(
+                Item   (' E~X~IT         Alt+X ', cmQUIT,
+                nil ) ) ) ) )
+        ), { SYSTEM }
+
+        nil ) ) ) ) )
+       );
+    end;

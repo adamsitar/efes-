@@ -1,0 +1,9 @@
+procedure systemove_nastavenia;
+    begin
+      {$IFDEF OPL}
+         JasBGI(ord(JAS) and 1)
+      end;
+      {Rozsviet;}
+    end;
+
+

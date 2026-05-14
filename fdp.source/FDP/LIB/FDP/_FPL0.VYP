@@ -1,0 +1,613 @@
+{
+  "decode_trat":
+
+   Funkcia pre urcenie trasy a vypocet casov na trase , ak je zadany cas startu, rychlost a trat.
+   ----------------------------------------------------
+
+   - ak je chyba, vrati string, ktory nemoze detekovat; inak '';
+   - pre uplne dokoncenie si ziada este naprogramovanie zmeny vysky...
+}
+
+function get_TD(s: string; var T: real; var D: bool): bool;
+   var   r   : bool;
+         cas : TTime;
+   begin
+     fillchar(cas,sizeof(cas),0);
+     if s[1] in setCisl then s:= icao_NXIT+s; { ak nie je priznak meskania, odchodu }
+     {get_TD:= GetTimeStr(cas.h,cas.m,cas.s, copy(s,2+ord(D),length(s)-1-ord(D)));}
+     s:= cut_(delchar(s,setPism));
+     D:= s[1]='+';
+     s:= cut_(delchar(s,['+']));
+     get_TD:= (length(s)=kod_TIME) and GetTimeStr(cas.h,cas.m,cas.s, s);
+     T:= TimeToSec(cas.h,cas.m,0)
+   end;
+
+{
+  dekodovanie otocneho bodu
+  -----------------------------
+}
+function is_str(str: string; in_str: string): bool;
+   begin
+     is_str:= copy(in_str,1,length(str))=str
+   end;
+
+function cut_str(str: string; var s: string): bool;
+   begin
+     if (copy(s,1,length(str))<>str) then cut_str:= false
+     else begin
+            s:= copy(s,length(str)+1,length(s)-length(str));
+            cut_str:= true
+          end
+   end;
+
+
+function is_AREA_FPL0 (kod,bod_trate: string; var Ai: TpArea; var ires: int): bool;
+   var   kod0: string;
+   begin
+     kod0:= kod;
+     if kod=rmk_AREA then kod:= getstr(bod_trate,2,ODD_BODU);
+     ires:= _AREAind_ (kod,AREA,Ai);
+     is_AREA_FPL0:= (ires>-1) or (kod0=rmk_AREA)
+   end;
+
+
+procedure decode_bod_trate(ptrat: pchar; pbod,pbodov: int;
+                           bod_trate: string;
+
+                           var Trat: TOBxys; var bodov: int;
+                           var S,T,D: real;
+
+                           var irych: single; var irych_: char;
+                           var ivys : word; var ivys_ : char;
+                           var lvys : word; var lvys_ : char; { posledne udaje o vyske }
+
+                           vojensky_plan : bool;
+                           err_exit : bool;   { ukonci pri chybe }
+
+                           vynechaj_oat : bool;
+                           var _OAT : bool;
+
+                           var res: string
+                          );
+
+    var   kod,st,st0,sb : string;
+          i,j,l,z,k,p,ires, zac,kon  : int;
+
+          cis  : long;
+          bres : bool;
+          pom  : real;
+          cas  : TTime;
+          R    : PRTE;
+          dT   : real;       { oneskorenie na trati pred bodom  }
+          dTB  : real;       { zdrzanie sa na bode }
+          TA   : real;       { Time of Arrival - cas priletu na bod }
+          TD   : real;       { Time of Departure - cas odletu z bodu }
+          dS   : real;
+          DA   : bool;
+          DD   : bool;
+
+          smer : int;
+          let,tsa : string;
+
+          B  : TOBxy;
+          Ai : TpArea;
+
+
+    function vloz_bod_trate (j: int): bool;
+       begin
+         decode_bod_trate(nil,0,0, R^.rte^[j].kod, Trat, bodov, S,T,D,
+                          irych,irych_, ivys,ivys_, lvys,lvys_,
+                          vojensky_plan,err_exit, vynechaj_oat,_OAT,res
+                         );
+         vloz_bod_trate:= not ((bodov>=max_OB-3) or ((res<>'') and err_exit))
+       end;
+
+
+    function vyska__fr(v: string): bool;
+       begin
+         if v=rte_VFR then
+            begin
+              lvys:= ivys; lvys_:= ivys_;
+              ivys:= MtoS(alt_vfr); ivys_:= altG;
+              vyska__fr:= true
+            end
+         else if v=rte_IFR then
+              begin
+                ivys:= lvys; ivys_:= lvys_;
+                vyska__fr:= true
+              end
+         else vyska__fr:= false
+       end;
+
+
+    begin
+      res:= '';
+
+    { dekodovanie popisu trate
+      - podla L4444 su vynechavane niektore popisne slova
+    }
+      bod_trate:= l4str(bod_trate);
+      kod:= getstr(bod_trate,1,ODD_BODU);
+
+      if vynechaj_oat then
+         begin
+           if kod{bod_trate}=rte_OAT then _OAT:= true
+           else if kod{bod_trate}=rte_GAT then begin _OAT:= false; Exit end;
+           if _OAT then Exit;
+         end;
+      if vyska__fr(kod{bod_trate}) then Exit
+      else for j:= 0 to max_rte_DESC-1 do if kod{bod_trate}=rte_DESC[j] then Exit;
+
+      fillchar(B,sizeof(B),0);
+
+      if get_OB_XYM(kod, B) then
+         begin
+         { ---------------
+           Znamy bod trate
+           ---------------
+           dalej su dekodovane zmeny na nom, ak su uvedene
+         }
+         end
+
+      else if vojensky_plan and is_AREA_FPL0 (kod,bod_trate,Ai,ires) then
+           begin
+           { ------------------
+             Priestor cinnosti
+             ------------------
+             dalej su dekodovane zmeny na nom,
+             ako by boli uvedene za znamym bodom
+           }
+             p:= getstritems(bod_trate,[icao_NXT]);
+             if ires>-1 then
+                begin
+                  if kod=Ai.bodc then Exit; { chyba }
+                  st:= bod_trate;
+                  bod_trate:= Ai.bodc;
+                  if kod=rmk_AREA then z:= 3 else z:= 2;
+                  if (p>z-1) then
+                     begin
+                       st:= st+NULL;
+                       bod_trate:= bod_trate + icao_NXT + get_strs0p (@st,length(st),z,p,[icao_NXT])
+                     end;
+                end
+             else begin
+                  { ak nie je priestor znamy, zapisuje sa
+                    AREA/D040[/BOD/CXX]
+                  }
+                    if p<=2 then Exit;
+                    bod_trate:= bod_trate+NULL;
+                    bod_trate:= get_strs0p (@bod_trate,length(bod_trate),3,p,[icao_NXT]);
+                  end;
+             decode_bod_trate(nil,0,0, bod_trate,
+                         Trat, bodov, S,T,D, irych,irych_, ivys,ivys_, lvys,lvys_,
+                         vojensky_plan,err_exit,
+                         vynechaj_oat,_OAT,
+                         res
+                        );
+             Exit;
+           end
+
+      else begin
+             ires:= _RTEind(kod, RTE_M, RTEs_M);
+             if ires>=0 then
+                begin
+                { ---------------
+                  Standartna trat
+                  ---------------
+                  Vojenske plany mozu obsahovat rozhonove alebo priletove trate do TSA.
+                  Ak je polozkou trat, napriklad RT1, moze byt uvedena len sama.
+                  Vzhladom ku vlastnostiam vojenskeho letu sa uvazuju jej vsetky body.
+                }
+                  R:= @RTE_M^[ires];
+                  let:= ''; tsa:= ''; smer:= 1;
+                  zac:= 0; kon:= R^.top;
+                  if _is_PT(kod,ires, let,tsa) then
+                     begin
+                     { zistenie orientacie trate : prilet/odlet/chyba
+                     } if (pbod>1) and (getstr(getPstr(ptrat,pbod-1,ODD_BODOV),1,ODD_BODU)=tsa) then smer:= -1
+                       else if (pbod<pbodov) and (getstr(getPstr(ptrat,pbod+1,ODD_BODOV),1,ODD_BODU)=tsa) then smer:= +1
+                       else res:= l4_errs(a_FPLM,kod+' <-> '+tsa,err_FPLM_let_PTSA);
+                     end
+                  else begin
+                        { 1.bod trate }
+                         if pbod>0 then
+                            begin
+                              j:= 0; while (j<=R^.top) and (Trat[pbod-1].kod<>R^.rte^[j].kod) do inc(j);
+                              if j<R^.top then inc(j);
+                              if j<=R^.top then zac:= j;
+                            end;
+                        { n.ty bod trate }
+                         if pbod<pbodov then
+                            begin
+                              sb:= getstr(getPstr(ptrat,pbod+1,ODD_BODOV),1,ODD_BODU);
+                              j:= R^.top; while (j>=0) and (sb<>R^.rte^[j].kod) do dec(j);
+                              if j>0 then dec(j);
+                              if j>=0 then kon:= j;
+                            end;
+                         if zac>kon then
+                            begin
+                              j:= zac; zac:= kon; kon:= j;
+                              smer:= -1;
+                            end;
+                       end;
+                  if res='' then
+                     if smer=+1 then begin for j:= zac to kon do if not vloz_bod_trate(j) then break end
+                     else for j:= kon downto zac do begin if not vloz_bod_trate(j) then break end;
+                  Exit
+                end
+             else begin
+                    if vojensky_plan then res:= l4_errs(a_FPLM,kod,err_BOD_neznamy)
+                    else res:= l4_errs(a_OPL,kod,err_OPL_neznamy_ob);
+                  end;
+             if (res<>'') and err_exit then Exit
+           end;
+
+      if not xy_in_range(B.x,B.y) then
+         begin
+           res:= l4_errs(a_OPL,B.kod,err_OPL_nezname_zs);
+           if err_exit then Exit
+         end;
+
+    { ----------------------------
+      dekodovanie cinnosti na bode
+      ----------------------------
+    }
+      dT:= 0; dTB:= 0;
+      TA:= 0; TD:= 0;
+      DA:= false; DD:= false;
+      st:= '';
+
+      for i:= 2 to GetStrItems(bod_trate,ODD_BODU) do
+          begin
+            st0:= st;
+            st:= getstr(bod_trate,i,ODD_BODU{+ODD_BODOV});
+
+          { dekodovanie cinnosti na OB - podla stareho predpisu
+          } cut_str(hd_ASC,st);
+            cut_str(hd_DES,st);
+
+            for j:= 0 to max_rte_DESC-1 do
+              if     (st[1]<>fpl_TIME)
+                 and (st[1]<>rte_C)
+                 and (st<>rte_IFR)
+                 and (st<>rte_VFR)
+                     then cut_str(rte_DESC[j],st);
+            if (st='') then continue;
+
+          { kontrola na spravnost cinnosti nad bodom }
+            { if L^.is_in('/'+getstr(st,1,setCisl+['+']))=-1 then begin res:= code_err(1,si,st); goto X end; }
+
+
+          { -------------------------------------
+            Vypocet casov a vysky na bodoch trate
+            -------------------------------------
+          }
+          { je tam medzipristatie ?
+          } if cut_str(fpl_MZP,st) then
+               begin
+                 val(st,cis,ires);
+                 if (st<>'') and (ires>0) then
+                    begin
+                      res:= l4_errs(a_L4,st,err_l4444_time);
+                      Exit
+                    end;
+                 dTB:= cis*60;
+                 B.pozn:= B.pozn or OBxy_MZP
+               end
+
+          { zadanie presneho casu priletu a odletu na bod
+          } else if    is_str(fpl_DEP,st)
+                    or is_str(fpl_ARR,st)
+                    or (st[1] in [fpl_TIME]+['+']+setCisl-[' ']) then
+                  begin
+                    if is_str(fpl_DEP,st) then
+                       begin
+                         bres:= get_TD(st, TD,DD);
+                         if (not DD) and is_str(fpl_ARR,st0) and get_TD(st0, TA,DA) then
+                            if TD<TA then DD:= true
+                       end
+                    else {if is_str([fpl_ARR,fpl_T],st) then} bres:= get_TD(st, TA,DA);
+                    if not bres then
+                       begin
+                         res:= l4_errs(a_L4,st,err_l4444_time);
+                         Exit
+                       end
+                  end
+
+          { dekodovanie rychlosti, zdrzania a vysky
+          } else if     (length(st)>2)
+                    and (st[1] in [fpl_ACT,fpl_DLA] + [fpl_RYCH]+setRych_ + set_alt)
+                    and (st[2] in setCisl) then
+                    begin
+
+                    { kontrola na spravnost zadania cisla
+                    }
+                      if (length(st)>1+spdK_) and (st[1] in setRych_) then { uvedena zmena rychlosti i vysky }
+                         begin
+                           if not decode_l4_rych_vys (st, irych,irych_, ivys,ivys_) then
+                              begin
+                                res:= l4_errs(a_L4,st,err_l4444_cislo);
+                                Exit
+                              end;
+                         end
+
+                      else if st[1] in [fpl_RYCH] + setRych_ then { zmena rychlosti }
+                         begin
+                           if st[1]<>fpl_RYCH then irych_:= st[1] else irych_:= spdK;
+                           val(copy(st,2,length(st)-1),irych,ires);
+                           if ires<>0 then
+                              begin
+                                res:= l4_errs(a_L4,st,err_l4444_cislo);
+                                Exit
+                              end
+                         end
+
+
+                      else if vyska__fr(st) then
+
+                      else if (st[1] in set_alt) {or (st=rte_VFR) or (st=rte_IFR)} then
+                         begin
+                          { zmena vysky         }
+                           if not decode_l4_vys(st, ivys,ivys_) then
+                              begin
+                                res:= l4_errs(a_L4,st,err_l4444_vyska_chyba);
+                                Exit
+                              end;
+                         end
+
+                      else begin
+                             val(delchar(st,setPism),cis,ires);   { bolo : copy(st,2,length(st)-1) }
+                             if ires>0 then
+                                begin
+                                  res:= l4_errs(a_L4,st,err_l4444_time);
+                                  Exit
+                                end;
+                             case st[1] of
+                               fpl_ACT : dTB:= cis*60;            { zdrzanie sa na bode }
+                               fpl_DLA : dT := cis*60;            { meskanie pred bodom }
+                               else bres:= false;
+                             end
+                           end
+                    end
+
+          { f¤ucking error...
+          }
+            else begin
+                   res:= l4_errs(a_OPL,st,err_OPL_chybna_cinnost_ob);
+                   Exit
+                 end;
+        end;
+
+      {Trat[bodov].kod := kod;  - zapise uz get_BOD_XYM }
+
+      B.rych := irych;
+      B.rych_:= irych_;
+
+      if (B.pozn and OBxy_MZP<>0) then { bolo : pos(fpl_MZP,bod_trate)<>0}
+         begin
+           B.vys := 0;
+           B.vys_:= altS
+         end
+      else begin
+             B.vys := ivys;
+             B.vys_:= ivys_
+           end;
+
+    { vypocet casu na OB ------------------------------------ }
+
+      if bodov>0 then dS:= vzdialenost(B.x,B.y, Trat[bodov-1].x,Trat[bodov-1].y)
+      else dS:= 0;
+
+      S:= S + dS;
+      if irych<>0 then pom:= dS*secHOUR/get_rych_kmh(irych,irych_, ivys,ivys_)/1000 { prepocet km/h->m/s }
+      else pom:= 0;
+      T:= T + pom + dT;
+
+      if TA<>0 then
+         begin
+           T:= D + TA;
+           if (   {((bodov>0) and (T<Trat[bodov-1].casD))   a je cas kratsi ako na predchadzajucom bode
+                or}DA
+              ) then T:= T + secDAY;
+         end;
+      B.casA:= T;
+
+      T:= T + dTB;  { cas odletu = cas priletu + cinnost na bode }
+      if TD<>0 then
+         begin
+           T:= D + TD;
+           if (  {(T<B.casA)   a je cas kratsi ako na predchadzajucom bode
+                or}DD or DA
+              ) then T:= T + secDAY;
+         end;
+      B.casD:= T;
+
+      TimeFromSec(T, cas.h,cas.m,cas.s);
+      B.h:= cas.h;
+      B.m:= cas.m;
+      T:= B.casD;
+      if FPL0_DOUBLE_POINTS or (bodov=0) or (B.x<>Trat[bodov-1].x) or (B.y<>Trat[bodov-1].y) then inc(bodov);
+      Trat[bodov-1]:= B;
+    end;
+
+
+function  _decode_FPL0_15
+
+                    (_15 : pchar;
+
+                      var start,prist: TAP;
+                      var Trat: TOBxys; var bodov: int;
+
+                      var rych : single; var rych_ : char;
+                      var vys  : word ;  var vys_  : char;
+
+                      date : TDate;
+
+                      vojensky_plan  : bool;
+                      vynechaj_oat   : bool;
+                      err_exit       : bool;   { ukonci pri chybe                    }
+                      uplna_trat     : bool;   { i so startom a pristatim            }
+                      prist_prepocet : bool    { prepocet casu pristatia podla trate }
+                    ): string;
+
+   var   res  : string;
+         bres : bool;
+         S,dS,T,dT,D : real;       { cas na poslednom bode }
+         i,max : int;
+         cas : TTime;
+
+         irych,ir : single; irych_,ir_ : char;
+         ivys,lvys,iv : word ; ivys_,lvys_,iv_ : char;
+
+         bod_trate: string;
+         _15l : pchar;
+          B : TOBxy;
+
+         _OAT : bool;
+
+   label X;
+
+   begin
+     irych:= rych; irych_:= rych_;
+     ivys:= vys; ivys_ := vys_;
+     lvys:= vys; lvys_ := vys_;
+
+     _15l:= ReplChar0 (_15, setNL+setNL_, icao_NXIT, true);
+     {_15l:= _15;}
+
+     fillchar(Trat,sizeof(TOBxys),0);
+     {if irych=0 then irych:= 10;}
+     bodov := 0;
+     D := DateToSec(date.r,date.m,date.d);
+     S := 0;
+     {irych := get_rych_kmh(irych,irych_, ivys,ivys_);}
+     {L    := New(PList,Init(@fnMRteAct,1,false));}
+
+   { -----------------------------------------------------
+     START
+   }
+     start.cas:= DTtoSec(date.r,date.m,date.d, start.h,start.m,0);
+     prist.cas:= DTtoSec(date.r,date.m,date.d, prist.h,prist.m,0);
+     if prist.cas<start.cas then prist.cas:= prist.cas + secDAY;
+
+     bres:= get_OB_XYM(start.kod, Trat[0]);
+     if bres then { AIP }
+        begin
+          if not xy_in_range(Trat[0].x,Trat[0].y) then
+             begin
+               res:= l4_errs(a_OPL,start.kod,err_OPL_nezname_zs);
+               if err_exit then goto X;
+             end;
+          with Trat[0] do
+            begin
+              kod:= start.kod;
+              h:= start.h; m:= start.m;
+              casA:= start.cas;
+              casD:= start.cas
+            end;
+          Trat[0].vys  := 0;
+          Trat[0].vys_ := altS;
+          Trat[0].rych := irych;
+          Trat[0].rych_:= irych_;
+          inc(bodov)
+        end
+     else if uplna_trat then
+             begin
+               res:= l4_errs(a_OPL,start.kod,err_FPLM_nezname_dep);
+               if err_exit then goto X
+             end;
+     T:= start.cas;
+
+   { ------------------------------------------------------
+     TRAT
+   }
+     res:= ''; 
+     _OAT:= false;
+     i:= 0; max:= GetPStrItems(_15l,ODD_BODOV);
+     while (bodov<max_OB-3) and (i<max) do
+       begin
+         bod_trate:= getPstr(_15l,i+1,ODD_BODOV);
+         if (i=0) and decode_l4_rych_vys(bod_trate, ir,ir_, iv,iv_) then
+            begin
+              rych:= ir; rych_:= ir_; irych:= ir; irych_:= ir_;
+              vys:= iv; vys_:= iv_;
+              ivys:= iv; ivys_:= iv_;
+              lvys:= iv; lvys_:= iv_;
+            end
+         else decode_bod_trate(_15l,i+1,max, bod_trate,
+                          Trat, bodov, S,T,D, irych,irych_, ivys,ivys_, lvys,lvys_,
+                          vojensky_plan,
+                          err_exit,
+                          vynechaj_oat, _OAT,
+                          res
+                         );
+         inc(i);
+         if (res<>'') and err_exit then goto X
+       end;
+
+   { -----------------------------------------------------
+     PRISTATIE
+   }
+     fillchar(B,sizeof(B),0);
+     bres:= get_OB_XYM(prist.kod, B);
+     if bres then
+        begin
+          if not xy_in_range(B.x,B.y) then
+             begin
+               res:= l4_errs(a_OPL,prist.kod,err_OPL_nezname_zs);
+               if err_exit then goto X;
+             end;
+          if bodov>0 then dS:= vzdialenost(B.x,B.y, Trat[bodov-1].x,Trat[bodov-1].y)
+          else dS:= 0;
+          S := S + dS;
+          if irych<>0 then dT:= dS*secHOUR/get_rych_kmh(irych,irych_, ivys,ivys_)/1000 { m/s }
+          else begin
+{!              dT:= DTtoSec(date.r,date.m,date.d, prist.h,prist.m,0)-B.casD;
+!}              dT:= 0;
+               end;
+          T := T + dT
+        end
+     else begin
+            prist_prepocet:= false;
+            if uplna_trat then
+               begin
+                 res:= l4_errs(a_OPL,prist.kod,err_FPLM_nezname_arr);
+                 if err_exit then goto X
+               end
+            end;
+
+     if prist_prepocet then { nie TPv>TPz, lebo cas moze byt zadany operatorom na tvrdo }
+        begin
+          TimeFromSec(T, cas.h,cas.m,cas.s);
+          if cas.s>0 then IncTimeMin(cas.h,cas.m, 1);
+          {TPv:= TimeToSec(cas.h,cas.m,0);
+          TPz:= TimeToSec(prist.h,prist.m,0);}
+          prist.h:= cas.h; prist.m:= cas.m;
+          T:= T - TimeToSec(cas.h,cas.m,cas.s) + TimeToSec(prist.h,prist.m,0);
+          prist.cas:= T
+        end
+     else T:= prist.cas;
+
+     if bres then
+        begin
+          with B do
+            begin
+              kod:= prist.kod;
+              h:= prist.h; m:= prist.m;
+              casA:= prist.cas;
+              casD:= prist.cas
+            end;
+          B.vys  := 0;
+          B.vys_ := altS;
+          B.rych := irych;
+          B.rych_:= irych_;
+          Trat[bodov]:= B;
+          inc(bodov);
+        end;
+
+   { -------------------------------------------------------------- }
+     X: {_dekoduj_uplnu_trat:= true;}
+        StrDispose(_15l);
+        _decode_FPL0_15:= res
+   end;
+

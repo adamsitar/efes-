@@ -1,0 +1,131 @@
+{ ---------------------
+  FPL4
+  ---------------------
+}
+ procedure update_PLN_to_FPL4 (const PLN: DPLN; var FPL: DFPL4);
+     var   s,it : string;
+           nl   : bool;
+           rych : single; rych_: char;
+           vys  : word;    vys_ : char;
+           t    : real;
+     begin
+     { 14 }
+       if (FPL._14='') then with PLN.eet do
+          begin
+            FPL.eet.kod:= kod; FPL.eet.h:= h; FPL.eet.m:= m;
+            if decode_l4_rych_vys (getpstr(FPL._15,1,[icao_NXIT]), rych,rych_, vys,vys_) then
+               FPL._14:= code_l4_14 (kod, h,m, vys,vys_, 0,' ',' ');
+          end;
+
+     { 18 }
+       _dec_18 (FPL._18, rmk_PLN);
+       {nl:= (get_lines_i_(FPL._18)>0) and (cut_(get_line_i(FPL._18,1))<>'');}
+       with PLN do
+         s:= rmk_PLN+icao_NXT{+strpas(src)+icao_NXIT}+
+             dep.kod{+code_l4_utc(dep.h,dep.m)}+icao_NXIT+
+             {eet.kod+code_l4_utc(eet.h,eet.m)+icao_NXIT+
+             exi.kod+code_l4_utc(exi.h,exi.m)+icao_NXIT+}
+             arr.kod{+code_l4_utc(arr.h,arr.m)};
+
+       {it:= _item_18_ (FPL._18,rmk_DATE,-1);
+       if (it<>'') then
+         begin
+           _dec_18 (FPL._18, rmk_DATE);
+           s:= rmk_DATE+icao_NXT+it + icao_NXIT+s;
+         end;
+
+       it:= _item_18_ (FPL._18,rmk_RPL,-1);
+       if (it<>'') then s:= s+icao_NXIT+rmk_RPL+icao_NXT+it;
+
+       it:= _item_18_ (FPL._18,rmk_FDA,-1);
+       if (it<>'') then s:= s+icao_NXIT+rmk_FDA+icao_NXT+it;
+
+       it:= _item_18_ (FPL._18,rmk_FPL,-1);
+       if (it<>'') then s:= s+icao_NXIT+rmk_FPL+icao_NXT+it;
+
+       FPL._18:= StrNPCopy(FPL._18,s,false,true);}
+
+       _inc_18(FPL._18,s,1);
+       FPL.src:= 0; fplsrc_decode (FPL._18, FPL.src);
+     end;
+
+ procedure code_PLN_to_FPL4 (const PLN: DPLN; var FPL: DFPL4);
+
+     var   s,t,u : string;
+           h,m,y : byte;
+           bres : bool;
+
+           rych: single; rych_: char; minkmh,maxkmh: single;
+           vys: word;    vys_ : char; minS,maxS: word;
+
+           B : TsBod;
+           o1,o2 : TOBxy;
+           t1,t2 : real;
+
+     begin
+       fillchar(FPL,sizeof(FPL),0);
+
+       FPL._3:= hd_FPL;
+       FPL._7:= PLN.idn;
+
+       if strpas(PLN.src) = hd_RPL then s:= PRAV_DOPRAVNY_LET
+       else s:= NEPR_DOPRAVNY_LET;
+       FPL._8:= IFR_let+s;
+
+       FPL._9:= PLN.typ;
+       _code_9_by8643(FPL._9,false);
+
+       FPL._10:= eqp_STD+icao_NXT+mod_C;
+
+       with PLN.dep do FPL._13:= code_l4_13(kod, h,m, h,m, true);
+
+       with PLN.arr do FPL._16:= code_l4_16(kod, h,m, '', PLN.dep.h,PLN.dep.m, true);
+
+       t:= PLN.eet.kod + icao_NXIT + PLN.exi.kod; u:= t;
+       if pln_assign_15 and _prirad_trat_FPL4 (PLN.eet.kod,PLN.exi.kod,u,t,nil)
+          then _9b_rychvys_fl(FPL._9, t, PLN.eet.kod,PLN.exi.kod, rych,rych_, vys,vys_)
+       else _9b_rychvys (FPL._9,true, rych,rych_,minkmh,maxkmh, vys,vys_,minS,maxS);
+
+       { vypocet rychlosti }
+       with PLN do
+         begin
+           t1:= TimeToSec(exi.h,exi.m,0)-TimeToSec(eet.h,eet.m,0);
+           if t1<0 then t1:= t1+secDay;
+           if (t1<>0) and get_OB_XYM(eet.kod,o1) and get_OB_XYM(exi.kod,o2) then
+              begin
+                rych:= Zaokruhli (3.6 * vzdialenost(o1.x,o1.y,o2.x,o2.y) / t1, 10);
+                rych_:= spdK;
+              end;
+         end;
+
+       s:= code_l4_rych_vys(rych,rych_, vys,vys_, lo_FL,false);
+       FPL._15:= strpasnew(s+icao_NXIT+t);
+
+       with PLN.eet do FPL._14:= code_l4_14 (kod, h,m, vys,vys_, 0,' ',' ');
+
+       FPL.date:= PLN.date;
+       s:= rmk_DATE+icao_NXT+code_l4_date_r(PLN.date.d,PLN.date.m,true);
+
+       if not is_OB(PLN.dep.kod,B,true) then
+          begin
+            with PLN.dep do t1:= TimeToSec(h,m,0);
+            with PLN.eet do t2:= TimeToSec(h,m,0);
+            TimeFromSec(abs(t2-t1), h,m,y);
+            t:= ' '+rmk_EET+icao_NXT+FIR_adr+TimeToStr(h,m,'');
+          end
+       else t:= '';
+       FPL._18:= strpasnew(s+icao_NXIT+t);
+
+      { naplnenie prepocitanych udajov
+      }
+       FPL.date:= PLN.date;
+       FPL.stat:= hd_FPL;
+       FPL.src := fplsrc_PLN;
+
+       with PLN.eet do begin FPL.eet.kod:= kod; FPL.eet.h:= h; FPL.eet.m:= m end;
+       with PLN.exi do begin FPL.exi.kod:= kod; FPL.exi.h:= h; FPL.exi.m:= m end;
+       FPL.vys := vys;
+       FPL.vys_:= vys_;
+
+       update_PLN_to_FPL4(PLN,FPL);
+     end;

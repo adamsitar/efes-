@@ -1,0 +1,210 @@
+{ ---------------------
+  kodovanie ku RDP
+  ---------------------
+}
+
+{$IFDEF RDP}
+
+  procedure code0_mFPL_RDP (FPL: PDmFPL; var pkt: TNETpkt);
+      var   _trat_   : POBxys;
+            _bodov_  : int;
+            s,t,a,sres : string;
+            w,rvys,p : word;
+            i,z,k    : int;
+      begin
+        New(_trat_);
+
+        with FPL^ do
+          begin
+            sres:= '';
+            if trat_<>nil then
+               begin
+                 Move(trat_^,_trat_^,bodov*SizeOf(TOBxy)); _bodov_:= bodov
+               end
+            else sres:= _decode_FPL0_15
+                             (trat, start,prist,
+                              _trat_^,_bodov_, rych,rych_,vys,vys_, date,
+                              true,false, false,false,false
+                             );
+
+            s:= inschar(idn_mFPL(FPL),10,' ',1);
+
+           {$IFDEF GOST}
+             s:= s + InsChar(ssr,kod_7c,' ',0);
+           {$ELSE}
+             val(ssr,W,i); s:= s + chr(lo(W)) + chr(hi(W));
+           {$ENDIF}
+
+           { Poziadavka Zdenka Peterku z 10.3.1999
+             na odfiltrovanie poli 9a a 9c pre
+             RDP a EDD
+           }
+            t:= typ;
+            {$IFDEF CZ}
+             decode_l4_9 (typ, a,t,sres);
+            {$ENDIF}
+            s:= s + inschar(t ,4,' ',1);
+
+            t:= typ2;
+            {$IFDEF CZ}
+             decode_l4_9 (typ2, a,t,sres);
+            {$ENDIF}
+            s:= s + inschar(t,4,' ',1);
+
+            s:= s + inschar(start.kod,4,' ',1);
+            s:= s + chr(start.h)  + chr(start.m);
+
+            s:= s + inschar(prist.kod,4,' ',1);
+            s:= s + chr(prist.h)  + chr(prist.m);
+
+          { vyska je v desiatkach metrov, preto sa uz netransformuje }
+            rvys:= get_altM(vys_,vys) div m_S;
+            s:= s + chr(lo(rvys)) + chr(hi(rvys)) + check_alt_(rvys,altS);
+            rvys:= get_altM(vys2_,vys2) div m_S;
+            s:= s + chr(lo(vys2)) + chr(hi(vys2)) + check_alt_(rvys,altS);
+
+            if strpos(rte_RT,pozn)<>nil then w:= rych_RT
+            else w:= minimum(trunc(rych),high(w));
+            s:= s + chr(lo(w)) + chr(hi(w));
+
+            s:= s + _8a;
+            s:= s + chr(lo(RDP)) + chr(hi(RDP)); { if RDP<>0 then s:= s + is_ACC else s:= s + is_NAC; }
+           {s:= s + 'N';}
+
+           {$IFDEF UA}
+            t:= abc_str(delchar(strpas(trat),setNL+setNL_));
+           {$ELSE}
+            if sres<>'' then
+               begin
+                 t[0]:= chr(minimum(strlen(trat),sizeof(t)-1));
+                 move(trat^,t[1],ord(t[0]));
+                 t:= replchar(t,setNL+setNL_,' ')
+               end
+            else begin
+                   t:= '';
+                   if _cairbase(_trat_^[0].kod)<>_cairbase(start.kod) then z:= 0
+                   else z:= 1;
+                   if (_bodov_>1) and (_cairbase(_trat_^[_bodov_-1].kod)=_cairbase(prist.kod)) then k:= _bodov_-1
+                   else k:= _bodov_;
+                   for i:= z to k-1 do t:= t +_trat_^[i].kod+' ';
+                   t:= cut_(t)
+                 end;
+           {$ENDIF}
+
+            a:= _cinnost_v_priestore(FPL);
+          end;
+
+        if new_NETpkt_data (nil,length(s)+1+length(t)+1+length(a), pkt.pkt) then
+           begin
+             move(s[1],pkt.pkt.data^[0],length(s)); p:= length(s);
+             move(t[0],pkt.pkt.data^[p],1+length(t)); p:= p+1+length(t);
+             move(a[0],pkt.pkt.data^[p],1+length(a));
+           end;
+
+        Dispose(_trat_)
+      end;
+
+
+  {
+    pouziva sa len pri trenazeri..., posiela len body na trati
+  }
+ {$IFDEF TRENAZER}
+   function get_word(s: string; pos: int): word;
+      var   w: word;
+      begin
+        s:= copy(s,pos,2);
+        w:= ord(s[2]) shl 8 + ord(s[1]);
+        get_word:= w
+      end;
+
+  procedure decode0_mFPL_RDP(const pkt: TNETpkt; FPL: PDmFPL);
+     var    strip     : string;
+            c,p,i,_1  : int;
+            kod1,kod2 : string[KOD_OB+1];
+            trats     : string;
+            w         : word;
+    begin
+      strip:= init_str(pkt.pkt.data,pkt.pkt.dlz);
+      fillchar(FPL^,sizeof(FPL^),0);
+
+      with FPL^ do
+        begin
+          idn := cut_(copy(strip,1,10));  { 'M'->2 }
+
+         (*{$IFNDEF GOST}*)
+          p := get_word(strip,11);
+          str(p,ssr);
+          c:= 13;
+         (*{$ELSE}
+          ssr := copy(strip,c,KOD_SSR); inc(c,KOD_SSR);
+         {$ENDIF}*)
+
+          typ := copy(strip,c,4);
+          typ2:= copy(strip,c+4,4);
+          inc(c,8); { c=22 }
+
+          kod1:= cut_(ReplChar(copy(strip,c,4),[#0],' '));
+          {if _OBind(kod1, LK, LKs)>=0 then begin} start.kod:= kod1; {kod1:= '' end
+          else kod1:= kod1+' ';}
+          start.h := byte(strip[c+4]);
+          start.m := byte(strip[c+5]);
+          inc(c,6); { c=30 }
+
+          kod2:= cut_(ReplChar(copy(strip,c,4),[#0],' '));
+          {if _OBind(kod2, LK, LKs)>=0 then begin} prist.kod:= kod2; {kod2:= '' end
+          else kod2:= ' '+kod2;}
+          prist.h := byte(strip[c+4]);
+          prist.m := byte(strip[c+5]);
+          inc(c,6); { c=32 }
+
+          vys  := get_word(strip,c);
+          vys_ := getchar(copy(strip,c+2,1));
+          if vys_=' ' then vys_:= altS;
+          inc(c,3); { c=35 }
+
+          vys2 := get_word(strip,c);
+          vys2_:= getchar(copy(strip,c+2,1));
+          if vys2_=' ' then vys2_:= altS;
+          inc(c,3); { c=38 }
+
+          rych := get_word(strip,c);
+          inc(c,2); { c=40 }
+
+          _8a := strip[c];
+          inc(c,1);
+          _8a:= IFR_let;
+          _8b:= VOJENSKY_LET_OAT;
+
+          w    := get_word(strip,c);      { RDP }
+          inc(c,2); { c=43 }
+
+          p:= byte(strip[c]);
+          trats:= delchar({kod1+}copy(strip,c+1,p){+kod2},[#0..#31]); { Minimum(p,length(strip)-c) }
+
+          if cut_(FPL^.start.kod)='' then
+             begin
+               FPL^.start.kod:= getstr(trats,1,[icao_NXIT]);
+             end;
+
+          trat := strpasnew(trats);
+
+          {init_time(time, BIOS.hour,BIOS.min,0);}
+          init_date(date, BIOS.year,BIOS.month,BIOS.day);
+
+          VU:= ' ';
+          for i:= 0 to max_ulohy_FPLm-1 do ulohy[i]:= ' ';
+
+          stat:= cnst_active;
+          format_mFPL(FPL)
+        end
+      end;
+ {$ENDIF}
+
+  procedure code0_mFPL_mess(FPL: PDmFPL; var pkt: TNETpkt); far;
+      var   s : string;
+      begin
+        s:= idn_mFPL(FPL)+#0;
+        new_NETpkt_data (@s[1],length(s), pkt.pkt)
+      end;
+
+{$ENDIF}

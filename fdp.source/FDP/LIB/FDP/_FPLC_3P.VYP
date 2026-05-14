@@ -1,0 +1,185 @@
+{ Ak sa zada cas n poslednom bode neskorsi ako cas pristatia =>
+  drzal by sa do dalsieho dna
+}
+ procedure oprava_casu_pristatia_cFPL (FPL: PDcFPL);
+     begin
+       with FPL^ do
+         if     (bodov>0)
+            and (prist.kod<>'')
+            and (prist.ind<>-1)
+            and (   ((prist.h=0{start.h}) and (prist.m=0{start.m}))
+                 or (    (not is_next_time (trat[bodov-1].h,trat[bodov-1].m, prist.h,prist.m))
+                     and ((trat[bodov-1].h<>23) or (prist.h<>0))
+                    )
+                ) then
+            begin
+              prist.cas:= trat[bodov-1].cas;
+              prist.h:=   trat[bodov-1].h;
+              prist.m:=   trat[bodov-1].m
+            end
+     end;
+
+
+{$IFDEF DEBUG}
+ {$I _FPL0.vyp}
+{$ENDIF}
+
+ function prepocet_trate_FPLc(FPL: PDcFPL; cmXXXX: word; bod: int): string;
+    var   _start : TAP;
+          _prist : TAP;
+          _OBs   : POBxys;
+          _OB    : TOBxy;
+          sres,p : string;
+          v_     : char;
+          pom    : byte;
+          i,j,r,k,sec,_bodov: int;
+          res    : word;
+    begin
+      sres:= '';
+
+      fillchar(_start,sizeof(_start),0);
+      if (cmXXXX=cmEST_DEP) and get_OB_XYM(FPL^.start.kod, _OB) then
+         begin
+           _start:= FPL^.start;
+           _start.h:= FPL^.start_.h;
+           _start.m:= FPL^.start_.m
+         end
+      else begin
+             _start.h:= FPL^.trat[bod].h;
+             _start.m:= FPL^.trat[bod].m
+           end;
+
+      fillchar(_prist,sizeof(_prist),0);
+      _prist:= FPL^.prist;
+
+      p:= '';
+      for i:= bod to FPL^.bodov-1 do p:= p + FPL^.trat[i].kod+' ';
+      p:= p+NULL;
+
+      New(_OBs); fillchar(_OBs^,sizeof(_OBs^),0);
+      v_:= vysOB;
+      sres:= _decode_FPL0_15
+                 (@p[1],
+                  _start,_prist,_OBs^,_bodov,
+                  FPL^.rych,FPL^.rych_, FPL^.vys,v_,
+                  FPL^.date,
+                  false,false, true,false,true
+                 );
+
+      if sres='' then
+         begin
+           if _start.kod<>'' then i:= 1 else i:= 0;
+           j:= bod;
+           while (i<=_bodov) and (j<=FPL^.bodov-1) do
+              begin
+                FPL^.trat[j].h:= _OBs^[i].h;
+                FPL^.trat[j].m:= _OBs^[i].m;
+                inc(j);
+                inc(i);
+              end;
+           if (_OBind(_prist.kod, LK)>=0) then FPL^.prist:= _prist;
+         end;
+
+      Dispose(_OBs);
+      format_cFPL(FPL);
+      prepocet_trate_FPLc:= ''
+    end;
+
+
+{ - Prepocet casu pristatia
+  - Pouzitie kvoli tomu, ze niektore zdroje udajov stripov
+    (ASTA) neudavaju presny cas pristatia a to moze sposobit
+    skorsie odmazanie, alebo naopak zotrvanie stripu
+    az na nasledujuci den...
+}
+ procedure pristatie_cFPL(FPL: PDcFPL);
+     var   B_0,B_1     : TOBxy;
+           D,T,R       : real;
+           ss          : byte;
+     begin
+       oprava_casu_pristatia_cFPL(FPL);
+       format_cFPL(FPL);
+       with FPL^ do
+         begin
+           if get_OB_XY(prist.kod,B_0) then
+              begin
+                R:= 0;
+                if rych<>0 then R:= get_rych_kmh(rych,rych_, vys,vysOB)
+                else if (bodov>1) and get_OB_XY(trat[bodov-1].kod,B_0) and get_OB_XY(trat[bodov-2].kod,B_1) then
+                        begin
+                          T:= Abs(TimeToSec(trat[bodov-1].h,trat[bodov-1].m,0)-TimeToSec(trat[bodov-2].h,trat[bodov-2].m,0));
+                          D:= vzdialenost(B_0.x,B_0.y, B_1.x,B_1.y);
+                          if T<>0 then R:= (D*secHOUR/T)/1000
+                        end;
+                if (R>0) and (bodov>0) and get_OB_XY(trat[bodov-1].kod,B_1) and get_OB_XY(prist.kod,B_0) then
+                   begin
+                     D:= vzdialenost(B_0.x,B_0.y, B_1.x,B_1.y);
+                     T:= (D*secHOUR/R)/1000;  { km/h -> m/s }
+                     prist.cas:= trat[bodov-1].cas+T;
+                     TimeFromSec(prist.cas, prist.h,prist.m,ss)
+                   end
+              end;
+         end
+     end;
+
+
+
+
+
+{ naplni pole Trat otocnymi bodami pre zobrazenie;
+  _start, _prist, _trat musia byt naformatovane
+}
+ function decode_c_trat(_start,_prist: TAP; _trat: Tc_trat; _bodov: int;
+                        var Trat: TOBxys; var bodov: int
+                       ): string;
+    var   res : string;
+          i   : int;
+         {L   : PList;}
+    begin
+      res:= '';
+      fillchar(Trat,sizeof(TOBxys),0);
+      {L:= New(PList,Init(@fnCinnost,1));}
+
+    { urcenie trasy a vypocet casov na trase -------------------- }
+      bodov:= 0;
+
+      if get_OB_XY(_start.kod, Trat[0]) then { AIP }
+         begin
+           {$IFDEF EDD}
+             Trat[0].kod := _start.kod;
+             Trat[0].h   := _start.h;
+             Trat[0].m   := _start.m;
+           {$ENDIF}
+           Trat[0].casA := _start.cas;
+           Trat[0].casD := Trat[0].casA;
+           inc(bodov)
+         end;
+
+      for i:= 0 to _bodov{}-1 do
+          if get_OB_XY(_trat[i].kod, Trat[bodov]) then { AIP }
+             begin
+               {$IFDEF EDD}
+                 Trat[bodov].kod := _trat[i].kod;
+                 Trat[bodov].h   := _trat[i].h;
+                 Trat[bodov].m   := _trat[i].m;
+               {$ENDIF}
+               Trat[bodov].casA := _trat[i].cas;
+               Trat[bodov].casD := Trat[bodov].casA;
+               inc(bodov)
+             end;
+
+      if get_OB_XY(_prist.kod, Trat[bodov]) then { AIP }
+         begin
+           {$IFDEF EDD}
+             Trat[bodov].kod := _prist.kod;
+             Trat[bodov].h   := _prist.h;
+             Trat[bodov].m   := _prist.m;
+           {$ENDIF}
+           Trat[bodov].casA := _prist.cas;
+           Trat[bodov].casD := Trat[bodov].casA;
+           inc(bodov)
+         end;
+
+      {Dispose(L,Done);}
+      decode_c_trat:= res
+    end;

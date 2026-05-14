@@ -1,0 +1,37 @@
+{$IFDEF CONNECT_TO_ASOC}
+  procedure mnuASOC_COM_init(MMenu: PSubmenu); far;
+      var   smnu    : TPItems;
+            i,items,ihk : int;
+      begin
+        items:= 0; ihk:= 0;
+
+        smnu[items] := Item(' ~'+hk(ihk)+titSEND+CIVLETY, cmASOC_INIT_FPLC, nil);
+        inc(items);
+        smnu[items] := Item(' ~'+hk(ihk)+titSEND+VOJLETY, cmASOC_INIT_FPLM, nil);
+        inc(items);
+        smnu[items] := Item(' ~'+hk(ihk)+titSEND+INELETY, cmASOC_INIT_FPLO, nil);
+        inc(items);
+
+        smnu[items] := NewLine2(0,nil);
+        inc(items);
+
+        smnu[items] := Item(' ~'+hk(ihk)+'Test FPL   ', cmASOC_TEST_FPL, nil);
+        inc(items);
+        {smnu[items] := Item('~'+hk(ihk)+'Test CHG   ', cmASOC_TEST_CHG, nil);
+        inc(items);
+        smnu[items] := Item('~'+hk(ihk)+'Test DLA   ', cmASOC_TEST_DLA, nil);
+        inc(items); }
+        smnu[items] := Item(' ~'+hk(ihk)+'Test CNL   ', cmASOC_TEST_CNL, nil);
+        inc(items);
+        smnu[items] := Item(' ~'+hk(ihk)+'Test ARR   ', cmASOC_TEST_ARR, nil);
+        inc(items);
+        smnu[items] := Item(' ~'+hk(ihk)+'Test ACT   ', cmASOC_TEST_ACT, nil);
+        inc(items);
+        {smnu[items] := Item('~'+hk(ihk)+'Test REV   ', cmASOC_TEST_REV, nil);
+        inc(items); }
+        smnu[items] := Item(' ~'+hk(ihk)+'Test CPL   ', cmASOC_TEST_CPL, nil);
+        inc(items);
+
+        for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i]);
+      end;
+{$ENDIF}

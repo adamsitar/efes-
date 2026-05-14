@@ -1,0 +1,23 @@
+ DATE/       Date of flight (in case of PPL)
+ EET/        Significant points or FIR codes with time of their reaching
+
+ STS/        significant status of flight, i.e. for life rescue (STS/HOSP)
+
+ RIF/        Destination aerodrome changed
+ DEP/        Departure aerodrome if in array 13 is 'ZZZZ' or 'AFIL'
+ DEST/       Destination aerodrome if in array 16 is 'ZZZZ' or 'AFIL'
+ ALTN/       Suplementary aerodrome if in array 16 is 'ZZZZ'
+ RALT/       Suplementary aerodrome for route
+
+ REG/        Aircraft reistration different from 7a
+ SEL/        SELCAL code
+ OPR/        Flight operator
+
+ TYP/        Type of aircraft, if in array 9 is 'ZZZZ'
+
+ COM/
+ NAV/
+ DAT/        Data link
+ PER/        Aircraft performance
+
+ RMK/

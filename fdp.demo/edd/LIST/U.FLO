@@ -1,0 +1,103 @@
+ UAA  -                   ;  UAS - ONE                                        / UNITED KINGDOM
+ UAC  UNITAIR             ;  UNITED AIR CHARTERS                              / ZIMBABWE
+ UAE  EMIRATES            ;  EMIRATES                                         / UNITED ARAB EMIRATES
+ UAF  UNIFORCE            ;  UNITED ARAB EMIRATES AIR FORCE                   / UNITED ARAB EMIRATES
+ UAG  -                   ;  UAS - TWO                                        / UNITED KINGDOM
+ UAI  UNI AIR             ;  UNI AIR S.A.                                     / FRANCE
+ UAJ  -                   ;  UAS - THREE                                      / UNITED KINGDOM
+ UAK  AVIATION PLANT      ;  KIEV AVIATION PLANT                              / UKRAINE
+ UAL  UNITED              ;  UNITED AIR LINES INC.                            / UNITED STATES
+ UAN  AVIATON             ;  AVIATON                                          / UKRAINE
+ UAP  AIRTRACKER          ;  ANTONOV AIRTRACK                                 / UKRAINE
+ UAR  +                   ;  UNI AIR                                          / FRANCE
+ UAS  -                   ;  UAS - FOUR                                       / UNITED KINGDOM
+ UAT  RIVERSIDE           ;  UNIVERSAL AIR TRANSPORT                          / UNITED KINGDOM
+; UAV  MANAWATU            ;  UNITED AVIATION LTD                              / NEW ZEALAND
+                          ;
+ UBA  UNIONAIR            ;  MYANMA AIRWAYS                                   / MYANMAR
+                          ;
+ UCA  COMMUTAIR           ;  COMMUTAIR (PLATTSBURGH, NY)                      / UNITED STATES
+ UCC  UGANDA CARGO        ;  UGANDA AIR CARGO                                 / UGANDA
+ UCS  UNITED CARRIERS     ;  UNITED CARRIERS SYSTEMS, INC. (GAHANNA, OH)      / UNITED STATES
+ UCZ                      ;  B L O C K E D
+                          ;
+ UDA  UDARA               ;  PUSDIKLAT PERHUBUNGAN UDARA/PLP                  / INDONESIA
+ UDD  DONBASS             ;  AIR LINES DONBASS                                / UKRAINE
+ UDK  ENTERPRISE DONETSK  ;  DONETS'K AVIATION ENTERPRISE                     / UKRAINE
+ UDN  DNIEPRO             ;  DNIEPROAVIA                                      / UKRAINE
+                          ;
+ UED  AIR L-A             ;  AIR L.A., INC. (LOS ANGELES, CA)                 / UNITED STATES
+                          ;
+ UFA  FLIGHT ACADEMY      ;  STATE FLIGHT ACADEMY OF UKRAINE, THE             / UKRAINE
+ UFL  UNIFLY              ;  UNIFLY                                           / GUINEA ECUATORIAL
+ UFR  UNITED AFRICA       ;  UNITED AFRICA AIRLINE (LIBERIA), INC.            / LIBERIA
+ UFS  FEEDER FLIGHT       ;  UFS, INC. (ST.LOUIS, MO)                         / UNITED STATES
+                          ;
+ UGA  UGANDA              ;  UGANDA AIRLINES CORPORATION                      / UGANDA
+ UGG  UGLAND              ;  UGLAND AIR A/S                                   / NORWAY
+ UGL  UGLY VAN            ;  INTER-ISLAND AIR, INC. (KAHULUI, HI)             / UNITED STATES
+                          ;
+ UHP  SIERRA YANKEE       ;  UNITED AIR SERVICE                               / NIGERIA
+ UHS  PILOT AIR           ;  ULYANOVSK HIGHER CIVIL AVIATION SCHOOL           / RUSSIAN FEDERATION
+                          ;
+ UKA  UKAY                ;  AIR UK LTD.                                      / UNITED KINGDOM
+; UKC  UKRAINE CARGO       ;  AIR UKRAINE CARGO                                / UKRAINE
+ UKH  UKHTA               ;  UKHTA AIRENTERPRISE                              / RUSSIAN FEDERATION
+ UKL  UKRAINE ALLIANCE    ;  UKRAINE AIRALLIANCE                              / UKRAINE
+ UKP  POLICE              ;  UK HOME OFFICE                                   / UNITED KINGDOM
+ UKR  AIR UKRAINE         ;  AIR UKRAINE                                      / UKRAINE
+ UKS  AVIALUX             ;  AVIALUX                                          / UKRAINE
+ UKW  UKRAINE WEST        ;  LVOV AIRLINES                                    / UKRAINE
+                          ;
+ ULA  ZULIANA             ;  ZULIANA DE AVIACION                              / VENEZUELA
+; ULE  +                   ;  LEISURE INTERNATIONAL AIRWAYS LTD                / UNITED KINGDOM
+ ULS  ULSTER              ;  CARROLL AIR SERVICE, INC. (KINGSTON, NY)         / UNITED STATES
+ ULT  ULTRAIR             ;  ULTRAIR, INC. (SMYRNA, TN)                       / UNITED STATES
+                          ;
+ UMA  HUMAYA              ;  LINEAS AEREAS DEL HUMAYA, S.A. DE C.V.           / MEXICO
+ UMK  YUZMASH             ;  YUZMASHAVIA                                      / UKRAINE
+                          ;
+ UNA  UNIVERSAIR          ;  UNIVERSAIR                                       / ESPANA
+ UNC  UNA-UKRAINE         ;  AIR UNA                                          / UKRAINE
+ UNF  UNION FLIGHTS       ;  UNION FLIGHTS (SACRAMENTO, CA)                   / UNITED STATES
+ UNG  AIRUNG              ;  AIRUNG AEP                                       / UKRAINE
+ UNI  COMMUNITY           ;  COMMUNITY EXPRESS AIRLINES LTD                   / UNITED KINGDOM
+ UNN                      ;  B L O C K E D
+ UNO  UNITED NATIONS      ;  UNITED NATIONS ORGANIZATION
+ UNS  UNSPED              ;  UNSPED PAKET SERVISI INC.                        / TURKEY
+ UNV  UKRAINE UNIVERSAL   ;  UKRAINE UNIVERSAL                                / UKRAINE
+                          ;
+ UPA  FOYLE               ;  AIR FOYLE LTD                                    / UNITED KINGDOM
+ UPB  KRIS                ;  AIR FOYLE CHARTERS LTD                           / UNITED KINGDOM
+ UPC  CUTLASS             ;  AIR FOYLE AIRWAYS LTD                            / UNITED KINGDOM
+ UPD  BROADSWORD          ;  AIR FOYLE CHARTER AIRWAYS LTD                    / UNITED KINGDOM
+ UPS  UPS                 ;  UNITED PARCEL SERVICE COMPANY, (LOUISVILLE, KY)  / UNITED STATES
+                          ;
+ URA  URALINTER           ;  URALINTERAVIA                                    / RUSSIAN FEDERATION
+ URG  URGA                ;  AIR URGA                                         / UKRAINE
+ URL  URALCO              ;  URALAVIALY                                       / RUSSIAN FEDERATION
+ URN  TURAN               ;  TURAN AIR                                        / AZERBAIJAN
+ URV  URAI                ;  URAIAVIA                                         / RUSSIAN FEDERATION
+ URW  AIR URAL            ;  URAL                                             / RUSSIAN FEDERATION
+ URY  CENTURY AVIA        ;  CENTURY AVIATION, S.A. DE C.V.                   / MEXICO
+                          ;
+ USA  U.S. AIR            ;  U.S. AIR                                         / UNITED STATES
+ USC  STAR CHECK          ;  U.S. CHECK AIRLINES (COLUMBUS, OH)               / UNITED STATES
+ USF  AFRICA EXPRESS      ;  USAFRICA AIRWAYS, INC. (RESTON, VA)              / UNITED STATES
+ USJ  USJET               ;  U.S. JET, INC. (WASHINGTON, DC)                  / UNITED STATES
+ USS  US SHUTTLE          ;  USAIR SHUTTLE (FLUSHING, NJ)                     / UNITED STATES
+ USX  AIR EXPRESS         ;  U.S. EXPRESS (PLYMOUTH, MA)                      / UNITED STATES
+                          ;
+ UTA  UTA                 ;  UNION DES TRANSPORTS AERIENS (UTA)               / FRANCE
+ UTD  UNIFORM ECHO        ;  UNITED AIR                                       / SOUTH AFRICA
+ UTL  AV UTIL             ;  AVIATIA UTILITARA SA                             / ROUMANIE
+ UTR  AGROAEROTRANS       ;  AEROTRANS, CLOSED JOINT-STOCK AIRCOMPANY         / UKRAINE
+                          ;
+ UVA  UNIVERSAL           ;  UNIVERSAL AIRWAYS, INC.                          / UNITED STATES
+ UVL  UNICENTER           ;  UNIVERSAL                                        / RUSSIAN FEDERATION
+                          ;
+ UYA  YUTE AIR            ;  YUTE AIR ALASKA (DILLINGHAM, AK)                 / UNITED STATES
+ UYC  CAM-AIR             ;  CAMEROON AIRLINES                                / REPUBLIQUE DU CAMEROU                                                                                                                                                          
+                          ;
+ UZB  UZBEK               ;  UZBEKISTAN HAVO JULLARY - UZBEKISTAN AIRWAYS     / UZBEKISTAN
+ UZC                      ;  B L O C K E D

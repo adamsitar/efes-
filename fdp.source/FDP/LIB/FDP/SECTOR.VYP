@@ -1,0 +1,214 @@
+ {
+ }
+  function _cez_sektor(mapa: PMapy; nazov: string;
+                       v0s,v1s: word;
+                       x0,y0 : real; v0: word; v0_: char;
+                       x1,y1 : real; v1: word; v1_: char;
+                       var x,y : real;
+                       var err: bool
+                      ): bool;
+
+     var   i,p : int;
+           patri, is_v0,is_v1, is_b0,is_b1,is_p : bool;
+           dr,dr0,dr1 : real;
+
+     begin
+       patri:= true; err:= true;
+       if mapa=nil then Exit;
+       patri:= false; err:= false;
+
+       if v0_<>altM then v0:= get_altM(v0_,v0);
+       if v1_<>altM then v1:= get_altM(v1_,v1);
+       is_v0 :=    ((v0s=0) and (v1s=0))      { bez obmedzenia     }
+                or (v0=0)                     { nepyta sa na vysku }
+                or (inRange(v0, v0s,v1s));    { pyta sa            }
+       is_v1 :=    ((v0s=0) and (v1s=0))
+                or (v1=0)
+                or (inRange(v1, v0s,v1s));
+
+
+       is_b0 := ((x0<>0) and prienik_bod (mapa,nazov, x0,y0));
+       is_b1 := ((x1<>0) and prienik_bod (mapa,nazov, x1,y1));
+       is_p  := ((x0<>0) and (x1<>0) and prienik_useciek (mapa,nazov, x0,y0,x1,y1, x,y));
+
+       if (not is_p) {and patri} then
+          if is_b0 then begin x:= x0; y:= y0 end
+          else if is_b1 then begin x:= x1; y:= y1 end;
+
+       {if is_p and is_b0 and (not is_b1) then dr0:= vzdialenost (x0,y0, x,y) else dr0:= 0;
+       if is_p and is_b1 and (not is_b0) then dr1:= vzdialenost (x1,y1, x,y) else dr1:= 0;
+       dr:= S_IN_KM; dr:= dr*1000;
+
+       Nemozem takto kontrolovat, lebo sektory mozu susedit
+       a bod1 nemusi byt vstupny ale vnutorny...
+       }
+       patri :=    ((is_p or (is_b0 and is_b1)) and (is_v0 or is_v1))
+                or (is_b0 and is_v0 and (not is_b1) {and (dr0>=dr)})
+                or (is_b1 and is_v1 and (not is_b0) {and (dr1>=dr)})
+                ;
+
+       _cez_sektor:= patri
+     end;
+
+
+  { dynamicke nastavenie/vrati, ci len bude/je/este je v riadenom sektore
+  }(*
+  function let_v_sektore(plan: pointer; func: TFunc_Txy; T0,T1: real): bool;
+     var   x0,y0, x1,y1 : real;
+     begin
+       let_v_sektore:= true;
+       if {(func=nil) or} (plan=nil) then Exit;
+       if (not func(plan, T0,x0,y0)) or (not func(plan, T1,x1,y1)) then Exit;
+       let_v_sektore:= v_sektore(x0,y0,x1,y1);
+     end;
+  *)
+
+ { vrati, ci len pretina riadeny sektor
+ }
+  function _trat_cez_sektor(mapa: PMapy; nazov: string; v0s,v1s: word;
+                            trat: pointer; bodov: int;
+                            p_xyvys: P_suradnice_a_vyska_trate;
+                            var err: bool
+                           ): bool;
+     var   x0,y0,x1,y1, x,y : real;
+           v0,v1 : word;
+           patri : bool;
+           i : int;
+     begin
+       _trat_cez_sektor:= true; err:= true;
+       if (mapa=nil) or (trat=nil) or (p_xyvys=nil) then Exit;
+       err:= false;
+
+       patri:= false; i:= 0;
+       while (not patri) and (i<bodov) do
+         begin
+           T_suradnice_a_vyska_trate(p_xyvys)(trat,bodov,i, x0,y0,v0);
+           if (i<bodov-1) then T_suradnice_a_vyska_trate(p_xyvys)(trat,bodov,i+1, x1,y1,v1)
+           else begin x1:= 0; y1:= 0; v1:= alt_UNL end;
+           patri:= _cez_sektor(mapa, nazov,v0s,v1s,
+                               x0,y0,v0,altM,
+                               x1,y1,v1,altM,
+                               x,y,
+                               err
+                              );
+           inc(i)
+         end;
+
+       _trat_cez_sektor:= patri
+     end;
+
+
+ function _trat_mimo_hranice_sektora
+                     (mapa: PMapy; nazov: string;
+                      trat: pointer; bodov: int;
+                      p_xyvys: P_suradnice_a_vyska_trate;
+                      var err: bool
+                     ): bool;
+
+     var   x0,y0,x1,y1, x,y,xn,yn: real;
+           in1,in2, is1,is2: bool;
+           v0,v1 : word;
+           mimo : bool;
+           i : int;
+     begin
+       _trat_mimo_hranice_sektora:= false; err:= true;
+       if (mapa=nil) or (trat=nil) or (p_xyvys=nil) then Exit;
+       err:= false;
+
+       mimo:= false; i:= 0;
+       while (not mimo) and (i<bodov) do
+         begin
+           T_suradnice_a_vyska_trate(p_xyvys)(trat,bodov,i, x0,y0,v0);
+           if (i<bodov-1) then
+              begin
+                T_suradnice_a_vyska_trate(p_xyvys)(trat,bodov,i+1, x1,y1,v1);
+                mimo:=     mapa^.priesecnik_xy(x0,y0,x1,y1, in1,in2,is1,is2, x,y,xn,yn)
+                       and inRange(x,x0,x1)
+                       and inRange(y,y0,y1)
+
+              end
+           else mimo:= not mapa^.patri_xy(x0,y0);
+           inc(i)
+         end;
+
+       _trat_mimo_hranice_sektora:= mimo
+     end;
+
+
+ function  _trat_cez_priestor
+                     (nazov: string; c0,c1: real; v0s,v1s: word;
+                      trat: pointer; bodov: int;
+                      p_casxyvys: P_cas_suradnice_a_vyska_trate;
+                      sprava: bool; var err: bool
+                     ): bool;
+
+    var    mapa : PMapy;
+           cas0,x0,y0, cas1,x1,y1, x,y : real;
+           v0,v1 : word;
+           c0i,c1i: real;
+           cez : bool;
+           sres : string;
+           i : int;
+
+    procedure init_var(i: int);
+        begin
+          T_cas_suradnice_a_vyska_trate(p_casxyvys)(trat,bodov,i, cas0,x0,y0,v0);
+          if (i<bodov-1) then T_cas_suradnice_a_vyska_trate(p_casxyvys)(trat,bodov,i+1, cas1,x1,y1,v1)
+          else begin cas1:= 0; x1:= 0; y1:= 0; v1:= alt_UNL end;
+        end;
+
+    begin
+       _trat_cez_priestor:= false;
+       err:= true;
+       if (trat=nil) or (p_casxyvys=nil) then Exit;
+       err:= false;
+
+       { najprv sa skontroluje casovy konflikt useku trate
+         s ohranicenim zaciatku a ukoncenia vyuzitia priestoru
+       }
+       if (c0<>0) or (c1<>0) then
+          begin
+            if c1=0 then c1:= DTtoSec(2999,1,1,0,0,0);
+            cez:= false; i:= 0;
+            while (not cez) and (i<bodov) do
+              begin
+                init_var(i);
+                cez:= RPrienik (cas0,cas1, c0,c1) or cez;
+                inc(i)
+              end;
+            if not cez then Exit;
+          end;
+
+
+      { nacitanie mapy pre kontrolu priestoroveho konfliktu
+      }
+       cez:= false;
+       mapa:= New(PMapy,Init);
+       if mapa^.najdi_a_nacitaj_subor(nazov+ext_MAP)<>nil then
+          begin
+            cez:= false; i:= 0;
+            while (not cez) and (i<bodov) do
+              begin
+                init_var(i);
+                cez:=    (    _cez_sektor(mapa, nazov, v0s,v1s,
+                                      x0,y0,v0,altM,
+                                      x1,y1,v1,altM,
+                                      x,y,
+                                      err
+                                     )
+                          and RPrienik (cas0,cas1, c0,c1)
+                         )
+                      or cez;
+                inc(i)
+              end;
+          end
+       else begin
+              l4_err(a_FUA,nazov,0,err_MAP_FPL_NOT_FOUND,sres);
+              if sprava then Say2(msgWARNING,sres)
+              else write_err_log(sres);
+              err:= true;
+            end;
+
+       Dispose(mapa,Done);
+      _trat_cez_priestor:= cez
+    end;

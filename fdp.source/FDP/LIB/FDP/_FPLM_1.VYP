@@ -1,0 +1,303 @@
+{ ----------------------------
+  poloha/stav
+  ----------------------------
+}
+
+ function _ukoncenie_letu (FPL: PDmFPL; cas: real; stav: Tstav): Tpoz;
+    var   z     : Tpoz;
+          za,wa : real;
+    begin
+      with FPL^ do
+        begin
+          na_bod:= N(bodov-1);
+          if (cas < prist.cas) then z:= poz_LETI
+          else if (cas = prist.cas) then z:= poz_PRIST
+          else if (stav=_ukonceny) then z:= poz_HANGAR
+          else begin
+                 za:= dT_deactive_FPLM*60;
+                 wa:= dT_arr_warn_FPLM*60;
+                 if kontrola_na_FPLM_ARW (FPL) and (cas < prist.cas + wa) then z:= poz_PATRAT
+                 else if (cas < prist.cas + za) then z:= poz_SEDI
+                 else z:= poz_HANGAR
+               end
+        end;
+      _ukoncenie_letu:= z
+    end;
+
+
+{ plan moze byt realizovany i mimo dobu,
+  definovanej zaciatkom a koncom,
+  pokial neprekroci limit pre zrusenie
+}
+ function  _bod_mzp(FPL: PDmFPL): Tpoz;
+     var   i : int;
+           t : string;
+     begin
+       _bod_mzp:= poz_MZP;
+       if (FPL^.trat_<>nil) then
+          begin
+            for i:= GetPStrItems(FPL^.trat,odd_BODOV) downto 1 do
+                begin
+                  t:= mtks_rus_to_lat (uni_str(GetPStr(FPL^.trat,i,odd_BODOV)));
+                  if     (pos(fpl_MZP,t)<>0)
+                     and (pos(fpl_ARR,t)<>0)
+                     and (pos(fpl_DEP,t)=0)
+                         then FPL^.na_bod:= i
+                end
+          end;
+     end;
+
+
+ function _bod_trate(FPL: PDmFPL; cas: real; stav: Tstav): Tpoz;
+    var   z : Tpoz;
+          b : int;
+    begin
+      z:= poz_START;
+      FPL^.na_bod:= 0;
+      with FPL^ do
+       if (trat_<>nil) and (bodov>1) then
+         begin
+           if (cas < trat_^[0].casD) then
+           else if (cas < trat_^[bodov-1].casD) then
+              begin
+              { let na trati ------------------------------
+              } b:= na_bod; na_bod:= 0;
+                while (na_bod < bodov-1) and (cas>=trat_^[na_bod].casD) do inc(na_bod);
+                if b<>na_bod then z:= poz_DALSI
+                else if (trat_^[na_bod].casA<=cas) and (cas<=trat_^[na_bod].casD) then
+                        if pos(cnst_MZP,stat)<>0 then z:= poz_MZP
+                        else z:= poz_STOJI
+                     else z:= poz_LETI
+              end
+           else begin
+                { pred poslednym bodom na trati -----------
+                } na_bod:= N(bodov-1);
+                  z:= _ukoncenie_letu (FPL,cas,stav);
+                end
+         end
+      else z:= poz_LETI;
+      _bod_trate:= z
+    end;
+
+
+ {$I _plan_vypocet.h}
+
+ function platny_plan_letu (FPL: PDmFPL; cas: real; var zmena: bool): Tpoz;
+
+    var   stav: Tstav;
+          pred,nepl,za: real;
+          krl : bool;
+          s,t : string;
+          z : Tpoz;
+
+    function _unactive: bool;
+       begin
+         _unactive:= (cas >= FPL^.prist.cas+nepl)
+                      {$IFDEF OPL}
+                      { (ne)drzia sa plany do konca dna
+                        alebo je uz nasledujuci den...
+                      } and (   ((not _unactive_dayFPLM) and (not krl))
+                             or (  DateToSec(FPL^.date.r,FPL^.date.m,FPL^.date.d)
+                                 < DateToSec(year,month,day) {_div(cas,secDAY) * secDAY}
+                                )
+                            )
+                      {$ENDIF}
+       end;
+
+    function _propose: bool;
+       begin
+         _propose:=      ( (cas >= FPL^.start.cas-pred)
+                          {$IFDEF OPL}
+                          { alebo sa nacitavaju plany na den
+                          } or (     _propose_dayFPLM
+                                and (  DateToSec(FPL^.date.r,FPL^.date.m,FPL^.date.d)
+                                     = DateToSec(year,month,day) {_div(cas,secDAY) * secDAY}
+                                    )
+                               )
+                          {$ENDIF}
+                         )
+                     and (not _unactive)
+       end;
+
+    begin
+      stav:= _decode_stav(FPL^.stat);
+
+      krl := is_KRL(FPL);
+      pred:= dT_propose_FPLM*60;
+      nepl:= {$IFDEF OPL} dT_unactive_FPLM {$ELSE} 0 {$ENDIF}; nepl:= nepl*60*60;  { hodin }
+      za  := dT_deactive_FPLM*60;
+
+      z:= poz_PLAN;
+
+      if stav = _zruseny then z:= poz_CANCELLED
+
+      else if krl or (stav = _fdp_def._plan) or (pos(cnst_sended,FPL^.stat) > 0) then
+         begin
+           if _unactive then z:= poz_NOT_ACTUAL
+           else if (not krl) and _propose then z:= poz_PREACTIVE
+           else z:= poz_PLAN;
+         end
+
+      else if stav = _neplatny   then z:= poz_NOT_ACTUAL
+
+      else if stav = _zruseny    then z:= poz_CANCELLED
+
+      else if stav = _zamietnuty then z:= poz_NOT_APPROVED
+
+      else if stav = _ziadost    then
+              if _unactive then z:= poz_NOT_ACTUAL
+              else z:= poz_PROPOSED
+
+      else if stav = _schvaleny  then
+              if _unactive then z:= poz_NOT_ACTUAL
+              else if cas < FPL^.start.cas-pred then z:= poz_PREACTIVE
+              else z:= poz_COORDINATED
+
+      else if stav = _preruseny then
+              begin
+                if pos(cnst_mzp,FPL^.stat)>0 then z:= _bod_mzp(FPL)
+                else z:= poz_STOJI
+              end
+
+      else if stav in [_aktivovany,_ukonceny] then
+           begin
+             if cas < FPL^.start.cas-pred then z:= poz_PREACTIVE
+             else if cas < FPL^.start.cas then z:= poz_COORDINATED
+             else if cas < FPL^.prist.cas then z:= _bod_trate(FPL,cas,stav)
+             else z:= _ukoncenie_letu (FPL,cas,stav);
+           end
+
+      else if not _unactive then z:= poz_PLAN
+
+      else z:= poz_NOT_ACTUAL;
+
+      platny_plan_letu:= z
+    end;
+
+
+
+ function stav_mFPL (FPL: PDmFPL; cas: real; var zmena: bool): Tpoz;
+    var   npoz : Tpoz;
+    begin
+      npoz:= poz_PLAN;
+      {if not is_KRL(FPL) then
+         begin}
+           npoz:= platny_plan_letu (FPL,cas,zmena);
+           if npoz=poz_DALSI then npoz:= poz_LETI;
+         {end};
+      zmena:= npoz<>FPL^.poz;
+      FPL^.poz:= npoz;
+      stav_mFPL:= npoz
+    end;
+
+
+ function est_mFPL(FPL: PDmFPL): bool;
+    var   bres,is_a,is_c,zmena : bool;
+          z : TPoz;
+    begin
+      {$IFDEF OPL}
+        z:= stav_mFPL(FPL,absTime,zmena);
+
+        {$IFDEF AIRBASE}
+         is_a:= _plan_pre(FPL^.let) or _plan_pre(FPL^.start.kod);
+         is_c:= _FPLM._plan_pre_pracovisko(FPL);
+        {$ELSE}
+         is_a:= true;
+         is_c:= true;
+        {$ENDIF}
+
+        bres:=             ((z>poz_COORDINATED))
+
+                or { a) preaktivovane plany letov pred ziadostou o schvalenie
+                   }
+                    (      (z = poz_PREACTIVE)
+                      and  (     (is_a and _preactived_FPLM)
+                             {$IFDEF AIRBASE}
+                              or (is_c and _preactived_FPLM_ot )
+                             {$ENDIF}
+                           )
+                    )
+
+                   { b) ziadosti na schvalenie
+                   }
+                or  (      (z = poz_PROPOSED)
+                      and  (     (is_a and _proposed_FPLM)
+                             {$IFDEF AIRBASE}
+                              or (is_c and _proposed_FPLM_ot )
+                             {$ENDIF}
+                           )
+                    )
+
+                   { c) schvalene lety pred aktivovanim
+                   }
+                or  (      (z = poz_COORDINATED)
+                      and  (     (is_a and _coordinated_FPLM)
+                             {$IFDEF AIRBASE}
+                              or (is_c and _coordinated_FPLM_ot )
+                             {$ENDIF}
+                           )
+                    );
+      {$ELSE}
+        bres:= stav_mFPL(FPL,absTime,zmena) in poz_est_FPLM;
+      {$ENDIF}
+
+      est_mFPL:= bres
+    end;
+
+ function est_oFPL(FPL: PDmFPL): bool;
+    var   bres,is_a,is_c,zmena : bool;
+          z : TPoz;
+    begin
+      {$IFDEF OPL}
+        z:= stav_mFPL(FPL, absTime, bres);
+        {$IFDEF AIRBASE}
+         is_a:= _plan_pre(FPL^.let);
+         is_c:= _FPLM._plan_pre_pracovisko(FPL);
+        {$ELSE}
+         is_a:= true;
+         is_c:= true;
+        {$ENDIF}
+
+        bres:=             (z >= poz_COORDINATED)
+
+                or { a) preaktivovane lety (plany)
+                   }
+                    (      (z >= poz_PREACTIVE)
+                      and  (     (is_a and _preactived_FPLO)
+                             {$IFDEF AIRBASE}
+                              or (is_c and _preactived_FPLO_ot)
+                             {$ENDIF}
+                           )
+                    );
+      {$ELSE}
+        bres:= stav_mFPL(FPL,absTime,zmena) in poz_est_FPLM;
+      {$ENDIF}
+       est_oFPL:= bres
+    end;
+
+
+ function suradnice_mFPL(FPL: PDmFPL; cas: real; var sur: Tsur): Tpoz;
+    var   OB1,OB2 : TOBxy;
+    begin
+      suradnice_mFPL:= FPL^.poz;
+      sur:= FPL^.sur;
+      if (FPL^.trat_=nil) then Exit;
+
+      OB1:= FPL^.trat_^[N(FPL^.na_bod-1)];
+      OB2:= FPL^.trat_^[FPL^.na_bod];
+      case FPL^.poz of
+        poz_LETI,poz_DALSI:
+            get_poloha(OB1.x,OB1.y,OB1.casD, OB2.x,OB2.y,OB2.casA,
+                       cas, FPL^.rych,FPL^.rych_, FPL^.vys,FPL^.vys_,
+                       sur.x,sur.y
+                      );
+        poz_MZP,poz_STOJI,poz_PRIST,poz_SEDI,poz_PATRAT:
+            begin
+              sur.x:= OB2.x;
+              sur.y:= OB2.y
+            end
+        else Exit
+      end;
+
+      suradnice_mFPL:= poz_LETI
+    end;

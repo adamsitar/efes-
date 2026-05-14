@@ -1,0 +1,244 @@
+{  Nasledujuci format NOTAMU je interny,
+   pouziva sa pre prenos dekodovanych udajov NOTAM v ramci systemu LETVIS;
+   format udajov pri(od)chadzajucich z(do) EXT(AFTN) nie je podla mojich
+   doterajsich znalosti unifikovatelny
+
+   Priklad : (NTM                     ; notam - cislo, napr. 0413/97 NOTAMi, kde i je <C,N,R> ; [MTK_2_LINE]
+              -_Q                     ; systemova polozka, napr. LZBB/QRPCA/IV/BO/W/000/230/  ; [MTK_2_LINE]
+              -_A                     ; responsible unit
+              -_B _C                  ; datum zaciatku a ukoncenia, napr. 9603281230 9604281130
+              -_F _G                  ; rozsah pouzivanych vysok,   napr. GND UNL
+              -_D                     ; aktivacia NOTAMu v urcitom obdobi (cas,pozn)          ; [MTK_2_LINE]
+              -_E                     ; text NOTAMu (suradnice)                               ; [MTK_2_LINE]
+              -SRC/500                ; pole 19 - vypoctove premenne
+              -DATE/9512291000 9810   ; datum podania planu a datum zaciatku platnosti (pre urcenie nazvu subora)
+               FDP/                   ; stav spracovania planu
+}
+
+{ ---------------------
+  kodovanie
+  ---------------------
+}
+
+ function code_NTM_data(NTM: PNTM): string;
+    var   s : string;
+    begin
+      with NTM^ do
+        begin
+          s:=              l4_format_s(strpas(_NTM))
+              + icao_ARR + l4_format_s(strpas(_Q))
+
+              + icao_ARR + l4_format_s(_A)
+
+              + icao_ARR             + l4_format_s(_B)  {code_l4_datum(_B)}
+                         + icao_NXIT + l4_format_s(_C)  {code_l4_datum(_C)}
+
+              + icao_ARR             + l4_format_s(_F)
+                         + icao_NXT  + l4_format_s(_G)
+        end;
+      code_NTM_data:= s
+    end;
+
+ procedure decode_NTM_data(s: string; NTM: PNTM);
+    var    t : string;
+    begin
+      fillchar(NTM^,sizeof(TNTM),0);
+
+      with NTM^ do
+        begin
+          _NTM := strpasnew(decode_l4_s(GetStr(s,1,[icao_STD,icao_ARR]),true));
+          _Q   := strpasnew(decode_l4_s(GetStr(s,2,[icao_STD,icao_ARR]),true));
+
+          _A   := decode_l4_s(GetStr(s,3,[icao_ARR]),true);
+
+          t := GetStr(s,4,[icao_ARR]);
+          _B:= decode_l4_s(GetStr(t,1,[icao_NXIT]),true);  {decode_l4_datum (GetStr(t,1,[icao_NXIT]),_B);}
+          _C:= decode_l4_s(GetStr(t,2,[icao_NXIT]),true);  {decode_l4_datum (GetStr(t,2,[icao_NXIT]),_C);}
+
+          t := GetStr(s,5,[icao_ARR]);
+          _F:= decode_l4_s(GetStr(t,1,[icao_NXT]),true);
+          _G:= decode_l4_s(GetStr(t,2,[icao_NXT]),true);
+        end
+    end;
+
+
+ function code_NTM_19(NTM: PNTM; archive: bool): string;
+    var   s : string;
+    begin
+      with NTM^ do
+        begin
+          s:=  rmk_SRC + icao_NXT + l4_format_s(let);
+          if archive then
+             begin
+               s:= s + icao_NXIT + rmk_DATE + icao_NXT  + code_l4_datums(dap);
+               if dav.r<>0 then s:= s + icao_NXIT + code_l4_date(dav);
+
+               s:= s + icao_NXIT + rmk_FDP  + icao_NXT  + stt;
+             end;
+        end;
+      code_NTM_19:= s
+    end;
+
+ function decode_NTM_19(_19: string; NTM: PNTM): string;
+    var   s: string;
+    begin
+      _19:= _19+NULL; { nebude > 254 }
+
+      NTM^.let:= decode_l4_s(_item_18_(@_19[1],rmk_SRC,1),true);
+
+      s:= _item_18_   (@_19[1],rmk_DATE,1);
+      decode_l4_datum (getstr(s,1,[ICAO_NXIT]),NTM^.dap);
+      decode_l4_date  (getstr(s,2,[ICAO_NXIT]),NTM^.dav);
+
+      NTM^.stt:= _item_18_(@_19[1],rmk_FDP,1);
+
+      decode_NTM_19:= ''
+    end;
+
+
+{ ---------------------
+  DB
+  ---------------------
+}
+ procedure codeDB_NTM(NTM: PNTM; buff: PDB_buff; desc: PDB_head);
+     var   s : string;
+           i : int;
+     begin
+       str_toDBstr(code_NTM_data(NTM),buff^[db_NTM_data]);
+
+       str_toDBstr(code_line_i(NTM^._D,1,3),buff^[db_NTM_D]);
+       for i:= db_NTM_E1 to db_NTM_E3 do
+           str_toDBstr(code_line_i(NTM^._E,(i-db_NTM_E1)*3+1,(i-db_NTM_E1)*3+3),buff^[i]);
+
+       str_toDBstr(code_NTM_19(NTM,true),buff^[db_NTM_19]);
+
+       s:= '' {$IFDEF NET} + icao_ARR + rectostr(NTM^.rec) {$ENDIF};
+       str_toDBstr(s,buff^[db_NTM_ine])
+     end;
+
+ procedure decodeDB_NTM(buff: PDB_buff; NTM: PNTM; desc: PDB_head);
+     var   s : string;
+           i : int;
+     begin
+       decode_NTM_data(DBstr_to_str(buff^[db_NTM_data]), NTM);
+
+       NTM^._D:= strpasnew (DBstr_to_str(buff^[db_NTM_D]));
+       for i:= db_NTM_E1 to db_NTM_E3 do NTM^._E:= decode_line_i (DBstr_to_str(buff^[i]), NTM^._E,[]);
+
+       decode_NTM_19(DBstr_to_str(buff^[db_NTM_19]), NTM);
+
+       s:= DBstr_to_str(buff^[db_NTM_ine]);
+       {$IFDEF NET}
+        strtorec(getstr(s,1,[icao_ARR]), NTM^.rec);
+       {$ENDIF}
+
+       format_NTM_(NTM{,'','',0}) {!}
+     end;
+
+
+{ ---------------------
+  prenos
+  ---------------------
+}
+ { -----------------------------
+    kodovanie podla vzoru 4444,
+    hlavne funkcie
+   -----------------------------
+ }
+  function code_l4_NTM_ (NTM: PNTM; cislo: string): pchar;
+     var   pch : pchar;
+           p   : pchar;
+     begin
+       pch:= StrPasNew(icao_STD + code_NTM_data(NTM));
+
+       pch:= StrNPCopy(pch, icao_ARR, true,true);
+       p:= l4_format_p(NTM^._D);
+       pch:= StrNCopy (pch, p,true,false);
+
+       pch:= StrNPCopy(pch, icao_ARR, true,true);
+       p:= l4_format_p(NTM^._E);
+       pch:= StrNCopy (pch, p,true,false);
+
+       pch:= StrNPCopy(pch, icao_ARR + code_NTM_19(NTM,true),true,true);
+       pch:= StrNPCopy(pch, icao_END, true,true);
+
+       code_l4_NTM_:= pch
+     end;
+
+  function  decode_l4_NTM_ (data: pchars; size: TNETdlz; NTM: PNTM): string;
+     var    p : pchar;
+            res : string;
+            k : int;
+     begin
+       decode_l4_NTM_:= '';
+       fillchar(NTM^,sizeof(NTM^),0);
+       frame_l4_pkt(data,size, res);
+
+       p:= get_strs0(data,size, 1,5, [icao_ARR]);
+       decode_NTM_data(strpas(p), NTM);
+       strdispose(p);
+
+       NTM^._D:= get_strs0(data,size, 6,6, [icao_ARR]);
+
+       k:= get_str_items(data,size,[icao_ARR]);
+       p:= get_strs0(data,size, 7,Maximum(7,N(k-1)), [icao_ARR]);
+       NTM^._E:= strnew(decode_l4_p({decode_line_ip (p),nil,[])} p,true));
+       strdispose(p);
+
+       decode_NTM_19 (get_str(data,size,k,[icao_ARR],sizeof(string)-1),NTM)
+     end;
+
+
+{ ---------------------
+  kodovanie pre prenos
+  ---------------------
+}
+{$IFDEF DATA_BIN}
+  {$I _NOTAM0.cod}
+{$ENDIF}
+
+
+ procedure code_NTM(NTM: PNTM; var pkt: TNETpkt);
+     var   pch : pchar;
+     begin
+       pch:= code_l4_NTM_(NTM,'');
+       new_NETpkt_data (pchars(pch),strlen(pch), pkt.pkt);
+       strdispose(pch)
+     end;
+
+ procedure decode_NTM(const pkt: TNETpkt; NTM: PNTM);
+     begin
+       decode_l4_NTM_ (pkt.pkt.data,pkt.pkt.dlz,NTM);
+       {format_NTM(NTM,'','',0);}
+       {$IFDEF NET}
+         rec_data(pkt.ods, NTM^.rec)
+       {$ENDIF}
+     end;
+
+
+{ ---------------------
+  kluc
+  ---------------------
+}
+
+ function codekey_NTM_(cislo: string; dav: TDate): string;
+    begin
+      codekey_NTM_:=               l4_format_s(cislo)
+                     { vypocitana informacia o subore pre ulozenie }
+                      + icao_ARR + code_l4_date (dav);
+    end;
+
+ function codekey_NTM(NTM: PNTM): string;
+    begin
+      codekey_NTM:= codekey_NTM_(cislo_NTM(NTM){key_NTM (NTM)},NTM^.dav);
+    end;
+
+ procedure decodekey_NTM(key: string; NTM: PNTM);
+     begin
+       fillchar(NTM^,sizeof(NTM^),0);
+       with NTM^ do
+         begin
+           _NTM:= strpasnew (getstr(key,1,[icao_ARR]));
+           decode_l4_date (getstr(key,2,[icao_ARR]),dav)
+         end
+     end;

@@ -1,0 +1,65 @@
+{ ---------------------
+  DB
+  ---------------------
+}
+procedure codeDB_PRZ(PRZ: PPRZ; buff: PDB_buff; desc: PDB_head);
+    begin
+      codeDB_NTM(PNTM(PRZ),buff, desc)
+    end;
+
+procedure decodeDB_PRZ(buff: PDB_buff; PRZ: PPRZ; desc: PDB_head);
+    begin
+      decodeDB_NTM(buff, PNTM(PRZ), desc);
+    end;
+
+{ ---------------------
+  prenos
+  ---------------------
+}
+procedure code0_PRZ(PRZ: PPRZ; var pkt: TNETpkt);
+    begin
+      code0_NTM(PNTM(PRZ),pkt)
+    end;
+
+procedure decode0_PRZ(const pkt: TNETpkt; PRZ: PPRZ);
+    begin
+      decode0_NTM(pkt,PNTM(PRZ));
+      format_PRZ(PRZ);
+    end;
+
+
+procedure code_PRZ(PRZ: PPRZ; var pkt: TNETpkt);
+    begin
+      code_NTM(PNTM(PRZ),pkt)
+    end;
+
+procedure decode_PRZ(const pkt: TNETpkt; PRZ: PPRZ);
+    begin
+      decode_NTM(pkt,PNTM(PRZ));
+      format_PRZ(PRZ);
+    end;
+
+
+{ ---------------------
+  kluc
+  ---------------------
+}
+function codekey_PRZ(PRZ: PPRZ): string;
+   begin
+     with PRZ^ do
+       codekey_PRZ:=               format_s(let)
+                     + icao_ARR  + code_l4_datums (dap)
+                     + icao_ARR  + code_l4_date (dav)
+   end;
+
+procedure decodekey_PRZ(key: string; PRZ: PPRZ);
+    var   t : string;
+    begin
+      with PRZ^ do
+        begin
+          fillchar(PRZ^,sizeof(PRZ^),0);
+          let:= getstr (key,1,[icao_ARR]);
+          decode_l4_datums (getstr(key,2,[icao_ARR]),dap);
+          decode_l4_date (getstr(key,3,[icao_ARR]),dav)
+        end
+    end;

@@ -1,0 +1,109 @@
+procedure _plan_DVZ(x0,y0,x1,y1: int; bk: int; sm: byte);
+    begin
+      BGIgraph.button(x0,y0,x1,y1, bk, btSmall, btOFF);
+      on_off(x0+4,y0+4,x1-4,y1-4,bk+clBUTTON_DARK,bk+clBUTTON_LIGHT, btSmall, btOFF);
+      on_off(x0+6,y0+27,x1-6,y1-6,bk+clBUTTON_DARK,bk+clBUTTON_LIGHT, btSmall, btON);
+
+      SetColor(bk+clBUTTON_LIGHT);
+     { Line(x0+6, y0+23, x1-6, y0+23);}
+      Line(x0+84, y0+27, x0+84, y0+79);
+      Line(x0+84, y0+82, x0+84, y1-6);
+      Line(x0+6,  y0+52, x1-6,  y0+52);
+      Line(x0+6,  y0+79, x1-6,  y0+79);
+
+      SetColor(bk+clBUTTON_DARK);
+     { Line(x0+6, y0+26, x1-6, y0+26);}
+      Line(x0+85, y0+27, x0+85, y0+79);
+      Line(x0+85, y0+82, x0+85, y1-6);
+      Line(x0+6,  y0+53, x1-6,  y0+53);
+      Line(x0+6,  y0+82, x1-6,  y0+82)
+    end;
+
+procedure plan_DVZ(DVZ: PDVZ; x,y: int; b: bool);
+    var   r1 : int;
+          cl : byte;
+          s,t : string;
+          cl_stat,bk: byte;
+          bres : bool;
+    begin
+      with DVZ^ do
+        begin
+          bk:= bkPLAN_[b];
+          cl_stat:= get_stat_cl(stat);
+          _plan_DVZ(x,y,x+dx_DVZ,y+dy_DVZ, bk,bk);
+
+          if pos(cnst_warn,stat)<>0 then cl:= red else cl:= get_stat_cl(stat);
+          s:=      tit_diverzia
+              +' '+tit_pre+' '+pre
+              +' '+tit_na +' '+kym
+              +' '+tit_dna+' '+code_l4_date(date)
+              +' '+tit_zac+' '+code0_utc(zac)
+              +' '+tit_kon+' '+code0_utc(kon);
+
+          bres:= true;
+          if cut_(od)<>'' then s:= s + {$IFNDEF SPEA}tit_odoslana+{$ENDIF}+decode_l4_utc_s(od)
+          else bres:= false;
+          if cut_(vystraha)<>'' then s:= s + {$IFNDEF SPEA}tit_vystraha+{$ENDIF}+decode_l4_utc_s(vystraha)
+          else bres:= false;
+          if bres then s:= s +' ('+decode_stat_s(DVZ^.stat,1)+')';
+
+          setcolor(cl); setcolor(cl_data);
+          {$IFDEF SPEA} SetBkColor(bk); SetTextStyle(BIT8x8, HorizDir,0); inc(y,dy_ch);
+          {$ELSE}       SetTextStyle(SmallFont, HorizDir,4);
+          {$ENDIF}
+          OutTextXY(x+10,y+9,s+'.');
+
+          setcolor(cl_data);
+          OutTextXY(x+10,y+33, tit_ziadost);
+          OutTextXY(x+10,y+61, tit_odoslanie);
+          OutTextXY(x+10,y+89, tit_zabezpecenie);
+          setcolor(cl_data+1);
+          OutTextXY(x+90,y+28{31}, get_line_i(poziadavka,1));
+          OutTextXY(x+90,y+38{41}, get_line_i(poziadavka,2));
+          OutTextXY(x+90,y+55{58}, get_line_i(odoslanie,1));
+          OutTextXY(x+90,y+65{68}, get_line_i(odoslanie,2));
+          OutTextXY(x+90,y+84{87}, get_line_i(zabezpecenie,1));
+          OutTextXY(x+90,y+94{87}, get_line_i(zabezpecenie,2));
+
+          SetTextStyle(DefaultFont, HorizDir,0);
+         {$IFDEF PROCESS_DVZ}
+          if _plan_pre(DVZ^.pre) then s:= adr_airbase(DVZ^.kym)
+          else if _plan_pre(DVZ^.kym) then s:= adr_airbase(DVZ^.kym)
+          else s:= '';
+          write_stat(stat,rec,SERVERaddress, x+dx_DVZ-23,y+12, cl_stat);
+         {$ENDIF}
+        end
+    end; { draw_DVZ }
+
+
+procedure _info_DVZ(x0,y0,x1,y1: int; DVZ: PDVZ); far;
+    begin
+      plan_DVZ(DVZ, x0+(x1-x0-dx_DVZ) shr 1, y0{+winHEIGHT},true)
+    end;
+
+
+{ --------------------
+  Spracovanie hlasenia
+  --------------------
+}
+ function info_DVZ(DVZ: PDVZ; title: string): bool;
+     begin
+       info_DVZ:= Info(title, @_info_DVZ, DVZ,dx_DVZ+20,dy_DVZ+10, nil,0)
+     end;
+
+ function report_DVZ (DVZ: PDVZ; title: string): bool;
+     var   res : bool;
+           p   : pointer;
+     begin
+      { Ak sa program dostane sem, to znamena, ze hlas_DVZ je povolenie
+      }
+       if varovanie_DVZ then
+          begin
+            Beep2;
+            p:= @Beep99
+          end
+       else p:= nil;
+       res:= Info(title, @_info_DVZ, DVZ,dx_DVZ+20,dy_DVZ+10,p,0);
+       if varovanie_DVZ then isDVZ:= isDVZ or (not res)
+     end;
+

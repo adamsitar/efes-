@@ -1,0 +1,145 @@
+{ vyhlada najblizsi bod trate ku bodu,
+  podla nastaveni programu
+}
+ function najblizsi_bod_trate (kod: string; R: TRTE; _15_BxR_ENABLE: bool): int;
+    var   minv,mino,dist : real;
+          ind, i   : int;
+          Bv,Bo,Bi : TsBod;
+          isvor,isbod : bool;
+    begin
+      najblizsi_bod_trate:= -1;
+      if not (_15_BxR_ENABLE or _fpl4_15_bxr_en) then Exit;
+
+      kod:= getstr(kod,1,[icao_NXT]); { Co ked sa mi tu zamota bod so zmenou na trati a ja ju neodfiltrujem ? }
+      isvor:= is_VOR_or_ZS (kod, Bv);
+      isbod:= is_OB (kod,Bo,false);
+      if (not _15_BxR_KM) or _fpl4_15_bxr_en then
+         begin
+           minv:= 10000*1000;
+           mino:= 10000*1000;
+         end
+      else begin
+             minv:= _15_XYxR; minv:= minv*1000.0 + 1;
+             mino:= _15_BxR;  mino:= mino*1000.0 + 1;
+           end;
+      ind:= -1;
+      for i:= 0 to R.top do
+        if is_OB(R.rte^[i].kod,Bi,true) then
+           begin
+             if isbod then
+                begin
+                  dist:= vzdialenost(Bo.x,Bo.y, Bi.x,Bi.y);
+                  if (dist<mino) and (dist<minv) then begin mino:= dist; ind:= i end
+                end;
+             if isvor then
+                begin
+                  dist:= vzdialenost(Bv.x,Bv.y, Bi.x,Bi.y);
+                  if (dist<mino) and (dist<minv) then begin minv:= dist; ind:= i end
+                end;
+             if dist=0 then break
+           end;
+      najblizsi_bod_trate:= ind
+    end;
+
+
+{ urcenie jednoznacneho priesecnika trati, ak je to dovolene
+}
+ function najdi_priesecnik_trati(R,R1: TRTE; var bod_trate: string; var ind_bodu: int; var res: string): int;
+    var   i,j : int;
+          ps  : string;
+    begin
+      najdi_priesecnik_trati:= -1;
+      ind_bodu:= -1;
+      ps:= R.kod+' x '+R1.kod;
+      if not _15_RxR_ENABLE then
+         begin
+           l4_err(a_15c,ps,i_15c,err_15c_neurceny_priesecnik_trati, res);
+           Exit
+         end;
+      for i:= 0 to R.top do
+        for j:= 0 to R1.top do
+            if (is_OB_eq(R.rte^[i].kod,R1.rte^[j].kod)) then
+               begin
+                 if ind_bodu<>-1 then
+                    begin
+                    { Viac priesecnikov alebo spolocnych bodov oboch trati.
+                      Bod prechodu sa musi jednoznacne definovat.
+                    }
+                      l4_err(a_15c,ps,i_15c,err_15c_viac_priesecnikov_trati, res);
+                      Exit
+                    end
+                 else begin
+                        bod_trate:= R.rte^[i].kod;
+                        ind_bodu:= i;
+                      end
+                end;
+      if ind_bodu=-1 then l4_err(a_15c,ps,i_15c,err_15c_niet_priesecnikov_trati, res);
+      najdi_priesecnik_trati:= ind_bodu
+    end;
+
+
+ function patri_bod_na_trat(bod: string; R: TRTE; bod_trate: pstring; var ind_bodu: int; var res: string): int;
+    var   B : TsBod;
+          ires : int;
+    begin
+      res:= '';
+      ind_bodu:= -1;
+
+      (*if decode_OB(bod,'', B, ry,r_, v,v_,v_a, v2,v2_, is_m,t1,t2, true,res,ires) then
+         begin
+         { Kod otocneho bodu podla AIP-u. Lezi na trati R ?
+         } ind_bodu:= _RTEbod_ind(B.kod,R);
+         end;*)
+      bod:= getstr(bod,1,[icao_NXT]);
+      ind_bodu:= _RTEbod_ind(bod,R);
+      if ind_bodu<0 then
+         begin
+         { Azimut alebo zemsur. Urci sa najblizsi bod trate (do vzdialenosti _15_XYxR)...
+         } ind_bodu:= najblizsi_bod_trate(bod,R,_15_BxR_ENABLE);
+           if ind_bodu<0 then
+              if is_VOR_or_ZS (bod,B) then
+                 l4_err(a_15c, bod+'-'+R.kod+' > '+cstr(trunc(_15_XYxR),2)+' km',i_15c,err_15c_bod_daleko_od_trate, res)
+              else l4_err(a_15c,R.kod+'<->'+bod,i_15c,err_15c_bod_nepatri_na_trat,res)
+         end;
+      if ind_bodu>=0 then
+         begin
+           if bod_trate<>nil then bod_trate^:= R.rte^[ind_bodu].kod
+         end;
+
+      patri_bod_na_trat:= ind_bodu
+    end;
+
+
+ function patria_body_na_trat(bod1,bod2: string): int;
+    var   i,ind : int;
+          R : TRTE;
+    begin
+      i:= 0;
+      while (i<RTEs) do
+        begin
+          if (_RTEbod_ind(bod1,RTE^[i])>-1) and (_RTEbod_ind(bod2,RTE^[i])>-1) then break;
+          inc(i)
+        end;
+      if i>=RTEs then i:= -1;
+      patria_body_na_trat:= i
+    end;
+
+
+ function najdi_najblizsi_bod_ku_trati(bod: string; _15_BxR_ENABLE: bool; R: TRTE;
+                                       var bod_trate: string;
+                                       var ind_bodu: int;
+                                       var res: string
+                                      ): int;
+    begin
+      if patri_bod_na_trat(bod,R, @bod_trate,ind_bodu, res)<0 then
+         begin
+           ind_bodu:= najblizsi_bod_trate(bod,R, _15_BxR_ENABLE);
+           if ind_bodu>-1 then
+              begin
+                bod_trate:= R.rte^[ind_bodu].kod;
+                res:= ''
+              end
+           else l4_err(a_15c,bod+'-'+R.kod+' > '+cstr(trunc(_15_XYxR),2)+' km',i_15c,err_15c_bod_daleko_od_trate, res)
+         end;
+      najdi_najblizsi_bod_ku_trati:= ind_bodu
+    end;

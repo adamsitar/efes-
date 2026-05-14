@@ -1,0 +1,292 @@
+{ ---------------------
+  kodovanie
+  ---------------------
+
+   (ESTMI/PL149
+    -BCS643/A1437
+    -IN
+    -B727              ; rozne sposoby zapisu, napr. B727, 02MI29, 2MI29, B73A/M, 3L29/L
+    -SD
+    -EDDK0230 0240
+    -OKG/0323S1005S0700 FL120FL100  ; bod/cas_vysB_vysI vysO_vys_N
+    -K0831S1005
+     OKG/S1005/0323 VOZ/S1005/0336 BNO/S1005/0345 ODNEM/S1005/0348
+    -LHBP0124 LZIB
+    -STS/VIP alebo NIL ; pole 18 poznamky
+    -DATE/             ; pole 19 - datum platnosti planu
+     EET/                        - cas podania spravy
+     SSR/              ;
+     FDP/              ;
+    -                  ; pole 22
+     80/               ; -> polozka 80
+     81/W/...          ; -> polozka 81 ---> RSVM
+   )
+
+   Priklad pola 14 : VOZ/0120F140F010A F070F140B, kde
+
+      bod  ... vstupny bod
+      cas  ... vypocitany cas na bode
+      vysB ... vyska na vstupnom bode do FIR (oblasti)
+      vysI ... vyska na hranici do FIR (oblasti)
+      vysO ... vyska na hranici z FIR (oblasti)
+      vysN ... cielova vyska v dalsom FIRe (oblasti)
+}
+
+ const  max_bod_string = 10;  { 8+1+4+1+5 = 19+medzera = do 20 znakov na jeden bod -> 255/20 = 10 bodov na string }
+
+
+{ -----------------------------
+   kodovanie podla vzoru 4444,
+   pomocne procedury
+   -----------------------------
+}
+ function code_7_FPLC(FPL: PDcFPL): string;
+    begin
+      with FPL^ do code_7_FPLC:= code_l4_7(idn,ssr_,ssr)
+    end;
+
+ procedure decode_7_FPLC(_7: string; FPL: PDcFPL);
+     var   t : string;
+     begin
+       with FPL^ do decode_l4_7 (_7, idn,ssr_,ssr);
+     end;
+
+
+ function code_14_FPLC(FPL: PDcFPL): string;
+    var   _14 : string;
+    begin
+      _14:= '';
+      if FPL^.bodov=0 then Exit;
+
+      with FPL^ do _14:= code_l4_14 (trat[0].kod,trat[0].h,trat[0].m, trat[0].vys,vysOB,
+                                     vys1,vysOB,vys1_a
+                                    );
+
+      if FPL^.bodov>1 then with FPL^ do
+         _14:=   cut_(_14)
+               + icao_NXIT
+               + code_l4_EXI (trat[bodov-1].kod,trat[bodov-1].h,trat[bodov-1].m, trat[bodov-1].vys,vysOB,
+                              vysO,vysOB,vysO_a,
+                              vysH,vysOB
+                             );
+
+      code_14_FPLC:= format_s(_14)
+    end;
+
+
+ procedure decode_14_FPLC(_14: string; FPL: PDcFPL);
+     var   kod1,res : string;
+           h1,m1 : byte;
+           v     : word;
+           v_    : char;
+
+     begin
+       if _14='' then Exit;
+       decode_l4_14 (_14, kod1,h1,m1,v,v_,
+                     true, FPL^.vys1,v_,FPL^.vys1_a
+                    );
+
+       _14:= get_strs0p(@_14[1],length(_14),2,3,[icao_NXIT]);
+       if _14='' then Exit;
+       decode_l4_EXI (_14, kod1, h1,m1, v,v_,
+                      FPL^.vysO,v_,FPL^.vysO_a, FPL^.vysH,v_
+                     );
+     end;
+
+
+ function code_16_FPLC(FPL: PDcFPL): string;
+    begin
+      with FPL^,FPL^.prist do code_16_FPLC:= code_l4_16 (kod, h,m, '', start.h,start.m, true)
+    end;
+
+ procedure decode_16_FPLC(_16: string; FPL: PDcFPL);
+     var   hl,ml : byte;
+           t : string;
+     begin
+       with FPL^,FPL^.prist do decode_l4_16 (_16, start.h,start.m, kod, h,m, hl,ml, t)
+     end;
+
+
+ function code_18_FPLC(FPL: PDcFPL): string;
+    var   _18: string;
+    begin
+      _18:= '';
+      with FPL^ do
+        begin
+          if inf<>'' then _18:= rmk_STS + icao_NXT + inf
+        end;
+      code_18_FPLC:= l4_format_s(_18)
+    end;
+
+ procedure decode_18_FPLC(_18: string; FPL: PDcFPL);
+     begin
+       _18:= _18+NULL;
+       FPL^.inf:= _item_18_(@_18[1],rmk_STS,1)
+     end;
+
+
+ function code_19_FPLC(FPL: PDcFPL): string;
+    var   _19,s: string;
+    begin
+      _19:= '';
+      with FPL^ do
+        begin
+          _19:=               rmk_DATE + icao_NXT + code_l4_date(date)
+                + icao_NXIT + rmk_SSR  + icao_NXT + format_s(ssr0)
+                + icao_NXIT + rmk_EET  + icao_NXT + code_l4_utc(eet.h,eet.m)
+                + icao_NXIT + rmk_FDP  + icao_NXT + format_s(stt)
+        end;
+
+      {$IFDEF FLI_COORDINATION}
+       s:= _code_l4_fli(FPL);
+       if s<>'' then _19:= _19 + icao_NXIT + s;
+      {$ENDIF}
+
+      code_19_FPLC:= _19
+    end;
+
+ procedure decode_19_FPLC(_19: string; FPL: PDcFPL);
+     begin
+       _19:= _19+NULL;
+       decode_l4_date(_item_18_(@_19[1],rmk_DATE,1),FPL^.date);
+       FPL^.ssr0:= _item_18_(@_19[1],rmk_SSR,1);
+       decode_l4_utc(_item_18_(@_19[1],rmk_EET,1),FPL^.eet.h,FPL^.eet.m);
+       FPL^.stt:= _item_18_(@_19[1],rmk_FDP,1);
+       {$IFDEF FLI_COORDINATION}
+        _decode_l4_fli(_19,FPL);
+       {$ENDIF}
+     end;
+
+
+ function  code_22_FPLC(FPL: PDcFPL): string;
+    var    s: string;
+    begin
+      s:= '';
+
+     {$IFDEF RVSM}
+       {if (FPL^._80<>NULL) then
+          begin
+          end;}
+
+       if (FPL^._81<>'') then
+          begin
+            {if s<>'' then s:= s + icao_NXIT;}
+            s:= s+field_81+icao_NXT+eqp_W+icao_NXT+FPL^._81;
+            {if (_81b<>'') then s:= s+eqp_Y+icao_NXT+_81b;}
+          end;
+       code_22_FPLC:= s;
+     {$ENDIF}
+    end;
+
+ procedure decode_22_FPLC(_22: string; FPL: PDcFPL);
+    var    s,t: string;
+    begin
+      if _22='' then Exit;
+      _22:= _22+NULL;
+
+     {$IFDEF RVSM}
+       s:= _item_18_(@_22[1],field_81+icao_NXT+eqp_W,1);
+       if s<>'' then
+          begin
+            {s:= s+NULL;
+            FPL^._81:=_item_18_(@s[1],eqp_W,1);}
+            FPL^._81:= s;
+          end;
+     {$ENDIF}
+    end;
+
+
+{ -----------------------------
+   kodovanie podla vzoru 4444,
+   hlavne funkcie
+  -----------------------------
+}
+ function code_l4_FPLC__(FPL: PDcFPL; _19: bool; cislo: string): pchar;
+    var   pch  : pchar;
+          s    : string;
+          hd   : Thead_ICAO;
+          i    : int;
+          v    : word; v_,v_a : char;
+    begin
+      with FPL^ do
+        begin
+          hd:= stt;
+          pch:= StrPasNew (  icao_STD + hd + cislo
+                           + icao_ARR + code_7_FPLC(FPL)
+                           + icao_ARR + code_l4_8(_8a,_8b, true)
+                           + icao_ARR + code_l4_9(typ,false)
+                           + icao_ARR + code_l4_10(com_,ssr_)
+                           + icao_ARR + code_l4_13(start.kod, start.h,start.m, start_.h,start_.m, true)
+                           + icao_ARR + code_14_FPLC(FPL)
+                          );
+
+          pch:= StrNPCopy(pch, icao_ARR + code_l4_rych_vys(rych,rych_,vys,vysOB,0,false),true,true);
+          v:= vys; v_:= vysOB; v_a:= ' ';
+          for i:= 0 to bodov-1 do with trat[i] do
+              pch:= StrNPCopy(pch, icao_NXIT + code_l4_bod_(kod, h,m, vys,vysOB,vysab, v,v_,v_a),true,true);
+
+          pch:= StrNPCopy(pch, icao_ARR + code_16_FPLC(FPL),true,true);
+          pch:= StrNPCopy(pch, icao_ARR + code_18_FPLC(FPL),true,true);
+          if _19 then
+             begin
+               pch:= StrNPCopy(pch, icao_ARR + code_19_FPLC(FPL),true,true);
+              { Pole 22 }
+               s:= code_22_FPLC(FPL);
+               if s<>'' then pch:= StrNPCopy(pch, icao_ARR + s,true,true);
+             end;
+          pch:= StrNPCopy(pch,icao_END, true,true)
+        end;
+      code_l4_FPLC__:= pch
+    end;
+
+
+ function code_l4_FPLC_(FPL: PDcFPL; cislo: string): pchar;
+    begin
+      code_l4_FPLC_:= code_l4_FPLC__(FPL,false,cislo)
+    end;
+
+
+ function  decode_l4_FPLC_ (data: pchars; size: TNETdlz; FPL: PDcFPL): string;
+    var    t,res   : string;
+           p,m : pchar;
+           i,k : int;
+           v   : word; v_,v_a : char;
+    begin
+      decode_l4_FPLC_:= '';
+      fillchar(FPL^,sizeof(FPL^),0);
+      frame_l4_pkt(data,size, res);
+
+      with FPL^ do
+        begin
+          decode_7_FPLC  (get_str(data,size,2,[icao_ARR],sizeof(string)-1), FPL);
+          decode_l4_8    (get_str(data,size,3,[icao_ARR],sizeof(string)-1), _8a,_8b);
+          typ:=          (get_str(data,size,4,[icao_ARR],sizeof(typ)-1));
+          decode_l4_10   (get_str(data,size,5,[icao_ARR],sizeof(string)-1),com_,ssr_);
+          decode_l4_13   (get_str(data,size,6,[icao_ARR],sizeof(string)-1), start.kod,start.h,start.m, start_.h,start_.m);
+          decode_14_FPLC (get_str(data,size,7,[icao_ARR],sizeof(string)-1), FPL);
+
+          p:= get_str0(data,size, 8, [icao_ARR]); m:= p;
+          if decode_l4_rych_vys (getPstr(p,1,[icao_NXIT]), rych,rych_, vys,v_) then m:= PosStr(p,2,[icao_NXIT]);
+          if m<>nil then
+             begin
+               v:= vys; v_:= v_; v_a:= ' ';
+               bodov:= 0; k:= GetPStrItems(m,[icao_NXIT]);
+               while (bodov<k) and (bodov<max_bod_FPLC) do
+                 begin
+                   decode_l4_bod_ (GetPStr(m,bodov+1,[icao_NXIT]),
+                                   trat[bodov].kod, trat[bodov].h,trat[bodov].m,
+                                   trat[bodov].vys, v_, trat[bodov].vysab,
+                                   v,v_,v_a
+                                  );
+                   inc(bodov)
+                 end;
+             end;
+          strdispose(p);
+
+          decode_16_FPLC (get_str(data,size,9, [icao_ARR],sizeof(string)-1), FPL);
+          decode_18_FPLC (get_str(data,size,10,[icao_ARR],sizeof(string)-1), FPL);
+          decode_19_FPLC (get_str(data,size,11,[icao_ARR],sizeof(string)-1), FPL);
+          decode_22_FPLC (get_str(data,size,12,[icao_ARR],sizeof(string)-1), FPL);
+        end
+    end;
+

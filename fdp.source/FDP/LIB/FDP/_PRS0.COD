@@ -1,0 +1,107 @@
+const  db_PRS0_RIADKOV = 2;
+
+{ ---------------------
+  kodovanie
+  --------------------- }
+
+function code_PRS0_(PRS: PPRS0): string;
+   var   s : string;
+   begin
+     with PRS^ do
+       begin
+         s:=   ZAC_SPR + ' '
+
+             + ODD_SPR + format_s(let)
+             + ODD_SPR + format_s(kod)
+
+             + ODD_SPR + TimeToStr(zac.h,zac.m,'')+' '+TimeToStr(kon.h,kon.m,'')
+             + ODD_SPR + format_s(vys)
+
+             + ODD_SPR + ' '{vys_}
+
+             + ODD_SPR + DateToStr(datz.d,datz.m,datz.r,0,'')
+             + ODD_SPR + format_s(stt)
+             + ODD_SPR + DateToStr(datk.d,datk.m,datk.r,0,'') { toto su nove polozky }
+
+             + ODD_SPR + format_s(strpas(pozn))
+
+             + ODD_SPR + TimeToStr2(casp.h,casp.m,casp.s,'','')
+             + KON_SPR
+       end;
+     code_PRS0_:= s
+   end;
+
+procedure decode_PRS0_(s: string; PRS: PPRS0);
+   var    t : string;
+          b : byte;
+   begin
+     fillchar(PRS^,sizeof(TPRS),0);
+     with PRS^ do
+       begin
+         let := GetStr(s,2,setLET_1_1);
+         kod := GetStr(s,3,setLET_1_1);
+
+         t   := GetStr(s,4,setLET_1_1);
+         GetTimeStr(zac.h,zac.m,b, Copy(t,1,4));
+         GetTimeStr(kon.h,kon.m,b, Copy(t,6,4));
+
+         vys := GetStr(s,5,setLET_1_1);
+         {vys_:= getchar(GetStr(s,6,setLET_1_1));}
+
+         GetDateStr(datz.r, datz.m,datz.d, GetStr(s,7,setLET_1_1), false);
+         stt:= GetStr(s,8,setLET_1_1);
+         GetDateStr(datk.r, datk.m,datk.d, GetStr(s,9,setLET_1_1), false);
+
+         pozn := strpasnew(getstr(s,10,setLET_1_1));
+
+         GetTimeStr(casp.h,casp.m,casp.s, GetStr(s,11,setLET_1_1))
+       end
+   end;
+
+
+
+{ ---------------------
+  DB
+  --------------------- }
+
+procedure codeDB_PRS0(PRS: PPRS0; buff: PDB_buff; desc: PDB_desc);
+    var   s: string;
+    begin
+      s:= code_PRS0_(PRS);
+      {$IFDEF NET}
+       s:= s + rectostr(PRS^.rec) + KON_SPR;
+      {$ENDIF}
+      Move(s[0],buff^[0],length(s)+1)
+    end;
+
+procedure decodeDB_PRS0(buff: PDB_buff; PRS: PPRS0; desc: PDB_desc);
+    var   s: string;
+    begin
+      Move(buff^[0],s[0],ord(buff^[0][0])+1);
+      decode_PRS0_(s, PRS);
+     {$IFDEF NET}
+       strtorec(getstr(s,2,[KON_SPR]), PRS^.rec)
+     {$ENDIF}
+    end;
+
+
+function codekey_PRS0(PRS: PPRS0): string;
+   begin
+     with PRS^ do
+       codekey_PRS0:=            format_s(kod)
+                     +ODD_SPR + {' '}format_s(let)
+                     +ODD_SPR + DateToStr(datz.d,datz.m,datz.r,0,'')
+                     +ODD_SPR + TimeToStr2(casp.h,casp.m,casp.s,'','')
+   end;
+
+procedure decodekey_PRS0(s: string; PRS: PPRS0);
+    begin
+      with PRS^ do
+        begin
+          fillchar(PRS^,sizeof(PRS^),0);
+          kod:= getstr(s,1,setLET_1_1);
+          {}let:= getstr(s,2,setLET_1_1);
+          GetDateStr(datz.r,datz.m,datz.d, getstr(s,3,setLET_1_1), false);
+          GetTimeStr(casp.h,casp.m,casp.s, GetStr(s,4,setLET_1_1))
+        end
+    end;

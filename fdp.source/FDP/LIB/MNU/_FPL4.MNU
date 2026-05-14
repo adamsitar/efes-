@@ -1,0 +1,419 @@
+{ -----------------
+   FPL
+ תתתתתתתתתתתתתתתתתת
+}
+{$IFDEF FPL4}
+
+ {$I ..\lib\mnu\_FPL4.h}
+
+ procedure mnuFPL4spracovanie_init(MMenu: PSubmenu); far;
+     var   smnu : TPItems;
+           sbmnu : PSubMenu;
+           i,items,nl,ihk: int;
+           pb : bool;
+     begin
+       items:= 0; nl:= 0; ihk:= 0;
+       pb:= {$IFDEF BACKUP} true {$ELSE} true {$ENDIF};
+
+       {$IFDEF PROCESS_FPL4}
+        smnu[items]:= Switch2 (' '+hk(ihk)+FPL4ERR,       @icao_ERR_DISPLAY,nil);
+        inc(items);
+        smnu[items]:= Switch2 (' '+hk(ihk)+TLGHEADERR,    @icao_HEAD_ERR,nil);
+        inc(items);
+        smnu[items]:= Switch2 (' '+hk(ihk)+TLGHEADERRTLG, @icao_HEAD_ERR_TLG,nil);
+        inc(items);
+
+        add_newline_(0,nl,items,smnu);
+
+        smnu[items]:= Switch2_(' '+hk(ihk)+FPL4PPLENABLE, @_FPL4_PPL_ENABLE, @SERVERstatus,pb, nil);
+        inc(items);
+        smnu[items]:= Switch2_(' '+hk(ihk)+FPL4CHGENABLE, @_FPL4_CHG_ENABLE, @SERVERstatus,pb, nil);
+        inc(items);
+        smnu[items]:= Switch2_(' '+hk(ihk)+FPL4DLAENABLE, @_FPL4_DLA_ENABLE, @SERVERstatus,pb, nil);
+        inc(items);
+        smnu[items]:= Switch2_(' '+hk(ihk)+FPL4CNLENABLE, @_FPL4_CNL_ENABLE, @SERVERstatus,pb, nil);
+        inc(items);
+        smnu[items]:= Switch2_(' '+hk(ihk)+FPL4DEPENABLE, @_FPL4_DEP_ENABLE, @SERVERstatus,pb, nil);
+        inc(items);
+        smnu[items]:= Switch2_(' '+hk(ihk)+FPL4ARRENABLE, @_FPL4_ARR_ENABLE, @SERVERstatus,pb, nil);
+        inc(items);
+        smnu[items]:= Switch2_(' '+hk(ihk)+FPL4XGENABLE,  @_FPL4_XG_ENABLE,  @SERVERstatus,pb, nil);
+        inc(items);
+        smnu[items]:= Switch2_(' '+hk(ihk)+ACTORDEP,      @_ACT_OR_DEP,      @SERVERstatus,pb, nil);
+        inc(items);
+
+        add_newline_(0,nl,items,smnu);
+
+        smnu[items] := Switch2_(' '+hk(ihk)+FPL4PREDAY, @_propose_dayFPL4 ,@SERVERstatus,pb,nil);
+        inc(items);
+        smnu[items] := SwitchI_(' '+hk(ihk)+FPL4PRE, @dT_preactive_FPL4,tit_min,dT_preactive_FPL4_lo,dT_preactive_FPL4_hi,
+                                @SERVERstatus,pb,nil
+                               );
+        inc(items);
+        smnu[items] := SwitchI_(' '+hk(ihk)+FPL4PRO, @dT_propose_FPL4,tit_min,dT_propose_FPL4_lo,dT_propose_FPL4_hi,
+                                @SERVERstatus,pb,nil
+                               );
+        inc(items);
+        smnu[items] := SwitchI_(' '+hk(ihk)+FPL4COO, @dT_coordinate_FPL4,tit_min,dT_coordinate_FPL4_lo,dT_coordinate_FPL4_hi,
+                                @SERVERstatus,pb,nil
+                               );
+        inc(items);
+        smnu[items] := SwitchI_(' '+hk(ihk)+ FPLCDEL,@dT_deactive_FPLC,tit_min,dT_deactive_FPLC_lo,dT_deactive_FPLC_hi,
+                                @SERVERstatus,pb,nil
+                               );
+        inc(items);
+        smnu[items] := SwitchI_(' '+hk(ihk)+FPL4UNA, @dT_unactive_FPL4,tit_min,dT_unactive_FPL4_lo,dT_unactive_FPL4_hi,
+                                @SERVERstatus,pb,nil
+                               );
+        inc(items);
+       {$ENDIF}
+
+       for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i]);
+     end;
+
+
+ procedure mnuFPL4zobrazenie_init(MMenu: PSubmenu); far;
+     var   smnu : TPItems;
+           sbmnu : PSubMenu;
+           i,items,nl,ihk: int;
+           pb : bool;
+     begin
+       items:= 0; nl:= 0; ihk:= 0;
+       pb:= {$IFDEF BACKUP} true {$ELSE} true {$ENDIF};
+
+       {$IFDEF _DPMI}
+        smnu[items]:= Switch2 (' '+hk(ihk)+FPL4GET,   @find_and_process_FPL4,nil);
+        inc(items);
+       {$ENDIF}
+
+       smnu[items]:= Switch2(' '+hk(ihk)+FDRGET, @find_and_process_FDR,nil);
+       inc(items);
+
+       smnu[items]:= Switch2(' '+hk(ihk)+PLANL,   @bminiFPL4,nil);
+       inc(items);
+       smnu[items]:= SwitchI(' '+hk(ihk)+FPL4L15,@max_FPL4_15_rm,'',max_FPL4_15_r_lo,max_FPL4_15_r_hi,nil);
+       inc(items);
+       smnu[items]:= SwitchI(' '+hk(ihk)+FPL4L18,@max_FPL4_18_rm,'',max_FPL4_18_r_lo,max_FPL4_18_r_hi,nil);
+       inc(items);
+
+       smnu[items]:= Switch2(' '+hk(ihk)+FPL4A36YKA,   @RUSSIAN_FPL,nil);
+       inc(items);
+       smnu[items]:= Switch2(' '+hk(ihk)+FPL4SOURCE,   @ZDROJ_PLANU,nil);
+       inc(items);
+
+       smnu[items]:= SubMenu (hk(ihk)+FPL4SORT+'... ', OptMenu (FPL4SORT,nil,cmDefault,
+                        Radio  (FPL4SORT, @comp_FPL4, 0,
+                          RadioItem('~a~) '+FPL4SORT_7a,
+                          RadioItem('~b~) '+FPL4SORT_INP,
+                          RadioItem('~c~) '+FPL4SORT_EET,
+                          nil) ) ),
+                        nil)
+                      ),nil);
+       inc(items);
+
+       add_newline_(0,nl,items,smnu);
+       smnu[items]:= Switch2 (' '+hk(ihk)+FPL4REPORTPLAN, @_FPL4_REPORT_PLAN, nil);
+       inc(items);
+       smnu[items]:= Switch2_(' '+hk(ihk)+FPL4CHGREP, @_FPL4_CHG_REPORT, @_FPL4_PPL_ENABLE,true, nil);
+       inc(items);
+       smnu[items]:= Switch2_(' '+hk(ihk)+FPL4DLAREP, @_FPL4_DLA_REPORT, @_FPL4_DLA_ENABLE,true, nil);
+       inc(items);
+       smnu[items]:= Switch2_(' '+hk(ihk)+FPL4CNLREP, @_FPL4_CNL_REPORT, @_FPL4_CNL_ENABLE,true, nil);
+       inc(items);
+       smnu[items]:= Switch2_(' '+hk(ihk)+FPL4DEPREP, @_FPL4_DEP_REPORT, @_FPL4_DEP_ENABLE,true, nil);
+       inc(items);
+       smnu[items]:= Switch2_(' '+hk(ihk)+FPL4ARRREP, @_FPL4_ARR_REPORT, @_FPL4_ARR_ENABLE,true, nil);
+       inc(items);
+
+       add_newline_(0,nl,items,smnu);
+       smnu[items]:= NewTLine(mnuTLAC,nil);
+       inc(items);
+       smnu[items]:= Switch2(' '+hk(ihk)+FPL4PRNICAO,@prn_FPL4_ICAO, nil);
+       inc(items);
+
+       for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i]);
+     end;
+
+
+ procedure mnuFPL4dekodovanie_init(MMenu: PSubmenu); far;
+     var   smnu : TPItems;
+           sbmnu : PSubMenu;
+           i,items,nl,ihk: int;
+           pb : bool;
+     begin
+       items:= 0; nl:= 0; ihk:= 0;
+       pb:= {$IFDEF BACKUP} true {$ELSE} true {$ENDIF};
+
+       add_newline_(0,nl,items,smnu);
+       smnu[items]:= Switch2_(' '+hk(ihk)+FPL49bCHECKICAO,  @_9b_CHECK_ICAO, @SERVERstatus,pb, nil);
+       inc(items);
+       smnu[items]:= Switch2_(' '+hk(ihk)+FPL49bCHECKZZZZ,  @_9b_CHECK_ZZZZ, @SERVERstatus,pb, nil);
+       inc(items);
+       smnu[items]:= Switch2_(' '+hk(ihk)+FPL49bCHECKTSGA,  @_9b_CHECK_TSGA, @SERVERstatus,pb, nil);
+       inc(items);
+       smnu[items]:= Switch2_(' '+hk(ihk)+FPL49bCHECKMIL,   @_9b_CHECK_MIL , @SERVERstatus,pb, nil);
+       inc(items);
+       smnu[items]:= Switch2_(' '+hk(ihk)+FPL49cCHECKICAO,  @_9c_CHECK_ICAO, @SERVERstatus,pb, nil);
+       inc(items);
+       smnu[items]:= Switch2_(' '+hk(ihk)+FPL49cCHECKZZZZ,  @_9c_CHECK_ZZZZ, @SERVERstatus,pb, nil);
+       inc(items);
+
+       smnu[items]:= Switch2_(' '+hk(ihk)+FPL10aCHECK,      @_10a_CHECK, @SERVERstatus,pb, nil);
+       inc(items);
+       smnu[items]:= Switch2_(' '+hk(ihk)+FPL10bCHECK,      @_10b_CHECK, @SERVERstatus,pb, nil);
+       inc(items);
+
+       add_newline_(0,nl,items,smnu);
+       smnu[items]:= Switch2_(' '+hk(ihk)+FPL415aRANGE,     @_15a_RANGE,     @SERVERstatus,pb, nil);
+       inc(items);
+       smnu[items]:= Switch2_(' '+hk(ihk)+FPL415bRANGE,     @_15b_RANGE,     @SERVERstatus,pb, nil);
+       inc(items);
+       {Switch2_(FPL415IOENABLE,  @_15_IO_ENABLE,  @SERVERstatus,pb, nil);
+       inc(items);}
+       smnu[items]:= Switch2_(' '+hk(ihk)+FPL415RxRENABLE,  @_15_RxR_ENABLE,  @SERVERstatus,pb, nil);
+       inc(items);
+       smnu[items]:= Switch2_(' '+hk(ihk)+FPL415BxRENABLE,  @_15_BxR_ENABLE,  @SERVERstatus,pb, nil);
+       inc(items);
+       smnu[items]:= Switch2_(' '+hk(ihk)+FPL415BxRKM,      @_15_BxR_KM,      @SERVERstatus,pb, nil);
+       inc(items);
+       smnu[items]:= SwitchI_(' '+hk(ihk)+FPL415BxR,        @_15_BxR,'km',0,_15_BxR_hi,   @SERVERstatus,pb, nil);
+       inc(items);
+       smnu[items]:= SwitchI_(' '+hk(ihk)+FPL415XYxR,       @_15_XYxR,'km',0,_15_XYxR_hi, @SERVERstatus,pb, nil);
+       inc(items);
+
+       smnu[items]:= Switch2_(' '+hk(ihk)+FPL415DCTPOINTS,  @_15_DCT_POINTS, @SERVERstatus,pb, nil);
+       inc(items);
+       smnu[items]:= Switch2_(' '+hk(ihk)+FPL4MZPENABLE,    @_FPL4_MZP_ENABLE, @SERVERstatus,pb, nil);
+       inc(items);
+
+       {smnu[items]:= Switch2_(' '+hk(ihk)+FPL415ALLENABLE,  @_15_ALL_ENABLE, @SERVERstatus,pb, nil);
+       inc(items);}
+       smnu[items]:= Switch2_(' '+hk(ihk)+FPL415UPLNATRAT,  @_15_UPLNA_TRAT, @SERVERstatus,pb, nil);
+       inc(items);
+       {smnu[items]:= Switch2_(' '+hk(ihk)+FPL415CHECKFDA,   @_15_CHECK_FDA,  @SERVERstatus,pb, nil);
+       inc(items);}
+
+       add_newline_(0,nl,items,smnu);
+       smnu[items]:= Switch2_(' '+hk(ihk)+FPL418CHECKIS,      @_18_CHECK_IS,   @SERVERstatus,pb, nil);
+       inc(items);
+       smnu[items]:= Switch2_(' '+hk(ihk)+FPL418CHECK,        @_18_CHECK,      @SERVERstatus,pb, nil);
+       inc(items);
+       smnu[items]:= Switch2_(' '+hk(ihk)+FPL418TYPECHECK,    @_18_TYPE_CHECK, @SERVERstatus,pb, nil);
+       inc(items);
+       smnu[items]:= Switch2_(' '+hk(ihk)+FPL418COMNAVCHECK,  @_18_COM_NAV_CHECK, @SERVERstatus,pb, nil);
+       inc(items);
+       smnu[items]:= Switch2_(' '+hk(ihk)+FPL418DATCHECK,     @_18_DAT_CHECK,  @SERVERstatus,pb, nil);
+       inc(items);
+       smnu[items]:= Switch2_(' '+hk(ihk)+FPL418DEPCHECK,     @_18_DEP_CHECK, @SERVERstatus,pb, nil);
+       inc(items);
+       smnu[items]:= Switch2_(' '+hk(ihk)+FPL418DESTCHECK,    @_18_DEST_CHECK, @SERVERstatus,pb, nil);
+       inc(items);
+       smnu[items]:= Switch2_(' '+hk(ihk)+FPL418ALTNCHECK,    @_18_ALTN_CHECK, @SERVERstatus,pb, nil);
+       inc(items);
+
+       add_newline_(0,nl,items,smnu);
+       smnu[items]:= Switch2_(' '+hk(ihk)+APEETEXI,           @_AP_EET_EXI, @SERVERstatus,pb, nil);
+       inc(items);
+
+       for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i]);
+     end;
+
+
+ procedure mnuFPL4editovanie_init(MMenu: PSubmenu); far;
+     var   smnu : TPItems;
+           sbmnu : PSubMenu;
+           i,items,nl,ihk: int;
+           pb : bool;
+     begin
+       items:= 0; nl:= 0; ihk:= 0;
+       pb:= {$IFDEF BACKUP} true {$ELSE} true {$ENDIF};
+
+       smnu[items]:= Switch2 (' '+hk(ihk)+EFIL8,       @_EFIL_8, nil);
+       inc(items);
+       smnu[items]:= Switch2 (' '+hk(ihk)+EFIL9,       @_EFIL_9, nil);
+       inc(items);
+       smnu[items]:= Switch2 (' '+hk(ihk)+EFIL10,      @_EFIL_10, nil);
+       inc(items);
+       smnu[items]:= Switch2 (' '+hk(ihk)+EFIL15ab,    @_EFIL_15ab, nil);
+       inc(items);
+       add_newline_(0,nl,items,smnu);
+       smnu[items]:= Switch2 (' '+hk(ihk)+CHG713,      @_CHG__7_13, nil);
+       inc(items);
+       smnu[items]:= Switch2 (' '+hk(ihk)+FPLCHG1417,  @_FPL_CHG__14_17, nil);
+       inc(items);
+       smnu[items]:= Switch2 (' '+hk(ihk)+ACTFIELDS,   @_ACT__FIELDS, nil);
+       inc(items);
+
+       for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i]);
+     end;
+
+
+ procedure mnuFPL4volby_init(MMenu: PSubmenu); far;
+     var   smnu : TPItems;
+           sbmnu : PSubMenu;
+           i,items,nl,ihk: int;
+     begin
+       items:= 0; nl:= 0; ihk:= 0;
+
+      {$IFDEF PROCESS_FPL4}
+       sbmnu:= SubMenu(mnu_SPRACOVANIE, OptMenu_S(tit_FPL4+' - '+mnu_SPRACOVANIE,
+                       hlp_mnu_FPL4_SPRACOVANIE,cmNASTAV_SPRACOVANIE,15,nil),nil);
+       sbmnu^.PMenu_init:= @mnuFPL4spracovanie_init;
+       smnu[items]:= SubMenuInitialized(sbmnu,nil);
+       inc(items);
+      {$ENDIF}
+
+       sbmnu:= SubMenu(mnu_ZOBRAZENIE, OptMenu_S(tit_FPL4+' - '+mnu_SPRACOVANIE,
+                      hlp_mnu_FPL4_ZOBRAZENIE,cmNASTAV_SPRACOVANIE,15,nil),nil);
+       sbmnu^.PMenu_init:= @mnuFPL4zobrazenie_init;
+       smnu[items]:= SubMenuInitialized(sbmnu,nil);
+       inc(items);
+
+      {$IFDEF FPL4_ACT}
+       sbmnu:= SubMenu(mnu_DEKODOVANIE, OptMenu_S(tit_FPL4+' - '+mnu_SPRACOVANIE,
+                      hlp_mnu_FPL4_DEKODOVANIE,cmNASTAV_SPRACOVANIE,15,nil),nil);
+       sbmnu^.PMenu_init:= @mnuFPL4dekodovanie_init;
+       smnu[items]:= SubMenuInitialized(sbmnu,nil);
+       inc(items);
+
+       sbmnu:= SubMenu(mnu_EDITOVANIE, OptMenu_S(tit_FPL4+' - '+mnu_SPRACOVANIE,
+                      hlp_mnu_FPL4_EDITOVANIE,cmNASTAV_SPRACOVANIE,15,nil),nil);
+       sbmnu^.PMenu_init:= @mnuFPL4editovanie_init;
+       smnu[items]:= SubMenuInitialized(sbmnu,nil);
+       inc(items);
+      {$ENDIF}
+
+       for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i]);
+     end;
+
+ procedure mnuFPL4Dprehlad_init_(MMenu: PSubmenu; _all: bool); far;
+     var   smnu    : TPItems;
+           sbmnu : PSubMenu;
+           i,items,nl : int;
+     begin
+       items:= 0; nl:= 0;
+
+       smnu[items]:= Item (mnu_FPL4_INAC, cmPREHLAD_FPL4D_INACTIVATED, nil);
+       inc(items);
+       smnu[items]:= Item (mnu_FPL4_PREA, cmPREHLAD_FPL4D_PREACTIVATED, nil);
+       inc(items);
+       smnu[items]:= Item (mnu_FPL4_PROP, cmPREHLAD_FPL4D_PROPOSED, nil);
+       inc(items);
+       smnu[items]:= Item (mnu_FPL4_NOTA, cmPREHLAD_FPL4D_NOTACTIVED, nil);
+       inc(items);
+       smnu[items]:= Item (mnu_FPL4_REAL, cmPREHLAD_FPL4D_REALISED, nil);
+       inc(items);
+       smnu[items]:= Item (mnu_FPL4_ALL,  cmPREHLAD_FPL4D_ALL, nil);
+       inc(items);
+
+       if _all then
+          begin
+            add_newline_(0,nl,items,smnu);
+            smnu[items]:= Item (tit_PRED, cmPREHLAD_FPL4D_PPL,  nil);
+            inc(items);
+            smnu[items]:= Item (tit_ARCH, cmPREHLAD_FPL4D_ARCH, nil);
+            inc(items);
+          end;
+
+       for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i]);
+     end;
+
+ procedure mnuFPL4Dprehlad_init_all(MMenu: PSubmenu); far;
+     begin
+       mnuFPL4Dprehlad_init_(MMenu,true)
+     end;
+
+ procedure mnuFPL4Dprehlad_init(MMenu: PSubmenu); far;
+     begin
+       mnuFPL4Dprehlad_init_(MMenu,false)
+     end;
+
+
+ procedure mnuFPL4_init(MMenu: PSubmenu); far;
+     var   smnu  : TPItems;
+           sbmnu : PSubMenu;
+           i,items,nl : int;
+     begin
+       items:= 0; nl:= 0;
+
+       {$IFDEF PROCESS_FPL4}
+        smnu[items]:= Item   (mnu_FPL4_FPL_F3, cm_FPL,nil);
+        inc(items);
+        smnu[items]:= Item   (mnu_FPL4_CHG , cm_CHG,nil);
+        inc(items);
+        smnu[items]:= Item   (mnu_FPL4_DLA , cm_DLA,nil);
+        inc(items);
+        smnu[items]:= Item   (mnu_FPL4_CNL , cm_CNL,nil);
+        inc(items);
+        add_newline_(0,nl,items,smnu);
+        smnu[items]:= Item   (mnu_FPL4_DEP , cm_DEP,nil);
+        inc(items);
+        smnu[items]:= Item   (mnu_FPL4_ACT_F3 , cm_ACT,nil);
+        inc(items);
+        {smnu[items]:= Item  (mnu_FPL4_EST , cmFPLc,nil);
+        inc(items);
+        smnu[items]:= Item   (mnu_FPL4_ETO , cmCHGc_strip,nil);
+        inc(items);}
+        smnu[items]:= Item   (mnu_FPL4_ARR , cm_ARR,nil);
+        inc(items);
+
+        { smnu[items]:= SubMenu (mnu_FPL4_PLAN, WinMenu(mnu_FPL4_PLAN,hlpmnuFPL4,
+                                Item   (mnu_FPL4_PLAN, cm_FPL,nil);
+                                Item   (mnu_FPL4_DLA , cm_DLA,nil);
+                                Item   (mnu_FPL4_CNL , cm_CNL,nil);
+                                add_newline_(0,nl,items,smnu);
+                                Item   (mnu_FPL4_DEP , cm_DEP,nil);
+                                Item   (mnu_FPL4_ACT_F3 , cm_ACT,nil);
+                                Item   (mnu_FPL4_EST , cmFPLc,nil);
+                                Item   (mnu_FPL4_ETO , cmCHGc_strip,nil);
+                                Item   (mnu_FPL4_ARR , cm_ARR,nil)
+                                nil)
+        }
+        add_newline_(2,nl,items,smnu);
+       {$ENDIF}
+
+       sbmnu:= SubMenu(cut_r(FPL4D)+'... ', WinMenu(tit_FPL4_PREHLAD,hlp_mnu_PREHLAD_FPL4D,nil),nil);
+       sbmnu^.PMenu_init:= @mnuFPL4Dprehlad_init_all;
+       smnu[items]:= SubMenuInitialized(sbmnu,nil);
+       inc(items);
+       smnu[items]:= Item (tit_PRED, cmPREHLAD_FPL4_PPL,  nil);
+       inc(items);
+       smnu[items]:= Item (tit_ARCH, cmPREHLAD_FPL4_ARCH, nil);
+       inc(items);
+
+       if not mnu_data_opt_common then
+          begin
+            add_newline_(2,nl,items,smnu);
+            sbmnu:= SubMenu(cut_r(mnu_OPTi)+'... ', WinMenu(tit_OPTi,hlp_mnu_FPL4_NASTAV,nil),nil);
+            sbmnu^.PMenu_init:= @mnuFPL4volby_init;
+            smnu[items]:= SubMenuInitialized(sbmnu,nil);
+            inc(items);
+          end;
+
+       for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i])
+     end;
+
+{$ENDIF}
+
+(*
+      smnu[items]:= SubMenu(' FPL P~R~OCESSING...   ',
+                    OptMenu(' FPL PROCESSING ', hlpmnuFPLprocessing, cmConfigChanged,
+                        {Switch2('~a~) ACT BY ~D~EP/EET', @FPD_ACT_EN,
+                        Switch2('~b~) ACT ~O~FFER',      @FPD_ACT_OFFER,
+                        NewLine2(0,}
+
+                        {NewLine(
+                        Switch2('UPDATE FLI', @repeat_FLI,
+                        }
+                        {
+                        SwitchI('~g~) POINT TO BORDER DISTANCE   [km]' , @S_IN_KM,
+                                                                         S_IN_KM_lo,S_IN_KM_hi,
+
+                        NewLine(
+                        Switch2('set up ~S~SR code          ', @SSR_ENABLED,
+                        NewLine(
+                        Switch2('~s~ectors enabed           ', @SECTOR_EN,
+                        }
+                        nil ) ) ) ) ) )
+
+*)

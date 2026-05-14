@@ -1,0 +1,299 @@
+{ ------------------------------------------
+   NETpaket -> RTRpaket
+  ------------------------------------------
+}
+function code_NETpkt_to_RTRpkt (const Np : TNETpkt;
+                                var   Rp : TRTRpkt_bin;
+                                distribute : PBplan_rec;
+                                protocol   : TRTRprotocol;
+                                var whole  : bool
+                               ): word;
+
+   var   RTRhead : TRTRpkt_head;
+         RTBadr  : TRTRadr;
+
+         dlz_pkt,dlz_head,dlz_data,dlz_adr : word;
+         pL : bool;
+         ofs,o,i,nd : int;
+         a : TNETadr;
+
+   begin
+     code_NETpkt_to_RTRpkt:= 0;
+     whole:= false;
+
+     FillChar(Rp,SizeOf(Rp),0);
+     FillChar(RTRhead,SizeOf(RTRhead),0);
+     dlz_pkt:= 0;
+
+    { Naplnenie pola adries :
+    }
+     if (protocol=rpRTR) and (distribute<>nil) then
+        begin
+          RTRhead.pocet:= 0;
+          nd:= -1;
+          pL:= false;
+
+          for i:= 0 to NODEpoc-1 do
+            if (NODEs^[i].desc.pro=RTR) and (distribute^[i]) then
+               begin
+                 inc(RTRhead.pocet);
+                 RTRhead.adr:= NODEs^[i].desc.adrr; {NETadr_rtr(NODEs^[i].desc.adr);}
+                 Move(RTRhead.adr,Rp[2+(RTRhead.pocet-1)*sizeof(RTRhead.adr)],sizeof(RTRhead.adr))
+               end;
+        end
+
+     else begin
+            RTRhead.pocet:= 1;
+            nd:= is_NETadr(Np.adr);
+            pL:= is_proL(Np.adr);
+
+            case protocol of
+
+              rpRTR, rpRTI :
+                begin
+                  RTRhead.adr:= NETadr_rtr(Np.adr);
+                  if (RTRhead.adr=0) then RTRhead.pocet:= 0
+                end;
+
+              rpRTB :
+                begin
+                  RTRhead.adr:= RBRIDGEadr;
+                  if nd>-1 then RTBadr:= NODEs^[nd].desc.adrr
+                  else RTBadr:= 0
+                end
+
+              else RTRhead.adr:= RTRadr;
+            end;
+
+            if RTRhead.pocet=1 then Move(RTRhead.adr,Rp[2],sizeof(RTRhead.adr));
+          end;
+
+    { Naplnenie ostatnych poloziek :
+    }
+     if RTRhead.pocet>0 then
+        begin
+          RTRhead.prizn:= ast_RTR_PKT;
+          RTRhead.ods:= RTRadr;
+
+         { hlavicka : priznak
+         }
+          Rp[0]:= RTRhead.prizn;
+
+         { adresy : adresatov adresati odosielatel
+         }
+          Rp[1]:= RTRhead.pocet;
+          ofs:= N(RTRhead.pocet-1)*sizeof(TRTRadr);  { preskocenie zaplneneho pola adries }
+          Rp[ofs+4]:= lo(RTRadr);
+          Rp[ofs+5]:= hi(RTRadr);
+
+         { vypocet typu spravy a jej dlzky
+         }
+          dlz_adr:= 0;                               { dlzka dodatocnej adresy }
+          if protocol = rpRTB then
+             begin
+               if RTBadr<>0 then
+                  begin
+                    RTRhead.typ:= rspr_RTB1;
+                    dlz_adr:= sizeof(TRTRadr)
+                  end
+               else begin
+                    RTRhead.typ:= rspr_RTB2;
+                    dlz_adr:= sizeof(TNETadr)
+                  end
+             end
+          else if (protocol=rpRTR) and (not pkt_from_this_node(Np)) then
+             begin
+               RTRhead.typ:= rspr_RT_;
+               dlz_adr:= sizeof(TNETadr)
+             end
+          else RTRhead.typ:= rspr_RTR;
+
+          if pL then inc(RTRhead.typ,rspr_LONGoffs);
+
+          dlz_head:= sizeof(Np.head.typ)+sizeof(Np.head.cis);
+          if pL then inc(dlz_head, sizeof(Np.head.ind)+sizeof(Np.head.poc));
+          dlz_data:= Minimum(Minimum(Np.pkt.dlz, size_of_RTRdata-(ofs+dlz_head+dlz_adr)),size_of_NETdata);
+
+         { identifikacia spravy
+           typ  cislo  dlz_dat
+         }
+          Rp[ofs+6]:= lo(RTRhead.typ);
+          Rp[ofs+7]:= hi(RTRhead.typ);
+
+          RTRhead.cis:= RTR_cis;
+          {$IFOPT R+} {$DEFINE R} {$R-} {$ENDIF} inc(RTR_cis); {$IFDEF R} {$UNDEF R} {$R+} {$ENDIF}
+          Rp[ofs+8]:= lo(RTRhead.cis);
+          Rp[ofs+9]:= hi(RTRhead.cis);
+
+{A}       RTRhead.dlz:= dlz_head+dlz_data+dlz_adr;
+          Rp[ofs+10]:= lo(RTRhead.dlz);
+          Rp[ofs+11]:= hi(RTRhead.dlz);
+
+          ofs:= 1+1+sizeof(TRTRadr)+ofs+sizeof(TRTRadr)+6;
+{A}       dlz_pkt:= ofs+RTRhead.dlz;
+
+        { prenasane udaje, vcitane identifikacie paketu :
+          typ cislo [index pocet] data [doplnkova adresa]
+        }
+          Move(Np.head.typ,Rp[ofs],sizeof(Np.head.typ)); inc(ofs,sizeof(Np.head.typ));
+          Move(Np.head.cis,Rp[ofs],sizeof(Np.head.cis)); inc(ofs,sizeof(Np.head.cis));
+
+          if pL then
+             begin
+               Move(Np.head.ind,Rp[ofs],sizeof(Np.head.ind)); inc(ofs,sizeof(Np.head.ind));
+               Move(Np.head.poc,Rp[ofs],sizeof(Np.head.poc)); inc(ofs,sizeof(Np.head.poc));
+             end;
+
+          if Np.pkt.data<>nil then Move(Np.pkt.data^,Rp[ofs],dlz_data);
+{A}       inc(ofs, dlz_data);
+
+        { pri smerovani ku RBRIDGE pripajam ciselnu alebo textovu adresu
+        }
+          if (RTRhead.typ in [rspr_RTB1,rspr_RTB2, rspr_LRTB1,rspr_LRTB2]) then
+             begin
+               if RTBadr<>0 then Move(RTBadr,Rp[ofs],sizeof(RTBadr))
+               else begin
+                      if nd>-1 then a:= NODEs^[nd].desc.adr
+                      else a:= Np.adr[0];
+                      Move(a[0],Rp[ofs],length(a)+1)
+                    end
+             end
+
+        { pri odosielani z RBRIDGE pripajam adresu odosielatela
+        }
+          else if (RTRhead.typ in [rspr_RT_,rspr_LRT_]) then
+                  begin
+                    Move(Np.ods[0],Rp[ofs],length(Np.ods)+1)
+                  end
+
+        end;
+
+     whole:= dlz_data = Np.pkt.dlz;
+     code_NETpkt_to_RTRpkt:= dlz_pkt
+   end;
+
+
+
+{ ------------------------------------------
+   RTRpaket -> NETpaket
+  ------------------------------------------
+}
+function decode_RTRpkt_bin_to_RTRpkt(const Rp: TRTRpkt_bin; var Rp0A: TRTRpkt; var err: bool): bool;
+   var   p,d : pointer;
+         kod : word;
+
+   begin
+     decode_RTRpkt_bin_to_RTRpkt:= false;
+     err:= false;
+
+     p:= @Rp;
+     move(p^,Rp0A.head.prizn,sizeof(Rp0A.head.prizn)); incptr(p,sizeof(Rp0A.head.prizn));
+     if Rp0A.head.prizn<>ast_RTR_PKT then Exit;
+
+     move(p^,Rp0A.head.pocet,sizeof(Rp0A.head.pocet)); incptr(p,sizeof(Rp0A.head.pocet));
+     move(p^,Rp0A.head.adr,  sizeof(Rp0A.head.adr));   incptr(p,sizeof(Rp0A.head.adr));
+     move(p^,Rp0A.head.ods,  sizeof(Rp0A.head.ods));   incptr(p,sizeof(Rp0A.head.ods));
+
+     move(p^,Rp0A.head.typ,  sizeof(Rp0A.head.typ));   incptr(p,sizeof(Rp0A.head.typ));
+     move(p^,Rp0A.head.cis,  sizeof(Rp0A.head.cis));   incptr(p,sizeof(Rp0A.head.cis));
+
+     move(p^,Rp0A.head.dlz,  sizeof(Rp0A.head.dlz));   incptr(p,sizeof(Rp0A.head.dlz));
+
+     Rp0A.head.dlz:= Minimum(Rp0A.head.dlz,size_of_RTRdata);
+
+     if  (Rp0A.head.typ = rsprCAS) then
+         begin
+           decode_rtrUTC(p,Rp0A.head.dlz);
+         end
+
+     else if    (Rp0A.head.typ = rspr_SYS)
+             or (Rp0A.head.typ = rspr_RTR)  or (Rp0A.head.typ = rspr_LRTR)
+             or (Rp0A.head.typ = rspr_RT_)  or (Rp0A.head.typ = rspr_LRT_)
+             or (Rp0A.head.typ = rspr_RTB1) or (Rp0A.head.typ = rspr_LRTB1)
+             or (Rp0A.head.typ = rspr_RTB2) or (Rp0A.head.typ = rspr_LRTB2)
+             then
+                begin
+                  d:= @Rp0A.data;
+                  move(p^,d^,Rp0A.head.dlz);
+                  decode_RTRpkt_bin_to_RTRpkt:= true
+                end
+     else begin
+            err:= true;
+          end;
+   end;
+
+
+{
+  Zisti kod spravy a transformuje ho na NETpacket podla mnoziny povolenych
+  kodov : [rspr_SYS, rspr_RDP, rspr_FDP, rspr_OLD_lo..rspr_OLD_hi].
+}
+function decode_RTRpkt_to_NETpkt (const Rp : TRTRpkt_bin; var Np: TNETpkt; var err: bool): bool;
+   var   Rp0A : PRTRpkt;
+         Radr : TRTRadr;
+         Nadr : TNETadr;
+         res  : bool;
+         off,dlz_data,dlz_head,dlz_adr : word;
+         pL   : bool;
+
+   label X;
+
+   begin
+     FillChar(Np,SizeOf(Np),0); { musi byt ! }
+
+     New(Rp0A); FillChar(Rp0A^,sizeof(Rp0A),0);
+     res:= decode_RTRpkt_bin_to_RTRpkt(Rp, Rp0A^,err);
+     if not res then goto X;
+
+     dlz_head:= sizeof(Np.head.typ) + sizeof(Np.head.cis);
+     pL:= Rp0A^.head.typ in set_rspr_FDP_L;
+     if pL then inc(dlz_head, sizeof(Np.head.ind)+sizeof(Np.head.poc));
+
+     off:= 0;
+     Move(Rp0A^.data[off], Np.head.typ, sizeof(Np.head.typ)); off:= sizeof(Np.head.typ);
+     Move(Rp0A^.data[off], Np.head.cis, sizeof(Np.head.cis)); inc(off,sizeof(Np.head.cis));
+     if pL then
+        begin
+          Move(Rp0A^.data[off], Np.head.ind, sizeof(Np.head.ind)); inc(off,sizeof(Np.head.ind));
+          Move(Rp0A^.data[off], Np.head.poc, sizeof(Np.head.poc)); inc(off,sizeof(Np.head.poc));
+        end;
+
+     Np.ods:= is_RTRadr(Rp0A^.head.ods);
+     dlz_data:= Rp0A^.head.dlz-dlz_head;
+
+     if (Rp0A^.head.typ = rspr_SYS)
+         or (Rp0A^.head.typ = rspr_RTR) or (Rp0A^.head.typ = rspr_LRTR)
+         or (Rp0A^.head.typ = rspr_RT_) or (Rp0A^.head.typ = rspr_LRT_)
+          then
+          begin
+            Np.adr:= RTRaddress;
+            if Rp0A^.head.typ in [rspr_RT_,rspr_LRT_] then
+               begin
+                 dec(dlz_data,sizeof(TNETadr));
+                 Move(Rp0A^.data[dlz_head+dlz_data],Nadr[0],sizeof(TNETadr));
+                 Np.ods:= Nadr
+               end
+          end
+
+     else if (Rp0A^.head.typ=rspr_RTB1) or (Rp0A^.head.typ = rspr_LRTB1) then
+          begin
+            dec(dlz_data,sizeof(TRTRadr));
+            Move(Rp0A^.data[dlz_head+dlz_data],Radr,sizeof(TRTRadr));
+            Np.adr:= is_RTRadr(Radr)
+          end
+
+     else if (Rp0A^.head.typ = rspr_RTB2) or (Rp0A^.head.typ = rspr_LRTB2) then
+          begin
+            dec(dlz_data,sizeof(TNETadr));
+            Move(Rp0A^.data[dlz_head+dlz_data],Nadr[0],sizeof(TNETadr));
+            Nadr:= is_RTRadr(is_in_RTRadr(Nadr));
+            Np.adr:= Nadr
+          end
+
+     else goto X;
+
+     new_NETpkt_data (@Rp0A^.data[dlz_head], N(dlz_data), Np.pkt);
+
+     X:
+     decode_RTRpkt_to_NETpkt:= res;
+     Dispose(Rp0A)
+   end;

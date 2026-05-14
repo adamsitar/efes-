@@ -1,0 +1,125 @@
+  { תתתתתתתתתתתתתתתתתת
+     ESTm
+    תתתתתתתתתתתתתתתתתת
+    תתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתת
+    b) dekodovanie EST do struktrury FPLm
+    תתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתת
+    METODA JE VYUZIVANA OBJEKTOM O_OPL a O_CAMUS
+    - trat sa uvedie v tvare ESTu (zatial )
+
+  }
+  function O_L4_FDP._decode_ESTm (var FPL: DFPL4; var FPLm: DmFPL; var res: string): bool;
+     var   h,m,b,h_,m_,hl,ml : byte;
+           t,s,s2,s3 : string;
+           i,k       : int;
+           poc,rdk   : int;
+           v         : word;
+           r         : single;
+           v_,r_     : char;
+           pch       : pchar;
+     begin
+       res:= '';
+       _decode_ESTm:= false;
+       FillChar(FPLm,sizeof(FPLm),0);
+
+       with FPLm do
+         begin
+
+          { identifikacia ...
+          }
+           decode_l4_7(FPL._7,idn,s,ssr);
+           idn:= cut_(idn);
+           {$IFNDEF L4444M}
+            idn_:= ' ';
+           {$ENDIF}
+
+           ssr:= code_l4_7c(ssr);
+
+           typ := getstr(FPL._9,1,[icao_NXT]);
+
+          { pravidla a typ letu...
+          }
+           decode_l4_8(FPL._8, _8a,_8b);
+
+          { start, prist ...
+          }
+           decode_l4_13(FPL._13, start.kod,start.h,start.m, h_,m_);
+           decode_l4_16(FPL._16, start.h,start.m, prist.kod,prist.h,prist.m,hl,ml, prist_);
+
+          { rychlost, vyska, trat...
+          }
+           if FPL._22<>nil then decode_l4_rych_vys (GetPStr(FPL._22,1,[icao_NXIT]), rych,rych_, vys,vys_);
+
+          { trat...
+          }
+           pch:= FPL._15; FPLm.trat:= nil; rdk:= 0;
+           s:= getstr(FPL._14,1,[icao_NXT]);
+           if (s<>'') then
+              begin
+                s:= s+NULL;
+                pch:= strpos(FPL._15,@s[1]);
+                if pch=nil then pch:= FPL._15;
+                inc(rdk,length(s)-1)
+              end;
+
+           poc:= GetPStrItems(pch,[icao_NXIT]);
+           i:= 1; bodov:= 0;
+           while (i<=poc) do
+             begin
+               t:= GetPStr(pch,i,[icao_NXIT]);
+              { na prvom mieste sa moze nachadzat rychlost a vyska letu }
+               if (i=1) and decode_l4_rych_vys(t, r,r_, v,v_) then
+                  begin
+                    vys:= v; vys_:= v_;
+                    rych:= r; rych_:= r_
+                  end
+               else begin
+                      s:= _decode_bod_trate(GetStr(t,1,[icao_NXT]),cfg_OB);
+                      s2:= GetStr (t,2,[icao_NXT]);
+                      s3:= GetStr (t,3,[icao_NXT]);
+                      decode_l4_vys(s2, v,v_);
+                      if vys=0 then begin vys:= v; vys_:= v_ end;
+                      if (i=1) and (s=start.kod) then
+                           begin
+                             GetTimeStr(start.h,start.m,b, delchar(s3,setPism))
+                           end
+                      else if (s=prist.kod) and (i=poc) then
+                           begin
+                             GetTimeStr(prist.h,prist.m,b, delchar(s3,setPism))
+                           end
+                      else begin
+                             if s2<>'' then
+                                begin
+                                  s:= s+icao_NXT+s2;
+                                  if s3<>'' then
+                                     begin
+                                       s:= s+icao_NXT+s3
+                                     end
+                                end;
+
+                                inc(rdk,length(s)+1);
+                                if trat<>nil then
+                                   if rdk <= dlz_rdk_FPLm then s:= icao_NXIT+s
+                                   else s:= kbCRLF+s
+                                else dec(rdk,1);
+                                trat:= StrNPCopy(trat,s,true,true);
+                                if rdk >= dlz_rdk_FPLm then rdk:= length(s)
+                           end
+                    end;
+               inc(i)
+             end;
+
+          { pozn }
+           pozn:= nil;
+
+          { ssr0
+           s:= strpas(_18);
+           if s<>'0' then ssr0:= s;}
+
+           stat:= cnst_active;
+           init_date(date, year,month,day);
+           {init_time(time, hour,min,sec)}
+         end;
+       format_mFPL(@FPLm);
+       _decode_ESTm:= res=''
+     end;

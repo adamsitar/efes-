@@ -1,0 +1,48 @@
+      type   TUDP_port = record
+               port   : word;
+               desc   : int;
+               flag   : word;
+               asynch : bool;
+             end;
+
+             PUDP_port = ^TUDP_port;
+
+
+      const { - casova synchronizacia (sk)
+              - systemove spravy, inicializacia (cz) : priznak 0xA
+            }
+              UDP_PORT_SYS : TUDP_port = (port   : $5102;
+                                          desc   : -1;
+                                          flag   : NET_FLG_NONBLOCKING {NET_FLG_};
+                                          asynch : true
+                                         );
+
+
+             { V Zvolene je brc ! }
+
+
+            { - RLI
+            }
+              UDP_PORT_BRC : TUDP_port = (port   : $5100;
+                                          desc   : -1;
+                                          flag   : NET_FLG_BROADCAST;
+                                          asynch : false
+                                         );
+
+
+            { - priama komunikacia (sk,cz)
+              - casova synchronizacia (cz) : priznak 0xF0
+            }
+              UDP_PORT_FDP : TUDP_port = (port   : $5101;
+                                          desc   : -1;
+                                          flag   : NET_FLG_NONBLOCKING {NET_FLG_};
+                                          asynch : true
+                                         );
+
+
+      const   UDP_FHOST = 0;
+              UDP_MTU   : long = 30;  { UDP_buff_size } {#020701: bolo 20}
+
+              cfg_UDP_PORT  = 'UDP-PORT';
+              cfg_IP_ADR    = 'IP-ADR';
+

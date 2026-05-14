@@ -1,0 +1,73 @@
+const   FPLPREDAY       = 'PREAKTIVOVANIE DENNùCH PLèNOV LETOV ';
+
+procedure mnuZOZNAMY_init(MMenu: PSubmenu); far;
+    var   smnu : TPItems;
+          i,items,ihk,nl : int;
+    begin
+      items:= 0; ihk:= 0; nl:= 0;
+
+      smnu[items]:=  Switch2('~1~. TABUúKA VOJENSKùCH PLèNOV LETOV ',  @tab_mFPL, nil);
+      inc(items);
+      {$IFDEF AIRBASE}
+       smnu[items]:= NewTLine(' PODANê (VLASTNê) PLèNY LETOV : ',nil);
+       inc(items);
+       smnu[items]:= Switch2 ('  - '+hk(ihk)+' PODANê FPL ',             @_preactived_FPLM,     nil);
+       inc(items);
+       smnu[items]:= Switch2 ('  - '+hk(ihk)+' íIADOSTI O PRIPOMIENKY ', @_proposed_FPLM,       nil);
+       inc(items);
+       smnu[items]:= Switch2 ('  - '+hk(ihk)+' VYDANê PRIPOMIENKY ',     @_coordinated_FPLM,    nil);
+       inc(items);
+
+       smnu[items]:= NewTLine(' PLèNY LETOV Z INùCH LETãSK : ',nil);
+       inc(items);
+       smnu[items]:= Switch2 ('  - '+hk(ihk)+' ODOSLANê FPL ',           @_preactived_FPLM_ot,  nil);
+       inc(items);
+       smnu[items]:= Switch2 ('  - '+hk(ihk)+' íIADOSTI O PRIPOMIENKY ', @_proposed_FPLM_ot,    nil);
+       inc(items);
+       smnu[items]:= Switch2 ('  - '+hk(ihk)+' VYDANê PRIPOMIENKY ',     @_coordinated_FPLM_ot, nil);
+       inc(items);
+       {smnu[items]:= Switch2 ('  '+hk(ihk)+' AKTIVOVANê PLèNY ',       @_activated_FPLM_ot,   nil);
+       inc(items); }
+      {$ELSE}
+       smnu[items]:= Switch2 ('  - '+hk(ihk)+' PODANê FPL ',             @_preactived_FPLM,     nil);
+       inc(items);
+       smnu[items]:= Switch2 ('  - '+hk(ihk)+' íIADOSTI O PRIPOMIENKY ', @_proposed_FPLM,       nil);
+       inc(items);
+       smnu[items]:= Switch2 ('  - '+hk(ihk)+' VYDANê PRIPOMIENKY ',     @_coordinated_FPLM,    nil);
+       inc(items);
+      {$ENDIF}
+
+      smnu[items]:= NewLine(nil);
+      inc(items);
+      smnu[items]:= Switch2('~2~. TABUúKA PLèNOV ~I~NùCH LETOV   ',    @tab_oFPL,nil);
+      inc(items);
+      {$IFDEF AIRBASE}
+       smnu[items]:= NewTLine(' PODANê (VLASTNê) PLèNY LETOV : ',nil);
+       inc(items);
+       smnu[items]:= Switch2 ('  - '+hk(ihk)+' PODANê FPL ',             @_preactived_FPLO,     nil);
+       inc(items);
+
+       smnu[items]:= NewTLine(' PLèNY LETOV INùCH LETãSK : ',nil);
+       inc(items);
+       smnu[items]:= Switch2 ('  - '+hk(ihk)+' ODOSLANê FPL ',           @_preactived_FPLO_ot,  nil);
+       inc(items);
+       {smnu[items]:= Switch2 ('  '+hk(ihk)+' AKTIVOVANê PLèNY ',       @_activated_FPLO_ot,   nil);
+       inc(items); }
+      {$ELSE}
+       smnu[items]:= Switch2 ('  - '+hk(ihk)+' PODANê FPL ',             @_preactived_FPLO,     nil);
+       inc(items);
+      {$ENDIF}
+
+      add_newline(nl,items, smnu);
+      smnu[items]:= Switch2('~3~. TABUúKA ~C~IVILNùCH LETOV ',  @tab_cFPL,nil);
+      inc(items);
+
+      smnu[items]:= NewLine(nil);
+      inc(items);
+      smnu[items]:= Switch2('~4~. '+FPLPREDAY, @_propose_dayFPLM,nil);
+      inc(items);
+      smnu[items]:= Switch2('~5~. RADENIE PODúA ABECEDY/STAVU A ÄASU õTARTU ', @tab_mFPL_abc,nil);
+      inc(items);
+
+      for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i])
+    end;

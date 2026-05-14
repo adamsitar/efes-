@@ -1,0 +1,237 @@
+ A       Austalia
+ B       North-west Europe (Greenland,Iceland)
+ C       Canada, North Atlantik
+ D       North West Africa (Algrie,Tunisie, Niger
+ E       North West Europe (Belgique,Germany,Finland,UK,Netherlands,Ireland,Denmark,Luxembourg,Norway,Pologne,Sveden,GDR)
+ F       South and Middle Africa (South Africa,Namibia,Botswana,Congo,Swaziland)
+ G       West Africa (Maroc,Mali,Guinee)
+ H       East Africa (Ethiopia,Libya,Burundi,Egypt,...)
+ K       USA
+ L       Middle,East,South Europe (Bulgaria,Cyprus,Espana,France,Greece,Hungary,Italia,Czech Republic,Israel,Malta,Austria,Portugal,Romanie,Suisse,Turkey,Giraltar,Yougoslavie,Slovakia)
+ M       Middle America (Netherlands Antilles,Colombia,Guatemala,Mexico,Cuba...)
+ N       New Zealand
+ O       Middle East and Far East
+ P       Alaska, Hawaii, North Pacifik
+ R       East Asia (China,Japan,Korea,Japan...)
+ S       South America (Argentina,...), South Atlantik and Pacifik
+ T       Middle Atlantik
+ U       USSR
+ V       South Asia (India...Viet Nam)
+ W       Indonesia (Singapore)
+ Z       North Korea, Cina
+
+
+ AA-AD   Austalia
+ AG      Slomon Islands
+ AH-AM   Austalia
+ AN      Nauru
+ AP-AS   Austalia
+ AY      Papua New Guinea
+
+ BG      Greenland
+ BI      Iceland
+
+ CF      Saint Perre et Miquel
+ CU-CZ   Canada
+
+ DA      Algerie
+ DD      Benin
+ DG      Ghana
+ DH      Haute-Volta
+ DI      Cote d'Invoire
+ DR      Niger
+ DT      Tunisie
+ DX      Togo
+
+ EB      Belgique
+ ED      Germany
+ EF      Finland
+ EG      United Kingdom
+ EH      Netherlands
+ EI      Ireland
+ EK      Denmark
+ EL      Luxembourg
+ EN      Norway
+ EP      Pologne
+ ES      Sveden
+ ET      GDR
+
+ FA      South Africa
+ FA      Namibia
+ FB      Botswana
+ FC      Congo
+ FD      Swaziland
+ .
+ .
+ .
+
+ GA     Mali
+ .
+ .
+ .
+ GU     Guinee
+
+ HA     Ethiopia
+ HB     Burundi
+ .
+ .
+ .
+ HE     Egypt
+
+ KA-KZ  USA
+
+ LB     Bulgaria
+ LC     Cyprus
+ LE     Espana
+ LF     France
+ LG     Greece
+ LH     Hungary
+ LI     Italia
+ LK     Czech Republic
+ LL     Israel
+ LM     Malta
+ LO     Austria
+ LP     Portugal
+ LR     Romanie
+ LS     Suisse
+ LT     Turkey
+ LX     Gibraltar
+ LY     Yugoslavia
+ LZ     Slovakia
+
+ MA     Netherlands Antilles
+ MC     Colombia
+ MG     Guatemala
+ .
+ .
+ MM     Mexico
+ .
+ .
+ MX     Bermuda
+
+ NC     Cook Island (New Zealand)
+ .
+ .
+ .
+ NZ     New Zealand
+
+ OA     Afganistan
+ .
+ OI     Iran
+ OK     Kuwait
+ OR     Iraq
+ .
+ .
+ OE     Saudia Arabia
+
+ PA     Alaska
+ PH     Hawaii
+
+ RC     China
+ RJ     Japan
+ RK     Korena
+ RO     Japan
+
+ SA     Argentina
+ SB     Brasil
+ .
+ .
+ .
+ SU     Uruguay
+
+
+ UAAA   Alma-Ata                zona Altma-Ata  (Kazachstan,...
+ UAFF   Frunce
+ UATA   Aralsk
+
+ UBBB   Baku                    zona Baku
+ UBEE   Evlach
+
+ UEEE   Yakutsk                 zona Yakutsk
+ UEEM   Magdagachi
+
+ UGGG   Tbilisi                 zona Tbilisi    (Gruzia
+ UGEE   Yerevan                                  Armenia...
+ UGSS   Sukhumi
+
+ UHBB                           zona Chabarovsk
+ UHBP   Ekimchan
+ UHHH   Khabarovsk
+ UHWZ   Vladivostok
+ UHSS   Yuzhno-Sakhalinsk
+
+ UI     Sibir                   zona Irkutsk
+ UIA    Chita
+ UIB    Bratsk
+ UII    Irkutsk
+ UIU
+
+ UKB    Kiev/Borispol           zona Kiev
+ UKC    Donetsk
+ UKF    Simferopol
+ UKH    Kharkov
+ UKI    Kishinev
+ UKKK   Kiev/Zhulany
+ UKKS   Semyenovka
+ UKL    Lvov
+ UKO    Odessa
+
+ ULLL   Petrograd
+ ULMM   Murmansk                zona Petrohrad
+ ULTT   Talin
+ ULWW   Volodga
+
+ UMMM   Minsk                   zona Minsk       (Bielorussia
+ UMRZ   Riga ATCC                                 Latvia
+ UMWW   Vilnius                                   Litva
+
+ UN                             zona Novosibirsk (Russia Sibir
+ UNNN   Novosibirsk
+
+ UOTT   Turukhansk              zona Norilsk     (North Russia
+ UOII
+
+ URKK   Krasnodar               zona Rostov      (South Russia, North Kaukaz, Kaspic Sea
+ URMM   Mineralnye Vody
+ URRR   Rostov na Donu
+ URSS   Sochi
+ URWW   Volgograd
+
+ USSS   Sverdlovsk              zona Sverdlovsk  (Middle Russia, Ural
+
+ UTAA   Ashkhabad               zona Tashkent
+ UTAK   Krasnovosk
+ UTAV   Chardodzhou
+ UTDD   Dushanbe                                  Tadgegistan
+ UTTT   Taskent
+                                zona Moskva
+ UUDD   Moskva/Domodevo
+ UUEE   Moskva/Sheremetyevo
+ UUOO   Voronez
+ UUUM   Moskva/
+ UUUU   Moskva/
+ UUWR   Ryazan
+ UUWW   Moskva/Vnukovo
+
+ UVVV   Kujbyshev               zona Kujbyshev    Middle-west Russia
+ UVVT   Togliati
+
+ UWPP   Penza                   West Russia
+ UWWW   Kuybyshev
+
+
+ VA     India
+ .
+ .
+ .
+ VV     Viet Nam
+
+ WA     Indonesia
+ .
+ .
+ .
+ WS     Singapore
+
+ ZK      North Korea
+ ZL,ZP,ZS,ZU,ZW,ZY    Cina
+

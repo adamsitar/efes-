@@ -1,0 +1,38 @@
+{ תתתתתתתתתתתתתתתתתת
+   RTZ
+  תתתתתתתתתתתתתתתתתת
+
+  spracovanie spravy o schopnostiach
+
+}
+ function O_OPL.decode_RTZ (data: pchars; size: word; var res: string): bool;
+    var   d,p,k : pchar;
+          dlz : int;
+          RTZ : TRTZ;
+    begin
+      res:= '';
+      decode_RTZ:= true;
+      if not OPL__PROCESS_RTZ then Exit;
+
+      fillchar(RTZ,sizeof(RTZ),0);
+      d:= stralloc(size);
+      move(data^,d[0],size);
+      p:= strpos(d,icao_STD);
+      k:= strpos(d,icao_END);
+      incptr(pointer(p),length(icao_STD+rtz_ID+icao_NXIT));
+      if (p=nil) or (k=nil) then Exit;
+      RTZ.id:= getPstr(p,1,[icao_NXIT]+odd_icao);
+      incptr(pointer(p),length(RTZ.id));
+      if (p<>nil) and (p[0]<>NULL) and (p[0]=icao_NXIT) then incptr(pointer(p),length(icao_NXIT));
+      if (p<>nil) and (p[0]<>NULL) then
+         begin
+           dlz:= k-p;
+           RTZ.data:= stralloc(dlz);
+           move(p[0],RTZ.data[0],dlz);
+         end;
+      strdispose(d);
+      init_date(RTZ.date, year,month,day);
+      zarad_RTZ(@RTZ,'',true,src_type);
+      disp_RTZ(@RTZ);
+      decode_RTZ:= (res='') and true
+    end;

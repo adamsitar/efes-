@@ -1,0 +1,265 @@
+{$IFDEF DATA_BIN}      { Povodny prenosovy format }
+  {$I _ZAM0.cod}
+{$ENDIF}
+
+ { ------------------------------------------------------
+
+   Priklad : (ZAM                      ; pole  3
+              -500                     ; kod letiska
+              -F230                    ; vrchna pouzita letova hladina
+              -9810230450 9810231500   ; datum zaciatku a ukoncenia
+              -05                      ; uzivatel zodpovedny za priestor - zatial VU
+              -poznamky                ; pole 18 - poznamky, pole moze obsahovat oddelovace "-"
+              -OPR/05                  ; pole 19 - doplnkove informacie : VU a pracovisko podania planu
+               UKL/ulohy
+               TYP/typy
+               RMK/pravidla
+               SRC/100
+               DATE/datum podania planu
+               FDP/stav spracovania planu
+             )
+
+ }
+
+ { -----------------------------
+    kodovanie podla vzoru 4444,
+    pomocne procedury
+   -----------------------------
+ }
+ function code_ZAM_data(ZAM: PZAM): string;
+    var   s: string;
+    begin
+      s:=               format_s(ZAM^.kod)
+          + icao_ARR  + format_s(ZAM^.vys)
+          + icao_ARR  + code_l4_datum(ZAM^.zac)
+          + icao_NXIT + code_l4_datum(ZAM^.kon)
+          + icao_ARR  + format_s(ZAM^.vu);
+      code_ZAM_data:= s
+    end;
+
+ function decode_ZAM_data(s: string; ZAM: PZAM; var res: string; check: bool): string;
+    var   t,r: string;
+    begin
+      r:= '';
+      ZAM^.kod:= getstr(s,1,[icao_ARR]);
+      ZAM^.vys:= getstr(s,2,[icao_ARR]);
+      t:= getstr(s,3,[icao_ARR]);
+      decode_l4_datum(getstr(t,1,[icao_NXIT]),ZAM^.zac);
+      decode_l4_datum(getstr(t,2,[icao_NXIT]),ZAM^.kon);
+      ZAM^.vu:= getstr(s,4,[icao_ARR]);
+      decode_ZAM_data:= r
+    end;
+
+
+ {function code_ZAM_18(ZAM: PZAM): string;
+    var   s: string;
+    begin
+      code_ZAM_18:= s
+    end;
+
+ function decode_ZAM_18(_18: string; ZAM: PZAM): string;
+    var   t: string;
+    begin
+      _18:= _18+#0;
+      decode_ZAM_18:= ''
+    end;}
+
+
+ function code_ZAM_19(ZAM: PZAM; archive: bool): string;
+    var   s: string;
+    begin
+      s:=               rmk_OPR  + icao_NXT  + l4_format_s(ZAM^.vu)
+          + icao_NXIT + rmk_UKL  + icao_NXT  + l4_format_s(strpas(ZAM^.ulohy))
+          + icao_NXIT + rmk_TYP  + icao_NXT  + l4_format_s(strpas(ZAM^.typy))
+          + icao_NXIT + hd_FPL   + icao_NXT  + cstr(ZAM^.planov,1)
+          + icao_NXIT + hd_DEP   + icao_NXT  + cstr(ZAM^.letov,1)
+          + icao_NXIT + rmk_RMK  + icao_NXT  + l4_format_s(ZAM^.prav)
+          + icao_NXIT + rmk_SRC  + icao_NXT  + l4_format_s(ZAM^.src);
+
+      if archive then
+         s:= s + icao_NXIT + rmk_DATE + icao_NXT + code_l4_datums(ZAM^.dap)
+               + icao_NXIT + rmk_FDP  + icao_NXT + format_s(ZAM^.stat);
+
+      code_ZAM_19:= s
+    end;
+
+ function decode_ZAM_19(_19: string; ZAM: PZAM): string;
+    var   t: string;
+    begin
+      _19:= _19+#0; { nebude > 254 }
+
+      {t:= _item_18_(@_19[1],rmk_OPR,1);
+      ZAM^.vu:=  decode_l4_s(getstr(t,1,[icao_NXIT]),true);
+      ZAM^.src:= decode_l4_s(getstr(t,2,[icao_NXIT]),true);}
+
+      ZAM^.vu     := _item_18_(@_19[1],rmk_OPR,1);
+      ZAM^.ulohy  := strpasnew(decode_l4_s(_item_18_(@_19[1],rmk_UKL,1),true));
+      ZAM^.typy   := strpasnew(decode_l4_s(_item_18_(@_19[1],rmk_TYP,1),true));
+      ZAM^.planov := s_int(_item_18_(@_19[1],hd_FPL,1));
+      ZAM^.letov  := s_int(_item_18_(@_19[1],hd_DEP,1));
+      ZAM^.prav   := getchar(_item_18_(@_19[1],rmk_RMK,1));
+      ZAM^.src    := _item_18_(@_19[1],rmk_SRC,1);
+
+      decode_l4_datum(_item_18_(@_19[1],rmk_DATE,1),ZAM^.dap);
+      ZAM^.stat:= _item_18_(@_19[1],rmk_FDP,1);
+
+      decode_ZAM_19:= ''
+    end;
+
+
+
+ { -----------------------------
+    kodovanie podla vzoru 4444,
+    hlavne funkcie
+   -----------------------------
+ }
+ function code_l4_ZAM_ (ZAM: PZAM; cislo: string): pchar;
+    var   pch : pchar;
+          hd  : Thead_ICAO;
+          p   : pchar;
+    begin
+      hd:= hd_ZAM;
+      pch:= StrPasNew(   icao_STD  + hd + cislo
+                       + icao_ARR  + code_ZAM_data(ZAM)
+                     );
+
+      pch:= StrNPCopy(pch, icao_ARR, true,true);
+      p:= l4_format_p(ZAM^.pozn);
+      pch:= StrNCopy (pch, p,true,false);
+
+      pch:= StrNPCopy(pch, icao_ARR + code_ZAM_19(ZAM,true),true,true);
+      pch:= StrNPCopy(pch, icao_END, true,true);
+
+      code_l4_ZAM_:= pch
+    end;
+
+
+ function  decode_l4_ZAM_ (data: pchars; size: TNETdlz; ZAM: PZAM): string;
+    var    p : pchar;
+           res : string;
+           k : int;
+    begin
+      decode_l4_ZAM_:= '';
+      fillchar(ZAM^,sizeof(ZAM^),0);
+      frame_l4_pkt(data,size, res);
+
+      p:= get_strs0(data,size, 2,5, [icao_ARR]);
+      decode_ZAM_data(strpas(p), ZAM, res,false);
+      strdispose(p);
+
+      k:= get_str_items(data,size,[icao_ARR]);
+      p:= get_strs0(data,size, 6,Maximum(6,N(k-1)),[icao_ARR]);
+      ZAM^.pozn:= strnew(decode_l4_p({decode_line_ip (p),nil,[])} p,true));
+      strdispose(p);
+
+      decode_ZAM_19 (get_str(data,size,k,[icao_ARR],sizeof(string)-1),ZAM)
+    end;
+
+
+ { ---------------------
+   kodovanie pre prenos
+   ---------------------
+ }
+
+ procedure code_ZAM(ZAM: PZAM; var pkt: TNETpkt);
+     var   pch : pchar;
+     begin
+       pch:= code_l4_ZAM_(ZAM,'');
+       new_NETpkt_data (pchars(pch),strlen(pch), pkt.pkt);
+       strdispose(pch)
+     end;
+
+ procedure decode_ZAM(const pkt: TNETpkt; ZAM: PZAM);
+     begin
+       decode_l4_ZAM_ (pkt.pkt.data,pkt.pkt.dlz,ZAM);
+       format_ZAM(ZAM);
+       {$IFDEF NET}
+         rec_data(pkt.ods, ZAM^.rec)
+       {$ENDIF}
+     end;
+
+
+ procedure code_ZAM_mess(ZAM: PZAM; var pkt: TNETpkt);
+     var   s: string;
+     begin
+       s:=    icao_STD + decode_code_to_hd(pkt.head.typ)
+            + icao_ARR + codekey_ZAM(ZAM)
+            + icao_END;
+       new_NETpkt_data (@s[1],length(s), pkt.pkt)
+     end;
+
+ procedure decode_ZAM_mess(const pkt: TNETpkt; ZAM: PZAM);
+     var   s: string;
+           i: int;
+     begin
+       s:= get_str(pkt.pkt.data,pkt.pkt.dlz,1,[icao_STD,icao_END],sizeof(s)-1);
+       i:= pos(icao_ARR,s);  { odfiltrovanie hlavicky }
+       if i>0 then s:= copy(s,i+1,length(s)-i);
+       decodekey_ZAM(s,ZAM)
+     end;
+
+
+
+ { ---------------------
+   kodovanie pre DB
+   ---------------------
+ }
+
+ {$I _ZAM_DB.cod}
+
+ procedure codeDB_ZAM (ZAM: PZAM; buff: PDB_buff; desc: PDB_head);
+     begin
+       if desc^.attr and DBbin <> 0 then _codeDBB_ZAM(ZAM,buff,desc)
+       {$IFDEF OPL} else if desc^.attr and DBtxt = 0 then _codeDB0_ZAM(ZAM,buff,desc) {$ENDIF}
+       else _codeDBT_ZAM(ZAM,buff,desc)
+     end;
+
+ procedure decodeDB_ZAM(buff: PDB_buff; ZAM: PZAM; desc: PDB_head);
+     begin
+       fillchar(ZAM^,sizeof(ZAM^),0);
+       if desc^.attr and DBbin <> 0 then _decodeDBB_ZAM(buff,ZAM,desc)
+       {$IFDEF OPL} else if desc^.attr and DBtxt = 0 then _decodeDB0_ZAM(buff,ZAM,desc) {$ENDIF}
+       else _decodeDBT_ZAM (buff,ZAM,desc);
+     end;
+
+
+ { ---------------------
+   kluc
+   ---------------------
+ }
+
+ function codekey_ZAM(ZAM: PZAM): string;
+    var   d: TDate;
+    begin
+      d.d:= ZAM^.zac.den; d.m:= ZAM^.zac.mes; d.r:= ZAM^.zac.rok;
+      codekey_ZAM:=   mtks_rus_to_lat(
+                                   format_s(_mairbase(ZAM^.kod))
+                      + icao_ARR + format_s(ZAM^.src)
+                      + icao_ARR + code_l4_date(d)
+                      + icao_ARR + code_l4_datums(ZAM^.dap)
+                      );
+    end;
+
+ procedure decodekey_ZAM(key: string; ZAM: PZAM);
+    var   d: TDate;
+     begin
+       fillchar(ZAM^,sizeof(ZAM^),0);
+       ZAM^.kod:= getstr(key,1,[icao_ARR]);
+       ZAM^.src:= getstr(key,2,[icao_ARR]);
+       decode_l4_date(getstr(key,3,[icao_ARR]),d);
+       ZAM^.zac.den:= d.d; ZAM^.zac.mes:= d.m; ZAM^.zac.rok:= d.r;
+       decode_l4_datum(getstr(key,4,[icao_ARR]),ZAM^.dap);
+     end;
+
+
+ function codekey_ZAM_RPL(ZAM: PZAM): string; far;
+    begin
+      codekey_ZAM_RPL:=
+                      mtks_rus_to_lat
+                      (
+                                   format_s(_mairbase(ZAM^.kod))
+                      + icao_ARR + format_s(ZAM^.src)
+                      + icao_ARR + code_l4_datums(ZAM^.dap)
+                      );
+    end;
+

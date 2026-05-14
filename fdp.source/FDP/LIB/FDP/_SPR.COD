@@ -1,0 +1,261 @@
+{$IFDEF DATA_BIN}
+  {$I _SPR0.cod}
+{$ENDIF}
+
+ function code_adr(adr: string): string;
+    begin
+      adr:= replchar(adr,[icao_ARR],'_');
+      code_adr:= adr
+    end;
+
+
+ function code_SPR_data(SPR: PSPR): string;
+    var   s : string;
+    begin
+      with SPR^ do
+        s:=               l4_format_s(typ)
+            + icao_NXT  + l4_format_s(prty)
+            + icao_NXT  + inttostr(cis,3,0)
+            + icao_ARR  + l4_format_s(code_adr(ods))
+            + icao_ARR  + l4_format_s(code_adr(strpas(adr)))
+            + icao_ARR  + code_l4_datums(dap);
+      code_SPR_data:= s
+    end;
+
+ function decode_SPR_data(s: string; SPR: PSPR; var res: string; check: bool): string;
+    var   t: string;
+    begin
+      with SPR^ do
+        begin
+          t:= getstr(s,1,[icao_ARR]);
+          typ:=  decode_l4_s(getstr(t,1,[icao_NXT]),true);
+          prty:= decode_l4_s(getstr(t,2,[icao_NXT]),true);
+          cis:=  getint(t,3,[icao_NXT]);
+
+          ods:= decode_l4_s(getstr(s,2,[icao_ARR]),true);
+          adr:= strpasnew(decode_l4_s(getstr(s,3,[icao_ARR]),true));
+          decode_l4_datums(getstr(s,4,[icao_ARR]),dap);
+        end;
+      decode_SPR_data:= ''
+    end;
+
+
+{ -----------------------------
+   kodovanie podla vzoru 4444,
+   hlavne funkcie
+  -----------------------------
+}
+ function code_l4_SPR_ (SPR: PSPR; cislo: string): pchar;
+    var   pch : pchar;
+          p   : pchar;
+    begin
+      pch:= StrPasNew(icao_STD + code_SPR_data(SPR));
+      pch:= StrNPCopy(pch, icao_ARR, true,true);
+      p:= l4_format_p(SPR^.text);
+      pch:= StrNCopy (pch, p,true,false);
+      pch:= StrNPCopy(pch, icao_END, true,true);
+      code_l4_SPR_:= pch
+    end;
+
+ function  decode_l4_SPR_ (data: pchars; size: TNETdlz; SPR: PSPR): string;
+    var    p : pchar;
+           res : string;
+           k : int;
+    begin
+      decode_l4_SPR_:= '';
+      fillchar(SPR^,sizeof(SPR^),0);
+      frame_l4_pkt(data,size, res);
+      decode_SPR_data(get_strs0p(data,size, 1,4, [icao_ARR]), SPR, res,false);
+      k:= get_str_items(data,size,[icao_ARR]);
+      p:= get_strs0(data,size, 5,Maximum(5,N(k)), [icao_ARR]);
+      SPR^.text:= strnew(decode_l4_p(p,true));
+      strdispose(p)
+    end;
+
+
+{ ---------------------
+  kodovanie pre prenos
+  ---------------------
+}
+ procedure code_SPR(SPR: PSPR; var pkt: TNETpkt);
+     var   pch : pchar;
+     begin
+       pch:= code_l4_SPR_(SPR,'');
+       new_NETpkt_data (pchars(pch),strlen(pch), pkt.pkt);
+       strdispose(pch)
+     end;
+
+ procedure decode_SPR(const pkt: TNETpkt; SPR: PSPR);
+     begin
+      {$IFDEF DATA_BIN}
+       if pkt.head.typ=spr0_SPR then decode0_SPR(pkt,SPR)
+       else
+      {$ENDIF}
+       decode_l4_SPR_ (pkt.pkt.data,pkt.pkt.dlz,SPR);
+       {$IFDEF NET}
+        rec_from_(pkt.ods, SPR^.rec, is_rec, false)
+       {$ENDIF}
+     end;
+
+
+{ ---------------------
+  kodovanie pre DB
+  ---------------------
+}
+ {$I _SPR_DB.cod}
+
+ procedure codeDB_SPR (SPR: PSPR; buff: PDB_buff; desc: PDB_head);
+     begin
+       {if desc^.attr and DBbin <> 0 then _codeDBB_SPR(SPR,buff,desc)
+       else} if desc^.attr and DBtxt <> 0 then _codeDBT_SPR(SPR,buff,desc)
+       else _codeDB0_SPR(SPR,buff,desc)
+     end;
+
+ procedure decodeDB_SPR(buff: PDB_buff; SPR: PSPR; desc: PDB_head);
+     begin
+       fillchar(SPR^,sizeof(SPR^),0);
+       {if desc^.attr and DBbin <> 0 then _decodeDBB_SPR(buff,SPR,desc)
+       else} if desc^.attr and DBtxt <> 0 then _decodeDBT_SPR(buff,SPR,desc)
+       else _decodeDB0_SPR (buff,SPR,desc);
+     end;
+
+
+
+{ ---------------------
+  kluc
+  ---------------------
+}
+ function codekey_SPR(SPR: PSPR): string;
+    begin
+      with SPR^ do codekey_SPR:=              l4_format_s(code_adr(SPR^.ods))
+                                 + icao_ARR + inttostr(cis,3,0)
+                                 + icao_ARR + code_l4_datums(SPR^.dap)
+    end;
+
+ procedure decodekey_SPR(key: string; SPR: PSPR);
+     begin
+       fillchar(SPR^,sizeof(SPR^),0);
+       SPR^.ods:= decode_l4_s(getstr(key,1,[icao_ARR]),true);
+       SPR^.cis:= getint(key,2,odd_L4);
+       decode_l4_datums (getstr(key,3,[icao_ARR]),SPR^.dap);
+     end;
+
+
+{ ----------------------
+  potvrdenie spracovania
+  ----------------------
+}
+ function code_SPR_LAM(SPR: PSPR; kod: TNETtyp): string;
+    var   s : string;
+          t : string;
+          i,p : int;
+    begin
+      code_SPR_LAM:= '';
+
+      t:= ''; i:= 1; p:= get_lines_i_(SPR^.text);
+      while (i<=p) and (t='') do
+        begin
+          t:= get_line_i(SPR^.text,i);
+          inc(i)
+        end;
+      t:= '"'+copy(t,1,10) + '..."';
+
+      case kod of
+
+        spr0_SPR_LAM :
+            begin
+              s:= _spr0_ack;
+              if SPR^.acs=_accepted then s:= s+'+' else s:= s+'-';
+              s:= s + IntToStr(SPR^.cis,5,1) + ODD_SPR
+                    + t + ODD_SPR
+                    + TimeToStr(BIOS.hour,BIOS.min,':');
+            end;
+
+        spr_SPR_LAM  :
+            begin
+              s:= icao_ARR+codekey_SPR(SPR);
+              if SPR^.acs=_accepted then s:= hd_LAM + s
+              else if SPR^.acs=_cancelled then s:= hd_NLM + s
+              else s:= hd_NIL + s;
+              s:= s + icao_ARR + code_l4_datums(SPR^.daz);
+              s:= s + icao_ARR + t;
+              s:= icao_STD + s + icao_END
+            end;
+
+        else Exit
+      end;
+
+      code_SPR_LAM:= s
+    end;
+
+
+ function decode_SPR_LAM(const pkt: TNETpkt; var SPR: DSPR{; var zapis: bool}): string;
+    var   s,t,t1,t2,t3: string;
+          i,p : int;
+    begin
+      decode_SPR_LAM:= '';
+      {zapis:= false;}
+      fillchar(SPR,sizeof(SPR),0);
+
+      case pkt.head.typ of
+
+        spr0_SPR_LAM :
+            begin
+              s[0]:= chr(pkt.pkt.dlz);
+              Move(pkt.pkt.data^[0],s[1],pkt.pkt.dlz);  { - A+lohi }
+              {t1:= getstr(s,1,[ODD_SPR]);}
+              t1:= getstr(s,2,[ODD_SPR])+' ';
+              t2:= getstr(s,3,[ODD_SPR]);
+              if pkt.pkt.data^[1] = '+' then
+                 begin
+                   SPR.acs:= _accepted;
+                   t1:= t1+tit_MSG_acc_+t2
+                 end
+              else begin
+                     SPR.acs:= _cancelled;
+                     t1:= t1+tit_MSG_not_acc_
+                   end
+            end;
+
+        spr_SPR_LAM  :
+            begin
+              s:= init_str(@pkt.pkt.data^[0],pkt.pkt.dlz);
+              p:= getstritems(s,odd_L4);
+              i:= pos(icao_ARR,s);
+              if i>0 then decodekey_SPR(copy(s,i+1,length(s)-i), @SPR);
+              if p>1 then
+                 begin
+                   decode_l4_datums(getstr(s,p-1,odd_L4),SPR.daz);
+                   {zapis:= true}
+                 end;
+              if p>0 then t2:= getstr(s,p,odd_L4) else t2:= '';
+
+              t:= getstr(s,1,odd_L4);
+              if t = hd_LAM then
+                 begin
+                   SPR.acs:= _accepted;
+                   t3:= tit_MSG_acc_;
+                   if SPR.daz.rok>1900 then t3:= t3 + TimeToStr2(SPR.daz.h,SPR.daz.m,SPR.daz.h,':','ú');
+                 end
+              else if t = hd_NLM then
+                   begin
+                     SPR.acs:= _cancelled;
+                     t3:= tit_MSG_not_acc_;
+                   end
+              else {if t = hd_NIL then}
+                   begin
+                     SPR.acs:= _unprocessed;
+                     t3:= tit_MSG_not_read_;
+                   end;
+              t1:= t2+' '+t3
+            end;
+
+        else Exit
+      end;
+      {zapis:= zapis or}
+
+      i:= is_NETadr (pkt.ods);
+      if (i>-1) and (NODEs^[i].desc.name<>nil) then t2:= strpas(NODEs^[i].desc.name)
+      else t2:= cut_(NETadr_wan(pkt.ods)+' '+NETadr_lan(pkt.ods));
+      decode_SPR_LAM:=   tit_MSGreport + t2 + ': '+ tit_MSG + ' ' + t1 + '.'
+    end;

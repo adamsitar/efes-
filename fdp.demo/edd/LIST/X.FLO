@@ -1,0 +1,89 @@
+ XAA  -              ; AERONAUTICAL RADIO, INC. (ARINC)                                                         / UNITED STATES
+ XAB  AERO XABRE     ; XABRE AEROLINEAS, S.A. DE C.V.                                                           / MEXICO
+ XAC  -              ; AIR CHARTER WORLD (CORRALES, NM)                                                         / UNITED STATES
+ XAD  -              ; CERTIFIED AIRCRAFT DISPATCH, INC. (MIAMI, FL)                                            / UNITED STATES
+ XAF  +              ; EXECUTIVE AIR FLEET (TRENTON, NJ)                                                        / UNITED STATES
+ XAL  XALITIC        ; AEROVIAS XALITIC, S.A. DE C.V.                                                           / MEXICO
+ XAM  ALLIANCE       ; AMR SERVICES CORP (DALLAS, TX)                                                           / UNITED STATES
+ XAO  -              ; AIRLINE OPERATIONS SERVICES (SAN FRANCISCO, CA)                                          / UNITED STATES
+ XAP  MID-TOWN       ; DIRECT AIR, INC. D/B/A/ MIDWAY CONNECTION (GARY, IN)                                     / UNITED STATES
+ XAS  -              ; PHH AVIATION SYSTEMS, INC.                                                               / UNITED STATES
+ XAT  -              ; AT AND T AVIATION DIVISION (MORRISTOWN, NH)                                              / UNITED STATES
+                     ;
+ XBG  -              ; BANGOR, CITY OF (BANGOR, ME)                                                             / UNITED STATES
+ XBO  -              ; BASEOPS INTERNATIONAL, INC. (HOUSTON, TX)                                                / UNITED STATES
+                     ;
+ XCL  -              ; CONTEL ASC (MCLEAN, VA)                                                                  / UNITED STATES
+ XCO  +              ; COMPUFLIGHT OPERATIONS SERVICE, INC. (PORT  WASHINGTON, NY)                              / UNITED STATES
+ XCR                 ; L O C K E D
+ XCS  -              ; COMPUSERVE INCORPORATED                                                                  / UNITED STATES
+ XCX  -              ; CITIBANK, N.A. (NEWARK, NJ)                                                              / UNITED STATES
+ XCZ                 ; L O C K E D
+                     ;
+ XDA  -              ; BUREAU VERITAS S.A.                                                                      / FRANCE
+ XDD  -              ; LOCKHEED DUATS                                                                           / UNITED STATES
+ XDS  -              ; DISPATCH SERVICES, INC. (MIAMI, FL)                                                      / UNITED STATES
+ XDT  -              ; DATE TRANSFORMATION CORP. (TURNERSVILLE, NJ)                                             / UNITED STATES
+ XDY  -              ; DYNAIR SERVICES, INC. (MCLEAN, VA)                                                       / UNITED STATES
+                     ;
+ XEL  XEL-HA         ; HELICOPTEROS XEL-HA, S.A. DE C.V.                                                        / MEXICO
+ XFS  -              ; AMERICAN FLIGHT SERVICE SYSTEMS, INC. (PHOENIX, AZ)                                      / UNITED STATES
+ XFX  -              ; AIRWAYS CORPORATION OF NEW ZEALAND LIMITED                                               / NEW ZEALAND
+                     ;
+ XGA  -              ; GENERAL AVIATION TERMINAL INC.                                                           / CANADA
+ XGG  -              ; IMP GROUP AVIATION SERVICES LIMITED                                                      / CANADA
+ XGS  -              ; GLOBAL SYSTEMS, INC.                                                                     / UNITED STATES
+ XGW  -              ; GLOBAL WEATHER DYNAMICS, INC.                                                            / UNITED STATES
+                     ;
+ XHA  -              ; EMPRESAS ESPECIALES DE SERVICIO EN TIERRA
+ XHA  -              ; ENTREPRISES SPECIALES DE SERVICE AU SOL
+ XHA  -              ; SPECIAL HANDLING SERVICE FOR AIRCRAFT
+ XHL                 ; L O C K E D
+                     ;
+ XIA  -              ; IRVING OIL LTD (GANDER FBO)                                                              / CANADA
+                     ;
+ XJA  -              ; ASSISTANCE AEROPORTUAIRE DE L'AEROPORT DE PARIS                                          / FRANCE
+                     ;
+ XKA  -              ; KAVOURAS, INC. (MINNEAPOLIS, MN)                                                         / UNITED STATES
+ XKX  -              ; ASECNA - AGENCE POUR LA SECURITE DE LA NAVIGATION  AERIENNE EN AFRIQUE ET A MADAGASCAR   / FRANCE
+                     ;
+ XLD  -              ; JEPENSSEN DATA PLAN, INC. (SAN FRANCISCO, CA)                                            / UNITED STATES
+ XLG  -              ; LOCKHEED AIR TERMINAL, INC. (TAMUNING, GU)                                               / UNITED STATES
+ XLT  -              ; TELECOMUNICACOES AERONAUTICAS S/A-TASA                                                   / BRAZIL
+                     ;
+ XMA  -              ; MARTIN AVIATION SERVICES (MIAMI, FL)                                                     / UNITED STATES
+ XMX  -              ; SERVICIOS A LA NAVEGACION EN EL ESPACIO AEREO  MEXICANO (SENEAM)                         / MEXICO
+                     ;
+ XNC  -              ; CANADIAN NATIONAL TELECOMMUNICATIONS                                                     / CANADA
+ XNN                 ; L O C K E D
+ XNS  -              ; NAVTECH SYSTEM SUPPORT INC.                                                              / CANADA
+ XNT  -              ; NOTAMS INTERNATIONAL, INC. (PEACHTREE CITY, GA)                                          / UNITED STATES
+ XNV  +              ; TIGIN LTD. D/B/A NAVINC AIRLINES  SERVICES (HONOLULU, HI)                                / UNITED STATES
+                     ;
+ XPA  -              ; PAN AM WEATHER SYSTEMS (MINNEAPOLIS, MN)                                                 / UNITED STATES
+ XPD  EXPEDITION     ; EXPEDITION AIRWAYS                                                                       / ZIMBABWE
+ XPG  -              ; SOUTHPORT AEROSPACE CENTRE                                                               / CANADA
+ XPR  -              ; AIR-REP (LOS ANGELES, CA)                                                                / UNITED STATES
+ XPS  XP PARCEL      ; XP INTERNATIONAL BV                                                                      / NETHERLANDS,KINGDOM                                                                                                                       OF HE
+ XPX  -              ; PHOENIX FLIGHT OPERATIONS LTD.                                                           / CANADA
+                     ;
+ XSA  -              ; SPECTRUM AIR SERVICE, INC. (LEAGUE CITY,TX)                                              / UNITED STATES
+ XSN  -              ; STEPHENVILLE AVIATION SERVICES                                                           / CANADA
+                     ;
+ XTJ  -              ; ADVANCE AVIATION SERVICES, INC. (MIAMI SPRINGS, FL)                                      / UNITED STATES
+ XTR  EXTER          ; SECTOR AIRLINES                                                                          / CANADA
+                     ;
+ XUT  -              ; AEROREPRESENTACIONES TUPAC AMARU                                                         / PERU
+                     ;
+ XWS  -              ; WSI CORPORATION                                                                          / UNITED STATES
+ XWW  -              ; WORLD WEATHERWATCH                                                                       / CANADA
+                     ;
+ XXD                 ; L O C K E D
+ XXH                 ; L O C K E D
+ XXI  -              ; AERONAUTICAL TELECOMMUNICATIONS LTD (JAMAICA)
+ XXS  -              ; SKYPLAN SERVICES LTD.                                                                    / CANADA
+ XXV  -              ; ADMINISTRACION DE AEROPUERTOS Y SERVICIOS AUXILIARES  A LA NAVEGACION AEREA (AASANA)     / BOLIVIA
+                     ;
+ XYZ  RAINBIRD       ; ISLAND AIR EXPRESS (FRIDAY HARBOR, WA)                                                   / UNITED STATES
+                     ;
+ XZC                 ; L O C K E D

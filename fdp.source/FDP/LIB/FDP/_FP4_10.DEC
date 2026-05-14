@@ -1,0 +1,223 @@
+{ ------------------------------------------
+  Je to znamy bod alebo trat ?
+  ------------------------------------------
+  Ak sa dodefinuje dalsie pole OB alebo RTE,
+  upravit nasledujuce fcie,
+  alebo definovat ich pole...
+  ------------------------------------------
+}
+
+{ upresnujuci popis ?
+}
+ function is_DESC (kod: string): bool;
+    var   i: int;
+    begin
+      kod:= cut_(getstr(kod,1,[icao_NXT]));
+      i:= 0; while (i<max_rte_DESC) and (kod<>rte_DESC[i]) do inc(i);
+      is_DESC:= i<max_rte_DESC
+    end;
+
+
+{ zaciatok stupania : zmena rychlosti/vysky je povolena len
+  za bodom na trati alebo priznakom "C":
+  C/POINT/K0650F340F360
+  C/POINT/N400F340PLUS
+}
+ function is_C (kod : string;
+                typ : string;
+
+                var kodB: string;
+                var rych: single; var rych_: char;
+                var vys : word; var vys_,vys_a : char;
+                var vys2: word; var vys2_: char;
+
+                var res: string; var ires: int
+               ): bool;
+    var   B : TsBod;
+    begin
+      is_C:= false;
+      if cut_(getstr(kod,1,[icao_NXT]))<>rte_C then Exit;
+
+      kodB:= getstr(kod,2,[icao_NXT]);
+      if is_OB(kodB,B,true) then
+         begin
+           ires:= _check_rychvys2_by4444 (getstr(kod,3,[icao_NXT]),typ,rych,rych_,vys,vys_,vys_a,vys2,vys2_,res);
+           if (ires<>0) then
+           else if get_altM(vys_,vys)<get_altM(vys2_,vys2) then is_C:= true
+           else ires:= l4_err(a_15c,kod,i_15c,err_15c_chyba_C, res)
+         end
+      else ires:= l4_err(a_15c,kod,i_15c,err_15c_chyba_bod, res)
+    end;
+
+
+{ MZP je v tvare LKKK1204/1349
+}
+ function is_MZP (kods: string; var kodB, tarr,tdep: string): bool;
+    var   kod,t1_,t2_ : string;
+          h,m,s : byte;
+          B : TsBod;
+          ry            : single;
+          v,v2          : word;
+          r_,v_,v_a,v2_ : char;
+    begin
+      is_MZP:= false;
+
+      kod  := getstr(kods,1,[icao_NXT]);
+      t1_  := copy(kod,length(kod)-kod_TIME+1,kod_TIME);
+      kod  := copy(kod,1,length(kod)-kod_TIME);
+      t2_  := getstr(kods,2,[icao_NXT]);
+
+      if     {(length(kod)=kod_MZP)}
+             is_OB(kod,B,true)        { and is_AP }
+         and (length(t1_)=kod_TIME) and gettimestr(h,m,s,t1_)
+         and (length(t2_)=kod_TIME) and gettimestr(h,m,s,t2_) then
+             begin
+               kodB:= kod; tarr:= t1_; tdep:= t2_;
+               is_MZP:= true
+             end
+    end;
+
+
+ function in_FIR (kod: string): bool;
+
+    var   B : TsBod;
+          R : TRTE;
+          res, k1,t1,t2 : string;
+          bres : bool;
+          ires : int;
+          ry   : single;
+          v,v2 : word;
+          r_,v_,v_a,v2_ : char;
+
+    begin
+      k1:= cut_(getstr(kod,1,[icao_NXT]));
+
+     {$IFDEF FDR}
+      if is_VOR_or_ZS(kod,B) then
+         bres:=     (FIRmap=nil)
+                 {or (not FIRmap^.is)}
+                 or FIRmap^.patri_xy(B.x,B.y)
+
+      else
+     {$ENDIF}
+           bres:=     is_RTE (k1, R)
+                   or (is_OB (k1, B,false) and (B.ine.podriadene))
+                   or is_MZP (kod, k1, t1,t2)
+                   or is_C   (kod,'', k1, ry,r_, v,v_,v_a, v2,v2_, res,ires);
+
+      in_FIR:= bres
+    end;
+
+
+{ Chcelo byt o este sprehladnit...
+}
+
+{ --------------------------------------------
+   najdenie znamych tratii a bodov na trati
+  תתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתת
+
+   Pri dekodovani trate_planu do bodov vyhladavame zname useky trati.
+   Znamych usekov trati moze byt viac, pretoze jednotlive trate mozu
+   prechadzat cez viacero riadenych oblasti. Predpokladame, ze je v useku
+   trate cez riadeny sektor najdeme najviac dekodovatelnych poloziek,
+   ak nepocitame komentare a nachadzaju sa ta kody bodov na trati.
+
+}
+ function _urcenie_znamej_trate (FDR : DFDR;
+
+                                 const f15_ : pchar;  { pole bez oddelovacov riadkov }
+                                 var   f15T : pchar;  { znama trat }
+
+                                 var dd   : TFDR_decoded_data;
+                                 var res  : string;
+                                 var ires : int
+                                ): int;
+
+    var   i,j, pocet, z1,zP, zac,kon,poc, zaci,koni,poci : int;
+          kods, kodl, k1,k2,k3, t1, t2, c1,c2 : string;
+          p1,p2,p3 : pchar;
+          was,is,is_k,is_d : bool;
+
+          ry            : single;
+          v,v2          : word;
+          r_,v_,v_a,v2_ : char;
+
+          B : TsBod;
+
+
+    function _znamy_kod(i: int): bool;
+       var   kods : string;
+       begin
+         kods:= GetPStr(f15_,i,[icao_NXIT]);
+         _znamy_kod:= in_FIR (kods) or is_DESC (kods)
+       end;
+
+    label X;
+
+    begin
+
+      f15T:= nil;
+      dd.prvy:= -1;
+
+    { 1.polozka musi byt rychlost a vyska letu
+      - vid "_urcenie_vysky_rychlosti"
+    }
+
+    { Najdenie prvej a poslednej znamej polozky
+    }
+      pocet:= GetPStrItems(f15_,[icao_NXIT]);
+      z1:= 2;     while (z1<=pocet) and (not _znamy_kod(z1)) do begin inc(z1); CheckProcesses end;
+      zP:= pocet; while (zP>=2) and (not _znamy_kod(zP)) do begin dec(zP); CheckProcesses end;
+
+
+    { Najdenie a nacitanie najdlhsieho useku trate
+    }
+      zaci:= z1; koni:= z1; poci:= 0;
+      zac:= z1;  kon:= z1;  poc:= 0;
+      was:= false;
+      for i:= z1 to zP do
+         begin
+           kods := GetPStr(f15_,i,[icao_NXIT]);
+
+           is_k := in_FIR (kods);
+           is_d := is_DESC (kods);
+           is   := is_k or is_d;
+
+           if is {and (i<=zP)} then
+              begin
+                if not was then begin zac:= i; poc:= 0 end;
+                kon:= i;
+                if is_k then inc(poc)
+              end;
+
+           if ((not is) or (i=zP)) and (poc>poci) then
+              begin
+                poci:= poc; zaci:= zac; koni:= kon;
+               { na znamom useku trate by mal byt i znamy bod... preto is_b
+               }
+              end;
+           was:= is;
+         end;
+
+      if (pocet=0) or (z1>zP) or (poci=0) then
+         begin
+           ires:= l4_err(a_15c,'',i_15c,err_15c_nenajdena_trat_cez_fir, res);
+           goto X
+         end;
+
+      if dd.isDEP and dd.isARR and (zP-z1+1<pocet-1) then
+         begin
+           ires:= l4_err(a_15c,'',i_15c,err_15c_nenajdena_trat_pre_let_vo_fir, res);
+           goto X
+         end;
+
+      dd.prvy:= zaci; kodl:= '';
+      for i:= zaci to koni do
+          begin
+            kods:= GetPStr(f15_,i,[icao_NXIT]);
+            if kods<>kodl then f15T:= StrNPCopy(f15T,kods+icao_NXIT,true,true);
+            kodl:= kods
+          end;
+
+      X: _urcenie_znamej_trate:= ires;
+    end;

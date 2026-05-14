@@ -1,0 +1,247 @@
+{
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+Û                                                          Û
+Û zobrazenie                                               Û
+ÛÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÛ
+}
+
+ function dxi_SPR: int; far;
+    begin
+      dxi_SPR:= dxm_SPR
+    end;
+
+
+ function dyi_SPR_a(ra: int): int; far;
+    var   dy: int;
+    begin
+      ra:= aspon1(ra);
+      if not bminiPRS then ra:= max_SPR_a_hi;
+      dy:= dy_rmk+10+dy_rmk*2;
+      if ra > 0 then dy:= dy + (ra*10)+dy_rmk;
+      dyi_SPR_a:= dy
+    end;
+
+ function dyi_SPR_r(rr: int): int; far;
+    var   dy: int;
+    begin
+      rr:= aspon1(rr);
+      if not bminiPRS then rr:= max_SPR_r_hi;
+      if rr > 0 then dy:= dy_rmk*2 + (rr*10)
+      else dy:= 0;
+      dyi_SPR_r:= dy
+    end;
+
+ function dyi_SPR: int; far;
+    begin
+      dyi_SPR:= dyi_SPR_a(max_SPR_am) + dyi_SPR_r(max_SPR_rm)
+    end;
+
+
+{ vrati, ci je povolene vypisat podrobnosti
+  o spracovani tejto spravy
+}
+ function _write_acc(SPR: PSPR; var nd: int): bool;
+    begin
+      nd:= is_NETnode(_adri(SPR,1));
+      _write_acc:=  (    (SPR^.ods = NETaddress)  { vypisuje len pre odoslane spravy }
+                     and (nd>-1)
+                     and (not _adrmult(SPR^.adr))
+                     and (not _adrbrc(_adri(SPR,1)))
+                    )
+     end;
+
+{ vrati nazov znameho alebo adresu neznameho odosielatela spravy
+}
+ function _spr_od (SPR: PSPR): string;
+    var   s  : string;
+          nd : int;
+    begin
+      nd:= is_NETnode (SPR^.ods);
+      if nd>-1 then s:= strpas(NODEs^[nd].desc.name)
+      else s:= SPR^.ods;
+      _spr_od:= tit_MSGod+s
+    end;
+
+ function _spr_cas (SPR: PSPR): string;
+    var   s: string;
+          nd: int;
+    begin
+      with SPR^ do
+        begin
+          s:= tit_MSGpod+' '+TimeToStr(dap.h,dap.m,':')+'ú'+inttostr(dap.s,2,0);
+          if     (SPR^.ods <> NETaddress)                     { dorucena }
+             or  (    write_acc and _write_acc(SPR,nd)        { odoslana }
+                  and (nd>-1) and (SPR^.acc[nd]<>_unreceived)
+                 )
+            then s:= s+', '+tit_MSGzob+' '+TimeToStr(daz.h,daz.m,':')+'ú'+inttostr(daz.s,2,0)
+        end;
+      _spr_cas:= s
+    end;
+
+
+ function _msg_acs (acc: Tspr_acc): string;
+    var   s : string;
+    begin
+      if acc=_accepted then s:= tit_MSG_acc
+      else if (acc=_cancelled) then s:= tit_MSG_not_acc
+      else s:= tit_MSG_not_read; {tit_MSGrec;}
+      _msg_acs:= s
+    end;
+
+ function _msg_acci (SPR: PSPR; nd: int): string;
+    var   s : string;
+    begin
+      if nd<0 then s:= '?'
+      else begin
+             if (SPR^.rec[nd]=no_ack) then s:= tit_MSG_not_rec
+             else s:= _msg_acs(SPR^.acc[nd])
+           end;
+      _msg_acci:= s
+    end;
+
+{ vypise
+}
+ function _spr_acc(SPR: PSPR): string;
+    var   s: string;
+          nd: int;
+    begin
+      s:= '';
+      if write_acc then
+         begin
+           if (SPR^.ods <> NETaddress) then s:= _msg_acs(SPR^.acs)
+           else if _write_acc(SPR,nd) then s:= _msg_acci(SPR,nd)
+           else s:= tit_MSG_in_lam
+         end;
+      write_acc:= true;
+      _spr_acc:= ' '+s
+    end;
+
+
+ procedure _plan_SPR(x0,y0,x1,y1: int; bk: int; ra,rr: byte; form: bool);
+     begin
+       BGIgraph.button(x0,y0,x1,y1, bk, btSmall, btOFF);
+       on_off(x0+4,y0+4,x1-5,y0+dyi_SPR_a(max_SPR_am),
+              clBUTTON_COLOR+clBUTTON_DARK,clBUTTON_COLOR+clBUTTON_LIGHT,
+              btSmall, btOFF
+             );
+       on_off(x0+4,y0+4,x1-5,y0+dyi_SPR_a(max_SPR_am),
+              clBUTTON_COLOR+clBUTTON_DARK,clBUTTON_COLOR+clBUTTON_LIGHT,
+              btSmall, btON
+             );
+       _lineho (x0+4,x1-5,y0+18,bk);
+
+       FillWin(x0+4,y0+dyi_SPR_a(ra)+dy_rmk,x1-5,y1-dy_rmk,bk-1);
+     end;
+
+
+ procedure plani_SPR(SPR: PSPR; x,y: int; b,mini: bool);
+     var   dx,dy0,dy, dx_plan,dy_plan, i,p,k,y0 : int;
+           cl_stat, bk : byte;
+           pb,_1ab : bool;
+           s,t,_1as : string;
+
+     begin
+       y0:= y{+8}{$IFDEF SPEA}+dy_ch{$ENDIF};
+
+       bk:= bkPLAN_[b];
+       pb:= bminiSPR; bminiSPR:= mini;
+       dx_plan:= dxi_SPR; dy_plan:= dyi_SPR;
+       _plan_SPR (x,y,x+dx_plan,y+dy_plan,bk, max_SPR_am,max_SPR_rm,false);
+
+     { Hlavicka
+     } SetTextStyle(DefaultFont, HorizDir,0);
+       {$IFDEF SPEA} SetBkColor(bk); {$ENDIF}
+
+       s:= _spr_od(SPR);
+       Write_ (x+10,y+8,s,clGRd);
+       t:=  ', '+_spr_cas(SPR)+', '+_spr_acc(SPR);
+       Write_ (x+10+TextWidth(s),y+8,t,clGRb);
+
+       WriteStr (x+10,y+23,SPR^.prty, clGRb,bk-1);
+       y0:= y+25;
+       WriteStr (x+35,y0,get_line_i(SPR^.adr,1), clGRb,bk-1);
+       for i:= 2 to max_SPR_am do
+         begin
+           inc(y0,10);
+           WriteStr (x+10,y0,get_line_i(SPR^.adr,i), clGRb,bk-1);
+         end;
+
+     { Text
+     } inc(y0,10+dy_rmk+(dy_rmk shr 1));
+       k:= get_data_lines_i_(SPR^.text);
+       if mini then p:= Minimum(k,max_SPR_rm)
+       else p:= Minimum(k,max_SPR_r_hi);
+       setcolor (clGRb);
+       i:= 0; while i<p do
+          begin
+            outtextxy(x+10,y0, get_line_i(SPR^.text,i+1));
+            inc(y0,10);
+            inc(i);
+          end;
+
+       if (p<k) then outtextxy(x+dx_plan-30,y+8, '...');
+
+       bminiSPR:= pb
+     end;
+
+
+ procedure plan_SPR(SPR: PSPR; x,y: int; b: bool); far;
+     begin
+       plani_SPR(SPR, x,y, b,bminiSPR)
+     end;
+
+
+ procedure _info_SPRriadkov(x0,y0,x1,y1: int; SPR: PSPR; adries,riadkov: int);
+     var   b : bool; a,r: int;
+     begin
+       b:= bminiSPR; bminiSPR:= true;
+       a:= max_SPR_am; max_SPR_am:= adries;
+       r:= max_SPR_rm; max_SPR_rm:= riadkov;
+       plani_SPR(SPR, x0+(x1-x0-dxf_SPR) shr 1, y0,false,false);
+       max_SPR_am:= r;
+       max_SPR_rm:= r;
+       bminiSPR:= b
+     end;
+
+
+ procedure _info_SPR(x0,y0,x1,y1: int; SPR: PSPR);
+     begin
+       _info_SPRriadkov(x0,y0,x1,y1, SPR, max_SPR_a_hi,max_SPR_r_hi)
+     end;
+
+ function  info_SPR (SPR: PSPR; title: string): bool;
+    begin
+      info_SPR:= Info(title, @_info_SPR, SPR,dxf_SPR+20,dyi_SPR_a(max_SPR_a_hi) + dyi_SPR_r(max_SPR_r_hi)+10, nil,0)
+    end;
+
+
+ procedure _info_SPRr(x0,y0,x1,y1: int; SPR: PSPR); far;
+     begin
+       _info_SPRriadkov(x0,y0,x1,y1, SPR, get_data_lines_i_(SPR^.adr),get_data_lines_i_(SPR^.text))
+     end;
+
+ function  info_SPRr_(SPR: PSPR; title,_btOKtitle: string; beep: bool; _wait: long; var t_o: bool): bool;
+    var    I: PInfo;
+           E: TEvent;
+           p: pointer;
+           res: bool;
+    begin
+      if title='' then if SPR^.typ=hd_MSG then title:= tit_TLG else title:= tit_MSG;
+      {$IFNDEF DEBUG} if beep then p:= @Beep99 else {$ENDIF} p:= nil;
+
+      if _wait=0 then _wait:= waitINFO*18;
+      I:= New(PInfo,Init(title,_btOKtitle, @_info_SPRr, SPR,
+                         dxf_SPR+20, dyi_SPR_a(get_data_lines_i_(SPR^.adr)) + dyi_SPR_r(get_data_lines_i_(SPR^.text))+10-20,
+                         nil,0,0,0, p,nil,
+                         _wait, @t_o,@res, 0, nil,nil)
+                        );
+      I^.Run(E);
+      Dispose(I,Done);
+      info_SPRr_:= res
+    end;
+
+ function  info_SPRr (SPR: PSPR; title: string; beep: bool; _wait: long): bool;
+    var    t_o: bool;
+    begin
+      info_SPRr:= info_SPRr_ (SPR,title,'',beep,_wait,t_o)
+    end;

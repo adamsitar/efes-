@@ -1,0 +1,61 @@
+{$I ..\lib\mnu\_strips.h}
+
+
+ procedure mnuEST_init(MMenu: PSubmenu); far;
+     var   smnu : TPItems;
+     const max_items = 30;
+     var   i,items,nl : int;
+     begin
+       items:= 0; nl:= 0;
+       smnu[items]:= Item_(F4e,  cmESTc_strip, @ENABLE_FPLC,true, nil);
+       inc(items);
+       smnu[items]:= Item_(F5e,  cmESTm_strip, @ENABLE_FPLM,true, nil);
+       inc(items);
+       for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i]);
+     end;
+
+
+ procedure mnuETO_init(MMenu: PSubmenu); far;
+     var   smnu : TPItems;
+     const max_items = 30;
+     var   i,items,nl : int;
+     begin
+       items:= 0; nl:= 0;
+       smnu[items]:= Item_(F4o,  cmETOc_strip, @ENABLE_FPLC,true, nil);
+       inc(items);
+       smnu[items]:= Item_(F5o,  cmETOm_strip, @ENABLE_FPLM,true, nil);
+       inc(items);
+       {$IFDEF FPLO}
+        smnu[items]:= Item_(F6o, cmETOo_strip, @ENABLE_FPLM,true, nil);
+        inc(items);
+       {$ENDIF}
+       for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i]);
+     end;
+
+
+ procedure mnuCNL_init(MMenu: PSubmenu); far;
+     var   smnu : TPItems;
+     const max_items = 30;
+     var   i,items,nl : int;
+     begin
+       items:= 0; nl:= 0;
+       smnu[items]:= Item(PA, cmACK_PROP_PLANs,nil);
+       inc(items);
+       smnu[items]:= Item(PD, cmCNL_PROP_PLANs,nil);
+       inc(items);
+       smnu[items]:= NewLine(nil);
+       inc(items);
+       smnu[items]:= Item(F4c,  cmCNLc_strip,nil);
+       inc(items);
+       smnu[items]:= Item(F5c,  cmCNLm_strip,nil);
+       inc(items);
+       {$IFDEF FPLO}
+        smnu[items]:= Item(F6c, cmCNLo_strip,nil);
+        inc(items);
+       {$ENDIF}
+       smnu[items]:= NewLine2(0,nil);
+       inc(items);
+       smnu[items]:= Item(DELa, cmCNL_ALL_PLANs,nil);
+       inc(items);
+       for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i]);
+     end;

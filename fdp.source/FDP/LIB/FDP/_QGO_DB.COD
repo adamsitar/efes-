@@ -1,0 +1,115 @@
+ procedure _codeDB0_QGO(QGO: PQGO; buff: PDB_buff; desc: PDB_head); far;
+     var   s : string;
+     begin
+       s:= code0_QGO_1(QGO);
+       str_toDBstr(s,buff^[0]);
+       s:= code0_QGO_2(QGO);
+       {$IFDEF NET} s:= s+KON_SPR+rectostr(QGO^.rec); {$ENDIF}
+       str_toDBstr(s,buff^[1]);
+     end;
+
+ procedure _decodeDB0_QGO(buff: PDB_buff; QGO: PQGO; desc: PDB_head); far;
+     var   s : string;
+     begin
+       Move(buff^[0],s[0],ord(buff^[0][0])+1);
+       decode0_QGO_1(s, QGO);
+       Move(buff^[1],s[0],ord(buff^[1][0])+1);
+       decode0_QGO_2(s, QGO);
+       {$IFDEF NET}
+         strtorec(getstr(s,2,[KON_SPR]), QGO^.rec)  { 9 }
+       {$ENDIF}
+     end;
+
+
+ procedure _codeDBB_QGO(QGO: PQGO; buff: PDB_buff; desc: PDB_head); far;
+     var   p : pchar;
+           s : string;
+     begin
+       p:= code_QGO_stav(QGO);
+       str_toDBstr(strpas(p),buff^[db_QGO_stav]);
+       strdispose(p);
+
+       p:= code_QGO_qgo(QGO^.TQGO,QGO^.TQGOc,QGO^.TQGO_);
+       str_toDBstr(strpas(p),buff^[db_QGO_tqgo]);
+       strdispose(p);
+
+       p:= code_QGO_qgo(QGO^.MQGO,QGO^.MQGOc,QGO^.MQGO_);
+       str_toDBstr(strpas(p),buff^[db_QGO_mqgo]);
+       strdispose(p);
+
+       str_toDBstr(code_QGO_19(QGO,true),buff^[db_QGO_19]);
+
+       s:= '' {$IFDEF NET} + icao_ARR + rectostr(QGO^.rec) {$ENDIF};
+       str_toDBstr(s,buff^[db_QGO_ine])
+     end;
+
+ procedure _decodeDBB_QGO(buff: PDB_buff; QGO: PQGO; desc: PDB_head); far;
+     var   s : string;
+           i : int;
+     begin
+       fillchar(QGO^,sizeof(QGO^),0);
+
+       s:= DBstr_to_str (buff^[db_QGO_stav]);
+       decode_QGO_stav (@s[1],length(s), QGO);
+
+       s:= DBstr_to_str (buff^[db_QGO_tqgo]);
+       decode_QGO_qgo (@s[1],length(s), QGO^.TQGO,QGO^.TQGOc,QGO^.TQGO_);
+
+       s:= DBstr_to_str (buff^[db_QGO_mqgo]);
+       decode_QGO_qgo (@s[1],length(s), QGO^.MQGO,QGO^.MQGOc,QGO^.MQGO_);
+
+       decode_QGO_19 (DBstr_to_str (buff^[db_QGO_19]),QGO);
+
+       s:= DBstr_to_str (buff^[db_QGO_ine]); i:= 1;
+       {$IFDEF NET} strtorec(getstr(s,i,[icao_ARR]), QGO^.rec);
+       {$ENDIF}
+
+       {format_mFPL(QGO);}
+     end;
+
+
+ procedure _codeDBT_QGO(QGO: PQGO; buff: PDB_buff; desc: PDB_head); far;
+     var   p : pchar;
+           s : string;
+     begin
+       p:= code_QGO_stav(QGO);
+       str_toDBstr(strpas(p),buff^[db_QGO_stav]);
+       strdispose(p);
+
+       p:= code_QGO_qgo(QGO^.TQGO,QGO^.TQGOc,QGO^.TQGO_);
+       str_toDBstr(strpas(p),buff^[db_QGO_tqgo]);
+       strdispose(p);
+
+       p:= code_QGO_qgo(QGO^.MQGO,QGO^.MQGOc,QGO^.MQGO_);
+       str_toDBstr(strpas(p),buff^[db_QGO_mqgo]);
+       strdispose(p);
+
+       str_toDBstr(code_QGO_19(QGO,true),buff^[db_QGO_19]);
+
+       s:= '' {$IFDEF NET} + icao_ARR + rectostr(QGO^.rec) {$ENDIF};
+       str_toDBstr(s,buff^[db_QGO_ine])
+     end;
+
+ procedure _decodeDBT_QGO(buff: PDB_buff; QGO: PQGO; desc: PDB_head); far;
+     var   s : string;
+           i : int;
+     begin
+       fillchar(QGO^,sizeof(QGO^),0);
+
+       s:= DBstr_to_str (buff^[db_QGO_stav]);
+       decode_QGO_stav (@s[1],length(s), QGO);
+
+       s:= DBstr_to_str (buff^[db_QGO_tqgo]);
+       decode_QGO_qgo (@s[1],length(s), QGO^.TQGO,QGO^.TQGOc,QGO^.TQGO_);
+
+       s:= DBstr_to_str (buff^[db_QGO_mqgo]);
+       decode_QGO_qgo (@s[1],length(s), QGO^.MQGO,QGO^.MQGOc,QGO^.MQGO_);
+
+       decode_QGO_19 (DBstr_to_str (buff^[db_QGO_19]),QGO);
+
+       s:= DBstr_to_str (buff^[db_QGO_ine]); i:= 1;
+       {$IFDEF NET} strtorec(getstr(s,i,[icao_ARR]), QGO^.rec);
+       {$ENDIF}
+
+       {format_mFPL(QGO);}
+     end;

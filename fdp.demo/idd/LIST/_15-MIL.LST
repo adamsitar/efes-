@@ -1,0 +1,22 @@
+/ARR  ‡as pr¡letu na OB - hod:min
+/DEP  ‡as odletu z OB - hod:min
+
+/L    oneskorenie pr¡letu na OB oproti pl nu v min
+/C    doba ‡innosti nad OB v min
+
+/V    zmena r˜chlosti nad OB
+
+/S    zmena v˜¨ky nad OB v desiatk ch metrov STD alebo QNH + 4 ‡¡slice
+/H    zmena v˜¨ky nad OB v desiatk ch metrov STD alebo QNH + 4 ‡¡slice
+
+/F    zmena v˜¨ky nad OB v desiatkach st“p + 3 ‡¡slice
+/A    zmena v˜¨ky nad OB v desiatkach st“p + 3 ‡¡slice
+
+/G    zmena v˜¨ky nad ter‚nom v desiatk ch metrov (do 300 m NT)
+
+/MZP  medziprist tie - m“‘e sa ur‡iŸ doba v min)
+/STH  od tohto bodu let¡ po ¨t tnej hranici
+/IP   od tohto bodu let¡ v identifika‡nom p sme
+
+/DES  klesanie na OB
+/ASC  st£panie na OB

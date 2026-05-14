@@ -1,0 +1,26 @@
+procedure ReadCOM; interrupt;
+    var   b : char;
+    label endp;
+    begin
+      if Port[IIR[COMi]]<>$04 then goto endp;
+      b:= chr(Port[COM[COMi]]);
+      if (b=#0) then goto endp;
+
+      if (b=ZAC_SPR_COM) or (COMznakov>=sizeof(COMbuffer.b)) then COMznakov:= 0;
+      COMbuffer.b[COMznakov]:= b;
+      inc(COMznakov);
+
+      if (b=KON_SPR_COM) then
+         begin
+           if (COMbuffer.b[0]=ZAC_SPR_COM) then
+              begin
+                COMbuffer.p:= COMznakov;
+                COMsave(@COMbuffer)
+              end;
+           COMznakov:= 0
+         end;
+
+      endp: Port[$20]:= $20
+    end;
+
+

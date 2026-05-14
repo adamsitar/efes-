@@ -1,0 +1,409 @@
+{ ----------------------------
+   dekodovanie letoveho planu
+  ----------------------------
+  - dekodovanie struktur FPL, kontrola ich uplnosti a citatelnosti
+  - urcenie EET
+  - vypocet trate do bodov
+}
+
+{ ----------------------------------------
+   Kontrola spravnosti naplnenia poli FPL
+   - predide sa tym posunu poli
+     a nacitanie ich hodnot :
+  תתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתת
+}
+ function  _decode_FPL4_stat (var FPL: DFPL4;
+                              var FDR: DFDR;
+
+                              check_en: bool;
+                              var res: string
+                             ): int;
+    var    ires : int;
+    begin
+      ires:= 0; res:= '';
+
+    { stav spracovania moze byt dany iny, ako je v hlavicke spravy...
+    }
+      if cut_(FPL.stat)='' then FPL.stat:= copy(FPL._3,1,kod_HEAD);
+      FDR.stat:= FPL.stat;
+
+      FPL.src:= 0; fplsrc_decode (FPL._18, FPL.src);
+      FDR.src:= FPL.src;
+
+      _decode_FPL4_stat:= ires
+    end;
+
+
+ function  _decode_FPL4_7a (var FPL: DFPL4;
+                            var FDR: DFDR;
+
+                            check_en: bool;
+                            var res: string
+                           ): int;
+    var    ires : int;
+           s    : string;
+    begin
+    { a) 7a - identifikacia
+    }
+      ires:= 0; res:= '';
+      s:= idn_FPL4(@FPL);
+      if check_en then
+         begin
+           if s='' then ires:= l4_err(a_7,'',i_7a,err_7a_missing, res);
+           if length(s)>kod_7a then ires:= l4_err(a_7,s,i_7a,err_7a_length, res)
+         end;
+
+      FDR.idn:= s;
+      if FDR.fpl<>nil then FDR.fpl^.idn:= FDR.idn;
+
+      _decode_FPL4_7a:= ires
+    end;
+
+
+ function  _decode_FPL4_DATA (var FPL: DFPL4;
+                              var FDR: DFDR;
+
+                              var dd : TFDR_decoded_data;
+                              var res: string
+                             ): int;
+    var    ires  : int;
+           s,t,u, s_ : string;
+           h,m, h_,m_ : byte;
+
+    label  X;
+
+    begin
+      ires:= 0; if res<>'' then goto X;
+
+
+      { -------------------------
+         3 -
+      }
+        ires:= _decode_FPL4_stat (FPL,FDR,true,res);
+
+
+      { -------------------------
+        a) 7a - identifikacia
+      }
+        ires:= _decode_FPL4_7a (FPL,FDR, dd.check_en,res);
+        if dd.check_en and (res<>'') then goto X;
+
+
+      { -------------------------
+           7b,c - SSR code
+      }
+        s:= cut_(getstr(FPL._7,2,[icao_NXT]));
+        if FDR.fpl<>nil then with FDR.fpl^ do
+           begin
+             ssr_:= getchar(delchar(s,setCisl));
+             ssr := delchar(s,setPism_);
+             if (ssr<>'') and (not is_ssr(ssr,(length(ssr)=kod_uvd_BN),res)) and (ires<>0) and dd.check_en then goto X;
+           end;
+
+
+
+      { --------------------------------
+        b) 8a, 8b - pravidla a typ letu
+      }
+        if FDR.fpl<>nil then with FDR.fpl^ do ires:= _check_8_by4444 (FPL._8, _8a,_8b, res);
+        if (ires<>0) and dd.check_en then goto X;
+
+
+      { -------------------------
+        c) pole 9 - typ letuna
+      }
+        s_:= FPL._9;
+        ires:= _check_9_by8643 (s_,res,true,false);
+        decode_l4_9(s_, s,t,u);     { setrim pamatou }
+        FDR.typ:= code_l4_9_('',t,u);
+        if FDR.fpl<>nil then FDR.fpl^.typ:= s_;
+        if (ires<>0) and dd.check_en then goto X;
+
+
+      { ---------------------------------
+        d) pole 10 - vybavenie a mod ssr
+      }
+        if FDR.fpl<>nil then with FDR.fpl^ do ires:= _check_10_by4444 (FPL._10, ssr_,com_, res);
+        if (ires<>0) and dd.check_en then goto X;
+
+
+      { ---------------------------------
+        e) pole 13 - letisko odletu
+      }
+        ires:= _check_13_by4444 (FPL._13, dd.dep.kod,dd.dep.h,dd.dep.m,h_,m_, res);
+        if FDR.fpl<>nil then with FDR.fpl^ do
+           begin
+             start.kod:= dd.dep.kod;
+             start.h:= dd.dep.h; start.m:= dd.dep.m;
+             start_.h:= h_; start_.m:= m_;
+           end;
+        if (ires<>0) and dd.check_en then goto X
+        else if dd.dep.kod<>ZZZZ then
+             begin
+               dd.isDEP:=     (   get_OB_XY (dd.dep.kod, dd.dep)
+                               {or is_VOR_or_ZS(FDR.fpl.start.kod,dd._dep)}
+                              )
+                          {$IFDEF FDR}
+                           and (   (FIRmap=nil)
+                                {or (not FIRmap^.is)}
+                                or FIRmap^.patri_xy(dd.dep.x,dd.dep.y)
+                               );
+                          {$ENDIF}
+             end;
+
+
+      { e) pole 16 - letisko urcenia
+      }
+        ires:= _check_16_by4444 (FPL._16, h_,m_, dd.arr.kod,dd.arr.h,dd.arr.m, dd.arr2, res);
+        if FDR.fpl<>nil then with FDR.fpl^ do
+           begin
+             prist.kod:= dd.arr.kod;
+             prist.h:= dd.arr.h; prist.m:= dd.arr.m;
+           end;
+        if (ires<>0) and dd.check_en then goto X
+        else if dd.arr.kod<>ZZZZ then
+             begin
+               dd.isARR:=     (   get_OB_XY (dd.arr.kod, dd.arr)
+                               {or is_VOR_or_ZS(FDR.fpl.prist.kod,dd._arr)}
+                              )
+                          {$IFDEF FDR}
+                           and (   (FIRmap=nil)
+                                {or (not FIRmap^.is)}
+                                or FIRmap^.patri_xy(dd.arr.x,dd.arr.y)
+                               )
+                          {$ENDIF}
+             end;
+
+
+      { f) pole 17 - nahradne letisko urcenia
+      }
+        if FPL._17<>nil then
+           begin
+             ires:= _check_17_by4444 (strpas(FPL._17),s,h,m,t, res);
+             if (ires<>0) and dd.check_en then goto X
+           end;
+
+
+      X: _decode_FPL4_DATA:= ires
+    end;
+
+
+
+  function _urc_trat_FPLC (var _OBs: TOBxys; var _bodov: int; _exclude_uknown_points: bool): bool;
+     var   i,ires,bodov0 : int;
+           dS,dSi : real;
+     begin
+       bodov0:= _bodov;
+
+     { vyhodenie rovnakych bodov
+     }
+       i:= 0; while (i<_bodov-1) do
+         begin
+           if     (_exclude_uknown_points or (_OBs[i].x<>0)) { nie j neznamy bod }
+              and (_OBs[i].x=_OBs[i+1].x) and (_OBs[i].y=_OBs[i+1].y) then
+              begin
+                move(_OBs[i+1],_OBs[i],sizeof(TOBxy)*(_bodov-i-1));
+                dec(_bodov);
+              end
+            else inc(i)
+         end;
+
+     { vyhodenie neznamych bodov
+     }
+       if (_bodov>max_bod_FPLC) or _exclude_uknown_points then
+          begin
+            i:= 0; while (i<_bodov) and (_bodov>max_bod_FPLC) do
+              begin
+                if get_OB_XYM(_OBs[i].kod,_OBs[i]) then inc(i)
+                else begin
+                       move(_OBs[i+1],_OBs[i],sizeof(TOBxy)*N((_bodov-i-1)));
+                       dec(_bodov)
+                     end;
+              end;
+          end;
+
+     { vyhodenie najblizsich bodov
+     }
+       ires:= 0; while (_bodov>max_bod_FPLC) and (ires>-1) and (ires<_bodov-1) do
+         begin
+           ires:= -1;
+           i:= 0; while (i<_bodov) and (_bodov>=max_bod_FPLC) do
+             begin
+               ires:= -1; dSi:= 99999999;
+               i:= 0; while i<_bodov-1 do
+                 begin
+                   dS:= vzdialenost(_OBs[i].x,_OBs[i].y, _OBs[i+1].x,_OBs[i+1].y);
+                   if dS<dSi then if ires<_bodov-1 then ires:= i+1 else ires:= i;
+                   inc(i,2);
+                 end;
+               if (ires>-1) and (ires<_bodov) then
+                 begin
+                   move(_OBs[ires+1],_OBs[ires],sizeof(TOBxy)*(_bodov-ires-1));
+                   dec(_bodov);
+                   ires:= 0
+                 end
+               else break
+             end
+         end;
+
+       _urc_trat_FPLC:= _bodov<>bodov0;
+     end;
+
+ procedure _napln_trat_FPLC_ (var rte: POBxys; var bodov: int;
+                              var FPL: DFPLC;
+                              _exclude_uknown_points: bool
+                             );
+     var   i, _bodov: int;
+     begin
+       _bodov:= bodov;
+       _urc_trat_FPLC (rte^,_bodov, _exclude_uknown_points);
+       FPL.bodov:= 0; fillchar(FPL.trat,sizeof(FPL.trat),0);
+       for i:= 0 to _bodov-1 do
+         begin
+           if (i=0) and (FPL.start.kod=rte^[i].kod) then continue;
+           if (i=_bodov-1) and (FPL.prist.kod=rte^[i].kod) then break;
+           if FPL.bodov=max_bod_FPLC then break;
+           OBxy_to_OB(rte^[i],FPL.trat[FPL.bodov]);
+           inc(FPL.bodov)
+         end;
+     end;
+
+ procedure _napln_trat_FPLC (var FDR: DFDR; var FPL: DFPLC);
+     var   bres: bool;
+     begin
+       FPL.date:= FDR.date;
+
+       if in_icao_head (FDR.stat,ms_ICAOact-[msARR],bres) then FPL.stt:= hd_EST
+       else if (FDR.stat=hd_ARR) then FPL.stt:= hd_ARR
+       else if (FDR.stat=hd_CNL) then FPL.stt:= hd_CNL
+       else FPL.stt:= hd_CPL;
+
+       { data, start, prist by uz mali byt }
+       _napln_trat_FPLC_ (FDR.rte,FDR.bodov, FPL, false);
+
+       format_cFPL_(@FPL)
+     end;
+
+ function  _decode_FPL4_15 (FPL: DFPL4; var FDR: DFDR;
+                            var dd: TFDR_decoded_data;
+                           var res: string
+                           ): int;
+
+    var    f15_ : pchar;          { pole bez oddelovacov riadkov       ) }
+           f15T : pchar;          { usek trate vo FIRe (s popisom trate) }
+           f15B : pchar;          { usek trate vo FIRe po bodoch (s popisom trate) }
+           ires,i : int;
+           B    : TsBod;
+
+    begin
+      _decode_FPL4_15:= 0;
+      if (res<>'') and (dd.check_en) then Exit;
+
+      with FDR.date do dd.dep.casA:= DTtoSec(r,m,d, dd.dep.h,dd.dep.m,0);
+      dd.dep.casD:= dd.dep.casA;
+      OBxy_to_AP_(dd.dep,FDR.dep);
+
+      with FDR.date do dd.arr.casA:= DTtoSec(r,m,d, dd.arr.h,dd.arr.m,0);
+      if dd.arr.casA<dd.dep.casA then dd.arr.casA:= dd.arr.casA+secDay;
+      dd.arr.casD:= dd.arr.casA;
+      OBxy_to_AP_(dd.arr,FDR.arr);
+
+      ires:= 0;
+      f15_:= l4line(FPL._15);
+      f15T:= nil; f15B:= nil;
+      if FDR.fpl=nil then new(FDR.fpl);
+
+                                            _urcenie_znamej_trate    (FDR,     f15_,f15T, dd,res,ires);
+      if (res='') or (not dd.check_en) then _urcenie_vysky_rychlosti (FDR,     f15_,      dd,res,ires);
+      if (res='') or (not dd.check_en) then _dekodovanie_na_body     (FPL,FDR, f15T,f15B, dd,res,ires);
+      if (res='') or (not dd.check_en) then _cas_na_vstupnom_bode    (FPL,FDR,            dd,res,ires);
+      if (res='') or (not dd.check_en) then _casy_na_bodoch          (FPL,FDR, f15B,      dd,res,ires);
+      if (res='') or (not dd.check_en) then _uplna_trat              (FPL,FDR,            dd,res,ires);
+
+      strdispose(f15B);
+      strdispose(f15T);
+      strdispose(f15_);
+
+     { Tato cast zabezpeci naplnenie nenulovych hodnot do FDR,
+       mozu vzniknut problemy s urcenim eet, exi, ak uvedene hodnoty
+       sa nedaju urcit, pretoze nie je uvedene pole 14, EET
+       alebo dekodovna trat
+     }
+      OBxy_to_AP_ (dd.dep, FDR.dep);
+      OBxy_to_AP_ (dd.arr, FDR.arr);
+
+      OBxy_to_OB_ (dd.eet, FDR.eet);
+      if FDR.eet.kod='' then
+         begin
+           OBxy_to_OB_ (dd.dep, FDR.eet);
+           with FDR do eet.cas:= DTtoSec(date.r,date.m,date.d, eet.h,eet.m,0);
+         end;
+
+      OBxy_to_OB_ (dd.exi, FDR.exi);
+      if FDR.exi.kod='' then
+         begin
+           OBxy_to_OB_ (dd.arr, FDR.exi);
+           with FDR do
+             begin
+               exi.cas:= DTtoSec(date.r,date.m,date.d, exi.h,exi.m,0);
+               if exi.cas<eet.cas then exi.cas:= exi.cas+secDay;
+             end;
+         end;
+
+      if FDR.fpl<>nil then _napln_trat_FPLC (FDR, FDR.fpl^);
+
+      if _AP_EET_EXI then with FPL.data^.fdr^ do if (fpl<>nil) then
+        begin
+          if is_OB(fpl^.start.kod,B,false) and B.ine.podriadene then AP_to_OB_(fpl^.start,eet);
+          if is_OB(fpl^.prist.kod,B,false) and B.ine.podriadene then AP_to_OB_(fpl^.prist,exi);
+        end;
+
+      if (res<>'') then if (ires=0) then ires:= i_15c;
+      _decode_FPL4_15:= ires
+    end;
+
+
+{ תתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתת
+   Hlavna funkcia
+  תתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתת
+}
+ function _decode_FPL4 (var FPL: DFPL4; check_en: bool; var res: string): int;
+
+    var   dd : TFDR_decoded_data;
+          zmena : bool;
+
+    begin
+      _decode_FPL4:= 0; res:= '';
+      {fillchar(FDR,sizeof(FDR),0);
+      new(FDR.fpl);}
+
+      if (FPL.data<>nil) then disp_FDR_(FPL.data^.fdr)
+      else New(FPL.data);
+      fillchar(FPL.data^,sizeof(FPL.data^),0);
+      new_FDR_(nil,FPL.data^.fdr);
+      new_cFPL_(nil,FPL.data^.fdr^.fpl);
+
+      fillchar(dd,sizeof(dd),0);
+      dd.check_en:= check_en;
+
+      _decode_FPL4:= _decode_FPL4_DATA (FPL,FPL.data^.fdr^, dd,res);
+      if check_en and (res<>'') then Exit;
+
+      _decode_FPL4:= _decode_FPL4_18   (FPL,FPL.data^.fdr^, dd,res);
+      if check_en and (res<>'') then Exit;
+
+      _decode_FPL4:= _decode_FPL4_15   (FPL,FPL.data^.fdr^, dd,res);
+      if check_en and (res<>'') then Exit;
+
+      FPL.vys  := FPL.data^.fdr^.vys;
+      FPL.vys_ := FPL.data^.fdr^.vys_;
+      FPL.eet  := FPL.data^.fdr^.eet;
+      FPL.exi  := FPL.data^.fdr^.exi;
+
+      stav_FDR (FPL.data^.fdr, absTime, zmena);
+
+     { nastavenie pomocnych vypoctovych premmennych
+     }
+      _fpl4_date_all:= false;
+      _fpl4_15_bxr_en:= false;
+     end;

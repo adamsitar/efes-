@@ -1,0 +1,53 @@
+{ ---------------------
+  DB
+  ---------------------
+}
+ procedure codeDB_PRN(PRN: PPRN; buff: PDB_buff; desc: PDB_head);
+     begin
+       codeDB_NTM(PNTM(PRN),buff,desc)
+     end;
+
+ procedure decodeDB_PRN(buff: PDB_buff; PRN: PPRN; desc: PDB_head);
+     begin
+       decodeDB_NTM(buff,PNTM(PRN),desc);
+     end;
+
+
+{ ---------------------
+  prenos
+  ---------------------
+}
+ procedure code0_PRN(PRN: PPRN; var pkt: TNETpkt);
+     begin
+       code0_NTM(PNTM(PRN),pkt)
+     end;
+
+ procedure decode0_PRN(const pkt: TNETpkt; PRN: PPRN);
+     begin
+       decode0_NTM(pkt,PNTM(PRN))
+     end;
+
+ procedure code_PRN(PRN: PPRN; var pkt: TNETpkt);
+     begin
+       code_NTM(PNTM(PRN),pkt)
+     end;
+
+ procedure decode_PRN(const pkt: TNETpkt; PRN: PPRN);
+     begin
+       decode_NTM(pkt,PNTM(PRN))
+     end;
+
+
+{ ---------------------
+  kluc
+  ---------------------
+}
+ function codekey_PRN(PRN: PPRN): string;
+    begin
+      codekey_PRN:= codekey_NTM(PNTM(PRN))
+    end;
+
+ procedure decodekey_PRN(key: string; PRN: PPRN);
+     begin
+       decodekey_NTM(key,PNTM(PRN))
+     end;

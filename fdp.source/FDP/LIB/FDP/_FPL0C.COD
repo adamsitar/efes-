@@ -1,0 +1,470 @@
+{$IFDEF FPLC_L}
+
+ { ---------------------
+   kodovanie
+   ---------------------
+ }
+  function code0_cFPL_1(FPL: PDcFPL): string;
+     var   s : string;
+     begin
+       with FPL^ do
+         begin
+           s:=              format_s(stt)
+               + icao_ARR + format_s(idn)+icao_NXT+format_s(ssr)+icao_NXT+format_s(ssr0)
+               + icao_ARR + format_s(typ)
+               + icao_ARR + format_s(_8b)+icao_NXT+format_s(''{sts})+icao_NXT+format_s(com_)+icao_NXT+format_s(ssr_)
+               + icao_ARR + format_s(inf)
+               + icao_ARR +              code_l4_rych_vys(rych,rych_,vys,vysOB,0,false){+vys_a}
+                            + icao_NXT + code_l4_vys(vys1,vysOB)+vys1_a
+               + icao_ARR + format_s(start.kod)+icao_NXT+TimeToStr(start.h,start.m,'')+icao_NXT+TimeToStr(start_.h,start_.m,'')
+               + icao_ARR + format_s(prist.kod)+icao_NXT+TimeToStr(prist.h,prist.m,'')
+               + icao_ARR + DateToStr(date.d,date.m,date.r,0,'')+icao_NXT+TimeToStr(eet.h,eet.m,'')
+               ;
+         end;
+       code0_cFPL_1:= s
+     end;
+
+
+  function code0_cFPL_T(FPL: PDcFPL; _od,_do: int): string;
+     var   s : string;
+           i : int;
+     begin
+       with FPL^ do
+         begin
+           s:= '';
+           for i:= _od to _do do {0 to minimum(bodov-1,(max_bod_FPLC div 2) -1) do}
+             with Trat[i] do
+               if cut_(kod)<>'' then
+                  s:= s + format_s(kod)
+                        + icao_NXT + TimeToStr(h,m,'')
+                        + icao_NXT + code_l4_vys(vys,vysOB) + vysab
+                        + icao_NXIT
+                        ;
+         end;
+       code0_cFPL_T:= s
+     end;
+
+  function code0_cFPL_2(FPL: PDcFPL): string;
+     begin
+       code0_cFPL_2:=   icao_ARR  + code0_cFPL_T(FPL, 0,(max_bod_FPLC div 2)-1)
+     end;
+
+
+  function code0_cFPL_3(FPL: PDcFPL): string;
+     var   s : string;
+     begin
+       s[0]:= chr(max_przn_fpl);
+       move(FPL^.przn,s[1],sizeof(FPL^.przn));
+       code0_cFPL_3:=   icao_NXIT + code0_cFPL_T(FPL, max_bod_FPLC div 2,max_bod_FPLC-1)
+                     + icao_ARR  + s
+                    {+ icao_ARR + cstr(FPL^.RDP,0)}
+     end;
+
+
+  procedure decode0_cFPL_1(s: string; FPL: PDcFPL);
+      var   t,u  : string;
+            b    : byte;
+            vys_ : char;
+            p    : int;
+      begin
+        fillchar(FPL^,sizeof(FPL^),0);
+        s:= getstr(s,1,[icao_STD]);
+        with FPL^ do
+          begin
+            stt := cut_(getstr(s,1,[icao_ARR]));
+
+            t:= getstr(s,2,[icao_ARR]);
+            idn := getstr(t,1,[icao_NXT]);
+            ssr := getstr(t,2,[icao_NXT]);
+            ssr0:= cut_(getstr(t,3,[icao_NXT]));
+
+            typ:= getstr(s,3,[icao_ARR]);
+
+            t:= getstr(s,4,[icao_ARR]);
+            _8b := getchar(getstr(t,1,[icao_NXT]));
+            {sts    := getstr(t,2,[icao_NXT]);}
+            com_   := getstr(t,3,[icao_NXT]);
+            ssr_   := getchar(getstr(t,4,[icao_NXT]));
+
+            inf:= cut_(getstr(s,5,[icao_ARR]));
+
+            u:= getstr(s,6,[icao_ARR]);
+            t:= getstr(u,1,[icao_NXT]);
+            decode_l4_rych_vys(t{copy(t,1,length(t)-1)}, rych,rych_,vys,vys_);
+            {vys_a:= t[length(t)];}
+            t:= getstr(u,2,[icao_NXT]);
+            decode_l4_vys_(t{copy(t,1,length(t)-1)}, vys1,vys_,@vys1_a,p,false);
+            {vys1_a:= t[length(t)]};
+
+            t:= getstr(s,7,[icao_ARR]);
+            start.kod:= getstr(t,1,[icao_NXT]);
+            GetTimeStr (start.h,start.m,b, getstr(t,2,[icao_NXT]));
+            GetTimeStr (start_.h,start_.m,b, getstr(t,3,[icao_NXT]));
+
+            t:= getstr(s,8,[icao_ARR]);
+            prist.kod:= getstr(t,1,[icao_NXT]);
+            GetTimeStr (prist.h,prist.m,b, getstr(t,2,[icao_NXT]));
+
+            t:= getstr(s,9,[icao_ARR]);
+            GetDateStr (date.r,date.m,date.d, getstr(t,1,[icao_NXT]),false);
+            GetTimeStr (eet.h,eet.m,b, getstr(t,2,[icao_NXT]));
+          end
+      end;
+
+
+  procedure decode0_cFPL_T(s: string; FPL: PDcFPL; _od,_do: int);
+      var   t,u   : string;
+            b     : byte;
+            i,j,p : int;
+            vys_  : char;
+      begin
+        for i:= _od to _do do
+          begin
+            t:= getstr(s,i+1,[icao_NXIT]);
+            if t='' then break;
+            with FPL^.Trat[i] do
+              begin
+                kod:= getstr(t,1,[icao_NXT]);
+                GetTimeStr(h,m,b, getstr(t,2,[icao_NXT]));
+                t:= getstr(t,3,[icao_NXT]);
+                decode_l4_vys_(t, vys,vys_,@vysab,p,false)
+              end;
+          end
+      end;
+
+  procedure decode0_cFPL_2(s: string; FPL: PDcFPL);
+      begin
+        decode0_cFPL_T(getstr(s,1,[icao_ARR]),FPL,0,(max_bod_FPLC div 2)-1)
+      end;
+
+
+  procedure decode0_cFPL_3(s: string; FPL: PDcFPL);
+      var   r : string;
+      begin
+        decode0_cFPL_T(getstr(s,1,[icao_ARR,icao_STD]),FPL,max_bod_FPLC div 2,max_bod_FPLC-1);
+        r:= getstr(s,2,[icao_ARR,icao_STD]);
+        move(r[1],FPL^.przn,sizeof(FPL^.przn));
+        {FPL^.RDP := getint(s,3,[icao_ARR,icao_STD])}
+      end;
+
+
+ { ---------------------
+   prenosy
+   ---------------------
+ }
+  procedure code0_cFPL(FPL: PDcFPL; var pkt: TNETpkt);
+      var   s1,s2,s3 : string; p : word;
+      begin
+        s1:= ZAC_SPR+code0_cFPL_1(FPL)+kbCR_+kbLF_;
+        s2:= code0_cFPL_2(FPL)+kbCR_+kbLF_;
+        s3:= code0_cFPL_3(FPL)+kbCR_+kbLF_+KON_SPR;
+
+        if not new_NETpkt_data (nil,length(s1)+length(s2)+length(s3), pkt.pkt) then Exit;
+        move(s1[1],pkt.pkt.data^[0],length(s1)); p:= length(s1);
+        move(s2[1],pkt.pkt.data^[p],length(s2)); inc(p,length(s2));
+        move(s3[1],pkt.pkt.data^[p],length(s3));
+      end;
+
+  procedure decode0_cFPL(const pkt: TNETpkt; FPL: PDcFPL);
+      var   s,s2: string;
+      begin
+        s:= get_str (pkt.pkt.data, pkt.pkt.dlz,1,[kbCR_,kbLF_], sizeof(string)-1);
+        decode0_cFPL_1(s, FPL);
+        s:= get_str (pkt.pkt.data, pkt.pkt.dlz,2,[kbCR_,kbLF_], sizeof(string)-1);
+        decode0_cFPL_2(s, FPL);
+        s2:= get_str (pkt.pkt.data,pkt.pkt.dlz,3,[kbCR_,kbLF_], sizeof(string)-1);
+        decode0_cFPL_3(s+s2, FPL);
+
+        {format_cFPL(FPL);}
+        {$IFDEF NET}
+          rec_data(pkt.ods, FPL^.rec)
+        {$ENDIF}
+      end;
+
+
+ { ---------------------
+   DB
+   ---------------------
+ }
+  procedure _codeDB0_FPLC(FPL: PDcFPL; buff: PDB_buff; head: PDB_head); far;
+      var   s : string;
+      begin
+        s:= code0_cFPL_1(FPL);
+        s:= s + icao_ARR + inttostr(FPL^.cor_,1,1)
+              {$IFDEF SECTORS} + icao_ARR + cstr(FPL^.sec and ($FF xor s_on),0) {$ENDIF}
+              {$IFDEF NET}     + icao_ARR + rectostr(FPL^.rec)                  {$ENDIF}
+        ;
+
+        Move(s[0],buff^[0],length(s)+1);
+        s:= code0_cFPL_2(FPL)+code0_cFPL_3(FPL);
+        Move(s[0],buff^[1],length(s)+1);
+      end;
+
+
+  procedure _decodeDB0_FPLC(buff: PDB_buff; FPL: PDcFPL; head: PDB_head); far;
+      var   s,t : string;
+            i : int;
+      begin
+        Move(buff^[0],s[0],ord(buff^[0][0])+1);
+        decode0_cFPL_1(s, FPL);
+
+        FPL^.cor_:= getint(s,10,[icao_ARR]);
+        i:= 11;
+        {$IFDEF SECTORS}
+          t:= cut_(getstr(s,i,[icao_ARR]));
+          FPL^.sec:= scis(t,1,length(t)) and ($FF xor s_on);
+          inc(i);
+        {$ENDIF}
+        {$IFDEF NET}
+          strtorec(getstr(s,i,[icao_ARR]), FPL^.rec);
+        {$ENDIF}
+
+        Move(buff^[1],s[0],ord(buff^[1][0])+1);
+        decode0_cFPL_2(s, FPL);
+        decode0_cFPL_3(s, FPL);
+
+        format_cFPL(FPL)
+      end;
+
+
+ { ---------------------
+   kluc
+   ---------------------
+ }
+  function code0key_cFPL(FPL: PDcFPL): string;
+     begin
+       code0key_cFPL:= cut_(FPL^.idn)+ODD_SPR+DateToStr(FPL^.date.d,FPL^.date.m,FPL^.date.r,0,'')
+     end;
+
+  procedure decode0key_cFPL(s: string; FPL: PDcFPL);
+      begin
+        fillchar(FPL^,sizeof(DcFPL),0);
+        with FPL^ do
+          begin
+            idn:= getstr(s,1,setLET_1_1);
+            GetDateStr(date.r,date.m,date.d, getstr(s,2,setLET_1_1),false)
+          end
+      end;
+
+{$ELSE}
+
+ { ---------------------
+   kodovanie
+   ---------------------
+ }
+  function code0_cFPL_(FPL: PDcFPL): string;
+     var   s,t, _9a,_9b,_9c : string;
+           i : int;
+     begin
+       with FPL^ do
+         begin
+           s:= ZAC_SPR+' '+stt+'-';
+           s:= s + format_s(idn)+'/'+format_s(ssr)+'/'+format_s(ssr0);
+
+           _9b:= typ;
+           {$IFDEF LK}
+            if not decode_l4_9 (typ, _9a,_9b,_9c) then _9b:= getstr(typ,1,[icao_NXT]);
+            if _9a<>'01' then _9b:= _9a+_9b;
+           {$ENDIF}
+           s:= s + '-'+format_s(_9b);
+           str(rych:RYCH_C:RYCH_D,t);
+
+           s:= s + '-'+rych_+t;
+           s:= s + '/'+inttostr(vys, 4,0){+vysab};
+           s:= s + '/'+inttostr(vys1,4,0)+vys1_a;
+           s:= s + '/'+inttostr(vysO,4,0)+vysO_a;
+           s:= s + '/'+inttostr(vysH,4,0);
+
+           s:= s + '-'+format_s(start.kod)+'/'+TimeToStr(start.h,start.m,'')+'/'+TimeToStr(start_.h,start_.m,'');
+           s:= s + '-'+format_s(prist.kod)+'/'+TimeToStr(prist.h,prist.m,'');
+           s:= s + '-';
+
+           for i:= 0 to bodov{}-1 do with Trat[i] do
+               begin
+                 s:= s + format_s(kod)+'/'+TimeToStr(h,m,'')+'/'+inttostr(vys,4,0)+vysab+' ';
+               end;
+
+           s:= s + ' -'+format_s(inf)+'/ '{+inttostr(cislo,3,0)};
+           s:= s + '/' + TimeToStr(eet.h,eet.m,'')+DateToStr(date.d,date.m,date.r,0,'');
+           s:= s + ODD_SPR + _8b
+                 + ODD_SPR + ' '
+                 + ODD_SPR + com_
+                 + ODD_SPR + ssr_
+                 {$IFDEF RVSM}
+                  + ODD_SPR + format_s(_81)
+                 {$ENDIF}
+                 + KON_SPR
+         end;
+
+       code0_cFPL_:= s
+     end;
+
+
+  procedure decode0_cFPL_(s: string; FPL: PDcFPL);
+      var   i,ii,c  : int;
+            t,s1,s2 : string;
+      begin
+        fillchar(FPL^,sizeof(DcFPL),0);
+        with FPL^ do
+          begin
+            t    := cut_(getstr(s,1,setLET_1_1+['-']));
+            stt  := t[length(t)];
+            if stt=fpl_CPL then stt:= hd_CPL else stt:= hd_EST;
+
+            t    := getstr(s,2,['-']);
+            idn  := getstr(t,1,['/']);
+            ssr  := getstr(t,2,['/']);
+            ssr0 := getstr(t,3,['/']);
+
+            typ  := getstr(s,3,['-']);
+
+            t    := getstr(s,4,['-']);
+
+            s1   := getstr(t,1,['/']);
+            rych_:= getcharu(s1[1]);
+            val(copy(s1,2,length(s1)-1),rych,c);
+
+            s1     := getstr(t,2,['/']);
+            vys    := GetInt(s1,1,setPism);
+            {vysab  := getcharu(DelChar(s1,setCisl));}
+
+            s1     := getstr(t,3,['/']);
+            vys1   := GetInt(s1,1,setPism);
+            vys1_a := getcharu(DelChar(s1,setCisl));
+
+            s1     := getstr(t,4,['/']);
+            vysO   := GetInt(s1,1,setPism);
+            vysO_a := getcharu(DelChar(s1,setCisl));
+
+            vysH   := GetInt(t,5,['/']);
+
+            t:= getstr(s,5,['-']);
+            start.kod:= getstr(t,1,['/']);
+            s1:= getstr(t,2,['/']);
+            start.h  := scis(s1,1,2);
+            start.m  := scis(s1,3,2);
+            s1:= getstr(t,3,['/']);
+            start_.h := scis(s1,1,2);
+            start_.m := scis(s1,3,2);
+
+            t:= getstr(s,6,['-']);
+            prist.kod:= getstr(t,1,['/']);
+            s1:= getstr(t,2,['/']);
+            prist.h  := scis(s1,1,2);
+            prist.m  := scis(s1,3,2);
+
+            t:= getstr(s,7,['-']);
+            i:= 0;
+            while (i < max_bod_FPLC) do with Trat[i] do
+              begin
+                s1  := getstr(t,i+1,[' ']);
+                kod := getstr(s1,1,['/']);
+                s2  := getstr(s1,2,['/']);
+                h{p}:= scis(s2,1,2);
+                m{p}:= scis(s2,3,2);
+
+                s2    := getstr(s1,3,['/']);
+                vys   := GetInt(s2,1,setPism);
+                vysab := getcharu(DelChar(s2,setCisl));
+
+                inc(i)
+              end;
+
+            t  := getstr(s,8,['-']);
+            inf:= getstr(t,1,['/']);
+           {cislo:= getint(t,2,['/']);}
+            s1 := getstr(t,3,['/']);
+            with eet do
+              begin
+                h:= scis(s1,1,2);
+                m:= scis(s1,3,2);
+              end;
+            with date do
+              begin
+                d:= scis(s1,5,2);
+                m:= scis(s1,7,2);
+                r:= scis(s1,9,4)
+              end;
+
+            _8a := ' ';
+            _8b := getchar(getstr(s,2,setLET_1_1));
+            if not (_8b in set_8b) then _8b:= INY_LET;
+            {sts  := getstr(s,10,setLET_1_1);}
+            com_ := getstr(s,4,setLET_1_1);
+            ssr_ := getchar(getstr(s,5,setLET_1_1));
+
+            {$IFDEF RVSM}
+             _81 := getchar(getstr(s,6,setLET_1_1))
+            {$ENDIF}
+          end;
+      end;
+
+
+ { ---------------------
+   prenos
+   ---------------------
+ }
+
+  procedure code0_cFPL(FPL: PDcFPL; var pkt: TNETpkt);
+      var   s : string;
+      begin
+        s:= code0_cFPL_(FPL);
+        new_NETpkt_data (@s[1],length(s), pkt.pkt)
+      end;
+
+  procedure decode0_cFPL(const pkt: TNETpkt; FPL: PDcFPL);
+      var   s : string;
+      begin
+        s:= init_str(pkt.pkt.data,pkt.pkt.dlz);
+        decode0_cFPL_(s, FPL);
+        init_time(FPL^.eet, hour,min, sec);
+        {$IFDEF NET}
+          rec_data(pkt.ods, FPL^.rec)
+        {$ENDIF}
+      end;
+
+
+ { ---------------------
+    DB
+   ---------------------
+ }
+  procedure _codeDB0_FPLC(FPL: PDcFPL; buff: PDB_buff; head: PDB_head); far;
+      var   s : string;
+      begin
+        s:= code0_cFPL_(FPL);
+        {$IFDEF NET} s:= s + rectostr(FPL^.rec) + KON_SPR; {$ENDIF}
+        s:= s + ODD_SPR + inttostr(FPL^.cor_,1,1) + ODD_SPR;
+        Move(s[0],buff^[0],length(s)+1)
+      end;
+
+  procedure _decodeDB0_FPLC(buff: PDB_buff; FPL: PDcFPL; head: PDB_head); far;
+      var   s : string;
+      begin
+        Move(buff^[0],s[0],ord(buff^[0][0])+1);
+        decode0_cFPL_(s, FPL);
+        {$IFDEF NET} strtorec(getstr(s,2,[KON_SPR]), FPL^.rec); {$ENDIF}
+        FPL^.cor_:= getint(s,3,setLET_1_1);
+      end;
+
+
+ { ---------------------
+   kluc
+   ---------------------
+ }
+
+  function code0key_cFPL(FPL: PDcFPL): string;
+     begin
+       code0key_cFPL:= cut_(FPL^.idn)+ODD_SPR+DateToStr(FPL^.date.d,FPL^.date.m,FPL^.date.r,0,'')
+     end;
+
+  procedure decode0key_cFPL(s: string; FPL: PDcFPL);
+      begin
+        fillchar(FPL^,sizeof(DcFPL),0);
+        with FPL^ do
+          begin
+            idn:= getstr(s,1,setLET_1_1);
+            GetDateStr(date.r,date.m,date.d, getstr(s,2,setLET_1_1),false)
+          end
+      end;
+
+{$ENDIF}

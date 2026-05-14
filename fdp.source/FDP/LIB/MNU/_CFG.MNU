@@ -1,0 +1,51 @@
+procedure mnuCFG_READ__init (MMenu: PSubmenu); far;
+    const max_items = cmCFG_USER_hi-cmCFG_USER_lo+1;
+    var   smnu : array[0..max_items-1] of PItem;
+          i,items,nl,ihk : int;
+          dir   : PDir;
+          files : int;
+    begin
+      items:= 0; ihk:= 0; nl:= 0;
+
+      smnu[items]:= Item(' '+hk(ihk)+CFG_DEFAULT, cmCFG_DEFAULT, nil);
+      inc(items);
+
+      if GetDirFiles ('', fn_all+ext_usa, dir,files)>0 then
+         begin
+           QuickSort(Pptrs(dir),@comp_fn_FileAttr,nil,0,files-1,false);
+           smnu[items]:= NewLine(nil);
+           inc(items);
+           i:= 0; while (i<files) and (i<max_items) do
+             begin
+               smnu[items]:= Item(' '+hk(ihk)+getstr(dir^[i]^.name,1,['.']), cmCFG_USER_lo+i, nil);
+               inc(items);
+               inc(i)
+             end;
+           if files>0 then FreeDirFiles(dir,files);
+         end;
+
+      for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i])
+    end;
+
+
+function CFG_READ_menu_init(title: string): PSubMenu;
+   var   sbmnu : PSubMenu;
+   begin
+     sbmnu:= SubMenu (cut_r(title)+'... ', WinMenu_S (title, hlp_CFG,10,nil),nil);
+     sbmnu^.PMenu_init:= @mnuCFG_READ__init;
+     {sbmnu^.PMenu_done:= @mnuCFG_done;}
+     CFG_READ_menu_init:= sbmnu
+   end;
+
+function CFG_SAVE_menu_init(title: string): PSubMenu;
+   var   sbmnu : PSubMenu;
+         D : DirStr; N : NameStr; E : ExtStr;
+   begin
+     FSplit(USER_CFG,D,N,E);
+     sbmnu:= SubMenu (cut_r(title)+'... ',  WinMenu(title,hlp_CFG,
+                             Item (CFG_SAVE_ACT + '('+upstring(N)+') ', cmCFG_SAVE_ACT,
+                             Item (CFG_SAVE_OTH, cmCFG_SAVE_OTH,
+                             nil) )
+                            ),nil);
+     CFG_SAVE_menu_init:= sbmnu
+   end;

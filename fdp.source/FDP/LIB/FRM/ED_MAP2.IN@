@@ -1,0 +1,346 @@
+procedure TMapa.SaveMapOrSymbol(_Data: PMapData);
+    var    res:Integer;
+
+         { SymbolF : file of tSymbol;}
+          SuradnF : file of Suradnica;
+          SymF    : file of tSymbol;
+          DirInfo : SearchRec;
+          stmap   : string;
+          sym     : tSymbol;
+          sur     : suradnica;
+
+Begin
+    with _Data^ do
+    If  not MapSym Then { symboly }
+      begin
+        if SVSym = Nil then Exit;
+        Assign(SymF,PathToMaps+MapNaz);
+        Rewrite(SymF);
+        if SVSym^.DejPocet = 0 then
+        begin
+          Close(SymF);
+          Erase(SymF);
+          Exit;
+        end;
+
+        SVSym^.JdiNaZacatek;
+        repeat
+          PMSym := SVSym^.DejAktPrvek;
+          if PMSym=nil then break;
+          Sym.Ts  := PMSym^.Ts;
+          Sym.Xzs := PMSym^.Xzs;
+          Sym.Yzd := PMSym^.Yzd;
+          Sym.Vet := PMSym^.Vet;
+          System.Write(SymF,Sym);
+          SVSym^.JdiNaDalsi(Konec)
+        until Konec;
+
+        for res := 0 to sizeof(MapSpec)-1 do MapSpec[res] := 0;
+        if MapKr Then  MapSpec[0] :=   0
+        else  MapSpec[0] :=  255;
+        MapSpec[2] := MapCl;
+        MapSpec[3] := MapTyp;
+        MapSpec[4] := byte(MapFill);
+        MapSpec[5] := MapPrior;
+        MapSpec[6] := 0;
+        MapSpec[7] := TypCiar;
+
+        MapSpec[11]:= day;
+        MapSpec[12]:= month;
+        if year < 2000 then MapSpec[13]:= year-1900
+        else MapSpec[13]:= year-2000;
+        Move(MapSpec,Sym,Sizeof(MapSpec));
+        System.Write(SymF,Sym);
+        Close(SymF);
+      end
+      else
+      begin           { mapy }
+        if SVMap = nil Then Exit;
+        Assign(Suradnf,PathToMaps+MapNaz);
+        Rewrite(Suradnf);
+
+        if SVMap^.DejPocet = 0 then
+        begin
+          Close(SuradnF);
+          Erase(SuradnF);
+          Exit;
+        end;
+
+        SVMap^.JdiNaZacatek;
+        repeat
+          PMSur := SVMap^.DejAktPrvek;
+          if PMSur=nil then break;
+          Sur.Ts  := PMSur^.Ts;
+          Sur.Xzs := PMSur^.Xzs;
+          Sur.Yzd := PMSur^.Yzd;
+          System.Write(SuradnF,sur);
+          SVMap^.JdiNaDalsi(Konec)
+        until Konec;
+
+        for res := 0 to sizeof(MapSpec)-1 do MapSpec[res] := 0;
+        if MapKr Then  MapSpec[0] :=   0
+        else  MapSpec[0] :=  255;
+        MapSpec[2] := MapCl;
+        MapSpec[3] := MapTyp;
+        if MapFill>0 Then
+        begin
+          MapSpec[4] :=   MapFill;
+          MapSpec[6] := MapPor;    { bolo maptyp }
+        end
+        else
+        begin
+          MapSpec[4] :=  0;
+          MapSpec[6] :=  0;
+        end;
+        MapSpec[5] := MapPrior;
+        MapSpec[7] := TypCiar;
+        MapSpec[11]:= day;
+        MapSpec[12]:= month;
+        if year < 2000 then MapSpec[13]:= year-1900
+        else MapSpec[13]:= year-2000;
+        Move(MapSpec,Sur,Sizeof(MapSpec));
+        System.Write(Suradnf,sur);
+        Close(SuradnF);
+      end;
+End; { SaveMapOrSymbol }
+
+
+procedure TMapa.FarbaMap(coho : int);
+var   _Event: TEvent;
+    begin
+      if USER_PRIORITY = 0 then
+      begin
+        Err('Nem te pr va na zmenu farieb');
+        Exit;
+      end;
+      if coho = cmPOVfarby then
+      begin
+        Map^.JdiNaZacatek;
+        repeat
+          PData := Map^.DejAktPrvek;
+          case  PData^.MapTyp  of
+             1: PData^.Mapcl:= clOBM;
+             2: PData^.Mapcl:= clNEB;
+             3: PData^.Mapcl:= clCTR;
+             4: PData^.Mapcl:= clTMA;
+             5: PData^.Mapcl:= clLET;
+             6: PData^.Mapcl:= clSTH;
+             7: PData^.Mapcl:= clROZ;
+             8: PData^.Mapcl:= clNAV;
+             9: PData^.Mapcl:= clCIV;
+          end;
+          Map^.JdiNaDalsi(Konec);
+        until Konec;
+      end
+      else
+      begin
+        formular_Farba(_Event);
+        if not isCommand(_Event, cmOK) then Exit;
+        Map^.JdiNaZacatek;
+        repeat
+          PData := Map^.DejAktPrvek;
+          if coho-cmFARBA = PData^.MapTyp then begin
+            PData^.Mapcl:= MapFarba;
+            SaveMapOrSymbol(PData);
+          end;
+          Map^.JdiNaDalsi(Konec);
+        until Konec;
+      end;
+      Draw;
+    end;
+
+
+procedure TMapa.Idle(var _Event: TEvent);
+    begin
+      if CO_ROBIT = cmNil then Exit;
+      if NOT MousePositionChanged then Exit;
+      { tu sa bude prepinat podla toho, ci chce pracovat so suradnicami
+        alebo so stvorcami d318777}
+!      Xrealne:= (Txx/Kon2)+Xs2;
+      Yrealne:= (((MaxY-Tyy)+dTyy)/Kon1)+Ys2;
+      PrepocetZS;
+      OKNOZSZD^.Vypis(stx,mx,sx,sty,my,sy);
+    end;
+
+{------------------------------------------}
+procedure TMapa.GetEvent(var _Event: TEvent);
+    begin
+      inherited GetEvent(_Event);
+      with _Event do
+        case What of
+          evKeyDown :
+            case CO_ROBIT of
+              robVYSTREDENIE: case Key of
+                                kbEnter: SetCommand(_Event,cmVYSTRED);
+                                kbEsc  : SetCommand(_Event,cmClose);
+                                else if kbset_xy(Key) then ClearEvent(_Event)
+                              end;
+              robEDITOVANIE: case Key of
+                                kbEnter     : SetCommand(_Event,Aky_Form);
+                                kbDel       : SetCommand(_Event,cmZMAZBOD);
+                                kbEsc       : SetCommand(_Event,cmUkoncit);
+                                kbF1        : SetCommand(_Event,cmZemSurForm);
+                                kbShiftF1   : SetCommand(_Event,cmLDMForm);
+                                kbCtrlEnter : SetCommand(_Event,cmOK);
+                                else if kbset_xy(Key) then ClearEvent(_Event)
+                              end;
+            else if Key = kbAltR then SetCommand(_Event,cmRefresh);
+            end;
+          evMouseClick:
+            if (What = evMouseClick) and (inView(M.x,M.y)) then
+               if bool(M.bt and mbLeftButton)  then
+                  case CO_ROBIT of
+                    robVYSTREDENIE: SetCommand(_Event,cmVYSTRED);
+                    robEDITOVANIE : SetCommand(_Event,cmVLOZBOD);
+                  end
+               else if bool(M.bt and mbRightButton) then
+                       case CO_ROBIT of
+                         robVYSTREDENIE: SetCommand(_Event,cmClose);
+                         robEDITOVANIE : SetCommand(_Event,cmRozdelit);{SetCommand(_Event,cmUkoncit);}
+                       end
+                     else if bool(M.bt and mbMiddleButton) then
+                             case CO_ROBIT of
+                               robVYSTREDENIE:;
+                               robEDITOVANIE :SetCommand(_Event,cmRozdelit);
+                             end;
+      end;
+    end;
+
+procedure TMapa.HandleEvent(var _Event: TEvent);
+    var DataPom  : PMapData;
+        PMSurPom : PMapsur;
+        btt      : byte;
+        xr0,yr0,xr1,yr1: int;   {}
+    const _Fill : bool = false;
+    begin
+     DataPom := PData; PMSurPom:= PMSur;
+     if _Fill and not (_Event.Key in [kbLeft,kbRight,kbDown,kbUp,'+','-']) then
+     begin
+       FILLOVAT := true;
+       _Fill  := false;
+       Draw;
+       if CO_ROBIT = robEDITOVANIE then writeCross;
+     end;
+     PData := Datapom; PMsur := PmSurPom;
+      case _Event.What of
+        evCommand :
+          case _Event.Command of
+            cmVYSTRED :   begin
+                            m_cl;
+                            with mouse_status.stat do
+                              begin
+                                get_m(x,y,bt);
+                                Txx:= x; Tyy:= y;
+                                Txxo := x; Tyyo :=y;
+                                InvPoint(Xvystred,Yvystred);
+                                btt:= 1;
+                                xr0 := x;
+                                xr1 := x;
+                                yr0 := y;
+                                yr1 := y;
+                                SetWriteMode(XorPut);
+                                while (bt=1) and not((btt<>1) {and TimeOut(tick,GetTicks,15)}) do
+                                  begin
+                                    get_m(x,y,btt);
+                                    if (x<>Txx) then
+                                      begin
+                                        Rectangle(xr0,yr0,xr1,yr1);
+                                        xr0 := Txxo-abs(Txxo-x);
+                                        xr1 := Txxo+abs(Txxo-x);
+                                        yr0 := Tyyo-trunc((Txxo-x)*0.8);
+                                        yr1 := Tyyo+trunc((Txxo-x)*0.8);
+                                        if yr1 > y1-10 then yr1 := y1-10;
+                                        if yr1 < 10 then yr1 := 10;
+                                        if yr0 > y1-10 then yr0 := y1-10;
+                                        if yr0 < 10 then yr0 := 10;
+
+                                        Rectangle(xr0,yr0,xr1,yr1);
+                                      end;
+                                    Txx:= x; Tyy:= y;
+                                    Main0
+                                  end;
+                                if abs(xr1-xr0) > 10  then
+                                      Rozsah := Rozsah*abs(Xr1-Xr0)/MaxX;
+                              end;         {}
+                            m_st;
+                            SetWriteMode(0);
+                            Draw;
+                            PData := Map^.DejPrvek(DataPom);
+                            Exit
+                          end;
+
+            cmVLOZBOD: if (Txx <> xc) or (Tyy <> yc) then
+                           DrawInsVect;
+
+            cmZMAZBOD: Delete_Point;
+            cmZemSurForm: begin
+                            Aky_Form := cmZemSurForm;
+                            formular_ZemSur(_Event);
+                            if _Event.Command = cmOK then
+                              DrawInsVect
+                          end;
+            cmLDMForm   : begin
+                            Aky_Form := cmLDMForm;
+                            formular_LDM(_Event);
+                            if _Event.Command = cmOK then
+                              DrawInsVect
+                          end;
+
+            cmUKONCIT   : begin
+                            Ask(_Event,cmQuit, ' Varovanie ','Ukoncit editovanie ?',White,clBUTTON_COLOR,waitASK*18);
+                            if isCommand(_Event,cmQuit) then
+                                begin
+                                 SetCommand(_Event,cmClose);
+                                 Exit
+                                end;
+                          end;
+            cmRozdelit  : Rozdelit_Ciaru;
+            else Exit
+          end;
+        evKeyDown :
+          if not (_Event.Key in setkbPreMapy) then Exit
+          else begin
+                 case _Event.Key of
+                   '+'    : Rozsah:= Rozsah+Vy_r(Rozsah);
+                   '-'    : Rozsah:= Rozsah-Vy_r(Rozsah);
+                   kbLeft : Stred(Xvystred-Vy_r(Rozsah),Yvystred);
+                   kbRight: Stred(Xvystred+Vy_r(Rozsah),Yvystred);
+                   kbDown : Stred(Xvystred,Yvystred-Vy_r(Rozsah));
+                   kbUp   : Stred(Xvystred,Yvystred+Vy_r(Rozsah));
+                  end;
+                  if CO_ROBIT = robEDITOVANIE then
+                  case _Event.Key of
+                   kbCtrlLeft,
+                   kbCtrlRight: Select_Point(_Event.Key);
+                   kbIns  :  Insert_point;
+                   'Z','z':  Zaciatok_ciary;
+                   'K','k':  Kruhovy_obluk;
+                   'R','r':  begin
+                               Draw;
+                               PData := Map^.DejPrvek(DataPom);
+                               PMSur := PData^.SVMap^.DejPrvek(PMSurPom);
+                               writecross;
+                             end;
+
+                 end;
+                 if (_Event.Key in [kbLeft,kbRight,kbDown,kbUp,'+','-']) then
+                   begin
+                     if FILLOVAT then
+                      begin
+                        FILLOVAT := false;
+                        _Fill := true;
+                        Draw;{Kresli(false){Draw ak nie je Xor}
+                        if CO_ROBIT = robEDITOVANIE then writeCross;
+                      end
+                     else Kresli(false);
+                     PData := Map^.DejPrvek(DataPom);
+                     if PData^.SVMap <> nil then
+                        PMSur := PData^.SVMap^.DejPrvek(PMSurPom);
+                   end;
+                 if CO_ROBIT = robEDITOVANIE then Cross;
+               end;
+         else Exit;
+      end;
+      ClearEvent(_Event)
+    end;
+

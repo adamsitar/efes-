@@ -1,0 +1,94 @@
+ function O_VERA._code_bod (kod: string; h,m: byte;
+                            vys: word; vys_,vys_a: char;
+                            var vysp: word; var vysp_,vysp_a: char
+                           ): string;
+    var  s: string;
+    begin
+      s:= alt_to_str (vys,vys_,'',true,false);
+      kod:= kod + icao_NXT + s {copy(s,2,length(s)-1)};
+      kod:= kod + icao_NXT + code_l4_utc(h,m);
+      vysp:= vys; vysp_:= vys_; vysp_a:= vys_a;
+      _code_bod:= kod
+    end;
+
+ function O_VERA._code_EST (var FPL: DFPL4): pchar;
+    var   p,p0: pchar;
+          s: string;
+    begin
+      with FPL do p:= StrPasNew
+        (
+                     _7
+         +icao_ARR + _8
+         +icao_ARR + _9
+         +icao_ARR + _13
+         +icao_ARR + _14
+         +icao_ARR + _16
+         +icao_ARR
+        );
+
+      s:= getpstr (FPL._15,1,[icao_NXIT]);
+      p:= StrNPCopy(p,s+icao_ARR,true,true);
+
+      p0:= FPL._15; incptr(pointer(p0),length(s));
+      if (p0<>nil) and (p0[0]=icao_NXIT) then incptr(pointer(p0),1);
+      p0:= l4_format_p(p0);
+      p:= StrNCopy(p,p0,true,false);
+
+      p:= StrNPCopy(p,icao_ARR,true,true);
+      p0:= l4_format_p(FPL._19);
+      p:= StrNCopy(p,p0,true,false);
+
+      p:= StrNPCopy(p,icao_ARR+rmk_NIL,true,true);
+      {p0:= l4_format_p(FPL._18);
+      p:= StrNCopy(p,p0,true,false);}
+      _code_EST:= p
+    end;
+
+
+ function O_VERA._code_ESTc(var FPLc: DcFPL; var FPL: DFPL4): bool;
+    var   hh,mm,ss : byte;
+          s,t,u    : string;
+          i        : int;
+          vys_     : char;
+          vysp: word; var vysp_,vysp_a: char;
+    begin
+      fillchar(FPL,sizeof(FPL),0);
+
+      with FPLc do
+        begin
+          FPL._7 := code_l4_7(idn,mod_A,ssr);
+
+          FPL._8 := code_l4_8(_8a,_8b, _l4444m);
+          if typ<>'' then FPL._9 := typ
+          else FPL._9 := ZZZZ;
+          FPL._10:= code_l4_10(com_,ssr_);
+
+          FPL._13:= code_l4_13a(start.kod,false);
+          if (start_.h<>0) or (start_.m<>0) then FPL._13:= FPL._13+TimeToStr(start.h,start.m,'');
+
+          FPL._16:= code_l4_16a(prist.kod,false);
+          {if (prist.h<>0)  or (prist.m<>0)  then FPL._16:= FPL._16+TimeToStr(prist.h,prist.m,'');}
+
+          if bodov>0 then with trat[0] do FPL._14:= kod+icao_NXT+TimeToStr(h,m,'')+code_l4_vys_(vys,vysOB,FL_from_alt,false)
+          else with start do FPL._14:= kod+icao_NXT+TimeToStr(h,m,'')+code_l4_vys_(vys,vysOB,FL_from_alt,false);
+
+          FPL._15:= StrPasNew(code_l4_rych (rych,rych_) + alt_to_str (vys,vysOB,'',true,false));
+
+          if bodov>0 then
+             begin
+               vysp:= vys; vysp_:= vysOB; vysp_a:= ' ';
+               for i:= 0 to bodov-1 do with trat[i] do
+                   FPL._15:= StrNPCopy(FPL._15,icao_NXIT+_code_bod(kod, h,m, vys,altS,' ', vysp,vysp_,vysp_a),true,true);
+             end;
+
+          if ssr<>ssr0 then s:= '0' else s:= ssr0;
+          FPL._19:= StrPasNew(s);
+        end;
+      _code_ESTc:= true
+    end;
+
+
+  function  O_VERA._code_ESTm (var FPLm: DmFPL; var FPL: DFPL4): bool;
+     begin
+       _code_ESTm:= inherited _code_ESTm (FPLm,FPL)
+     end;

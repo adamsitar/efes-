@@ -1,0 +1,74 @@
+{ תתתתתתתתתתתתתתתתתת
+   ABI
+  תתתתתתתתתתתתתתתתתת
+}
+procedure O_L4444._decode_ABI (data: pchars; size: word; var FPL: DFPL4; var res: string);
+   begin
+     res:= '';
+     FPL._3 := get_str (data,size, 1,odd_ICAO, sizeof(FPL._3)-1);
+     FPL._7 := get_str (data,size, 2,odd_ICAO, sizeof(FPL._7)-1);
+     FPL._13:= get_str (data,size, 3,odd_ICAO, sizeof(FPL._13)-1);
+     FPL._14:= get_str (data,size, 4,odd_ICAO, sizeof(FPL._14)-1);
+     FPL._16:= get_str (data,size, 5,odd_ICAO, sizeof(FPL._16)-1);
+     FPL._22:= get_str0(data,size, 6,odd_ICAO)
+   end;
+
+function O_L4444._process_ABI (data: pchars; size: word; var FPL: DFPL4; var res: string): bool;
+   begin
+     _process_ABI:= {najdi or } (FPL._22<>nil)
+   end;
+
+function O_L4444.decode_ABI (data: pchars; size: word; var FPL: DFPL4; var res: string): bool;
+   begin
+     _decode_ABI(data,size, FPL, res);
+     decode_ABI:= (res='') and _process_ABI(data,size, FPL, res)
+   end;
+
+
+{ תתתתתתתתתתתתתתתתתת
+   PAC
+  תתתתתתתתתתתתתתתתתת
+}
+function  O_L4444.decode_PAC (data: pchars; size: word; var FPL: DFPL4; var res: string): bool;
+   begin
+     res:= '';
+     decode_PAC:= (res='') and false
+   end;
+
+
+{ תתתתתתתתתתתתתתתתתת
+   ACT
+  תתתתתתתתתתתתתתתתתת
+}
+procedure O_L4444._decode_ACT (data: pchars; size: word; var FPL: DFPL4; var res: string);
+    begin
+      res:= '';
+      FPL._3 := get_str (data,size, 1,odd_ICAO, sizeof(FPL._3)-1);
+      FPL._7 := get_str (data,size, 2,odd_ICAO, sizeof(FPL._7)-1);
+      FPL._13:= get_str (data,size, 3,odd_ICAO, sizeof(FPL._13)-1);
+      FPL._14:= get_str (data,size, 4,odd_ICAO, sizeof(FPL._14)-1);
+      FPL._16:= get_str (data,size, 5,odd_ICAO, sizeof(FPL._16)-1);
+      FPL._22:= get_str0(data,size, 6,odd_ICAO)
+    end;
+
+function O_L4444._process_ACT (data: pchars; size: word; var FPL: DFPL4; var res: string): bool;
+   begin
+     _process_ACT:= {najdi or } (FPL._22<>nil)
+   end;
+
+function  O_L4444.decode_ACT (data: pchars; size: word; var FPL: DFPL4; var res: string): bool;
+   begin
+     _decode_ACT(data,size, FPL, res);
+     decode_ACT:= (res='') and _process_ACT(data,size, FPL, res)
+   end;
+
+
+{ תתתתתתתתתתתתתתתתתת
+   REV
+  תתתתתתתתתתתתתתתתתת
+}
+function  O_L4444.decode_REV (data: pchars; size: word; var FPL: DFPL4; var res: string): bool;
+   begin
+     res:= '';
+     decode_REV:= (res='') and false
+   end;

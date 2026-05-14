@@ -1,0 +1,73 @@
+     const  tmout_HEARTBEAT_hi  = 300;
+            tmout_HEARTBEAT     : word = 0; {tmout_HEARTBEAT_hi}
+            tmout_HEARTBEAT_max : word = 0; {tmout_HEARTBEAT_hi}
+
+            tmout_CALL_hi     = 60;
+            tmout_CALL        : word = 20;  {''}   { cakanie na odozvu v pripade vypadku siete }
+            tmout_ACK         : word = 10;  {''}   { cakanie na potvrdenie }
+            NET_ACK_ALL    : bool    = true;  { spracovanie vsetkych potvrdeni naraz }
+
+            dT                : byte = {$IFNDEF CAS RLI} 1 {$ELSE} 2 {$ENDIF};
+
+            (*
+            net_SEND_WAIT     : byte = 0;   { tickov, caka po vyslani paketu }
+            ipx_REPEAT        : byte = 0;   { opakuje x, ked nie je trasaok  }
+            *)
+
+            info_INIT         : bool = {$IFDEF SERVER} true {$ELSE} false {$ENDIF};
+            NODE_FILTER       : bool = true;
+
+
+     const  NET_ENABLED    : bool    = false;
+            NONET          : bool    = false;
+
+            DISTRIBUTE_EN  : bool    = true;  { povolenie rozoslat plan na podriadenu stanicu     }
+            INITIALIZE_EN  : bool    = true;  { povolenie inicializovat podriadenu stanicu        }
+            _INITIALIZE_EN : bool    = true;
+
+            WAIT_INIT_NODE : bool    = false; { pri initialize caka na ack, nemenit, pokial mozno }
+
+            INIT_TIMEOUT    : int    = 0;
+            cfg_INIT_TIMEOUT= 'NET INIT TIMEOUT';
+
+            INIT_VYP        : bool    = {$IFDEF SERVER} false {$ELSE} false {$ENDIF};
+            cfg_INIT_VYP    = 'CHECK NET INITIALIZING';
+
+            INIT_POCET     : int     = 3;     { pocet neuspesnych inicializacii, po ktorych sa inicializacia uzla vypne }
+            INIT_POCET_lo  : int     = 2;     { pocet neuspesnych inicializacii, po ktorych sa inicializacia uzla vypne }
+            INIT_POCET_hi  : int     = 10;    { pocet neuspesnych inicializacii, po ktorych sa inicializacia uzla vypne }
+
+            INIT_INT       : int     = 60;    { za sec }
+            INIT_INT_lo    = 1;
+            INIT_INT_hi    = 300;
+
+
+     const  cfg_EN_RDP_ZO_SUBORA = 'RDP INIT DB';
+            EN_RDP_ZO_SUBORA     : byte = 5;         { bool = true; }
+            nodesRDP             : byte = 0;
+
+
+     const  cfg_TEST_TIME_OUT  = 'NET TEST TIMEOUT';
+            cfg_ACK_TIME_OUT   = 'NET ACK TIMEOUT';
+            cfg_NET_ACK_ALL    = 'NET ACK ALL';
+
+            cfg_NET__HEARTBEAT = 'NET HEARTBEAT';
+            cfg_IPX__HEARTBEAT = 'IPX HEARTBEAT';
+
+            cfg_NETBuffer      = 'NET BUFFERS';
+            cfg_nd_buff_size   = 'IPX BUFFERS';
+            cfg_rtr_buff_size  = 'RTR BUFFERS';
+            {$IFDEF ARCHIVE_DAR}
+             cfg_DAR_buff_size = 'DAR BUFFERS';
+             cfg_archive_DAR   = 'DAR ARCHIVE';
+            {$ENDIF}
+
+            cfg_ipx_repeat     = 'IPX REPEAT';
+
+
+            cfg_pkt_wait       = 'NET SEND WAIT';
+            cfg_info_INIT      = 'NET IS INITIALIZED';
+            cfg_NODE_FILTER    = 'NODE FILTER';
+            cfg_INITIALIZE_EN  = 'NODE INITIALIZE';
+            cfg_WAIT_INIT_NODE = 'NODE INITIALIZE WAIT';
+

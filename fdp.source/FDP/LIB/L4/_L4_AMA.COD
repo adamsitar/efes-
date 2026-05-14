@@ -1,0 +1,128 @@
+function O_L4444._code_DEP (var FPL: DFPL4): pchar;
+   var   p: pchar;
+   begin
+     with FPL do p:= StrPasNew
+       (
+                     _7
+        + icao_ARR + _13
+        + icao_ARR + copy(_16,1,kod_AP)
+        + icao_ARR
+       );
+     _code_DEP:= p
+   end;
+
+function O_L4444.send_DEP (var FPL: DFPL4; key: string; typ: TNETtyp): bool;
+   var   p: pchar;
+   begin
+      p:= _code_DEP(FPL);
+      send_DEP:= p<>nil;
+      if p<>nil then
+         begin
+           send_data(NODE_REMOTE, hd_ICAO[msDEP],'','', pchars(p),strlen(p), key,typ);
+           StrDispose(p)
+         end
+   end;
+
+
+function O_L4444._code_ARR (var FPL: DFPL4): pchar;
+   var   a: string;
+         p: pchar;
+   begin
+     a:= copy(FPL._16,1,kod_AP);
+     if FPL._17<>nil then a:= strpas(FPL._17);
+     {if FPL._17<>nil then a:= a + icao_ARR + strpas(FPL._17);}
+     with FPL do p:= StrPasNew
+       (
+                     _7
+        + icao_ARR + copy(_13,1,kod_AP)
+        + icao_ARR + a
+       );
+     _code_ARR:= p
+   end;
+
+function O_L4444.send_ARR (var FPL: DFPL4; key: string; typ: TNETtyp): bool;
+   var   p: pchar;
+   begin
+      p:= _code_ARR(FPL);
+      send_ARR:= p<>nil;
+      if p<>nil then
+         begin
+           send_data(NODE_REMOTE, hd_ICAO[msARR],'','', pchars(p),strlen(p), key,typ);
+           StrDispose(p)
+         end
+   end;
+
+
+
+{ תתתתתתתתתתתתתתתתתת
+   CPL
+  תתתתתתתתתתתתתתתתתת
+}
+
+function O_L4444._code_CPL (var FPL: DFPL4): pchar;
+   var   p: pchar;
+   begin
+     with FPL do
+     p:= StrPasNew
+       (
+                    _7
+        +icao_ARR + _8
+        +icao_ARR + _9
+        +icao_ARR + _10
+        +icao_ARR + decode_l4_13a(_13)
+        +icao_ARR + _14
+        +icao_ARR
+       );
+     p:= StrNCopy(p,FPL._15,true,false);
+     p:= StrNPCopy(p,+icao_ARR+decode_l4_16a(FPL._16)+icao_ARR,true,true);
+     p:= StrNCopy(p,FPL._18,true,false);
+     _code_CPL:= p
+   end;
+
+
+function O_L4444.send_CPL (var FPL: DFPL4; key: string; typ: TNETtyp): bool;
+   var   p: pchar;
+   begin
+      p:= _code_CPL(FPL);
+      send_CPL:= p<>nil;
+      if p<>nil then
+         begin
+           send_data(NODE_REMOTE, hd_ICAO[msCPL],'','', pchars(p),strlen(p), key,typ);
+           StrDispose(p)
+         end
+   end;
+
+
+{ תתתתתתתתתתתתתתתתתת
+   EST
+  תתתתתתתתתתתתתתתתתת
+}
+
+function O_L4444._code_EST (var FPL: DFPL4): pchar;
+   var   p: pchar;
+   begin
+     with FPL do p:= StrPasNew
+       (
+                    _7
+        +icao_ARR + _13
+        +icao_ARR + _14
+        +icao_ARR + _16
+        +icao_ARR
+       );
+     p:= StrNCopy(p,FPL._15,true,false);
+     p:= StrNCopy(p,FPL._18,true,false);
+     _code_EST:= p
+   end;
+
+
+function O_L4444.send_EST (var FPL: DFPL4; key: string; typ: TNETtyp): bool;
+   var   p: pchar;
+   begin
+      p:= _code_EST(FPL);
+      send_EST:= p<>nil;
+      if p<>nil then
+         begin
+           send_data(NODE_REMOTE, hd_ICAO[msEST],'','', pchars(p),strlen(p), key,typ);
+           StrDispose(p)
+         end
+   end;

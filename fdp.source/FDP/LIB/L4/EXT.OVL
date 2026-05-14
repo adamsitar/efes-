@@ -1,0 +1,56 @@
+{ -----------------------------------------------
+   Moduly pre interface na externe datove zdroje
+  ...............................................
+}
+
+{$IFDEF EXTERNAL_NET}
+
+
+ {$IFNDEF EXTERNAL_ASYNC}
+  {$O _EXT_def}
+ {$ENDIF}
+ {$O _EXT}
+
+ {$O _L4444}
+ {$O _L4_FDP}
+
+ {$IFDEF OLDI}
+  {$O _OLDI}
+ {$ENDIF}
+
+
+ {$IFDEF CONNECT_TO_AFTN}
+  {$O _AFTN}
+  {$IFDEF TSGA}
+    {$O _AF_TSGA}
+  {$ENDIF}
+ {$ENDIF}
+
+
+ {$IFDEF CONNECT_TO_ASTA_EXT}
+  {$O _ASTA}
+ {$ENDIF}
+
+
+ {$IFDEF CONNECT_TO_CAMUS}
+  {$O _CAMUS}
+ {$ENDIF}
+
+
+ {$IFDEF CONNECT_TO_ASOC}
+  {$O _ASOC}
+ {$ENDIF}
+
+
+ {$IFDEF CONNECT_TO_OPL_EXT}
+  {$IFNDEF OPL_EXT_ASYNC}
+   {$O _OPL_def}
+  {$ENDIF}
+  {$O _OPL}
+ {$ENDIF}
+
+ {$IFDEF CONNECT_TO_VERA}
+  {$O _VERA}
+ {$ENDIF}
+
+{$ENDIF}

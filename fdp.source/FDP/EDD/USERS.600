@@ -1,0 +1,38 @@
+; -----------------------------------------
+;  FDP/OPL 600 RDC
+; =========================================
+
+; --------------------------------------------------------------------------------------------------------------------------------
+; Pracovisko ; Adresa logicka, RTR, IP          ; Protokol ; Stanica  ; informacie                               ; ine nastavenia
+; --------------------------------------------------------------------------------------------------------------------------------
+
+; -------------------------
+; 600
+; -------------------------
+  RDC        ; 600 APP       ,   192.100.106.32 ; @THIS      @AIRBASE = 600
+
+; TN IS IDD  ; TN IS_IDD     ,   192.100.011.32 ; ~UDP     ; @SERVER @IDD ; -master     MSG ALL              ; timeout=10
+  TMA        ; TMA           ,17,192.100.106.17 ; ~UDP     ; @RDP         ; -slave      EST FPLM FPLO PRS      @SECTOR
+; RL         ; RL            ,   192.100.106.16 ; ~UDP     ; @RDP         ; -slave      EST FPLM FPLO
+; RDP_TWR    ; RDP TWR       ,   192.100.107.16 ; ~UDP     ; @RDP         ; -slave      EST FPLM FPLO
+
+; -------------------------
+; Letiska
+; -------------------------
+; 100        ; 100 OPL       ,   192.100.037.32 ; ~UDP     ; @OPL         ; MSG  KRL DVZ                     ; timeout=6
+; 200        ; 200 OPL       ,   192.100.035.32 ; ~UDP     ; @OPL         ; MSG  KRL DVZ                     ; timeout=6
+; 250        ; 250 OPL       ,   192.100.013.32 ; ~UDP     ; @OPL         ; MSG  KRL DVZ                     ; timeout=6
+; 300        ; 300 OPL       ,   192.100.075.32 ; ~UDP     ; @OPL         ; MSG  KRL DVZ                     ; timeout=5
+; 500        ; 500 OPL       ,   192.100.108.32 ; ~UDP     ; @OPL         ; MSG  KRL DVZ                     ; timeout=3
+
+
+; -------------------------
+; StrRLP,...
+; -------------------------
+; SMD        ; MACC SMD      ,   192.100.141.34 ; ~UDP     ; @OPL         ; MSG                              ; timeout=5
+; SOD        ; MACC SOD      ,   192.100.141.35 ; ~UDP     ; @OPL         ; MSG                              ; timeout=5
+
+
+; SAR        ; SAR  OPL      ,   192.100.143.32 ; ~UDP ~L  ; @OPL         ; MSG                              ; timeout=6
+
+; VS         ; VS DPVL       ,   192.100.000.32 ; ~UDP ~L  ; @IDD         ; MSG                              ; timeout=3

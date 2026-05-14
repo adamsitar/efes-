@@ -1,0 +1,27 @@
+{ --------
+   8
+  --------
+}
+
+ function code_l4_8(_8a,_8b: char; _L4444M: bool): string;
+    begin
+      if _AFIL_8 then
+         begin
+           if not (_8a in set_8a) then _8a:= IFR_let;
+           if (not _L4444M) and (not (_8b in set_8b)) then
+              {$IFDEF ATCA} _8b:= PRAV_DOPRAVNY_LET
+              {$ELSE}       _8b:= INY_LET
+              {$ENDIF}
+         end;
+      code_l4_8:= format_s_(_8a) + cut_(_8b);
+      _AFIL_8:= true
+    end;
+
+ procedure decode_l4_8(_8: string; var _8a,_8b: char);
+     begin
+       {_8:= mtks_rus_to_lat(_8);}
+       if length(_8)>0 then _8a:= _8[1] else _8a:= ' ';
+       if length(_8)>1 then _8b:= _8[2] else _8b:= ' '
+     end;
+
+

@@ -1,0 +1,247 @@
+
+ { ----------------------------------
+    vypocet trate a casoveho profilu
+   תתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתת
+ }
+
+ function _casy_na_bodoch(const FPL  : DFPL4;
+                          var   FDR  : DFDR;
+
+                          var   f15B : pchar;
+
+                          var   dd   : TFDR_decoded_data;
+                          var   res  : string;
+                          var   ires : int
+                         ): int;
+
+    var   i,ind,prvy,pocet,bodov : int;
+
+          kods,
+          _arr,
+          tarr,tdep,
+          k1,k2  : string;
+
+          is_mzp : bool;
+
+          B0,B1  : TsBod;
+          Ba     : TOBxy;
+
+          ry,iry : single;
+          r_,ir_ : char;
+
+          v,v2, iv,iv2, lv : word;
+          v_,lv_,v_a, v2_,iv_,iv_a,iv2_ : char;
+          pomb, h1,m1,h2,m2 : byte;
+
+          Ri, T,dT, S,dS : real;
+
+    label X;
+
+    procedure _na_bode(var OB: TOBxy);
+        var   pomb: byte;
+        begin
+
+        { Cas priletu :
+        }
+          if ((B0.x<>0) and (B0.x<>B1.x)) or ((B0.y<>0) and (B0.y<>B1.y)) then
+             begin
+               dS:= vzdialenost(B0.x,B0.y, B1.x,B1.y);
+               S:= S+dS;
+               Ri:= get_rych_kmh (ry,r_,v,v_);         { mohla sa zmenit... }
+               if Ri<>0 then dT:= dS*secHOUR/Ri/1000   { prepocet km/h->m/s }
+               else dT:= 0;
+               T:= T+dT
+             end;
+
+          OB.kod:= B1.kod;
+          OB.x:= B1.x;
+          OB.y:= B1.y;
+
+          OB.casA:= T;
+          TimeFromSec(OB.casA, OB.h,OB.m,pomb);
+          OB.casD:= OB.casA;
+
+        { Rychlost+Vyska
+        }
+          if iry<>0 then begin ry:= iry; r_:= ir_ end;
+          if iv<>0  then begin v:= iv;   v_:= iv_ end;
+          OB.rych := ry;
+          OB.rych_:= r_;
+          OB.vys  := v;
+          OB.vys_ := v_;
+          if get_altM(v_,v) > alt_VFR then begin lv:= v; lv_:= v_ end
+        end;
+
+    begin
+      _arr:= najdi_arr(FPL,FDR);
+
+     { urcenie poctu bodov dekodovanej trate
+     }
+      pocet:= GetPStrItems(f15B,[icao_NXIT]);
+      bodov:= 0;
+      ind:=- 1;
+      prvy:= 1;
+      for i:= prvy to pocet do
+        begin
+          kods:= getPstr(f15B,i,[icao_NXIT]);
+          if decode_OB(kods,'', B0, iry,ir_,iv,iv_,iv_a,iv2,iv2_, is_mzp,tarr,tdep, dd.check_en,res,ires) then
+             begin
+               inc(bodov);
+               {if (dd.eet.kod<>'') and (dd.eet.kod=B.kod) then ind:= i}
+             end
+        end;
+
+     { ak vypocitany vstupny bod nie je zaradeny v poli trate,
+       predradi sa
+
+      if (dd.eet.kod<>'') and (dd.eet.kod<>dd.arr.kod) and (ind=-1) and (not dd.isEET_ARR) then
+          begin
+            f15B:= StrNPCopy(f15B,dd.eet.kod+icao_NXIT,false,true);
+            inc(pocet);
+            inc(bodov)
+          end;
+     }
+
+     { naplnenie bodov trate, vypocet casov a vysky na nich
+       ----------------------------------------------------
+       cas letu sa pocita od casu na vstupnom bode a vzdialenosti od neho,
+       ak vstupny bod nebol definovany, je nim prvy bod trate
+     }
+      if not alloc_FDRrte(FDR.rte,nil,bodov) then Exit;
+      FDR.bodov:= bodov;
+
+      B0.kod:= dd.eet.kod; B0.x:= dd.eet.x; B0.y:= dd.eet.y;
+      FDR.dep.h:= dd.dep.h; FDR.dep.m:= dd.dep.m;
+      FDR.eet.h:= dd.eet.h; FDR.eet.m:= dd.eet.m;
+      dd.eet.casA:= eet_FDR(@FDR);
+      dd.eet.casD:= dd.eet.casA;
+      T:= dd.eet.casA;
+      S:= 0;
+
+      ry:= dd.eet.rych; r_:= dd.eet.rych_;
+      v:= dd.eet.vys; v_:= dd.eet.vys_; v_a:= ' ';
+      lv:= v;  lv_:= v_;               { posledna vyska <> VFR }
+
+      ind:= 0;
+      for i:= prvy to pocet do
+        begin
+          {$IFNDEF DEBUG} CheckProcesses0; {$ENDIF}  { hnusne pomala funkcia }
+
+          kods:= getPstr(f15B,i,[icao_NXIT]);
+          if decode_OB(kods,FDR.typ, B1,iry,ir_,iv,iv_,iv_a,iv2,iv2_,is_mzp,tarr,tdep, dd.check_en,res,ires) then
+             begin
+              { bod trate s pripadnym upresnenim zmeny rezimu letu
+              }
+               if ind>=FDR.bodov then break
+               else if (ind=0) then
+                       begin
+                         if dd.isEET_14 then B1:= B0
+                         else if dd.isEET_ARR or dd.isEET_DEP then dd.eet.kod:= B1.kod;
+                       end;
+
+               _na_bode(FDR.rte^[ind]);
+
+              { Ak je to medzipristatie,
+                potom sa prepocitaju casy pristatia a startu
+              }
+                if is_mzp then
+                   begin
+                     GetTimeStr (h1,m1,pomb,tarr);
+                     GetTimeStr (h2,m2,pomb,tdep);
+                     with FDR.rte^[ind] do
+                       begin
+                         dT:= TimeToSec(h2,m2,0)-TimeToSec(h1,m1,0);
+                         if dT<0 then dT:= dT+secDAY; { co ked cez polnoc ? }
+                         T:= T+dT
+                       end
+                    end;
+
+               FDR.rte^[ind].casD:= T;
+
+               B0:= B1;
+               inc(ind)
+             end
+
+          else begin
+               { identifikator zmeny rezimu letu,
+                 napr. VFR, IFR
+               }
+                 kods:= getstr(kods,1,[icao_NXT]);
+
+                 if kods=rte_VFR then
+                    begin
+                    { BNO VFR
+                      BNO/K0330M0110 VFR
+                    }
+                      v:= MtoS(alt_VFR); v_:= altG;
+                      if (ind>0) then with FDR.rte^[ind-1] do
+                         if get_altM(vys_,vys) > alt_VFR then vysab:= altBellow
+                    end
+
+                 else if kods=rte_IFR then
+                    begin
+                    { BNO/K0700F200 IFR
+                    }
+                      v:= lv; v_:= lv_;
+                      if (ind>0) then with FDR.rte^[ind-1] do
+                         if get_altM(vys_,vys) < get_altM(v_,v) then vysab:= altAbove
+                    end
+               end;
+        end;
+
+
+     { Ak nebol uvedeny cas preletu cez hranicu EET (EET.h=arr.h) and (EET.m=arr.m),
+       musime ho od uvedeneho casu pristatia odvodit.
+     }
+      with FDR do
+        begin
+          {if bodov>0 then dd.exi:= rte^[bodov-1];}
+
+          if (bodov>0) and dd.isARR then        { 3103: dopleneno bodov>0, lebo inak B0 nie je naplnena  }
+            begin
+            { vypocet casu pristatia, ak je letisko vo FIRe...
+            } v:= 0;
+              _na_bode(Ba);
+              if (dd.isEET_ARR) and (not (dd.isEET_DEP or dd.isEET_18 or dd.isEET_14)) then
+                 begin
+                 { prist2.cas=eet2.cas+doba letu, preto ak eet2.cas=prist.cas => eet.cas=prist.cas-doba letu
+                 }
+                   if fpl<>nil then dd.exi.casD:= DTtoSec (date.r,date.m,date.d, fpl^.start_.h,fpl^.start_.m,0)
+                   else dd.exi.casD:= DTtoSec (date.r,date.m,date.d, dep.h,dep.m,0);
+                   dd.exi.casA:= DTtoSec (date.r,date.m,date.d, arr.h,arr.m,0);
+                   if dd.exi.casD>dd.exi.casA then dd.exi.casA:= dd.exi.casA+secDAY;
+                   dT:= Ba.casA - dd.exi.casA;
+                   dd.exi.casD:= dd.exi.casA;
+                   for i:= 0 to bodov-1 do with rte^[i] do
+                     begin
+                       casA:= casA - dT;
+                       casD:= casD - dT;
+                       TimeFromSec(casA, h,m,pomb);
+                     end;
+                   dd.eet.casA:= dd.eet.casA - dT;
+                   dd.eet.casD:= dd.eet.casA;
+                   TimeFromSec(dd.eet.casA, dd.eet.h,dd.eet.m,pomb);
+                 end
+              else begin
+                     TimeFromSec(Ba.casA, arr.h,arr.m,pomb);
+                     if       (fpl<>nil)
+                        and (   _16_PREPOCET_EST
+                             or (TimeToSec(fpl^.prist.h,fpl^.prist.m,0) > TimeToSec(arr.h,arr.m,0))
+                            ) then
+                        begin
+                          fpl^.prist.h:= arr.h;
+                          fpl^.prist.m:= arr.m;
+                        end;
+                   end
+            end;
+
+          if bodov>0 then dd.eet:= rte^[0]
+          else dd.eet:= dd.dep;                     { 3103: dd.exi -> dd.eet }
+
+          if bodov>0 then dd.exi:= rte^[bodov-1]
+          else dd.exi:= dd.eet;
+        end;
+
+      X: if (res<>'') and (ires=0) then ires:= i_15c;
+      _casy_na_bodoch:= ires
+    end;

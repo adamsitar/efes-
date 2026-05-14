@@ -1,0 +1,173 @@
+{ -----------------
+   FPL
+ תתתתתתתתתתתתתתתתתת
+}
+{$IFDEF KRL}
+
+ {$I ..\lib\mnu\_KRL.h}
+
+ (*procedure mnuKRLprehlad_init(MMenu: PSubmenu); far;
+     const max_items = 30;
+     var   smnu    : TPItems;
+           i,items : int;
+     begin
+       items:= 0;
+      {$IFDEF VLASTNE_PLANY}
+       smnu[items]:= SubMenu (tit_PRED_, WinMenu(tit_PRED,nil,
+                              Item(tit_KRIDLA_NASE,   cmPREHLAD_KRL_PPL_nase,
+                              Item(tit_KRIDLA_INE,    cmPREHLAD_KRL_PPL_ine,
+                              Item(tit_KRIDLA_VSETKY, cmPREHLAD_KRL_PPL,
+                              nil ) ) )
+                             ),nil);
+       inc(items);
+       smnu[items]:= SubMenu (tit_ARCH_, WinMenu(tit_ARCH,nil,
+                              Item(tit_KRIDLA_NASE,   cmPREHLAD_KRL_ARCH_nase,
+                              Item(tit_KRIDLA_INE,    cmPREHLAD_KRL_ARCH_ine,
+                              Item(tit_KRIDLA_VSETKY, cmPREHLAD_KRL_ARCH,
+                              nil ) ) )
+                             ),nil);
+       inc(items);
+      {$ELSE}
+       smnu[items]:= Item(tit_PRED, cmPREHLAD_KRL_PPL,nil);
+       inc(items);
+       smnu[items]:= Item(tit_ARCH, cmPREHLAD_KRL_ARCH,nil);
+       inc(items);
+      {$ENDIF}
+       for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i]);
+     end;*)
+
+
+ procedure mnuKRLvolby_init(MMenu: PSubmenu); far;
+     var   smnu : TPItems;
+           i,items,nl,ihk: int;
+     begin
+       items:= 0; nl:= 0; ihk:= 0;
+
+       smnu[items]:= Switch2(' '+hk(ihk)+KRLFPLMC, @KRL_FPLM_CNL,nil);
+       inc(items);
+       for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i]);
+     end;
+
+
+ procedure mnuKRL_init_(var smnu: TPItems; var items,nl: int);
+     var   sbmnu : PSubMenu;
+     begin
+
+      {$IFDEF VLASTNE_PLANY}
+       smnu[items]:= SubMenu (tit_PRED_, WinMenu(tit_PRED,nil,
+                              Item(tit_KRIDLA_NASE,   cmPREHLAD_KRL_PPL_nase,
+                              Item(tit_KRIDLA_INE,    cmPREHLAD_KRL_PPL_ine,
+                              Item(tit_KRIDLA_VSETKY, cmPREHLAD_KRL_PPL,
+                              nil ) ) )
+                             ),nil);
+       inc(items);
+       smnu[items]:= SubMenu (tit_ARCH_, WinMenu(tit_ARCH,nil,
+                              Item(tit_KRIDLA_NASE,   cmPREHLAD_KRL_ARCH_nase,
+                              Item(tit_KRIDLA_INE,    cmPREHLAD_KRL_ARCH_ine,
+                              Item(tit_KRIDLA_VSETKY, cmPREHLAD_KRL_ARCH,
+                              nil ) ) )
+                             ),nil);
+       inc(items);
+      {$ELSE}
+       smnu[items]:= Item(tit_PRED, cmPREHLAD_KRL_PPL,nil);
+       inc(items);
+       smnu[items]:= Item(tit_ARCH, cmPREHLAD_KRL_ARCH,nil);
+       inc(items);
+      {$ENDIF}
+
+       if not mnu_data_opt_common then
+          begin
+            add_newline_(2,nl,items,smnu);
+            sbmnu:= SubMenu(cut_r(mnu_OPTi)+'... ', OptMenu_S(tit_OPTi, hlp_mnu_KRL_NASTAV,cmNASTAV_SPRACOVANIE,15,nil),nil);
+            sbmnu^.PMenu_init:= @mnuKRLvolby_init;
+            smnu[items]:= SubMenuInitialized(sbmnu,nil);
+            inc(items);
+          end;
+     end;
+
+
+ {$IFDEF MACC_MENU}
+  procedure _mnuMACC_KRL_init(MMenu: PSubmenu); far;
+      var   smnu  : TPItems;
+            sbmnu : PSubMenu;
+            i,items,nl : int;
+      begin
+        items:= 0; nl:= 0;
+
+        {$IFDEF PROCESS_KRL}
+         smnu[items]:= SubMenu (mnu_KRL_PLAN, WinMenu(mnu_KRL_PLAN, hlpmnuKRL,
+                                { IFDEF AIRBASE}
+                                Item(mnu_KRL_oprava+mnu_KRL_oba, cmKRLchg,
+                                Item(mnu_KRL_zrus+mnu_KRL_oba,   cmKRLcnl,
+                                { ENDIF}
+                                Item(mnu_KRL_z_FPL, cmPREHLAD_mFPL_KRL,
+                                Item(mnu_KRL_sprac, cmKRLsprac,
+                               nil) ) ) )
+                               ), nil);
+         inc(items);
+         add_newline_(2,nl,items,smnu);
+        {$ENDIF}
+
+        {$IFDEF VLASTNE_PLANY}
+         smnu[items]:= Item (tit_KRIDLA_NASE,   cmPREHLAD_KRL_nase,nil);
+         inc(items);
+         smnu[items]:= Item (tit_KRIDLA_INE,    cmPREHLAD_KRL_ine,nil);
+         inc(items);
+         smnu[items]:= Item (tit_KRIDLA_VSETKY, cmPREHLAD_KRL,nil);
+         inc(items);
+         add_newline_(0,nl,items,smnu);
+        {$ENDIF}
+
+        mnuKRL_init_(smnu, items,nl);
+
+        for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i])
+      end;
+ {$ENDIF}
+
+ procedure _mnuKRL_init(MMenu: PSubmenu); far;
+     var   smnu  : TPItems;
+           sbmnu : PSubMenu;
+           i,items,nl : int;
+     begin
+       items:= 0; nl:= 0;
+
+       {$IFDEF PROCESS_KRL}
+        { IFDEF AIRBASE}
+         smnu[items]:= Item(mnu_KRL_oprava+mnu_KRL_oba, cmKRLchg,nil);
+         inc(items);
+         smnu[items]:= Item(mnu_KRL_zrus+mnu_KRL_oba,   cmKRLcnl,nil);
+         inc(items);
+        { ENDIF}
+        smnu[items]:= Item(mnu_KRL_z_FPL, cmPREHLAD_mFPL_KRL,nil);
+        inc(items);
+        smnu[items]:= Item(mnu_KRL_sprac, cmKRLsprac, nil);
+        inc(items);
+
+        add_newline_(2,nl,items,smnu);
+       {$ENDIF}
+
+       {$IFDEF VLASTNE_PLANY}
+        smnu[items]:= SubMenu (cut_r(PREHLADPLA_)+'... ', WinMenu(PREHLADPLA_, nil,
+                               Item (tit_KRIDLA_NASE,   cmPREHLAD_KRL_nase,
+                               Item (tit_KRIDLA_INE,    cmPREHLAD_KRL_ine,
+                               Item (tit_KRIDLA_VSETKY, cmPREHLAD_KRL,
+                               nil ) ) )
+                              ), nil);
+        inc(items);
+       {$ENDIF}
+       mnuKRL_init_(smnu, items,nl);
+
+       for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i])
+     end;
+
+ procedure mnuKRL_init(MMenu: PSubmenu); far;
+     begin
+      {$IFDEF MACC_MENU}
+       if MENU_MACC then _mnuMACC_KRL_init(MMenu)
+       else _mnuKRL_init(MMenu);
+      {$ELSE}
+       _mnuKRL_init(MMenu);
+      {$ENDIF}
+     end;
+
+{$ENDIF}

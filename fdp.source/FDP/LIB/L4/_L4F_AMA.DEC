@@ -1,0 +1,97 @@
+{ תתתתתתתתתתתתתתתתתת
+   CPL
+  תתתתתתתתתתתתתתתתתת
+}
+  function O_L4_FDP._process_CPL (data: pchars; size: word; var FPL: DFPL4; var res: string): bool;
+     var   FPLc : DcFPL;
+           bres,isssr : bool;
+           pom  : int;
+           _7a,_7b,_7c: string;
+     begin
+       bres:= false;
+       decode_l4_7 (FPL._7,_7a,_7b,_7c);
+       isssr:= (FPLC_CPL_SSR and (cut_(_7c)<>''));
+       if FPLC_CPL or isssr then
+          begin
+            pom:= poloziek_ESTc_bodov; poloziek_ESTc_bodov:= 1;
+            _decode_ESTc(FPL,FPLc,res);
+            if isssr then FPLc.stt:= hd_EST; { inak nebudu ostatne stanice spravu spracovavat }
+            poloziek_ESTc_bodov:= pom;
+            _process_message_FPLC (dst_set,FPLc.stt,FPLc.stt,nil,@FPLc);
+          end;
+       _process_CPL:= bres
+     end;
+
+
+{ תתתתתתתתתתתתתתתתתת
+   EST
+  תתתתתתתתתתתתתתתתתת
+}
+  function O_L4_FDP._process_EST (data: pchars; size: word; var FPL: DFPL4; var res: string): bool;
+     begin
+       {$IFNDEF FPLM_DISABLED}
+       if is_FPL4MIL(FPL) then _process_EST:= _process_ESTm(FPL, res)
+       else
+       {$ENDIF}
+         _process_EST:= _process_ESTc(FPL, res)
+     end;
+
+
+
+ { ------------------------
+   Vseobecna implementacia
+   funkcii spracovania EST
+ }
+  function O_L4_FDP._process_ESTc (var FPL: DFPL4; var res: string): bool;
+     var   FPLc : PDcFPL;
+           bres : bool;
+     begin
+       New(FPLc);
+       bres:= _decode_ESTc(FPL,FPLc^,res);
+       if bres then _process_message_FPLC (dst_set,FPLc^.stt,FPLc^.stt,nil,FPLc);
+       disp_cFPL(FPLc);
+       Dispose(FPLc);
+       _process_ESTc:= bres
+     end;
+
+ {$IFNDEF FPLM_DISABLED}
+  function O_L4_FDP._process_ESTm (var FPL: DFPL4; var res: string): bool;
+     var   FPLm,FPLmi: DmFPL;
+           bres : bool;
+     begin
+       bres:= _decode_ESTm(FPL,FPLm,res);
+       if bres then
+          begin
+            if najdi_FPLM(FPLm,FPLmi) then
+               begin
+                 StrDispose(FPLmi.trat);
+                 FPLmi.trat:= StrNew(FPLm.trat);
+                 {if    (FPLmi^.start.h<>FPLm^.start.h)
+                    or (FPLmi^.start.m<>FPLm^.start.m)
+                    or (FPLmi^.prist.h<>FPLm^.prist.h)
+                    or (FPLmi^.prist.m<>FPLm^.prist.m) then
+                    begin}
+                      FPLmi.start:= FPLm.start;
+                      FPLmi.prist:= FPLm.prist
+                    {end;}
+               end
+            else copy_mFPL(@FPLm,@FPLmi);
+            _process_message_FPLM (dst_set,hd_FPL,FPLm.stat,@FPLmi,@FPLm); { povodny, novy }
+            disp_mFPL(@FPLmi)
+          end;
+       disp_mFPL(@FPLm);
+       _process_ESTm:= bres
+     end;
+ {$ENDIF}
+
+ { -------------------------------------------------
+   Vseobecna implementacia funkcii dekodovania EST,
+   funkcie su pretazitelne podla zariadenia,
+   s ktorym LETVIS komunikuje
+ }
+
+ {$I _L4F_cEST.dec}
+
+ {$IFNDEF FPLM_DISABLED}
+ {$I _L4F_mEST.dec}
+ {$ENDIF}

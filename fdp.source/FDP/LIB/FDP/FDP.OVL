@@ -1,0 +1,182 @@
+{ ------------------------
+   Moduly pre datove typy
+  ........................
+}
+
+{$O _MTK_2}
+
+{$O _L4_def}
+{$O _L4_func}
+
+{$O _FDP_def}
+{$O _FPL_def}
+
+{$O _PLAN}
+{$O _STRIP}
+{$O _FPL}
+{$O _FDP}
+
+{$IFDEF RPL}
+  {$O _RPL}
+{$ENDIF}
+
+{$IFDEF PLN}
+  {$O _PLN}
+{$ENDIF}
+
+{$IFDEF FPL4}
+  {$O _FPL4}
+  {$O _FPL4s}
+{$ENDIF}
+
+{$IFDEF FPL0}
+  {$O _FPLC}
+  {$O _FPLM}
+  {$O _FPLMv}
+  {$O _FPLMs}
+{$ENDIF}
+
+{$IFDEF ZAM}
+  {$O _ZAM}
+{$ENDIF}
+
+{$IFDEF QGO}
+  {$O _QGO}
+{$ENDIF}
+
+{$IFDEF RTZ}
+  {$O _RTZ}
+{$ENDIF}
+
+{$IFDEF DVZ}
+  {$O _DVZ}
+{$ENDIF}
+
+{$IFDEF PRS}
+  {$O _PRS}
+  {$IFDEF FUA} {$O _FUA} {$ENDIF}
+{$ENDIF}
+
+{$IFDEF PRZ}
+  {$O _PRZ}
+{$ENDIF}
+
+{$IFDEF NOTAM}
+  {$O _NOTAM}
+{$ENDIF}
+
+{$IFDEF MET}
+  {$O _MET}
+{$ENDIF}
+
+{$IFDEF SPR}
+  {$O _SPR}
+{$ENDIF}
+
+{$IFDEF TLG}
+  {$O _TLG}
+{$ENDIF}
+
+
+{$O _SSR}
+
+
+{ ------------------------
+   Moduly pre ine udaje
+  ........................
+}
+{$O FIR_def}
+{$O BOD_def}
+{$O BODY}
+{$O LDM}
+
+{$O grprim}
+{$O mapydef}
+{$IFDEF MAPY}
+  {$O mapy}
+{$ENDIF}
+
+{$O vypocty}
+{$O zemsur}
+{$O sector}
+
+
+{ ------------------------
+   Moduly pre funkcie
+  ........................
+}
+{$O archiv}
+
+{$O FDP_func}
+{$O FDP_fun2}
+{$O FDP_fun3}
+{$O EDD_func}
+
+
+{ ------------------------
+   Moduly pre formulare
+  ........................
+}
+{$O FDP_edit}
+{$O form_SYS}
+{$O frm_FPL}
+{$IFDEF FPL4}
+ {$O frm_FPL4}
+{$ENDIF}
+{$IFDEF TLG}
+ {$O frm_TLG}
+{$ENDIF}
+
+
+{ ------------------------
+   Vypocty
+  ........................
+}
+{$IFDEF STATISTIKA}
+  {$O sta_def}
+ {$IFDEF STATISTIKA_OPL}
+  {$O sta_obj}
+  {$O sta_opl}
+ {$ENDIF}
+ {$IFDEF STATISTIKA_PRELETY}
+  {$O sta_fplc}
+ {$ENDIF}
+{$ENDIF}
+
+{$IFDEF DEMO}
+  {$O demo}
+{$ENDIF}
+
+{ ------------------------
+   Prostredie
+  ........................
+}
+{$O FDP_net}
+{ O FDP_netb}
+
+{$O FDP_rep}
+{$O FDP_scrl}
+
+{$O FDP_ap}
+{$O FDP_msg}
+{$O msg}
+{$O parstr}
+
+{$O ales}
+{$O ap}
+{$O hodiny}
+{$O gui}
+{$O menu}
+
+{$O cm}
+
+{$IFDEF STATUS}
+  {$O status}
+{$ENDIF}
+
+{$IFDEF EDD}
+  {$O BOARD}
+  {$O ACC_ini}
+  { O ACC}
+  {$O PROP}
+{$ENDIF}

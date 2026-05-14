@@ -1,0 +1,69 @@
+; -------------------------------------------
+; FDP/S-EDD  MACC Praha
+; -------------------------------------------
+
+; ---------------------------------------------------------------------------------------------------------
+; pracovisko ; adresa                               ; Fprotokol ; Lprotokol   ; informace
+; ---------------------------------------------------------------------------------------------------------
+
+
+; ------------------------
+; MACC - Technicke pozice
+; ------------------------
+
+  ROUTER (UDP) ; ROUTER        ,$0702, 10.192.49.100 ;            @ROUTER
+  MONITORING   ; MON           ,$0703                ; ~RTU     ; @RDP        ; -slave -noinit  EST,FPLm,FPLo, PRS,QGO,SYN
+
+  SERVER-A     ; MACC_SERVER   ,$0707, 10.192.49.85  ;            @THIS
+  SERVER-B     ; MACC_SLAVE    ,$0708, 10.192.49.80  ; ~UDP     ; @SERVER ~OX ; -slave -time    ES.,FPLm,FPLo, PRS,QGO,SYN
+
+  LEDIS        ; MET           ,     , 10.192.49.124 ; ~UDP     ; @MET ~OX    ;
+
+
+; ------------------
+; MACC - FDP pozice
+; ------------------
+
+  EDD-VYCHOD   ; EDD_VYCHOD    ,$070D, 10.192.49.84  ; ~RTU     ; @EDD      ; -slave        EST,FPLm,FPLo
+  EDD-TEREN    ; EDD_TEREN     ,$070C, 10.192.49.82  ; ~UDX     ; @EDD      ; -slave        EST,FPLm,FPLo
+  EDD-TEST     ; EDD_TEST      ,$070E, 10.192.49.124 ; ~RTU     ; @EDD      ; -slave        EST,FPLm,FPLo
+
+  FDO-SOD      ; FDO_SOD       ,     , 10.192.49.90  ; ~UDP     ; @EDD ~NX  ; @FDO -slave   EST,FPLm,FPLo, PRS
+
+
+; ------------------
+; MACC - RDP pozice
+; ------------------
+
+  RDP-SC       ; RDP_SC        ,$0705, 10.192.49.73  ; ~UDP     ; @RDP ~NX  ; -slave   PRS
+  RDP-TEREN    ; RDP_TEREN     ,$070A, 10.192.49.71  ; ~UDP     ; @RDP ~NX  ; -slave   PRS
+
+
+; ------------------
+; SAR a VELITELE
+; ------------------
+
+  RDP-ZKS      ; RDP-ZKS       ,$0740, 10.192.49.79  ; ~UDP     ; @RDP ~NX  ; -slave   EST,FPLm,FPLo, PRS
+  RDP-LANCI    ; RDP-BOSS      ,$0730, 10.192.49.81  ; ~UDP     ; @RDP ~NX  ; -slave   EST,FPLm,FPLo, PRS
+  IDD-ILP      ; ILP           ,$5905                ; ~RTU     ; @IDD      ; -slave   EST,FPLm,FPLo, PRS,QGO,SYN
+
+
+; ------------------
+; UVS a PVO
+; ------------------
+
+  UVS          ; UVS           ,$1009                ; ~RTU     ; @IDD ~OX  ; -slave   EST,FPLm,FPLo, PRS,QGO,SYN
+
+
+; ------------------
+; LETISTE
+; ------------------
+
+  Kbely        ; 420           ,$5009                ; ~RTU     ; @EDD      ; -slave    EST,FPLm,FPLo, PRS,QGO,SYN
+  Pardubky     ; 260           ,$5209                ; ~RTU     ; @EDD      ; -slave    EST,FPLm,FPLo, PRS,QGO,SYN
+  Prerov       ; 650           ,$5409                ; ~RTU     ; @EDD      ; -slave    EST,FPLm,FPLo, PRS,QGO,SYN
+  Namest       ; 140           ,$5309                ; ~RTU     ; @EDD      ; -slave    EST,FPLm,FPLo, PRS,QGO,SYN
+  CeskeBudejce ; 100           ,$5503                ; ~RTU     ; @RDP      ; -slave    EST,FPLm,FPLo, PRS
+  Hradec       ; 380           ,$5603                ; ~RTU     ; @RDP      ; -slave    EST,FPLm,FPLo, PRS
+  Cernovice    ; 230           ,$6030                ; ~RTU     ; @RDP      ; -slave    EST,FPLm,FPLo, PRS
+  Caslav       ; 250           ,$5109                ; ~RTU     ; @EDD      ; -slave    EST,FPLm,FPLo, PRS,QGO,SYN

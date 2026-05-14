@@ -1,0 +1,65 @@
+(*-------------------------------------------------------------------*)
+(* LETVIS FDP/S                                                      *)
+(* (c) Ales Kosice 1989,95 (ab)                                      *)
+(*-------------------------------------------------------------------*)
+{$I comp.h}
+
+{$IFDEF CONNECT_TO_OPL_EXT}  {$DEFINE CONNECT_TO_COM} {$ENDIF}
+{$IFDEF CONNECT_TO_ASTA_EXT} {$DEFINE CONNECT_TO_COM} {$ENDIF}
+{$IFDEF CONNECT_TO_AFTN}     {$DEFINE CONNECT_TO_COM} {$ENDIF}
+
+
+program Server;
+
+   uses  {$IFDEF _OVR}
+          ovr,
+         {$ENDIF}
+          TypeDef,
+          str0, utime, mess,
+          Crt, BIOS, _Check, DOS, COMs, IO, SVGA,
+          {$IFDEF COM} _COM, {$ENDIF}
+
+          {$I unit_ext.h},
+
+          App, Ap;
+
+         {$IFDEF _OVR}
+          {$I units.ovl}
+          {$I net.ovl}
+          {$I oop.ovl}
+          {$I fdp.ovl}
+          {$I ext.ovl}
+         {$ENDIF}
+
+
+{IFDEF CONNECT_TO_COM}
+  {$I ext_async.inc}
+{ENDIF}
+
+{$IFDEF COM}
+  {$I _com.int}
+{$ENDIF}
+
+
+procedure SERVER_input__init;
+    begin
+      init_COMs;
+    end;
+
+
+{
+‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹
+€                                                          €
+€ SERVER                                                   €
+€‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹€
+}
+begin
+  {$IFDEF COM}
+    COM_initialize(@ReadCOM);
+    SetIntVec(INT_COM[COMi],@ReadCOM);
+  {$ENDIF}
+  MainApp:= New(PSERVERapp,Init);
+  SERVER_input__init;
+  MainApp^.Run(MainEvent);
+  Dispose(MainApp,Done)
+end.

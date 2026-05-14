@@ -1,0 +1,303 @@
+{$IFDEF FPL0}
+
+  { תתתתתתתתתתתתתתתתתת
+     kodovanie
+    תתתתתתתתתתתתתתתתתת
+  }
+
+ {$IFNDEF FPLM_DISABLED}
+
+ { Kodovanie vojenskych planov
+   podla ICAO pre civilny system
+ }
+  function  O_L4_FDP._code_FPLm(var FPLm: DmFPL; var FPL: DFPL4): bool;
+
+     var    s1,s2,t,bod_trate,u,rmk,err : string;
+            rte,p              : pchar;
+            hod,min,sec        : byte;
+            i,prvy,bolo_bodov  : int;
+
+            r   : single;
+            r_  : char;
+            v   : word;
+            v_  : char;
+
+            zd,zs  : TZDZS;
+            BOD    : TOBxy;
+            _OBs   : POBxys;
+            _bodov : int;
+
+            _OAT : bool;
+
+     procedure add_rmk(var rmk: string; s: string);
+         begin
+           if s='' then Exit;
+           if rmk<>'' then rmk:= rmk + icao_NXIT;
+           rmk:= rmk + s;
+         end;
+
+     begin
+       _code_FPLm:= false;
+
+       fillchar(FPL,sizeof(FPL),0);
+
+       err:= ''; s1:= ''; rte:= nil; s2:= ''; rmk:= '';
+
+       with FPLm do
+         begin
+
+         { vypocet trate, ak nie je sucastou planu
+         }
+           New(_OBs); FillChar(_OBs^,sizeof(_OBs^),0);
+           err:= _decode_FPL0_15
+                     (trat, start,prist,
+                      _OBs^,_bodov, rych, rych_, vys,vys_, date,
+                      true,_oat_exclude, false, false,false
+                     );
+           if (err='') and (_OBs^[0].kod=start.kod) then prvy:= 1 else prvy:= 0;
+
+          { ---------------------------------
+            Kodovanie letu do struktury D4FPL
+            תתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתת
+          }
+          { 7-identifikacia
+            תתתתתתתתתתתתתתת
+          }
+           FPL._7 := code_l4_7(format_s(delchar(code_FPLM_7a(@FPLm),[' '])),mod_A,ssr);
+
+          { 8-pravidla a typ letu
+            תתתתתתתתתתתתתתתתתתתתת
+          }
+          {if is_VFR_mFPL(FPLm^) then u:= VFR_let
+           else if prav=VFR_let then u:= VFR_prv
+           else u:= IFR_let;
+           if is_mFPL(FPLm^) then t:= VOJENSKY_LET_OAT else t:= INY_LET;
+           }
+           FPL._8:= code_l4_8(_8a,_8b, _l4444m);
+
+
+          { 9-pocet a typ, dalsi typ sa uvadza v poznamke
+            תתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתת
+          }
+           t:= typ;
+           FPL._9:= t {_code_9_by8643(t,true) vyhodene 28.6. kvoli bordelu v 8643};
+           t:= '';
+           if (pos(ZZZZ,FPL._9)>0) or (typ2<>'') then t:= rmk_TYP+icao_NXT+typ;
+           if (typ2<>'') then t:= t + icao_NXIT+typ2;
+           add_rmk(rmk,t);
+
+
+          { 10-vybavenie
+            תתתתתתתתתתתת
+          }
+           FPL._10:= code_l4_10(com_,ssr_);
+
+
+          { 13-DEP
+            תתתתתת
+          }
+           t:= _cairbase(start.kod);  { t pouzijem v poli 14, ak nemozem      }
+           if t='' then t:= ZZZZ;     { urcit ICAO kod prveho bodu na trati   }
+                                      { preto neprepisovat "t" az do pola _15 }
+           FPL._13:= code_l4_13(t,start.h,start.m,start.h,start.m,false);
+           if pos(ZZZZ,FPL._13)=1 then add_rmk(rmk, rmk_DEP + icao_NXT + start.kod);
+
+
+          { 14-vypocitany cas preletu
+            תתתתתתתתתתתתתתתתתתתתתתתתת
+          }
+            if     (err='')
+               and (prvy<_bodov)
+               and (_OBs^[prvy].kod<>kod_ZSxy)
+               and (_OBs^[prvy].kod<>start.kod)
+               and (_OBs^[prvy].kod<>prist.kod)
+                   then FPL._14:=   _code_bod_trate(_OBs^[prvy].kod, _OBs^[prvy].x,_OBs^[prvy].y, cfg_OB)
+                              + icao_NXT
+                              + TimeToStr(_OBs^[prvy].h,_OBs^[prvy].m,'')
+                              + code_l4_vys_(_OBs^[prvy].vys,_OBs^[prvy].vys_, FL_from_alt,false)
+            else begin
+                   FPL._14:=   start.kod
+                         + icao_NXT
+                         + TimeToStr(start.h,start.m,'')
+                         {+ code_l4_vys_(0,altFL, FL_from_alt,false), Thomson to nezozerie }
+                         + code_l4_vys_(vys,vys_, FL_from_alt,false)
+                 end;
+
+          { 15-trat
+            תתתתתתת
+          }
+           FPL._15:=  strpasnew(code_l4_rych_vys(rych,rych_, vys,vys_, FL_from_alt,false{alt_VFR_sym}));
+           v:= vys;  v_:= vys_;
+           r:= rych; r_:= rych_;
+
+           if _mil_sys or (err<>'') then
+              begin
+                _OAT:= false;
+                for i:= 1 to GetPStrItems(trat,ODD_BODOV) do
+                  begin
+                    bod_trate:= cut_(getpstr(trat,i,ODD_BODOV));
+                    if _oat_exclude then
+                       begin
+                         u:= cut_(getstr(bod_trate,1,ODD_BODU));
+                         if u=rte_OAT then _OAT:= true
+                         else if u=rte_GAT then begin _OAT:= false; continue end;
+                         if _OAT then continue;
+                       end;
+                    FPL._15:= StrNPCopy(FPL._15,icao_NXIT+bod_trate, true,true);
+                  end
+              end
+           else begin
+                  bolo_bodov:= 0;
+                  for i:= 0 to _bodov-1 do
+                      begin
+                       { letisko startu a pristatia sa do pola _15 nevklada
+                       }
+                        if    ((i=0) and (_OBs^[i].kod=start.kod))
+                           or ((i=_bodov-1) and (_OBs^[_bodov-1].kod=prist.kod))
+                           or ((i>0) and (_OBs^[i-1].kod=_OBs^[i].kod))
+                              then continue;
+
+                       { kodovanie bodov
+                       }
+                        u:= _code_bod_trate(_OBs^[i].kod, _OBs^[i].x,_OBs^[i].y, cfg_OB);
+                        u:= icao_NXIT + u;
+                        if (i>0) then
+                           begin
+                             if _dct_points then u:= icao_NXIT + rte_DCT + u;
+                           end;
+
+                       { zmena parametrov letu
+                       }
+                        if (i>0) and (   (_OBs^[i].rych<>r)
+                                      or (_OBs^[i].rych_<>r_)
+                                      or (_OBs^[i].vys <>v)
+                                      or (_OBs^[i].vys_<>v_)
+                                     ) then
+                           begin
+                             u:=   u + icao_NXT + code_l4_rych_vys
+                                          (
+                                           _OBs^[i].rych, _OBs^[i].rych_,
+                                           _OBs^[i].vys,_OBs^[i].vys_,
+                                           FL_from_alt,alt_VFR_sym
+                                          );
+                             r := _OBs^[i].rych;
+                             r_:= _OBs^[i].rych_;
+                             v := _OBs^[i].vys;
+                             v_:= _OBs^[i].vys_
+                           end;
+
+                        FPL._15:= StrNPCopy(FPL._15,u,true,true);
+                        inc(bolo_bodov)
+                      end;
+
+                  if (bolo_bodov=0) and get_OB_XY (start.kod,BOD) then
+                     begin
+                       xy_ZdZs(BOD.x,BOD.y, zd,zs);
+                       u:= code_l4_ZemSur(zd.st,zd.mn,zd.se, zs.st,zs.mn,zs.se, true);
+                       FPL._15:= StrNPCopy(FPL._15,icao_NXIT+u,true,true)
+                     end
+                 end;
+
+
+          { 16,17-ARR
+            תתתתתתתתת
+          }
+           t:= _cairbase(prist.kod);
+           if t='' then t:= ZZZZ;
+           u:= _cairbase(prist_);
+           if (prist_<>'') and (u='') then u:= ZZZZ;
+           FPL._16:= code_l4_16 (t, prist.h,prist.m, u, start.h,start.m,false);
+           if pos(ZZZZ,FPL._16)=1 then add_rmk(rmk, rmk_DEST + icao_NXT + prist.kod);
+           if pos(ZZZZ,getstr(FPL._16,2,[icao_NXIT]))>=1 then add_rmk(rmk, rmk_ALTN + icao_NXT + prist_);
+
+
+          { RMK
+            תתת
+          }
+           if rmk<>'' then FPL._18:= StrPasNew(rmk);
+           {u:= cut_(replchar(strpas(pozn),setNL_+setNL,icao_NXIT)); 11.7.2000}
+           u:= _item_18_(FPL._18,rmk_DATE,-1);
+           {if u<>'' then 11.7.2000}
+           if DateToSec(date.r,date.m,date.d) <> DateToSec(Year,Month,Day) then
+              begin
+                {if rmk<>'' then u:= icao_NXIT+u; 11.7.2000}
+                if rmk<>'' then u:= icao_NXIT;
+                u:= u+rmk_DATE+icao_NXT+code_l4_date_r (date.d,date.m, true);
+                FPL._18:= StrNPCopy(FPL._18,u,true,true)
+              end;
+
+           Dispose(_OBs);
+         end;
+       _code_FPLm:= true
+     end;
+
+
+  function O_L4_FDP._code_CHGm(var FPLm: DmFPL; var FPL: DFPL4): bool;
+     var   FPLp: DmFPL;
+     begin
+       _code_CHGm:= false;
+
+       fillchar(FPL,sizeof(FPL),0);
+
+       if _code_FPLm(FPLm,FPL) then
+          begin
+            if (read_mFPL(codekey_FPLM(@FPLm),@FPLp)>-1) {and chg_mFPL(@FPLp,FPLm)} then
+               begin
+                { d o r o b i t
+
+                 if      _item='7'  then    _7:= strpas(pi)
+                 else if _item='8'  then    _8:= strpas(pi)
+                 else if _item='9'  then    _9:= strpas(pi)
+                 else if _item='10' then   _10:= strpas(pi)
+                 else if _item='13' then   _13:= strpas(pi)
+                 else if _item='14' then   _14:= strpas(pi)
+                 else if _item='15' then   begin strdispose(_15); _15:= strnew(pi) end
+                 else if _item='16' then   _16:= strpas(pi)
+                 else if _item='18' then   begin strdispose(_18); _18:= strnew(pi) end
+                 else if _item='19' then   begin strdispose(_19); _19:= strnew(pi) end;
+                }
+                 disp_mFPL(@FPLp)
+               end;
+           _code_CHGm:= true
+         end;
+     end;
+
+
+  { תתתתתתתתתתתתתתתתתת
+     odoslanie
+    תתתתתתתתתתתתתתתתתת
+  }
+  function O_L4_FDP.send_FPLm(var FPLm: DmFPL): bool;
+     var   FPL : DFPL4;
+     begin
+       new_FPL4(nil,@FPL);
+       send_FPLm:= _code_FPLm(FPLm,FPL) and send_FPL(FPL,codekey_FPLM(@FPLm),spr_FPLM);
+       disp_FPL4(@FPL)
+     end;
+
+  function O_L4_FDP.send_CHGm(var FPLm: DmFPL): bool;
+     var   FPL : DFPL4;
+     begin
+       new_FPL4(nil,@FPL);
+       send_CHGm:= _code_CHGm(FPLm,FPL) and send_CHG(FPL,codekey_FPLM(@FPLm),spr_FPLM);
+       disp_FPL4(@FPL)
+     end;
+
+  function O_L4_FDP.send_DLAm(var FPLm: DmFPL): bool;
+     var   FPL : DFPL4;
+     begin
+       new_FPL4(nil,@FPL);
+       send_DLAm:= _code_FPLm(FPLm,FPL) and send_DLA(FPL,codekey_FPLM(@FPLm),spr_FPLM);
+       disp_FPL4(@FPL)
+     end;
+
+  function O_L4_FDP.send_CNLm(var FPLm: DmFPL): bool;
+     var   FPL : DFPL4;
+     begin
+       new_FPL4(nil,@FPL);
+       send_CNLm:= _code_FPLm(FPLm,FPL) and send_CNL(FPL,codekey_FPLM(@FPLm),spr_FPLM);
+       disp_FPL4(@FPL)
+     end;
+
+ {$ENDIF}
+{$ENDIF}

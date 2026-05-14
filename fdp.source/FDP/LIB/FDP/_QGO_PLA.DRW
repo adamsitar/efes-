@@ -1,0 +1,92 @@
+{
+‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹
+€                                                          €
+€ zobrazenie                                               €
+€‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹€
+}
+
+procedure _plan_QGO(x0,y0,x1,y1: int; bk: int; sm: byte); far;
+    begin
+      BGIgraph.button(x0,y0,x1,y1, bk, btSmall, btOFF);
+      on_off(x0+3,y0+3,x1-3,y1-3,  bk+clBUTTON_DARK,bk+clBUTTON_LIGHT, btSmall, btOFF);
+      on_off(x0+5,y0+17,x1-5,y1-5, bk+clBUTTON_DARK,bk+clBUTTON_LIGHT, btSmall, btON);
+      SetColor(bk+clBUTTON_LIGHT);
+      _lineho(x0+5 ,x1-5 ,y0+44, bk);
+      _lineho(x0+5 ,x1-5 ,y0+59, bk);
+
+      _linevo(x0+85 ,y0+17,y1-6, bk);
+      _linevo(x0+159,y0+45,y1-6, bk);
+      _linevo(x0+411,y0+45,y1-6, bk);
+    end;
+
+
+procedure plan_QGO(QGO: PQGO; x,y: int; b: bool); far;
+    var   cl_stat,bk: byte;
+    begin
+      with QGO^ do
+        begin
+          bk:= bkPLAN_[b];
+          cl_stat:= get_stat_cl(stat);
+          _plan_QGO(x,y,x+dx_QGO,y+dy_QGO, bk, 1);
+          settextstyle(0,HorizDir,1); setcolor (cl_DATA-2);
+          {$IFDEF SPEA} SetBkColor(bk); SetTextStyle(BIT8x8, HorizDir,0);
+          {$ELSE} SetTextStyle(SmallFont, HorizDir,4);
+          {$ENDIF}
+          {$IFDEF SPEA} inc(y,dy_ch); {$ENDIF}
+          setcolor(cl_data-1);
+
+          outtextxy(x+10,y+4  {$IFDEF SPEA}+2{$ENDIF}, tit_schopnost+' '+kod+' '+tit_na+' '+code_l4_date(date));
+          OutTextXY(x+10,y+17 {$IFDEF SPEA}+2{$ENDIF}, tit_stav_);
+          {$IFDEF SPEA} OutTextXY(x+10,y+31, tit__prostriedkov);
+          {$ELSE}       OutTextXY(x+10,y+24 ,tit__prostriedkov);
+          {$ENDIF}
+
+          OutTextXY(x+10,y+47, tit_TQGO);
+          OutTextXY(x+10,y+60, tit_MQGO);
+          setcolor (cl_DATA);
+          outtextxy(x+95,y+19,  get_line_i(stav,1));
+          outtextxy(x+95,y+30,  get_line_i(stav,2));
+          outtextxy(x+95 ,y+47, TQGO);
+          outtextxy(x+165,y+47, strpas(TQGO_));
+          outtextxy(x+420,y+47, TQGOc);
+          outtextxy(x+95 ,y+60, MQGO);
+          outtextxy(x+165,y+60, strpas(MQGO_));
+          outtextxy(x+420,y+60, MQGOc);
+
+          SetTextStyle(DefaultFont, HorizDir,0);
+          write_stat(stat,rec,SERVERaddress, x+dx_QGO-25,y+06, cl_stat);
+        end;
+    end; { drawQGO }
+
+
+ procedure _info_QGO(x0,y0,x1,y1: int; QGO: PQGO); far;
+     begin
+       plan_QGO(QGO, x0+(x1-x0-dx_QGO) shr 1, y0{+winHEIGHT},true)
+     end;
+
+ function info_QGO(QGO: PQGO; title: string): bool;
+     begin
+       info_QGO:= Info(title, @_info_QGO, QGO,dx_QGO+20,dy_QGO+10, nil,0)
+     end;
+
+
+{ --------------------
+  Spracovanie hlasenia
+  --------------------
+}
+ function report_QGO (QGO: PQGO; title: string): bool;
+     var   res : bool;
+           p   : pointer;
+     begin
+      { Ak sa program dostane sem, to znamena, ze hlas_QGO je povolenie
+      }
+       if varovanie_QGO then
+          begin
+            Beep2;
+            p:= @Beep99
+          end
+       else p:= nil;
+       res:= Info(title, @_info_QGO, QGO,dx_QGO+20,dy_QGO+10,p,0);
+       if varovanie_QGO then isQGO:= isQGO or (not res)
+     end;
+

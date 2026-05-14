@@ -1,0 +1,192 @@
+
+{ תתתתתתתתתתתתתתתתתת
+   DEP
+  תתתתתתתתתתתתתתתתתת
+}
+ procedure O_L4444._decode_DEP (data: pchars; size: word; var FPL: DFPL4; var res: string);
+    begin
+      res:= '';
+      FPL._3 := get_str (data,size, 1,odd_ICAO, sizeof(FPL._3)-1);
+      FPL._7 := get_str (data,size, 2,odd_ICAO, sizeof(FPL._7)-1);
+      FPL._13:= get_str (data,size, 3,odd_ICAO, sizeof(FPL._13)-1);
+      FPL._16:= get_str (data,size, 4,odd_ICAO, sizeof(FPL._16)-1);
+
+      init_date (FPL.date, year,month,day);
+    end;
+
+ function O_L4444._process_DEP (data: pchars; size: word; var FPL: DFPL4; var res: string): bool;
+    var   FPLi : DFPL4;
+          ires : int;
+          s, _7b,_7c,_i7b,_i7c : string;
+          h,m, h_,m_, h0,m0,h0_,m0_: byte;
+          is_ind: bool;
+          ind: int;
+    begin
+      _process_DEP:= false;
+      if not _FPL4_DEP_ENABLE then Exit;
+      if (read_FPL4(codekey_FPL4(@FPL),@FPLi)>-1) then
+         begin
+          { priradenie ssr kodu, ak je uvedeny...
+          }
+           decode_l4_7 (FPL._7,s,_7b,_7c);
+           decode_l4_7 (FPLi._7,s,_i7b,_i7c);
+           if (_7c<>'') then FPLi._7:= code_l4_7 (s,_7b,_7c);
+
+          { upresnenie casu startu
+          }
+           decode_l4_13 (FPLi._13, s, h0,m0,h0_,m0_);
+           decode_l4_13 (FPL._13, s, h,m, h_,m_);
+           if (h0_<>h_) or (m0_<>m_) then FPLi._13:= code_l4_13 (s,h0,m0,h_,m_,true);
+           FPLi.stat:= hd_DEP;
+           _format_FPL4new(@FPLi,cm_decode_FPL4_FDR,res,ires,is_ind,ind);
+           if res='' then
+              begin
+                _process_DEP:= true;
+                _zarad_FPL4 (@FPLi,cm_spracuj_FPL4_EXT,'',true,ext_);
+                if _FPL4_CHG_REPORT then
+                   if _FPL4_REPORT_PLAN then info_FPL4(@FPLi,tit_fpl_dep)
+                   else Say3(tit_fpl_dep,data,size)
+              end;
+           disp_FPL4(@FPLi);
+         end
+      else l4_err(a_l4,'',0,err_l4444_nenajdeny_fpl,res);
+    end;
+
+ function O_L4444.decode_DEP (data: pchars; size: word; var FPL: DFPL4; var res: string): bool;
+    begin
+      _decode_DEP(data,size, FPL, res);
+      decode_DEP:= (res='') and _process_DEP(data,size, FPL, res)
+    end;
+
+
+{ תתתתתתתתתתתתתתתתתת
+   ARR
+  תתתתתתתתתתתתתתתתתת
+}
+ procedure O_L4444._decode_ARR (data: pchars; size: word; var FPL: DFPL4; var res: string);
+    var    s: string;
+    begin
+      res:= '';
+      FPL._3 := get_str (data,size, 1,odd_ICAO, sizeof(FPL._3)-1);
+      FPL._7 := get_str (data,size, 2,odd_ICAO, sizeof(FPL._7)-1);
+      FPL._13:= get_str (data,size, 3,odd_ICAO, sizeof(FPL._13)-1);
+      FPL._16:= get_str (data,size, 4,odd_ICAO, sizeof(FPL._16)-1);
+      FPL._17:= get_str0(data,size, 5,odd_ICAO);
+
+      init_date (FPL.date, year,month,day);
+    end;
+
+ function O_L4444._process_ARR (data: pchars; size: word; var FPL: DFPL4; var res: string): bool;
+    var   FPLi : DFPL4;
+          ires : int;
+          is_ind: bool;
+          ind: int;
+    begin
+      _process_ARR:= false;
+      if not _FPL4_ARR_ENABLE then Exit;
+      if (read_FPL4(codekey_FPL4(@FPL),@FPLi)>-1) then
+         begin
+           FPLi._16:= FPL._16;
+           FPLi.stat:= hd_ARR;
+           _format_FPL4new(@FPLi,cm_decode_FPL4_FDR,res,ires,is_ind,ind);
+           {if res='' then}
+              begin
+                _process_ARR:= true;
+                _zarad_FPL4 (@FPLi,cm_spracuj_FPL4_EXT,'',true,ext_);
+                if _FPL4_CHG_REPORT then
+                   if _FPL4_REPORT_PLAN then info_FPL4(@FPLi,tit_fpl_ARR)
+                   else Say3(tit_fpl_ARR,data,size)
+              end;
+           disp_FPL4(@FPLi);
+         end
+      else l4_err(a_l4,'',0,err_l4444_nenajdeny_fpl,res);
+    end;
+
+ function O_L4444.decode_ARR (data: pchars; size: word; var FPL: DFPL4; var res: string): bool;
+    begin
+      _decode_ARR(data,size, FPL, res);
+      decode_ARR:= (res='') and _process_ARR(data,size, FPL, res)
+    end;
+
+
+{ תתתתתתתתתתתתתתתתתת
+   CPL
+  תתתתתתתתתתתתתתתתתת
+
+  (CPLPR/MI001
+   -JAC1
+   -IS
+   -EA32/M
+   -EDDF
+   -EDDF/1100F000
+   -LZIB
+   -EDDF/F000/1100 BAY/F200/1119 OKG/F200/1124 BALTU/F200/1129 RAK/F200/1131 OKL/F200/1134 VLM/F200/1140 BODAL/F200/1145
+   -0
+   -NIL)
+
+}
+ procedure O_L4444._decode_CPL (data: pchars; size: word; var FPL: DFPL4; var res: string);
+    begin
+      res:= '';
+      FPL._3 := get_str   (data,size, 1,odd_ICAO, sizeof(FPL._3)-1);
+      FPL._7 := get_str   (data,size, 2,odd_ICAO, sizeof(FPL._7)-1);
+      FPL._8 := get_str   (data,size, 3,odd_ICAO, sizeof(FPL._8)-1);
+      FPL._9 := get_str   (data,size, 4,odd_ICAO, sizeof(FPL._9)-1);
+      FPL._13:= get_str   (data,size, 5,odd_ICAO, sizeof(FPL._13)-1);
+      FPL._14:= get_str   (data,size, 6,odd_ICAO, sizeof(FPL._14)-1);
+      FPL._15:= get_str0  (data,size, 7,odd_ICAO);
+      FPL._16:= get_str   (data,size, 8,odd_ICAO, sizeof(FPL._16)-1);
+      FPL._18:= get_strs0 (data,size, 9,Maximum(9,get_str_items(data,size,odd_ICAO)), odd_ICAO);
+    end;
+
+ function O_L4444._process_CPL (data: pchars; size: word; var FPL: DFPL4; var res: string): bool;
+    begin
+      _process_CPL:= _FPL4_CPL_ENABLE and _process_EST(data,size, FPL, res)
+    end;
+
+ function O_L4444.decode_CPL (data: pchars; size: word; var FPL: DFPL4; var res: string): bool;
+    begin
+      _decode_CPL(data,size, FPL, res);
+      decode_CPL:= (res='') and _process_CPL(data,size, FPL, res)
+    end;
+
+
+{ תתתתתתתתתתתתתתתתתת
+   EST
+  תתתתתתתתתתתתתתתתתת
+
+  (ESTPR/MI126
+   -FIN7176/A3371
+   -IX
+   -DC9/M
+   -LKPR
+   -LKPR/0845F000
+   -LKTB
+   -LKPR/F000/0844 OKL/F035/0845 RATIS/F109/0849 VOZ/F190/0855 BODAL/F132/0900 LKTB/F000/0908
+   -0-NIL
+  )
+}
+ procedure O_L4444._decode_EST (data: pchars; size: word; var FPL: DFPL4; var res: string);
+    begin
+      res:= '';
+      FPL._3 := get_str   (data,size, 1,odd_ICAO, sizeof(FPL._3)-1);
+      FPL._7 := get_str   (data,size, 2,odd_ICAO, sizeof(FPL._7)-1);
+      FPL._8 := get_str   (data,size, 3,odd_ICAO, sizeof(FPL._8)-1);
+      FPL._9 := get_str   (data,size, 4,odd_ICAO, sizeof(FPL._9)-1);
+      FPL._13:= get_str   (data,size, 5,odd_ICAO, sizeof(FPL._13)-1);
+      FPL._14:= get_str   (data,size, 6,odd_ICAO, sizeof(FPL._14)-1);
+      FPL._16:= get_str   (data,size, 7,odd_ICAO, sizeof(FPL._16)-1);
+      FPL._15:= get_str0  (data,size, 8,odd_ICAO);
+      FPL._18:= get_strs0 (data,size, 9,Maximum(9,get_str_items(data,size,odd_ICAO)), odd_ICAO);
+    end;
+
+ function O_L4444._process_EST (data: pchars; size: word; var FPL: DFPL4; var res: string): bool;
+    begin
+      _process_EST:= false
+    end;
+
+ function O_L4444.decode_EST (data: pchars; size: word; var FPL: DFPL4; var res: string): bool;
+    begin
+      _decode_EST(data,size, FPL, res);
+      decode_EST:= (res='') and _process_EST(data,size, FPL, res)
+    end;

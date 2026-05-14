@@ -1,0 +1,28 @@
+var CO_ROBIT : int;
+
+const  setkbPreMapy: TCharSet = [kbLeft,kbRight,kbUp,kbDown,'+','-',
+                                'Z','z','K','k',kbCtrlLeft,kbCtrlRight,
+                                'R','r',kbIns];
+       Aky_Form : int = cmZemSurForm;
+
+
+procedure Set_USER_PRIORITY;
+var
+  F: Text;
+  str,pomstr : string;
+begin
+   if Exists('A:\IBMBIO.COM') = 0 then
+     begin
+       Assign(F,'A:\IBMBIO.COM');  { Standard output }
+       Reset(F);
+        repeat
+          ReadLn(F,str);
+          pomstr := Copy(str,1,10);
+        until Eof(F) or (pomstr='A:\COUNTRY');
+       Close(F);
+       if pomstr='A:\COUNTRY' then  USER_PRIORITY := GetInt(str,1,setPism+[':','\'])
+       else USER_PRIORITY := 0;
+     end
+   else USER_PRIORITY := 255; {0}
+end;
+

@@ -1,0 +1,291 @@
+{ -------------
+   variant A
+  -------------
+}
+ {
+  ; ;970717;971025;1;0;0;4;5;6;7;AEW101  ;AN24 ;    ;UKBB ;1700 ;BULAP MATEG                     ;UKHH ;0115 ;           ;
+
+ }
+ function  _decode_txt_RPL (s: string; var RPL : DRPL): bool;
+
+     var   e,c,r,t, bd0,bdl,ntrat,trat : string;
+           i : int;
+
+           ry,minr, maxr  : single;
+           ry_,v_,vi_     : char;
+           v,minv,maxv,vi : word;
+
+     begin
+       _decode_txt_RPL:= false;
+
+       fillchar(RPL,sizeof(RPL),0);
+       with RPL do
+         begin
+
+           val  := '+';
+           dat0 := getstr(s,2,[';']); dat0:= cut_(dat0);
+           dat1 := getstr(s,3,[';']); dat1:= cut_(dat1);
+           for i:= 1 to 7 do
+              begin
+                week[i]:= getchar(getstr(s,4+i-1,[';']))
+              end;
+
+           _decode_txt_RPL:= false;
+           _7a  := getstr(s,11,[';']); _7a:= cut_(_7a);
+           if _7a='' then Exit;
+           _decode_txt_RPL:= true;
+
+           t:= getstr(s,12,[';']);
+           _9 := _assign_9c(cut_(t));
+
+           e   := getstr(s,14,[';']); e:= cut_(e);
+           t   := getstr(s,15,[';']); t:= cut_(t);
+           _13 := e+t;
+
+           c   := getstr(s,18,[';']); c:= cut_(c);
+           t   := getstr(s,17,[';']); t:= cut_(t);
+           _16 := t+c;
+
+           t   := getstr(s,16,[';']); t:= cut_(t);
+           {r:= getstr(t,1,[icao_NXIT]);
+           t:= copy(t,length(r)+1,length(t)-length(r));}
+           bd0:= getstr(t,1,[icao_NXIT]);
+           bdl:= getstr(t,getstritems(t,[icao_NXIT]),[icao_NXIT]);
+           if _RTE_FIR(bd0,bdl,ntrat,trat,nil) then
+               begin
+                 _9b_rychvys_fl(_9, ntrat, bd0,bdl, ry,ry_,v,v_)
+               end
+            else begin
+                   _9b_rychvys (_9,true, ry,ry_, minr, maxr, v,v_, minv,maxv)
+                 end;
+            _15:= StrPasNew(code_l4_rych_vys(ry,ry_, v,v_, lo_FL,false)+icao_NXIT);
+            _15:= StrNPCopy(_15, trat,true,true);
+            {
+            r:= _assign_15ab_to_9 (_9,r);
+            _15:= strpasnew(r+icao_NXIT+t);
+            }
+
+           if _OBind(e,LK,LKs)<0 then
+              begin
+                _18:= strpasnew(rmk_EET+icao_NXT+FIR_adr+c)
+              end;
+
+          {
+             if _RTE_FIR(bd0,bdl, ntrat,trat) then
+                begin
+                  _9b_rychvys_fl(_9, ntrat, bd0,bdl, ry,ry_,v,v_)
+                end
+             else begin
+                    _9b_rychvys (_9,true, ry,ry_, minr, maxr, v,v_, minv,maxv)
+                  end;
+             _15:= StrPasNew(code_l4_rych_vys(ry,ry_, v,v_, lo_FL,false)+icao_NXIT);
+             _15:= StrNPCopy(_15, trat,true,true);
+           }
+         end;
+     end;
+
+
+ procedure read_txt_rpls(fn: string);
+     var   T : text;
+           s : string;
+           RPL : DRPL;
+     begin
+       if Exists(fn)<>0 then Exit;
+       assign(T,fn);
+       reset(T);
+       readln(T,s);
+       while (not Eof(T)) do
+         begin
+           if _decode_txt_RPL(s,RPL) then save_RPL(@RPL);
+           writeln(RPL._7a);
+           disp_RPL(@RPL);
+           readln(T,s);
+         end;
+       close(T);
+     end;
+
+
+{ -------------
+   variant B
+  -------------
+}
+ {
+
+ êèã-Î èé êñ UKBZ çÄ 02/12/97 óÄëíú  10
+ (êèã-AFL295   àã86 UUEE0505 LGAT0340
+ åÄêòêìí-PIMEN R22 KO W520 UKKK G38 KEFIR
+ çÄÇàÉÄñàà-971027 971229 1000000 980105 980323 1000000
+ (êèã-AFL412   í154 LMML0015 UUEE0345
+ åÄêòêìí-KEFIR G38 UKKK W520 KO R22 PIMEN
+ çÄÇàÉÄñàà-971107 971107 0000500 971121 971121 0000500
+ 971219 971219 0000500 980102 980102 0000500
+ 980130 980130 0000500 980213 980213 0000500
+ 980313 980313 0000500 980327 980327 0000500
+ äéçÖñ  10 óÄëíà
+
+ }
+ const  SOT       = 'êèã-õ èé êñ UKBZ';
+        SOH_7     = '(êèã';
+        SOH_15    = 'åÄêòêìí';
+        SOH_DATE  = 'çÄÇàÉÄñàà';
+        EOT       = 'äéçÖñ';
+
+ function  _read_txt_rpl (fn: string; var T : text; var s: string): bool;
+
+     var   RPL : DRPL;
+
+           u,bd0,bdl,ntrat,trat : string;
+           i : int;
+           p : pchar;
+
+           ry,minr, maxr  : single;
+           ry_,v_,vi_     : char;
+           v,minv,maxv,vi : word;
+
+           err: bool;
+
+     label X;
+
+     begin
+       _read_txt_rpl:= false;
+       err:= true;
+
+      { (êèã-
+      }
+       s:= uni_str(s);;
+       if getstr(s,1,[icao_ARR]) <> SOH_7 then
+          begin
+            readln(T,s);
+            Exit
+          end;
+
+       fillchar(RPL,sizeof(RPL),0);
+       with RPL do
+         begin
+           s   := getstr(s,2,[icao_ARR]);
+
+           val := '+';
+           _7a := getstr(s,1,[icao_NXIT]);
+
+           _9  := _assign_9c(getstr(s,2,[icao_NXIT]));
+
+           _13 := getstr(s,3,[icao_NXIT]);
+           _16 := getstr(s,4,[icao_NXIT]);
+         end;
+
+      InfoCakaj(msgWAITING,tit_RPL_DECODING + RPL._7a + '...');
+
+
+      { åÄêòêìí-
+      }
+       readln(T,s);
+       s:= uni_str(s);
+       if getstr(s,1,[icao_ARR]) <> SOH_15 then goto X;
+       with RPL do
+         begin
+           trat:= getstr (s,2,[icao_ARR]);
+
+           bd0 := getstr (trat,1,[icao_NXIT]);
+           bdl := getstr (trat,getstritems(s,[icao_NXIT]),[icao_NXIT]);
+
+           if _RTE_FIR(bd0,bdl,ntrat,s,nil) then
+               begin
+                 _9b_rychvys_fl(_9, ntrat, bd0,bdl, ry,ry_,v,v_)
+               end
+           else begin
+                  _9b_rychvys (_9,true, ry,ry_, minr, maxr, v,v_, minv,maxv)
+                end;
+           _15:= StrPasNew(code_l4_rych_vys(ry,ry_, v,v_, lo_FL,false)+icao_NXIT);
+           _15:= StrNPCopy(_15, trat,true,true);
+         end;
+
+       readln(T,s);
+       s:= uni_str(s);
+       u:= getstr(s,1,[icao_ARR]);
+       while (not Eof(T)) and (s<>'') and (u<>SOH_DATE) and (u<>SOH_7) and (u<>EOT) do
+         begin
+           RPL._15:= StrNPCopy(RPL._15, kbNL+s,true,true);
+           readln(T,s);
+           s:= uni_str(s);
+           u:= getstr(s,1,[icao_ARR])
+         end;
+
+
+      { çÄÇàÉÄñàà-
+      }
+       if getstr(s,1,[icao_ARR]) <> SOH_DATE then goto X;
+       p:= StrPasNew(getstr(s,2,[icao_ARR]));
+
+       readln(T,s);
+       s:= uni_str(s);
+       u:= getstr(s,1,[icao_ARR]);
+       while (not Eof(T)) and (s<>'') and (u<>SOH_7) and (u<>EOT) do
+         begin
+           p:= StrNPCopy(p, icao_NXIT+s,true,true);
+           readln(T,s);
+           s:= uni_str(s);
+           u:= getstr(s,1,[icao_ARR])
+         end;
+
+       if p<>nil then
+          begin
+            RPL.dat0 := getPstr(p,1,[icao_NXIT]);
+            RPL.dat1 := getPstr(p,getPstritems(p,[icao_NXIT])-1,[icao_NXIT]);
+            u := getPstr(p,getPstritems(p,[icao_NXIT]),[icao_NXIT]);
+            move(u[1],RPL.week,sizeof(RPL.week));
+            strdispose(p)
+          end;
+
+       {InfoCakaj_zatvor;
+       }
+      { ak format multiple... => iny kluc, alebo doplnit data...
+      }
+       save_RPL(@RPL);
+ {     InfoCakaj(msgWAITING,tit_RPL_DECODING + RPL._7a + ' - succesfully.');
+       Delay(6);}
+       _read_txt_rpl:= true;
+       err:= false;
+
+       X : InfoCakaj_zatvor;
+           if err then Say2(msgSORRY,'RPL "'+RPL._7a+'/'+RPL._13+'/'+fn+'" has not valid RPL format.');
+           disp_RPL(@RPL)
+     end;
+
+
+ function  _read_txt_rpls(fn: string): int;
+     var   T   : text;
+           r,s : string;
+           z,k : bool;
+     begin
+       _read_txt_rpls:= 0;
+       IOErrorCode:= Exists(fn);
+       if IOErrorCode<>0 then begin _read_txt_rpls:= IOErrorCode; Exit end;
+
+       assign(T,fn);
+       reset(T);
+       readln(T,r); r:= uni_str(r);
+       z:= SOT=copy(r,1,length(SOT));
+       if z then
+          begin
+            while not Eof(T) do readln(T,r);
+            k:= EOT=copy(uni_str(r),1,length(EOT))
+          end;
+       if not (z and k) then
+          begin
+            Say2(msgSORRY,'"'+fn+'" has not valid RPL format.');
+            Exit
+          end;
+
+       ResetIOError;
+       reset(T);
+       readln(T,r); r:= uni_str(r);
+       while (not Eof(T)) and (IOErrorCode = 0) do
+         begin
+           _read_txt_rpl(fn,T,r);
+           IOErrorCode:= IOResult;
+           if kbhit and (GetKey=kbEsc) then IOErrorCode:= io_intr_by_user
+         end;
+       close(T);
+
+       _read_txt_rpls:= IOErrorCode
+     end;

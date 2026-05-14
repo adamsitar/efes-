@@ -1,0 +1,1404 @@
+; NDB name followed by * means IO NDB into/out from this FIR
+; ROUTE name followed by * means name of AWY used for the flights of CIS aircraft
+
+
+A28
+    (
+     BULAP
+     PI
+     SV
+     SADKO ;*
+     SH
+     REMBO
+     LISKA
+     DENAK
+     TARKA
+     LUTOS ;*
+     RASIL
+     PERUN
+     SILAR
+     SAFRA
+     BAGAN
+    )
+
+A42
+    (
+     IVF
+     VI
+     MALBE
+    )
+
+A68
+    (
+     KEDUB
+     BULAP
+     BG
+     MABAT
+     LAKTA
+    )
+
+A83        ; OLD W510
+    (
+     NALEM
+     EA
+     UGLED
+     LS
+     DOMEK
+     KK
+     KEMUN
+     ABABO
+     TP
+     PEKIT ;*
+     LABOG
+     GE
+     CY
+     BULAP
+    )
+
+A87        ;OLD W521
+    (
+     USTIL
+     WOLOD
+     KUZUK
+     ABRAD
+     BANAR
+     UKSAT
+     CH    ;*
+     SL
+     PI
+     KA
+     NIKIG
+     DEKAD ;*
+     AU
+     TIMOS
+     BULIG
+     PW
+     DK
+     GONED
+     TAMAK
+    )
+
+A97        ;OLD W512
+    (
+     TALIK
+     PENAK
+     DIRAK
+     ARDOK
+     NADIR
+     INTEK
+     LOMIK
+     AL
+     LB
+     KM
+     KEMES
+     RALAP ;*
+     TM
+     TIMOS
+     NIKOD
+     LI
+     MATEG
+     NALEG
+    )
+
+A131       ;OLD W513
+    (
+     FORMA
+     KW
+     LADIK
+     TP
+     AU
+     SABAB ;*
+     KH
+     ABSIN
+     SONEP
+     MAGOR
+     JL
+     RUKOL
+     GIGAR
+     MAKUN
+     ARDOK
+    )
+
+A137       ;OLD W517
+    (
+     BULAP
+     JA
+     BABEN
+     RS    ;*
+     KW
+     MATEG
+     ;KUBOK
+    )
+
+A142       ;OLD W515
+    (
+     SV
+     SITNA
+     EKTIN
+     NOGRO
+     ELDOP ;*
+     SABAB
+    )
+
+A230       ;OLD W527
+    (
+     SV
+     MILKY
+     BRATY ;*
+     PESON
+     PA
+     SUROK
+     NILAR
+     SK    ;*
+     KOTUR
+     LUKIR
+     DO
+    )
+
+A234       ;OLD W542
+    (
+     RASIL
+     SUBAN
+     INGUR
+     SKALA
+     NL
+     SONEP
+     LE
+     AL
+    )
+
+A239       ;OLD W548
+    (
+     BUKOV
+     LURIK
+     POLKA
+     LANPA
+     DE
+     ABRAD
+     DIBRO
+    )
+
+A260       ;OLD W579**
+    (
+     BN
+     KOKUP
+     LUGIR
+     WOLOD
+     ANIRI
+    )
+
+A263       ;OLD W566**
+    (
+     ABROK
+     KR
+     KORUN
+     SL
+    )
+
+A269       ;OLD W568**
+    (
+     KH
+     PILAS
+    )
+
+A279       ;OLD W530
+    (
+     KUBOK
+     MATEG
+     GR
+     TP
+     ;TIMOS
+    )
+
+;OLD B8A
+;    (
+;     DIBRO
+;     ABRAD
+;     DE
+;     ZL
+;     LUGIR
+;    )
+
+B27
+    (
+     ANGOL
+     NORAN
+     BAGAN
+    )
+
+B41
+    (
+     DIBED
+     LUGIR
+     BB
+     BE
+     SOLNU
+     POLKA
+     BADON
+     MO    ;*
+     PS
+     LOKAR ;*
+     SH
+    )
+
+B77
+    (
+     DIBED
+     VI
+     TAKON
+     HT
+     RUMUK
+    )
+
+B140
+    (
+     REMKA
+     TALIK
+    )
+
+B144
+    (
+     DOBOR
+     TAKON
+     IVF
+     SOLNU
+     SW
+    )
+
+B146
+    (
+     MAKUN
+     NADIR
+     ORLAN
+     KIMBA
+    )
+
+B147
+    (
+     DOMNA
+     KERTA
+     DENUS
+     ;VILAN
+    )
+
+;G23
+;    (
+;     REMBO
+;     KIWOK
+;    )
+
+G38
+    (
+     BORAS
+     LT
+     KEDUB
+     SL
+     NE
+     KEFIR
+     PS
+    )
+
+G107
+    (
+     TM
+     GOLIN ;*
+     KH
+     OKBAT
+     RITET ;*
+     GONUS
+     PA
+     BANIT
+     REMBO
+     ATNOS
+     IRMAL
+    )
+
+G203**
+    (
+     TURBA
+     REMBO
+    )
+
+G550
+    (
+     DIBED
+     BN
+     IVF
+     BUKOV
+    )
+
+L5
+    (
+     ANGOL
+     RUDON
+     LIMAN
+     SAFRA
+     PENAK
+     REMKA
+    )
+
+L623
+    (
+     TIRIS
+     DOBOR
+     RUMUK
+     ;-------ROMANIA && MOLDOVA
+     KIWOK
+     REMBO
+    )
+
+;P3A**
+;   (
+;    SM
+;    BUGOR
+;   )
+
+R5
+    (
+     TARKA
+     ULGOT
+     FAROS ;*
+     GUKMA
+     DOMNA
+     KORAT
+    )
+
+R5W
+    (
+     GUKMA
+     ROMOR
+    )
+
+R22
+    (
+     ;TARAS
+     LONLA
+     DOBOR
+     VI
+     BN
+     BB
+     KL
+     DE
+     SW    ;*
+     CH
+     KR
+     PISOK
+     KO
+     SORNA
+     SM
+     PIMEN
+    )
+
+R43
+    (
+     ROMOR
+     DOMNA
+     LIMAN
+     BAGAN
+    )
+
+;UT623
+;   (
+;    TIRIS
+;    DOBOR
+;    RUMUK
+;   )
+
+W511
+    (
+     KR
+     KEDUB
+     PI
+    )
+;     KA
+;     NIKIG
+;     DEKAD ;*
+;     AU
+;     TIMOS
+;     BULIG
+;     PW
+;     DK
+;     GONED
+
+W514
+    (
+     KH
+     LENKA
+     ARZAN
+     TITAG
+     TAGAN
+     DO
+    )
+
+W516
+    (
+     KW
+     LI
+     ROKOT
+     PR
+     DOMEK
+     DK
+     ODRAL
+     RASPU
+    )
+
+W518
+    (
+     LUGIR
+     KL
+    )
+
+W519
+    (
+     LISKA
+     BAKNA
+     SUROK
+     GONUS
+    )
+
+W520
+    (
+     KEDUB
+     KO
+    )
+
+W523
+    (
+     BG
+     KO
+    )
+
+W525
+    (
+     BULAP
+     DA
+     SORNA
+    )
+
+W533
+    (
+     KM
+     PILAS
+     KUBIR ;*
+     DK
+    )
+
+
+W550
+    (
+     FUROR
+     UGLED
+    )
+
+W552
+    (
+     DE
+     ZL
+     LUGIR
+    )
+
+;----------AWY CIS----------
+
+P50A
+    (
+     SEZON
+     DOMEK
+    )
+
+;P50W
+;     NASOK
+;     SIFON
+
+P52
+    (
+     LUGAT
+     ZANOS
+    )
+
+;P65A
+;     DOMEK
+;     GAWOL
+
+P77
+    (
+     PW
+     FASAD
+    )
+
+P219
+    (
+     UGLED
+     SOLRO
+     POROG
+    )
+
+;W9
+;     MATEG
+;     NALOG
+;
+;W10
+;     FORMA
+;     KW
+
+W11B
+    (
+     SFERA
+     MATEG
+    )
+
+W13
+    (
+     BATON
+     SOLRO
+    )
+
+W13G
+    (
+     NIKRA
+     MASOL
+    )
+
+W35
+    (
+     FAZAN
+     KW
+    )
+
+W55D
+    (
+     KW
+     KUROK
+    )
+
+W62
+    (
+     ORLAN
+     SEDUL
+    )
+
+W524
+    (
+     BB
+     ZL
+    )
+
+W526
+    (
+     BG
+     PI
+    )
+
+W528
+    (
+     KH
+     KM
+     PADKA
+     ;OGONA
+     ;DM
+    )
+
+W529
+    (
+     DA
+     CY
+     KA
+     SV
+    )
+
+W531
+    (
+     KEDON
+     LUGAT
+    )
+
+W532
+    (
+     ROKOT
+     KK
+     PW
+    )
+
+W534
+    (
+     LUGAT
+     TOROS
+    )
+
+W535
+    (
+     LASKA
+     EA
+     SOLRO
+     LUGAT
+     NIKRA
+     STENA
+    )
+
+W536
+    (
+     TIMOK
+     TP
+     RALOS
+     LI
+    )
+
+W537
+    (
+     GE
+     NIKIG
+    )
+
+W538
+    (
+     ZU
+     PR
+     KK
+    )
+
+W539
+    (
+     BABEN
+     POBAN
+     BG
+    )
+
+W540
+    (
+     BABEN
+     RILSU
+     CY
+    )
+
+W541
+    (
+     LB
+     DM
+     LANIL
+     BETEG
+     PALER
+    )
+
+W543
+    (
+     PW
+     KUBIR ;*
+     ;PILAS
+     ;PADKA
+    )
+
+W544
+    (
+     PI
+     LT
+     LAKTA
+    )
+
+W545
+    (
+     NE
+     BADON ;*
+     LS
+     LURIK
+    )
+
+W546
+    (
+     ODRAL
+     PW
+     ABABO
+    )
+
+W547
+    (
+     DOMEK
+     ZU
+     GONED
+     TAMAK
+    )
+
+W549
+    (
+     ORLAN
+     RENAT
+    )
+
+W551
+    (
+     PILAS
+     PADKA
+     OGONA
+    )
+
+W553
+    (
+     LT
+     BULAP
+     KA
+    )
+
+W560**
+    (
+     JA
+     ERBIS
+    )
+
+W562**
+    (
+     IBROK
+     RABEN
+     MAKUN
+    )
+
+;W563**
+;    (
+;     LB
+;     OGONA
+;     BERDA
+;    )
+
+W564**
+    (
+     PW
+     NASOK
+    )
+
+;W565**
+;    (
+;     PISOK
+;     KEDUB
+;    )
+
+W567**
+    (
+     PADKA
+     BETEG
+     GAMAN
+    )
+
+W569**
+    (
+     BULAP
+     LAKTA
+    )
+
+W570**
+    (
+     AU
+     ERKAD
+     ELDOP ;*
+     KESAM ;*
+     PESON
+     MOKAD
+     REMBO
+    )
+
+W571**
+    (
+     KO
+     SL
+     POLOS ;*
+     HIMIK
+     POLKA
+     IVF
+    )
+
+W572**
+    (
+     MO
+     ;LS
+     GOPAK
+     IVF
+    )
+
+W573**
+    (
+     REMBO
+     PEGAS
+     NL
+    )
+
+W574**
+    (
+     MAGOR
+     AL
+     BIDAR
+     GREKA
+    )
+
+W575**
+    (
+     CH
+     KORUN
+     KEDUB
+     TOBON ;*
+     SH
+     PA
+    )
+
+W576**
+    (
+     BE
+     TUMUK
+     LURIK
+    )
+
+W577**
+    (
+     ORLAN
+     AKONA
+     AL
+    )
+
+W578**
+    (
+     JL
+     PIKAK
+     NADIR
+    )
+
+W580**
+    (
+     REMBO
+     KOSAK
+     SK
+    )
+
+W581**
+    (
+     INGUR
+     TESLA ;*
+     LISKA
+    )
+
+;W582**
+;     LUGIR
+;     KOKUP
+;     BN
+
+W583**
+    (
+     DOMEK
+     NASOK
+    )
+
+W586**
+    (
+     OGLAR
+     KUZUK
+     ZL
+    )
+
+W587**
+    (
+     DE
+     OLENA
+     MO
+    )
+
+W588**
+    (
+     SOLNU
+     LURIK
+    )
+
+W589**
+    (
+     KIWOK
+     LUTOS
+    )
+
+W590**
+    (
+     BORAS
+     SL
+    )
+
+W591**
+    (
+     SM
+     PI
+    )
+
+W592**
+    (
+     SONEP
+     PERAL
+     KM
+    )
+
+W610
+    (
+     LT
+     LETOR
+	 KO
+    )
+
+W611
+    (
+     TR
+	 KEDUB
+	 PISOK
+    )
+
+W612
+    (
+     CH
+	 KORES
+	 ABRAD
+     OLYKA
+     LUCIK
+    )
+
+W613
+    (
+     SL
+	 POGER
+	 GAWOR
+     DERAN
+    )
+
+W614
+    (
+     DE
+     TERNA
+     SOLNU
+    )
+
+W615
+    (
+     VI
+     SR
+    )
+
+W616
+    (
+     LS
+     BALIN
+     HIMIK
+     TEOFA
+     DE
+     ABRAD
+     WM
+     ZABAD
+    )
+
+W617
+    (
+     REMBO
+     BUGAZ
+    )
+
+W618
+    (
+     IZMAL
+     BL
+     GRENK
+    )
+
+W619
+    (
+    GONUS
+    SK
+    )
+
+W620
+    (
+     ROKOT
+     WERES
+     WEROD
+     KIROW
+     ZAWAL
+     LUGAT
+    )
+
+W621
+    (
+     TM
+     HORTA
+     BULIG
+     DOMEK
+     MATOR
+    )
+
+W622
+    (
+     LETOR
+	 MABAT
+    )
+
+W623
+    (
+     PETRA
+     LUGAT
+    )
+
+W624
+    (
+     ABABO
+     TP
+     PEKIT
+	 OWIDA
+	 NIKIG
+	 KORNA
+	 SV
+    )
+
+W625
+    (
+     DANKA
+     GR
+     LI
+    )
+
+W626
+    (
+     TM
+     NS
+     BULIG
+     KK
+    )
+
+W627
+    (
+     PEKIT
+     TIMOS
+    )
+
+W628
+    (
+     PALTA
+     RS
+     OLEKA
+     SUMKA
+    )
+
+W629
+    (
+     RS
+     SUMKA
+     REPAH
+    )
+
+W630
+    (
+     KU
+	 MUKUN
+	 NIKIG
+    )
+
+W631
+    (
+     DEKAD
+     KU
+     PEKIT
+    )
+
+W632
+    (
+     DW
+     BEDAN
+     BELOL
+    )
+
+W633
+    (
+    LS
+    PEKTA
+    ZAWAL
+    )
+
+W634
+    (
+     LS
+     MO
+    )
+
+W635
+    (
+    KW
+    GR
+    TP
+    TIMOS
+    NS
+    HORTA
+    MG    ;*
+    BURDA
+    )
+
+W636
+    (
+     TIMOS
+     DANKA
+     RALOS
+    )
+
+W638
+    (
+     LADIK
+     DANKA
+    )
+
+W660
+    (
+     KO
+	 STOWA
+    )
+
+W661
+    (
+     KOLYK
+	 KOWAR
+	 SORNA
+    )
+
+W662
+    (
+     SORNA
+	 STOWA
+    )
+
+W663
+    (
+     DERAN
+     HIMIK
+     TERNA
+     ZL
+    )
+
+W664
+    (
+     KL
+     TERNA
+     LS
+	 GAWOR
+	 NE
+    )
+
+W665
+    (
+     SR
+     UG
+     VI
+     PEREG
+     IVF
+    )
+
+W666
+    (
+     TUMUK
+     IVF
+     BB
+    )
+
+W667
+    (
+     CH
+	 TOMOR
+	 KAZAT
+	 GAWOR
+    )
+
+W668**
+    (
+     MAPTA
+	 TOMOR
+	 SL
+    )
+
+W669
+    (
+     TR
+	 SV
+	 ROTMA
+	 BW
+	 EKTIN
+	 BRATY
+    )
+
+W670
+    (
+     BULAP
+	 SV
+	 HW
+	 EKTIN
+    )
+
+W671**
+    (
+     PS
+	 AKROS
+	 KOSNA
+	 EKTIN
+	 DEKAD ;*
+	 KRIHA
+     TM
+    )
+
+W672**
+    (
+     AKROS
+	 NOWIK
+	 EKTIN
+	 NIKIG
+	 PALTA
+    )
+
+W673
+    (
+     TIMOS
+     ELDOP
+     RAHMA ;*
+     GONUS
+    )
+
+W674
+    (
+     RAHMA
+     KH
+    )
+
+W675**
+    (
+     NOWIK
+	 NOGRO
+	 TERNY
+	 TM
+    )
+
+W676**
+    (
+     GE
+	 DEKAD
+	 ELDOP
+     TM
+    )
+
+W677
+    (
+     LS
+     LUGAT
+    )
+
+W678
+    (
+     DOMEK
+     PETRA
+    )
+
+W679
+    (
+     PEKIT
+     PALTA
+     GR
+    )
+
+W680**
+    (
+     KO
+	 MABAT
+    )
+
+W681
+    (
+     MG
+     MYKOL
+     ODRAL
+    )
+
+W682
+    (
+     POKOT
+     MATOR
+     WERES
+    )
+
+W683
+    (
+     KRIHA
+     HORTA
+     KUBIR
+     ODRAL
+    )
+
+W684
+    (
+     KRIHA
+     TIMOS
+    )
+
+W685
+    (
+     TIMOS
+     KU
+    )
+
+W686
+    (
+     PEKIT
+     LADIK
+     GR
+    )
+
+W687
+    (
+     KOROG
+     BETEG
+    )
+
+W688
+    (
+     IZMAL
+     BUGAZ
+     TARKA
+     PA
+    )
+
+W689
+    (
+     PALTA
+     TP
+    )
+
+W690
+    (
+     DANKA
+     PALTA
+    )
+
+W691
+    (
+     NOGRO
+     TIMOS
+    )
+
+W692
+    (
+     KM
+     BURDA
+     MYKOL ;*
+     PW
+    )
+
+W693
+    (
+     SUMKA
+     KW
+    )
+
+W694
+    (
+     TERNA
+     TEOFA
+    )
+
+W695
+    (
+     RALAP
+     HORTA
+    )
+
+W696**
+    (
+     DA
+	 SM
+    )

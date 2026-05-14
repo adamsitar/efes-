@@ -1,0 +1,204 @@
+{ ------------------
+   Options
+  תתתתתתתתתתתתתתתתתת
+}
+
+{$I ..\lib\mnu\_options.h}
+
+
+procedure mnuOPTIONs_init(MMenu: PSubmenu); far;
+    const max_items  = 30;
+    var   smnu  : TPItems;
+          sbmnu : PSubMenu;
+          i,items,nl : int;
+    begin
+      items:= 0; nl:= 0;
+
+     {$IFDEF SERVER}
+      {sbmnu:= SubMenu(cut_r(STREAM_LISTING)+'... ',
+                      OptMenu_S(STREAM_LISTING, hlpmnuNASTAV_OSTATNE, cmNASTAV_SPRACOVANIE,15,nil),nil
+                     );
+      sbmnu^.PMenu_init:= @mnuSTREAM_LIST_init;
+      smnu[items]:= SubMenuInitialized(sbmnu,nil);
+      inc(items);}
+
+      {
+      sbmnu:= SubMenu(cut_r(DATA_DECODING)+'... ',
+                      OptMenu_S(DATA_DECODING,hlpmnuDATA_DECODE,cmNASTAV_SPRACOVANIE,15,nil),nil
+                     );
+      sbmnu^.PMenu_init:= @mnuDEKODOVANIE_init;
+      smnu[items]:= SubMenuInitialized(sbmnu,nil);
+      inc(items);
+
+      add_newline(nl,items,smnu);}
+     {$ENDIF}
+
+     {$IFDEF RPL}
+       if mnu_data_opt_common then
+         begin
+           sbmnu:= SubMenu(cut_r(RPLM)+'... ', OptMenu_S(RPLM, hlp_mnu_RPL_NASTAV,cmNASTAV_SPRACOVANIE,15,nil),nil);
+           sbmnu^.PMenu_init:= @mnuRPLvolby_init;
+           smnu[items]:= SubMenuInitialized(sbmnu,nil);
+           inc(items);
+         end;
+     {$ENDIF}
+
+
+     {$IFDEF PLN}
+       if mnu_data_opt_common then
+         begin
+           sbmnu:= SubMenu(cut_r(PLNM)+'... ', OptMenu_S(PLNM, hlp_mnu_PLN_NASTAV,cmNASTAV_SPRACOVANIE,15,nil),nil);
+           sbmnu^.PMenu_init:= @mnuPLNvolby_init;
+           smnu[items]:= SubMenuInitialized(sbmnu,nil);
+           inc(items);
+         end;
+     {$ENDIF}
+
+     {$IFDEF FPL4_MENU}
+      if {$IFDEF PROCESS_FPL4}
+            mnu_data_opt_common
+         {$ELSE}
+            true
+         {$ENDIF}
+         then
+         begin
+           sbmnu:= SubMenu(cut_r(FPL4M)+'... ', WinMenu(FPL4M, hlp_mnu_FPL4_NASTAV,nil),nil);
+           sbmnu^.PMenu_init:= @mnuFPL4volby_init;
+           smnu[items]:= SubMenuInitialized(sbmnu,nil);
+           inc(items);
+         end;
+     {$ENDIF}
+
+     {$IFDEF FPL0}
+      sbmnu:= SubMenu(cut_r(FPLCM)+'... ', OptMenu_S(FPLCM,hlp_mnu_FPLC_NASTAV,cmNASTAV_SPRACOVANIE,15,nil),nil);
+      sbmnu^.PMenu_init:= @mnuFPLCvolby_init;
+      smnu[items]:= SubMenuInitialized(sbmnu,nil);
+      inc(items);
+
+      {$IFNDEF FPLM_DISABLED}
+      {$IFDEF PROCESS_FPLM} if mnu_data_opt_common then {$ENDIF}
+         begin
+           sbmnu:= SubMenu(cut_r(FPLMM)+'... ', OptMenu_S(FPLMM, hlp_mnu_FPLM_NASTAV,cmNASTAV_SPRACOVANIE,15,nil),nil);
+           sbmnu^.PMenu_init:= @mnuFPLMvolby_init;
+           smnu[items]:= SubMenuInitialized(sbmnu,nil);
+           inc(items);
+
+          {$IFDEF KRL}
+           sbmnu:= SubMenu(cut_r(KRLM)+'... ', OptMenu_S(KRLM, hlp_mnu_KRL_NASTAV,cmNASTAV_SPRACOVANIE,15,nil),nil);
+           sbmnu^.PMenu_init:= @mnuKRLvolby_init;
+           smnu[items]:= SubMenuInitialized(sbmnu,nil);
+           inc(items);
+          {$ENDIF}
+         end;
+      {$ENDIF}
+
+     {$ENDIF}
+
+     {$IFDEF ZAM}
+      {$IFDEF PROCESS_ZAM} if mnu_data_opt_common then {$ENDIF}
+         begin
+           add_newline__(0, 1,nl,items,smnu);
+           sbmnu:= SubMenu(cut_r(ZAMM)+'... ', OptMenu_S(ZAMM, hlp_mnu_ZAM_NASTAV,cmNASTAV_SPRACOVANIE,15,nil),nil);
+           sbmnu^.PMenu_init:= @mnuZAMvolby_init;
+           smnu[items]:= SubMenuInitialized(sbmnu,nil);
+           inc(items);
+         end;
+     {$ENDIF}
+
+     {$IFDEF QGO}
+      {$IFDEF PROCESS_QGO} if mnu_data_opt_common then {$ENDIF}
+         begin
+           add_newline__(0, 1,nl,items,smnu);
+           sbmnu:= SubMenu(cut_r(QGOM)+'... ', OptMenu_S(QGOM, hlp_mnu_QGO_NASTAV,cmNASTAV_SPRACOVANIE,15,nil),nil);
+           sbmnu^.PMenu_init:= @mnuQGOvolby_init;
+           smnu[items]:= SubMenuInitialized(sbmnu,nil);
+           inc(items);
+         end;
+     {$ENDIF}
+
+     {$IFDEF DVZ}
+      {$IFDEF PROCESS_DVZ} if mnu_data_opt_common then {$ENDIF}
+         begin
+           add_newline__(0, 1,nl,items,smnu);
+           sbmnu:= SubMenu(cut_r(DVZM)+'... ', OptMenu_S(DVZM, hlp_mnu_DVZ_NASTAV,cmNASTAV_SPRACOVANIE,15,nil),nil);
+           sbmnu^.PMenu_init:= @mnuDVZvolby_init;
+           smnu[items]:= SubMenuInitialized(sbmnu,nil);
+           inc(items);
+         end;
+     {$ENDIF}
+
+     {$IFDEF PRZ}
+      {$IFDEF PROCESS_PRZ} if mnu_data_opt_common then {$ENDIF}
+         begin
+           add_newline__(0, 2,nl,items,smnu);
+           sbmnu:= SubMenu(cut_r(PRZM)+'... ', OptMenu_S(PRZM, hlp_mnu_PRZ_NASTAV,cmNASTAV_SPRACOVANIE,15,nil),nil);
+           sbmnu^.PMenu_init:= @mnuPRZvolby_init;
+           smnu[items]:= SubMenuInitialized(sbmnu,nil);
+           inc(items);
+         end;
+     {$ENDIF}
+
+     {$IFDEF PRS}
+      {$IFDEF PROCESS_PRS} if mnu_data_opt_common then {$ENDIF}
+         begin
+           add_newline__(0, 2,nl,items,smnu);
+           sbmnu:= SubMenu(cut_r(PRSM)+'... ', OptMenu_S(PRSM, hlp_mnu_PRS_NASTAV,cmNASTAV_SPRACOVANIE,15,nil),nil);
+           sbmnu^.PMenu_init:= @mnuPRSvolby_init;
+           smnu[items]:= SubMenuInitialized(sbmnu,nil);
+           inc(items);
+         end;
+     {$ENDIF}
+
+     {$IFDEF MET}
+      {if mnu_data_opt_common then}
+         begin
+           add_newline__(0, 3,nl,items,smnu);
+           sbmnu:= SubMenu(cut_r(METM)+'... ', OptMenu_S(METM, hlp_mnu_MET_NASTAV,cmDefault,15,nil),nil);
+           sbmnu^.PMenu_init:= @mnuMETvolby_init;
+           smnu[items]:= SubMenuInitialized(sbmnu,nil);
+           inc(items);
+         end;
+     {$ENDIF}
+
+     {$IFDEF TLG}
+      if mnu_data_opt_common then
+         begin
+           add_newline__(0, 3,nl,items,smnu);
+           sbmnu:= SubMenu(cut_r(TLGM)+'... ', OptMenu_S(TLGM, hlp_mnu_TLG_NASTAV,cmDefault,15,nil),nil);
+           sbmnu^.PMenu_init:= @mnuTLGvolby_init;
+           smnu[items]:= SubMenuInitialized(sbmnu,nil);
+           inc(items);
+         end;
+     {$ENDIF}
+
+     {$IFDEF SPR}
+      {$IFDEF SK}
+      if mnu_data_opt_common then
+      {$ENDIF}
+         begin
+           add_newline__(0, 3,nl,items,smnu);
+           sbmnu:= SubMenu(cut_r(SPRM)+'... ', OptMenu_S(SPRM, hlp_mnu_SPR_NASTAV,cmDefault,15,nil),nil);
+           sbmnu^.PMenu_init:= @mnuSPRvolby_init;
+           smnu[items]:= SubMenuInitialized(sbmnu,nil);
+           inc(items);
+         end;
+     {$ENDIF}
+
+     {$IFDEF SSR_MANAGEMENT}
+     (* {if mnu_data_opt_common then}
+         begin
+           add_newline__(0, 3,nl,items,smnu);
+           sbmnu:= SubMenu(cut_r(SSRM)+'... ', OptMenu_S(SSRM, hlp_mnu_SSR_NASTAV,cmDefault,15,nil),nil);
+           sbmnu^.PMenu_init:= @mnuSSRvolby_init;
+           smnu[items]:= SubMenuInitialized(sbmnu,nil);
+           inc(items);
+         end;*)
+     {$ENDIF}
+
+      {sbmnu:= SubMenu(cut_r(DATA_PROCESSING)+'... ',
+                      OptMenu_S(DATA_PROCESSING,hlpmnuNASTAV_OSTATNE, cmNASTAV_SPRACOVANIE,15,nil),nil);
+      sbmnu^.PMenu_init:= @mnuSPRACOVANIE_init;
+      smnu[items]:= SubMenuInitialized(sbmnu,nil);
+      inc(items);}
+      for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i]);
+    end;

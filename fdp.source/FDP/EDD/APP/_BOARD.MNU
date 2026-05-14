@@ -1,0 +1,249 @@
+{$I .\app\_board.h}
+
+ { Menu
+ }
+
+ function STRIPs_menu_init(mnu,tit: string): PSubMenu; far;
+    var   sbmnu : PSubMenu;
+    begin
+      sbmnu:= {$IFDEF MAPY} SubMenu_  (mnu,@TABLET_EDD,true,
+              {$ELSE}       SubMenu   (mnu,
+              {$ENDIF}
+                {$IFDEF LINE_STRIP} OptMenu(tit, hlpmnuBOARD_FORMAT, cmNASTAV_ZOBRAZENIE,
+                {$ELSE}             WinMenu(tit, hlpmnuBOARD_FORMAT,
+                {$ENDIF}
+                    Item(MINI,   cmEDD_MINI_STRIP,
+                    Item(SHORT,  cmEDD_SHORT_STRIP,
+                    Item(LARGE,  cmEDD_FULL_STRIP,
+                    {$IFDEF LINE_STRIP}
+                      NewLine2(0,
+                      Switch2(LINE, @lineSTRIP,
+                    {$ENDIF}
+                    nil ) ) ) {$IFDEF LINE_STRIP} ) ) {$ENDIF}
+                   ),
+                nil);
+      STRIPs_menu_init:= sbmnu
+    end;
+
+
+ procedure mnuPROPOSED_init(MMenu: PSubmenu); far;
+     var   smnu  : TPItems;
+           sbmnu : PSubMenu;
+           i,items,nl,ihk : int;
+     begin
+       items:= 0; nl:= 0; ihk:= 0;
+
+       smnu[items]:= Switch2(hk(ihk)+_ACC_FPLC, @PROP_ACK_cFPL,nil);
+       inc(items);
+       smnu[items]:= Switch2(hk(ihk)+_ACC_FPLM, @PROP_ACK_mFPL,nil);
+       inc(items);
+       smnu[items]:= Switch2(hk(ihk)+_ACC_FPLO, @PROP_ACK_oFPL,nil);
+       inc(items);
+
+       {$IFDEF PRN_STRIP}
+        {smnu[items]:= NewLine2(0,nil);
+        inc(items);
+        smnu[items]:= Switch2(hk(ihk)+_PRN_PA,   @REC_PROP_PRN,nil);
+        inc(items);}
+       {$ENDIF}
+
+       for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i])
+     end;
+
+
+ procedure mnuARRANGEMENT_init(MMenu: PSubmenu); far;
+     var   smnu  : TPItems;
+           sbmnu : PSubMenu;
+           i,items,nl,ihk : int;
+     begin
+       items:= 0; nl:= 0; ihk:= 0;
+
+       smnu[items]:= Switch2(hk(ihk)+_IN_HD,  @NDB_INP, nil);
+       inc(items);
+       smnu[items]:= Switch2(hk(ihk)+_OTHERS, @NDB_OTHERS, nil);
+       inc(items);
+       smnu[items]:= Switch2(hk(ihk)+_NDB_XY, @NDB_XY, nil);
+       inc(items);
+       smnu[items]:= Switch2(hk(ihk)+_EMPTY,  @NDB_NULL, nil);
+       inc(items);
+       {$IFDEF SECTORS}
+        smnu[items]:= NewLine2(2,nil);
+        inc(items);
+        smnu[items]:= Switch2(hk(ihk)+_D_SEC_FIR, @S_DISPLAY, nil);
+        inc(items);
+        smnu[items]:= Switch2(hk(ihk)+_IN_TH, @S_D_IN_THROUGH, nil);
+        inc(items);
+        smnu[items]:= Switch2(hk(ihk)+_I_SEC_FIR, @S_IN, nil);
+        inc(items);
+        smnu[items]:= Switch2(hk(ihk)+_RTE_SEC, @S_ROUTE, nil);
+        inc(items);
+        smnu[items]:= NewLine2(0,nil);
+        inc(items);
+        smnu[items]:= SwitchI(hk(ihk)+_S_IN_KM,@S_IN_KM,'km',S_IN_KM_lo,S_IN_KM_hi,nil);
+        inc(items);
+        smnu[items]:= SwitchI(hk(ihk)+_S_EST_LIMIT,@S_EST_LIMIT,tit_min,S_EST_LIMIT_lo,S_EST_LIMIT_hi,nil);
+        inc(items);
+        smnu[items]:= SwitchI(hk(ihk)+_S_DEL_LIMIT,@S_DEL_LIMIT,tit_min,S_DEL_LIMIT_lo,S_DEL_LIMIT_hi,nil);
+        inc(items);
+       {$ENDIF}
+       {$IFDEF FIND_EQ_NDB}
+        smnu[items]:= NewLine2(0,nil);
+        inc(items);
+        smnu[items]:= Switch2(hk(ihk)+_EQ_NDB, @NDB_EQ, nil);
+        inc(items);
+       {$ENDIF}
+
+       for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i])
+     end;
+
+
+ procedure mnuPRESENTATION_init(MMenu: PSubmenu); far;
+     var   smnu  : TPItems;
+           sbmnu : PSubMenu;
+           i,items,nl,ihk : int;
+     begin
+       items:= 0; nl:= 0; ihk:= 0;
+
+       smnu[items]:= Switch2(hk(ihk)+_IN_FL, @in_FL,nil);
+       inc(items);
+       smnu[items]:= Switch2(hk(ihk)+_IN_KM, @in_km,nil);
+       inc(items);
+       smnu[items]:= Switch2(hk(ihk)+mnu_pis_STRIP_COR, @pis_STRIP_COR,nil);
+       inc(items);
+       {$IFDEF PVO}
+        smnu[items]:= Switch2(hk(ihk)+mnu_pis_STRIP_ACK, @pis_STRIP_ACK,nil);
+        inc(items);
+       {$ENDIF}
+       smnu[items]:= Switch2(hk(ihk)+_MSTRIP, @pis_STRIP_mFPL,nil);
+       inc(items);
+
+       for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i])
+     end;
+
+
+{$IFDEF PRN_STRIP}
+ procedure mnuPRINTING_init(MMenu: PSubmenu); far;
+     var   smnu  : TPItems;
+           sbmnu : PSubMenu;
+           i,items,nl,ihk : int;
+     begin
+       items:= 0; nl:= 0; ihk:= 0;
+
+       {smnu[items]:= Switch2(hk(ihk)+_PRN_REC,  @PRN_REC,nil);
+       inc(items);}
+       {smnu[items]:= Switch2(hk(ihk)+_PRN_PA,   @REC_PROP_PRN,nil);
+       inc(items);}
+
+       smnu[items]:= Switch2(hk(ihk)+_PRN_FPLC, @PRN_cFPL,nil);
+       inc(items);
+       smnu[items]:= Switch2(hk(ihk)+_PRN_FPLM, @PRN_mFPL,nil);
+       inc(items);
+       smnu[items]:= Switch2(hk(ihk)+_PRN_FPLO, @PRN_oFPL,nil);
+       inc(items);
+
+       {$IFDEF SECTORS}
+        smnu[items]:= NewLine2(0,nil);
+        inc(items);
+        smnu[items]:= Switch2(hk(ihk)+_PRN_S,  @S_PRINT,nil);
+        inc(items);
+        smnu[items]:= Switch2(hk(ihk)+_PRN_IN, @S_P_IN_THROUGH,nil);
+        inc(items);
+        {smnu[items]:= SwitchI(hk(ihk)+_PRN_EST,@S_P_EST_LIMIT,S_P_EST_LIMIT_lo,S_P_EST_LIMIT_hi,nil);
+        inc(items);}
+       {$ENDIF}
+
+       smnu[items]:= NewLine2(0,nil);
+       inc(items);
+       smnu[items]:= Switch2(hk(ihk)+_PRN_CHG,  @PRN_CHG,nil);
+       inc(items);
+
+       for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i])
+     end;
+{$ENDIF}
+
+
+ procedure mnuBOARD_init(MMenu: PSubmenu); far;
+     var   smnu  : TPItems;
+           sbmnu : PSubMenu;
+           i,items,nl,ihk : int;
+     begin
+       items:= 0; nl:= 0; ihk:= 0;
+
+       sbmnu:=  {$IFDEF MAPY} SubMenu_(PROPOSED,  @PLANZET_MAPA,false,
+                {$ELSE}       SubMenu (PROPOSED,
+                {$ENDIF}      OptMenu (PROPOSED_, hlpmnuBOARD_PROPOSED, cmPROP_SETT,
+                nil),nil);
+       sbmnu^.PMenu_init:= @mnuPROPOSED_init;
+       smnu[items]:= SubMenuInitialized(sbmnu,nil);
+       inc(items);
+
+
+       smnu[items]:= NewLine(nil);
+       inc(items);
+
+       sbmnu:=  {$IFDEF MAPY} SubMenu_(ARRANGE,  @PLANZET_MAPA,false,
+                {$ELSE}       SubMenu (ARRANGE,
+                {$ENDIF}      OptMenu (ARRANGE_, hlpmnuBOARD_ARRANGE, cmACC_SETT,
+                nil),nil);
+       sbmnu^.PMenu_init:= @mnuARRANGEMENT_init;
+       smnu[items]:= SubMenuInitialized(sbmnu,nil);
+       inc(items);
+
+       sbmnu:=  {$IFDEF MAPY} SubMenu_(SORTING,  @PLANZET_MAPA,false,
+                {$ELSE}       SubMenu (SORTING,
+                {$ENDIF}      OptMenu (SORTING_, hlpmnuBOARD_SORT, cmACC_SETT,
+                                Radio('', @STRIP_SORT, 2,
+                                RadioItem(_INDEX,
+                                RadioItem(_ETD,
+                                RadioItem(_FL,
+                                nil) ) ),
+                              nil)),
+                              nil);
+       smnu[items]:= SubMenuInitialized(sbmnu,nil);
+       inc(items);
+
+       sbmnu:=  {$IFDEF MAPY} SubMenu_(DIFFER,  @PLANZET_MAPA,false,
+                {$ELSE}       SubMenu (DIFFER,
+                {$ENDIF}      OptMenu (DIFFER_, hlpmnuBOARD_DIFFER, cmACC_SETT,
+                                Switch2(_SMER,    @STRIP_DIR,
+                                NewLine(
+                                Switch2(_D1,  @STRIP_DIR_[dir_east],
+                                Switch2(_D2,  @STRIP_DIR_[dir_west],
+                                NewLine2(0,
+                                Switch2(_D3,  @STRIP_DIR_[dir_in],
+                                Switch2(_D4,  @STRIP_DIR_[dir_inp],
+                                Switch2(_D5,  @STRIP_DIR_[dir_out],
+                                NewLine2(2,
+                                Switch2(_D6,  @STRIP_DIR_[dir_fpm],
+                                Switch2(_D7,  @STRIP_DIR_[dir_fpo],
+                                nil) ) ) ) ) ) ) ) ) ) ) ),
+                              nil);
+       smnu[items]:= SubMenuInitialized(sbmnu,nil);
+       inc(items);
+
+       sbmnu:=  {$IFDEF MAPY} SubMenu_(PRESENT,  @PLANZET_MAPA,false,
+                {$ELSE}       SubMenu (PRESENT,
+                {$ENDIF}      OptMenu (PRESENT_, hlpmnuBOARD_DISPLAY, cmACC_SETT,
+                nil),nil);
+       sbmnu^.PMenu_init:= @mnuPRESENTATION_init;
+       smnu[items]:= SubMenuInitialized(sbmnu,nil);
+       inc(items);
+
+       {$IFDEF PRN_STRIP}
+        sbmnu:=  SubMenu (PRINTED , OptMenu (PRINTED , hlpmnuBOARD_PRINT, cmDefault,nil),nil);
+        sbmnu^.PMenu_init:= @mnuPRINTING_init;
+        smnu[items]:= SubMenuInitialized(sbmnu,nil);
+        inc(items);
+       {$ENDIF}
+
+       smnu[items]:= NewLine2(0,nil);
+       inc(items);
+       smnu[items]:= {$IFDEF MAPY} Item_ (ACCDEFINE, cmACC_NDB, @PLANZET_MAPA,false,
+                     {$ELSE}       Item  (ACCDEFINE, cmACC_NDB,
+                     {$ENDIF}      nil);
+       inc(items);
+       smnu[items]:= SubMenuInitialized(GROUPs_menu_init(ACCGREAD),nil);
+       inc(items);
+
+       for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i])
+     end;

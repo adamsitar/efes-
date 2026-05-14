@@ -1,0 +1,64 @@
+function print_mFPL(FPL: PDmFPL): bool;
+   var   s   : string;
+         res : bool;
+         i,c : int;
+         b1  : bool;
+   label X;
+   begin
+     res:= false;
+     (*
+     if not setup_IER then goto X;
+     with FPL^ do
+       begin
+
+         s:=     '^J03^T002^E0301'; s:= s + inschar(idn,11,' ',1);
+         s:= s + '^T+001^E0101';    if ssr<>'' then s:= s + 'A' else s:= s + 'N';
+         s:= s + '^H03';            if ssr<>'' then s:= s + ssr else s:= s + '    ';
+         s:= s + '^H01' + ' ' + typ + ' ' + rych_ + inschar(format_rych(rych),4,' ',1);
+         res:= SendCOMi(PRINTER_COM,s); if not res then goto X;
+
+         c:= min(bodov,c_max_bod-2);
+         s:=     '^J02^T032^E0101'; for i:= 0 to c do s:= s + inschar(Trat[i].kod,6,' ',1);
+         s:= s + '^J04^T032';       for i:= 0 to c do s:= s + TimeToStr(Trat[i].h,Trat[i].m,'')+'  ';
+         s:= s + '^J06^T032';       for i:= 0 to c do
+                                        if (Trat[i].vys<>vys) or (Trat[i].vys_<>vys_) then
+                                            s:= s + inttostr(Trat[i].vys,4,1) + inschar(Trat[i].vys_,1,' ',1)+' '
+                                        else s:= s + '      ';
+         res:= SendCOMi(PRINTER_COM,s); if not res then goto X;
+
+         b1:= (start.h<>0) or (start.m<>0) or (prist.h<>0) or (prist.m<>0);
+         s:=     '^J06^T002^E0101'; s:= s + inschar(start.kod,4,' ',1);
+                                    if b1 then s:= s + TimeToStr(start.h,start.m,'')
+                                    else s:= s+'    ';
+
+         s:= s + '^T014'+'S'+'^D';  if vys<>0 then s:= s + inttostr(vys,4,0)+vys_+' '
+                                    else s:= s + '      ';
+
+         s:= s + '^J08^T002^E0101'; s:= s + inschar(prist.kod,4,' ',1);
+                                    if b1 then s:= s + TimeToStr(prist.h,prist.m,'')
+                                    else s:= s+'    ';
+
+         s:= s + '^T014'+'S'+'^D';  if vys1<>0 then s:= s + inttostr(vys1,4,0)+vys1_+' '
+                                    else s:= s + '      ';
+         res:= SendCOMi(PRINTER_COM,s); if not res then goto X;
+
+         s:=     '^J06^T025^D' ;    s:= s + ssr0;
+         s:= s + '^J08^T025^D' ;    s:= s + inf;
+         res:= SendCOMi(PRINTER_COM,s); if not res then goto X;
+
+         s:=     '^J09^T055^E0101' +DateToStr2(date.r,date.m,date.d)+'  '+TimeToStr(time.h,time.m,':');
+         res:= SendCOMi(PRINTER_COM,s); if not res then goto X;
+       end;
+
+     s:= '^,'#3; {^X';}
+     res:= SendCOMi(PRINTER_COM,s); if not res then goto X;
+
+     s:= chr($18);
+     res:= SendCOMi(PRINTER_COM,s);
+     *)
+     X: print_mFPL:= res
+   end;
+
+procedure print_mFPLs(FPLs: Pptrs; top: pointer; title: string);
+    begin
+    end;

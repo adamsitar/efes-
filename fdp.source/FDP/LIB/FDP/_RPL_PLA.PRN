@@ -1,0 +1,93 @@
+{$IFDEF PRN}
+ function print_RPL(RPL: PRPL): bool; far;
+    const max_s = 20;
+    var   s : array[0..max_s-1] of string;
+          t,u : string;
+          i,p,r : int;
+          b : bool;
+          rych: single; rych_: char; sr: string; rres: bool;
+          vys: word; vys_: char;     sv: string; vres: bool;
+    begin
+      print_RPL:= false;
+
+
+      with RPL^ do
+        begin
+          t:= ''; for i:= low(dni) to high(dni) do if dni[i]<>' ' then t:= t+dni[i] else t:= t+'0';
+
+          if prn_RPL_IFPS then
+            begin
+             {
+              1 RPL                990328 991025      UKKKZDZX
+              2 990329 991025 1000000 AEW101     B732   UKBB 0330 UKHH 0040
+              3            BULAP A137 MATEG
+             }
+              s[0]:=   icao_NXIT + rightchar(zac,kod_DATE,' ')
+                     + icao_NXIT + rightchar(kon,kod_DATE,' ')
+                     + icao_NXIT + t
+                     + icao_NXIT + rightchar(_7a,kod_7a,' ')
+                     + icao_NXIT + rightchar(_9b,kod_9b,' ') + icao_NXIT + _9c
+                     + icao_NXIT + _13a + icao_NXIT + _13b
+                     + icao_NXIT + _16a + icao_NXIT + _16b;
+              r:= 1;
+
+              for i:= 0 to get_lines_i_(_15)-1 do
+                begin
+                  t:= get_line_i(_15,i+1);
+                  if i=0 then
+                     begin
+                       u:= getstr (t,1,[icao_NXIT]);
+                       if not decode_l4_rych_vys_ (u, rych,rych_,sr,rres, vys,vys_,sv,vres) then u:= '';
+                       t:= rightchar(u,kod_RYCH+kod_VYS,' ')+' '+t
+                     end;
+                  s[r+i]:= t;
+                  inc(r);
+                end;
+
+              for i:= 0 to get_lines_i_(_18)-1 do
+                begin
+                  s[r+i]:= get_line_i(_18,i+1);
+                  inc(r);
+                end;
+            end
+          else begin
+               {
+                + 804001 991021 1204560 BAW232  HS23 M EDFL0700 X1 X2 X2 EWES1234 REMARK
+               }
+                 s[0]:=               val
+                        + icao_NXIT + rightchar(zac,kod_DATE,' ')
+                        + icao_NXIT + rightchar(kon,kod_DATE,' ')
+                        + icao_NXIT + t
+                        + icao_NXIT + rightchar(_7a,kod_7a,' ')
+                        + icao_NXIT + rightchar(_9b,kod_9b,' ') + icao_NXIT + _9c
+                        + icao_NXIT + _13a + _13b
+                        + icao_NXIT + _16a + _16b
+                        + icao_NXIT + strpas(_15)
+                        + icao_NXT  + strpas(_18);
+                 r:= 1
+               end
+        end;
+
+      b:= print_strs(PortNo,@s,r);
+      if b and prn_RPL_IFPS then for p:= 0 to 0 do print_str(PortNo,kbNL);
+      print_RPL:= true
+    end;
+
+
+ procedure print_RPLs(RPLs: PRPLs; top: pint; title: string);
+     var   i: int;
+     begin
+         i:= 0; while (i<1) and print_str(PortNo,_CR+_LF) do inc (i);
+         if i<1 then Exit;
+         if not print_head(PortNo, _PRN_TAB+title+_CR+_LF) then Exit;
+         if not print_str(PortNo,_CR+_LF) then Exit;
+
+         i:= 0; while (i<=int(top^)) and print_RPL(RPLs^[i]) do
+           begin
+             CheckProcesses;
+             inc(i)
+           end;
+         if i>=int(top^) then print_str(PortNo, kbNL)
+     end;
+
+{$ENDIF}

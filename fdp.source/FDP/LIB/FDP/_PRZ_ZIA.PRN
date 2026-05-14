@@ -1,0 +1,10 @@
+
+ function print_PRZ(PRZ: PPRZ): bool; far;
+    begin
+      print_PRZ:= print_NTM(PNTM(PRZ))
+    end;
+
+ procedure print_PRZs(PRZs: Pptrs; top: pointer; title: string); far;
+     begin
+       print_PRZs(PRZs, top, title)
+     end;

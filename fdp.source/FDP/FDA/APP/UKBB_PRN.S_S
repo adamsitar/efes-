@@ -1,0 +1,231 @@
+procedure STATUS_init(_App: PApp {$IFDEF DATA_WRITTEN_IN_APP}; _AppGui: PAppGui{$ENDIF});
+    var   hi_,i,dx : int;
+          s  : string;
+          c  : char;
+          pG : PGroup;
+    begin
+      hi_:= 163;
+
+      {$IFDEF UKBB_PRN}
+
+        for i:= lo_BGUadr to hi_BGUadr do
+          begin
+            s:= 'BGU~'+cstr(i,1)+'~';
+            if i=0 then c:= kbAlt0 else c:= chr(ord(kbAlt1)+(i-1));
+            btBGUi[i]:= New(PIButton,Init(_App,
+                         hi_+1, MaxY-16, Length(s) shl 3 - 4,15,
+                         c, cmBGU_ERROR+i,s,
+                         1,clGRd,clGRc,clBUTTON_COLOR)
+                        );
+            {btBGUi[i]^.bk0:= black;
+            btBGUi[i]^.visible:= false;
+            hi_:= btBGUi[i]^.x1+1;}
+            addStatIndicator(btBGU[i]);
+          end;
+        inc(hi_,2);
+
+        for i:= lo_MPUadr to hi_MPUadr do with MPUs^[i] do
+          begin
+            s:= bytetohex(i);
+            if s[1]='$' then s:= copy(s,2,length(s)-1);
+            if s[1]='0' then s:= copy(s,2,length(s)-1);
+            s:= '~'+s[1]+'~'+copy(s,2,length(s)-1);
+            bt  := New(PFButton,Init(_App,
+                       hi_+1, MaxY-16, 2 shl 3 + 4,15,
+                       kbNoKey, cmPRN_ERROR+i,s,
+                       1,clGRd,clGRc,clBUTTON_COLOR)
+                      );
+            bt^.visible:= false;
+            bt^.bk0:= black;
+            hi_:= bt^.x1+1
+          end;
+      {$ELSE}
+
+       {$IFDEF OLDI}
+         btOLDI:= New(PTButton,Init(_App,
+                      hi_+1, MaxY-16, Length('PENDING') shl 3 + 4,15,
+                      kbNoKey,cmNil, ' OLDI  ',1, {$IFDEF _X25} clGRe,clGRe {$ELSE} clGR7, clGR7 {$ENDIF},clBUTTON_COLOR,
+                      nil,true, hi_, true)
+                     );
+         btOLDI^.btSize := btSmall;
+         btOLDI^.visible:= true;
+         addStatIndicator(btOLDI);
+       {$ENDIF}
+
+       {$IFDEF AFTN}
+         btSS := New(PSButton,Init(_App,
+                     hi_+1, MaxY-16, Length(cbtSS) shl 3 + 4,15,
+                     kbNoKey, cmAFTN_SS, cbtSS, 1,clGRf,clGRc,clBUTTON_COLOR, nil,false,nil,false)
+                    );
+         hi_:= btSS^.x1+1;
+         addStatIndicator(btSS);
+         btFF := New(PSButton,Init(_App,
+                     hi_+1, MaxY-16, Length(cbtFF) shl 3 + 4,15,
+                     kbNoKey, cmAFTN_FF, cbtFF, 1,clGRf,clGRc,clBUTTON_COLOR, nil,false,nil,false)
+                    );
+         hi_:= btFF^.x1+1;
+         addStatIndicator(btFF);
+         btKK := New(PSButton,Init(_App,
+                     hi_+1, MaxY-16, Length(cbtKK) shl 3 + 4,15,
+                     kbNoKey, cmAFTN_KK, cbtKK, 1,clGRf,clGRc,clBUTTON_COLOR, nil,false,nil,false)
+                    );
+         hi_:= btKK^.x1+1;
+         addStatIndicator(btKK);
+       {$ENDIF}
+
+       {$IFDEF ALR}
+         btALR:= New(PFButton,Init(_App,
+                     hi_+1, MaxY-16, Length(cbtALR) shl 3 + 4,15,
+                     kbNoKey, cmICAO_ALR, cbtALR, 1,white,clGRc,red)
+                    );
+         btALR^.bk0:= black;
+         hi_:= btALR^.x1+1;
+         addStatIndicator(btALR);
+       {$ENDIF}
+
+       {$IFDEF ERR}
+         btERS:= New(PFButton,Init(_App,
+                     hi_+1, MaxY-16, Length(cbtERS) shl 3 + 4,15,
+                     kbNoKey, cmICAO_ERS, cbtERS, 1,white,clGRc,red)
+                    );
+         btERS^.bk0:= black;
+         hi_:= btERS^.x1+1;
+         addStatIndicator(btERS);
+       {$ENDIF}
+
+       {$IFDEF PLN}
+         btPLN:= New(PFButton,Init(_App,
+                     hi_+1, MaxY-16, Length(cbtPLN) shl 3 + 4,15,
+                     kbNoKey, cmPEND_PLN, cbtPLN, 1,clGRf,clGRc,clBUTTON_COLOR)
+                    );
+         btPLN^.visible:= false;
+         btPLN^.bk0:= black;
+         hi_:= btPLN^.x1+1;
+         addStatIndicator(btPLN);
+       {$ENDIF}
+
+       {$IFDEF FPD}
+         btACT:= New(PFButton,Init(_App,
+                     hi_+1, MaxY-16, Length(cbtACT) shl 3 + 4,15,
+                     kbNoKey, cm_ACT_FPD, cbtACT, 1,white,clGRc,clBUTTON_COLOR)
+                    );
+         btACT^.visible:= false;
+         btACT^.bk0:= black;
+         hi_:= btACT^.x1+1;
+         addStatIndicator(btACT);
+       {$ENDIF}
+
+       {$IFDEF FLI_COORDINATION}
+         btFLI:= New(PFButton,Init(_App,
+                     hi_+1, MaxY-16, Length(cbtFLI) shl 3 + 4,15,
+                     kbNoKey, cmICAO_FLI, cbtFLI, 1,white,clGRc,red)
+                    );
+         btFLI^.bk0:= black;
+         hi_:= btFLI^.x1+1;
+         btFLI^.visible:= false;
+         addStatIndicator(btFLI);
+       {$ENDIF}
+
+       {$IFDEF AFTN}
+         btAFTN := New(PFButton,Init(_App,
+                     hi_+1, MaxY-16, Length(cbtAFTN) shl 3 + 4,15,
+                     kbNoKey, cmAFTN_ERLINE, cbtAFTN, 1,white,clGRc,red)
+                    );
+         btAFTN^.bk0:= black;
+         hi_:= btAFTN^.x1+1;
+         btAFTN^.visible:= false;
+         addStatIndicator(btAFTN);
+       {$ENDIF}
+
+       {$IFDEF BACKUP}
+         btBCK:= New(PFButton,Init(_App,
+                     hi_+1, MaxY-16, Length(cbtBCK) shl 3 + 4,15,
+                     kbNoKey, cmSERVER_BCK, cbtBCK, 1,white,clGRc,red)
+                    );
+         btBCK^.visible:= false;
+         btBCK^.bk0:= black;
+         hi_:= btBCK^.x1+1;
+         addStatIndicator(btBCK);
+       {$ENDIF}
+
+       {$IFDEF CONNECT_TO_AFTN}
+         bt2Line:= New(PFButton,Init(_App,
+                       hi_+1, MaxY-16, Length(cbt2Line) shl 3 + 4,15,
+                       kbNoKey, cmAFTN_2LINE, cbt2Line, 1,white,clGRc,red)
+                      );
+         bt2Line^.visible:= false;
+         bt2Line^.bk0:= black;
+         hi_:= bt2Line^.x1+1;
+         addStatIndicator(bt2Line);
+       {$ENDIF}
+
+      {$ENDIF}
+
+      {$IFDEF DATA_WRITTEN_IN_APP}
+       if _AppGui<>nil then
+          begin
+            dx:= Length(cbtAPPsc) shl 3 + 4;
+            {if hi_<MaxX-50 then inc(hi_,50) else hi_:= MaxX-dx;}
+            btAPPsc := New(PFButton,Init(_AppGui,
+                          hi_, MaxY-16, dx,15,
+                          kbNoKey, cmScrollEnable, cbtAPPsc, 1,white,clGRc,blue)
+                         );
+            btAPPsc^.kbHot:= kbAltP;
+            btAPPsc^.bk0:= black
+            addStatIndicator(btAPPsc);
+          end;
+      {$ENDIF}
+    end;
+
+procedure STATUS_init(_App: PApp {$IFDEF DATA_WRITTEN_IN_APP}; _AppGui: PAppGui{$ENDIF});
+    var   hi_,i,dx : int;
+          s  : string;
+          c  : char;
+          pG : PGroup;
+    begin
+      hi_:= 163;
+
+      {$IFDEF BACKUP}
+        btFDPBCK:= New(PFButton,Init(_App,
+                    hi_+1, MaxY-16, Length(cbtFDPBCK) shl 3 + 4,15,
+                    kbNoKey, cmSERVER_BCK, cbtFDPBCK, 1,white,clGRc,red)
+                   );
+        btFDPBCK^.visible:= false;
+        btFDPBCK^.bk0:= black;
+        btFDPBCK^.kbHot:= getaltchar(btFDPBCK^.kbHot);
+        hi_:= btFDPBCK^.x1+1;
+        addStatIndicator(btFDPBCK);
+
+        {$IFDEF OLDI}
+         btOLDIBCK:= New(PFButton,Init(_App,
+                     hi_+1, MaxY-16, Length(cbtOLDIBCK) shl 3 + 4,15,
+                     kbNoKey, cmSERVER_BCK, cbtOLDIBCK, 1,white,clGRc,red)
+                    );
+         btOLDIBCK^.visible:= false;
+         btOLDIBCK^.bk0:= black;
+         btOLDIBCK^.kbHot:= getaltchar(btOLDIBCK^.kbHot);
+         hi_:= btOLDIBCK^.x1+1;
+         addStatIndicator(btOLDIBCK);
+       {$ENDIF}
+      {$ENDIF}
+
+      {$IFDEF OLDI}
+        btOLDI:= New(PTButton,Init(_App,
+                     hi_+1, MaxY-16, Length('PENDING') shl 3 + 4,15,
+                     kbNoKey,cmNil, ' OLDI  ',1, {$IFDEF _X25} clGRe,clGRe {$ELSE} clGR7, clGR7 {$ENDIF},clBUTTON_COLOR,
+                     nil,true, hi_, true)
+                    );
+        btOLDI^.btSize := btSmall;
+        btOLDI^.visible:= true;
+        addStatIndicator(btOLDI);
+      {$ENDIF}
+
+      {$IFDEF SPR}
+       btMES:= New(PTButton,Init(_App,
+                   hi_+4, MaxY-16, Length(cbtMES) shl 3 + 4,15,
+                   kbNoKey, cmPREHLAD_SPR_dor, cbtMES, 1, clGRf,clGRc,clBUTTON_COLOR,
+                   @isSPR,true, hi_, true)
+                  );
+       addStatIndicator(btMES);
+      {$ENDIF}
+    end;

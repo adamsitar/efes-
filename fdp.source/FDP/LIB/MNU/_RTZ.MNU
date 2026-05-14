@@ -1,0 +1,90 @@
+{ -----------------
+   Stav letisk
+  ˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙
+}
+{$I ..\lib\mnu\_RTZ.h}
+
+{$IFDEF RTZ}
+
+ procedure mnuRTZvolby_init(MMenu: PSubmenu); far;
+     var   smnu : TPItems;
+           i,items,nl,ihk: int;
+     begin
+       items:= 0; nl:= 0; ihk:= 0;
+
+       smnu[items]:= NewTLine(mnuSPRACOVANIE,nil);
+       inc(items);
+
+       {$IFDEF RTZ_REPORT}
+        smnu[items]:= Switch2 (' '+hk(ihk)+RTZREP, @hlas_RTZ,nil);
+        inc(items);
+        smnu[items]:= Switch2 (' '+hk(ihk)+RTZVAR, @varovanie_RTZ,nil);
+        inc(items);
+       {$ENDIF}
+
+       {add_newline_(2,nl,items,smnu);
+       smnu[items]:= NewTLine(mnuZOBRAZENIE,nil);
+
+       add_newline_(2,nl,items,smnu);
+       smnu[items]:= NewTLine(mnuTLAC,nil);}
+
+       for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i]);
+     end;
+
+
+ procedure mnuRTZprehlad_init(MMenu: PSubmenu); far;
+     var   smnu    : TPItems;
+           i,items : int;
+     begin
+       items:= 0;
+
+       smnu[items]:= Item (RTZM,      cmPREHLAD_RTZ{_PPL},nil);
+       inc(items);
+       smnu[items]:= Item (RTZM_ARCH, cmPREHLAD_RTZ_ARCH,nil);
+       inc(items);
+
+       {$IFDEF OPL} {$IFDEF PROCESS_RTZ}
+        smnu[items]:= Item (tit_SAMPLE, cmPREHLAD_RTZ_RPL, nil);
+        inc(items);
+       {$ENDIF} {$ENDIF}
+
+       for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i])
+     end;
+
+
+ procedure mnuRTZ_init(MMenu: PSubmenu); far;
+     var   smnu  : TPItems;
+           sbmnu : PSubMenu;
+           i,items,nl : int;
+     begin
+       items:= 0; nl:= 0;
+
+       {$IFDEF PROCESS_RTZ}
+        {smnu[items]:= SubMenu (mnu_RTZ_PLAN, WinMenu(mnu_RTZ_PLAN,nil,
+                               Item (' HLèSENIE O ~S~TAVE LETISKA  F8 ',  cmRTZ,
+                               Item (' ~A~KTUALIZèCIA HLèSENIA        ',  cmRTZakt,
+                               Item (' ~Z~RUõENIE HLèSENIA            ',  cmRTZzru,
+                               nil) ) )
+                              ), nil);
+        inc(items);}
+       {$ENDIF}
+
+       add_newline_(2,nl,items,smnu);
+       smnu[items]:= Item (RTZM,      cmPREHLAD_RTZ{_PPL},nil);
+       inc(items);
+       smnu[items]:= Item (RTZM_ARCH, cmPREHLAD_RTZ_ARCH,nil);
+       inc(items);
+
+       if not mnu_data_opt_common then
+          begin
+            add_newline_(2,nl,items,smnu);
+            sbmnu:= SubMenu(cut_r(mnu_OPTi)+'... ', OptMenu_S(tit_OPTi, hlp_mnu_RTZ_NASTAV,cmNASTAV_SPRACOVANIE,15,nil),nil);
+            sbmnu^.PMenu_init:= @mnuRTZvolby_init;
+            smnu[items]:= SubMenuInitialized(sbmnu,nil);
+            inc(items);
+          end;
+
+       for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i])
+     end;
+
+{$ENDIF}

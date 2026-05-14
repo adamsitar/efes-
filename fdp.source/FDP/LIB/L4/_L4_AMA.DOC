@@ -1,0 +1,32 @@
+{ תתתתתתתתתתתתתתתתתת
+   CPL
+  תתתתתתתתתתתתתתתתתת
+
+  (CPLPR/MI001
+   -JAC1
+   -IS
+   -EA32/M
+   -EDDF
+   -EDDF/1100F000
+   -LZIB
+   -EDDF/F000/1100 BAY/F200/1119 OKG/F200/1124 BALTU/F200/1129 RAK/F200/1131 OKL/F200/1134 VLM/F200/1140 BODAL/F200/1145
+   -0
+   -NIL)
+
+}
+
+{ תתתתתתתתתתתתתתתתתת
+   EST
+  תתתתתתתתתתתתתתתתתת
+
+  (ESTPR/MI126
+   -FIN7176/A3371
+   -IX
+   -DC9/M
+   -LKPR
+   -LKPR/0845F000
+   -LKTB
+   -LKPR/F000/0844 OKL/F035/0845 RATIS/F109/0849 VOZ/F190/0855 BODAL/F132/0900 LKTB/F000/0908
+   -0-NIL
+  )
+}

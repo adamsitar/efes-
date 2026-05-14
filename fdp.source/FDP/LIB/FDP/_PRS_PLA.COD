@@ -1,0 +1,348 @@
+{ Kodovanie vysky predpoklada kodovanie podla pravidiel L4444,
+  pripusta vsak vynimky dane FUA : UNL,VFR,GND.
+
+  VFR musi byt konfigurovana rovnako v celom systeme. !!!
+
+  Priklad : (PRS                      ; pole  3
+             -LZR300                  ; uplny kod priestoru
+             -GND UNL                 ; spodna a vrchna pouzita letova hladina
+             -9810230450 9810231500   ; datum zaciatku a ukoncenia
+             -LZXYWAER                ; uzivatel zodpovedny za priestor - zatial VU alebo neskor kod AFTN
+             -RMK                     ; pole 18 - poznamky, pole moze obsahovat oddelovace "-"
+             -TYP/L                   ; pole 19 - doplnkove informacie : typ priestoru
+              SRC/500                 ; pole 19 - doplnkove informacie : pracovisko podania planu
+              DATE/datum podania planu
+              FDP/stav spracovania planu
+            )
+}
+
+ function code_PRS_data(PRS: PPRS): string;
+    var   s : string;
+    begin
+      with PRS^ do
+        s:=              format_s(kod)
+            + icao_ARR + format_s(vys1)     + icao_NXIT + format_s(vys2)
+            + icao_ARR + code_l4_datum(zac) + icao_NXIT + code_l4_datum(kon)
+            + icao_ARR + l4_format_s(unt);
+      code_PRS_data:= s
+    end;
+
+ function decode_PRS_data(s: string; PRS: PPRS; var res: string; check: bool): string;
+    var   t : string;
+    begin
+      with PRS^ do
+        begin
+          kod:= getstr(s,1,[icao_ARR]);
+
+          t:= getstr(s,2,[icao_ARR]);
+          vys1:= getstr(t,1,[icao_NXIT]);
+          vys2:= getstr(t,2,[icao_NXIT]);
+
+          t:= getstr(s,3,[icao_ARR]);
+          decode_l4_datum(getstr(t,1,[icao_NXIT]),zac);
+          decode_l4_datum(getstr(t,2,[icao_NXIT]),kon);
+
+          unt:= decode_l4_s(getstr(s,4,[icao_ARR]),true);
+        end;
+      decode_PRS_data:= ''
+    end;
+
+
+ function code_PRS_19b(PRS: PPRS): string;
+    var   s: string;
+    begin
+      with PRS^ do
+        begin
+          s:= '';
+          {IFDEF FUA}
+           { doplnenie schvaleneho zaciatku a ukoncenia }
+            if ((not eq_datum (zac,zacp)) or (not eq_datum (kon,konp))) and (not eq_datum (zacp,konp)) then
+               s:= s + icao_NXIT + rmk_TIME + icao_NXT  + code_l4_datum(zacp)
+                                            + icao_NXIT + code_l4_datum(konp);
+
+           { doplnenie schvaleneho vyskoveho rozsahu }
+            if ((vys1<>vys1p) or (vys2<>vys2p)) and ((cut_(vys1p)<>'') or (cut_(vys2p)<>'')) then
+               s:= s + icao_NXIT + rmk_ALT  + icao_NXT  + format_s(vys1p)
+                                            + icao_NXIT + format_s(vys2p);
+
+           { hodnoty aup }
+            s:= s + icao_NXIT + hd_AUP + icao_NXT  + code_l4_datum(zac_aup)
+                                       + icao_NXIT + code_l4_datum(kon_aup)
+                                       + icao_NXIT + format_s(vys1_aup)
+                                       + icao_NXIT + format_s(vys2_aup);
+          {ENDIF}
+        end;
+      code_PRS_19b:= s
+    end;
+
+ function code_PRS_19(PRS: PPRS; archive: bool): string;
+    var   s: string;
+    begin
+      with PRS^ do
+        begin
+          s:= rmk_SRC  + icao_NXT + l4_format_s(let);
+          if archive then
+             begin
+               s:= s + icao_NXIT + rmk_TYP  + icao_NXT  + l4_format_s(typ)
+                     + icao_NXIT + rmk_DATE + icao_NXT  + code_l4_datums(dap)
+                                            + icao_NXIT + code_l4_date(das)
+                     + icao_NXIT + rmk_FDP  + icao_NXT  + format_s(PRS^.stat)
+                     + code_PRS_19b(PRS)
+             end
+        end;
+      code_PRS_19:= s
+    end;
+
+
+ function decode_PRS_19b(_19: string; PRS: PPRS): string;
+    var   s: string;
+    begin
+      _19:= _19+NULL; { nebude > 254 }
+
+     {IFDEF FUA}
+      s:= _item_18_(@_19[1],rmk_TIME,1);
+      with PRS^ do if s<>'' then
+         begin
+           decode_l4_datum (getstr(s,1,[ICAO_NXIT]),zacp);
+           decode_l4_datum (getstr(s,2,[ICAO_NXIT]),konp)
+         end
+      else begin
+             zacp:= zac; konp:= kon
+           end;
+
+      s:= _item_18_(@_19[1],rmk_ALT,1);
+      with PRS^ do if s<>'' then
+         begin
+           vys1p:= getstr(s,1,[icao_NXIT]);
+           vys2p:= getstr(s,2,[icao_NXIT]);
+         end
+      else begin
+             vys1p:= vys1; vys2p:= vys2
+           end;
+
+      s:= _item_18_(@_19[1],hd_AUP,1);
+      with PRS^ do if s<>'' then
+        begin
+          decode_l4_datum (getstr(s,1,[ICAO_NXIT]),zac_aup);
+          decode_l4_datum (getstr(s,2,[ICAO_NXIT]),kon_aup);
+          vys1_aup:= getstr(s,3,[icao_NXIT]);
+          vys2_aup:= getstr(s,4,[icao_NXIT]);
+        end;
+     {ENDIF}
+
+      decode_PRS_19b:= ''
+    end;
+
+ function decode_PRS_19(_19: string; PRS: PPRS): string;
+    var   s: string;
+    begin
+      _19:= _19+NULL; { nebude > 254 }
+
+      PRS^.typ:=  getchar(decode_l4_s(_item_18_(@_19[1],rmk_TYP,1),true));
+
+      PRS^.let:=  decode_l4_s(_item_18_(@_19[1],rmk_SRC,1),true);
+
+      s:= _item_18_(@_19[1],rmk_DATE,1);
+      decode_l4_datums (getstr(s,1,[ICAO_NXIT]),PRS^.dap);
+      decode_l4_date   (getstr(s,2,[ICAO_NXIT]),PRS^.das);
+
+      PRS^.stat:= _item_18_(@_19[1],rmk_FDP,1);
+
+      decode_PRS_19b(_19,PRS);
+
+      decode_PRS_19:= ''
+    end;
+
+
+ { -----------------------------
+    kodovanie podla vzoru 4444,
+    hlavne funkcie
+   -----------------------------
+ }
+ function code_l4_PRS__ (PRS: PPRS; _hd: bool; _cislo: string; _18,_19: bool): pchar;
+    var   pch,p : pchar;
+          s   : string;
+    begin
+      if _hd then s:= icao_STD + hd_PRS + _cislo + icao_ARR else s:= '';
+      pch:= StrPasNew(s + code_PRS_data(PRS));
+      if _18 then
+         begin
+           pch:= StrNPCopy(pch, icao_ARR, true,true);
+           p:= l4_format_p(PRS^.pozn);
+           pch:= StrNCopy(pch, p,true,false);
+         end;
+      if _19 then pch:= StrNPCopy(pch, icao_ARR + code_PRS_19(PRS,true),true,true);
+      if _hd then pch:= StrNPCopy(pch, icao_END, true,true);
+      code_l4_PRS__:= pch
+    end;
+
+ function code_l4_PRS_ (PRS: PPRS; _cislo: string): pchar;
+    begin
+      code_l4_PRS_:= code_l4_PRS__ (PRS,true,_cislo,true,true)
+    end;
+
+ function  decode_l4_PRS_ (data: pchars; size: TNETdlz; PRS: PPRS): string;
+    var    p : pchar;
+           k : int;
+           res : string;
+    begin
+      decode_l4_PRS_:= '';
+      fillchar(PRS^,sizeof(PRS^),0);
+      frame_l4_pkt(data,size, res);
+
+      p:= get_strs0(data,size, 2,5, [icao_ARR]);
+      decode_PRS_data(strpas(p), PRS, res,false);
+      strdispose(p);
+
+      k:= get_str_items(data,size,[icao_ARR]);
+      p:= get_strs0(data,size, 6,Maximum(6,N(k-1)), [icao_ARR]);
+      PRS^.pozn:= strnew(decode_l4_p({decode_line_ip (p),nil,[])} p,true));
+      strdispose(p);
+
+      decode_PRS_19 (get_str(data,size,k,[icao_ARR],sizeof(string)-1),PRS)
+    end;
+
+
+ { ---------------------
+   kodovanie pre prenos
+   ---------------------
+ }
+ procedure code_PRS(PRS: PPRS; var pkt: TNETpkt);
+     var   pch : pchar;
+     begin
+       pch:= code_l4_PRS_(PRS,'');
+       new_NETpkt_data (pchars(pch),strlen(pch), pkt.pkt);
+       strdispose(pch)
+     end;
+
+ procedure decode_PRS(const pkt: TNETpkt; PRS: PPRS);
+     begin
+       decode_l4_PRS_ (pkt.pkt.data,pkt.pkt.dlz,PRS);
+       format_PRS(PRS);
+       {$IFDEF NET}
+         rec_data(pkt.ods, PRS^.rec)
+       {$ENDIF}
+     end;
+
+
+(* procedure code_PRS_mess_(PRS: PPRS; var pkt: TNETpkt);
+     var   s: string;
+     begin
+       s:=    icao_STD + hd_PRS {decode_code_to_hd(pkt.head.typ)}
+            + icao_ARR + codekey_PRS(PRS)
+            + icao_ARR + strpas(pchar(PRS^.ine))
+            + icao_END;
+       new_NETpkt_data (@s[1],length(s), pkt.pkt)
+     end;
+
+ procedure decode_PRS_mess_(const pkt: TNETpkt; PRS: PPRS);
+     var   s: string;
+           i: int;
+     begin
+       s:= get_str(pkt.pkt.data,pkt.pkt.dlz,1,[icao_STD,icao_END],sizeof(s)-1);
+       i:= pos(icao_ARR,s);  { odfiltrovanie hlavicky }
+       if i>0 then s:= copy(s,i+1,length(s)-i);
+       decodekey_PRS(s,PRS)
+     end;
+*)
+
+ procedure code_PRS_mess(PRS: PPRS; var pkt: TNETpkt);
+     var   s: string;
+     begin
+       s:=    icao_STD + hd_PRS{decode_code_to_hd(pkt.head.typ)}
+            + icao_ARR + codekey_PRS(PRS)
+            + icao_ARR + PRS^.stat
+            + icao_END;
+       new_NETpkt_data (@s[1],length(s), pkt.pkt)
+     end;
+
+ procedure decode_PRS_mess(const pkt: TNETpkt; PRS: PPRS);
+     var   s: string;
+           i: int;
+     begin
+       s:= get_str(pkt.pkt.data,pkt.pkt.dlz,1,[icao_STD,icao_END],sizeof(s)-1);
+       i:= pos(icao_ARR,s);  { odfiltrovanie hlavicky }
+       if i>0 then s:= copy(s,i+1,length(s)-i);
+       decodekey_PRS(s,PRS)
+     end;
+
+
+{$IFDEF DATA_BIN}
+  { I _PRS0.cod}
+  {$I _PRSS.cod}
+  {$I _PRS0RDP.cod}
+{$ENDIF}
+
+
+{ ---------------------
+  kodovanie pre DB
+  ---------------------
+}
+ {$I _PRS_DB.cod}
+
+ procedure codeDB_PRS (PRS: PPRS; buff: PDB_buff; desc: PDB_head);
+     begin
+       if desc^.attr and DBbin <> 0 then _codeDBB_PRS(PRS,buff,desc)
+       {$IFDEF OPL} else if desc^.attr and DBtxt = 0 then _codeDB0_PRS(PRS,buff,desc) {$ENDIF}
+       else _codeDBT_PRS(PRS,buff,desc)
+     end;
+
+ procedure decodeDB_PRS(buff: PDB_buff; PRS: PPRS; desc: PDB_head);
+     begin
+       fillchar(PRS^,sizeof(PRS^),0);
+       if desc^.attr and DBbin <> 0 then _decodeDBB_PRS(buff,PRS,desc)
+       {$IFDEF OPL} else if desc^.attr and DBtxt = 0 then _decodeDB0_PRS(buff,PRS,desc) {$ENDIF}
+       else _decodeDBT_PRS (buff,PRS,desc);
+     end;
+
+
+ { ---------------------
+   kluc
+   ---------------------
+ }
+
+ function codekey_PRS(PRS: PPRS): string;
+    begin
+      if PRS<>nil then with PRS^ do
+        codekey_PRS:=
+                      mtks_rus_to_lat
+                      (
+                                     format_s (kod)
+                       + icao_ARR  + format_s (let)
+                       + icao_ARR  + code_l4_date (das)
+                       {IFDEF PRS_PLAN}
+                        + icao_NXT + code_l4_datums (dap)
+                       {ENDIF}
+                      )
+      else codekey_PRS:= ''
+    end;
+
+ procedure decodekey_PRS(key: string; PRS: PPRS);
+     var   t : string;
+     begin
+       fillchar(PRS^,sizeof(PRS^),0);         { nesmie sa zrusit ! }
+       if PRS<>nil then with PRS^ do
+         begin
+           kod:= getstr(key,1,[icao_ARR]);
+           let:= getstr(key,2,[icao_ARR]);
+           t:= getstr(key,3,[icao_ARR]);
+           decode_l4_date   (getstr(t,1,[icao_NXT]),das);
+           {IFDEF PRS_PLAN}
+            decode_l4_datums (getstr(t,2,[icao_NXT]),dap)
+           {ENDIF}
+           ;
+         end
+     end;
+
+
+ function codekey_PRS_RPL(PRS: PPRS): string; far;
+    begin
+      with PRS^ do
+        codekey_PRS_RPL:=
+                         mtks_rus_to_lat
+                         (
+                            format_s(kod)
+                          + icao_ARR + format_s(let)
+                          {+ icao_ARR + code_l4_datums (dap)}
+                         )
+    end;

@@ -1,0 +1,80 @@
+{$IFDEF PRS}
+
+ function chg_PRS_CA(PRS1,PRS2 : PPRS): bool;
+    begin
+      chg_PRS_CA:= not (     eq_PRS   (PRS1,PRS2)
+
+                        and  (decode_l4_vys_M(PRS1^.vys1)=decode_l4_vys_M(PRS2^.vys1))
+                        and  (decode_l4_vys_M(PRS1^.vys2)=decode_l4_vys_M(PRS2^.vys2))
+
+                        and  eq_datum (PRS1^.zac,  PRS2^.zac)
+                        and  eq_datum (PRS1^.kon,  PRS2^.kon)
+
+                        {and  eq_str   (PRS1^.unt,  PRS2^.unt)}
+                        and  eq_lines (PRS1^.pozn, PRS2^.pozn)
+
+                        and  eq_str   (PRS1^.stat, PRS2^.stat)
+                   )
+    end;
+
+ function  O_CAMUS._is_to_send_message_PRS(zmeneny: bool; PRS: TPRS): bool;
+    var    stav0,stav1 : Tstav;
+           is,is0 : bool;
+           PRS0 : TPRS;
+    begin
+      _is_to_send_message_PRS:= false;
+      if not inherited _is_to_send_message_PRS(zmeneny,PRS) then Exit;
+
+      stav1:= _decode_stav(PRS.stat);
+      is0:= read_PRS(codekey_PRS(@PRS),@PRS0)>-1;
+      if is0 then stav0:= _decode_stav(PRS0.stat);
+
+      is:=      chg_PRS_CA (@PRS,@PRS0)
+           and (    (    is0
+                     and (stav0 in [_aktivovany.._preruseny]) { ### doplnene 30.1 }
+                     and (stav1 in [_aktivovany.._zruseny])
+                    )
+                or  (    {(not is0)}
+                     {and} (stav1 in [_aktivovany,_preruseny])
+                    )
+               );
+      disp_PRS(@PRS0);
+
+      _is_to_send_message_PRS:= is
+    end;
+
+ {$IFDEF DEBUG}
+  { I _L4_vys.inc}   { vyska       }
+ {$ENDIF}
+
+ function O_CAMUS._code_PRS (PRS: TPRS): pchar;
+    var   PRSi,PRSp : TPRS;
+          v    : word;
+          v_   : char;
+          pch  : pchar;
+          s    : string;
+    begin
+      new_PRS(@PRS,@PRSi);
+
+      {$IFDEF CONNECT_TO_OPL_EXT}
+        PRSi.vys1:= code_vysOPL(PRSi.vys1);
+        PRSi.vys2:= code_vysOPL(PRSi.vys2);
+      {$ENDIF}
+
+      (*decode_l4_vyss(PRSi.vys1, v,v_, nil);
+      PRSi.vys1:= code_l4_vyss_ (v,v_,'',true,true,false);
+      decode_l4_vyss(PRSi.vys2, v,v_, nil);
+      PRSi.vys2:= code_l4_vyss_ (v,v_,'',true,true,false);
+      s*)
+
+      { PRSi.unt:= ''; _cairbase(PRSi.unt);} { FDP0326 }
+      pch:= code_l4_PRS__ (@PRSi, false,'',true,false);
+      s:= '';
+      s:= s + icao_ARR + code_l4_stat_(PRS.stat,PRS.oprava);
+      if (cut_(PRS.unt)<>'') then s:= icao_NXIT + rmk_OPR + icao_NXT + PRS.unt;
+      pch:= StrNPCopy(pch, s,true,true);
+      _code_PRS:= pch;
+
+      disp_PRS(@PRSi)
+    end;
+{$ENDIF}

@@ -1,0 +1,99 @@
+{ --------
+   7
+  --------
+}
+
+ function  code_l4_7 (_7a,_7b,_7c: string): string;
+    begin
+      _7a:= copy(_7a,1,kod_7a);
+      if cut_(_7c)<>'' then
+         begin
+           _7b:= cut_(copy(_7b,1,kod_7b));
+           _7a:= _7a+icao_NXT+_7b+code_l4_7c(_7c);
+         end;
+      code_l4_7:= format_s(_7a)
+    end;
+
+ function  code_l4_7c (_7c: string): string;
+    begin
+      if (_7c='') or (_7c=mod_N) then _7c:= '';
+      _7c:= delchar(_7c,setPism_+[NULL]);
+      if (_7c<>'') and (length(_7c)<kod_7c_icao) then _7c:= inschar(_7c,kod_7c_icao,'0',0);
+      code_l4_7c:= _7c
+    end;
+
+ {function code_l4_7b  (ssr: string; ssr_: char; ssr0 : string): string;
+    var   b1,b2,b3 : bool;
+          s : string;
+    begin
+      s:= '';
+      b1:= (ssr_<>' ') and (ssr_<>#0); b2:= cut_(ssr)<>''; b3:= cut_(ssr0)<>'';
+      if b1 or b2 or b3 then
+         begin
+           if b1 then s:= s + ssr_;
+           if b2 then s:= s + ssr;
+           if b3 then s:= s + icao_NXIT + format_s(ssr0)
+         end;
+      code_l4_7b:= s
+    end;}
+
+ {function format_ssr_ssr_(var ssr: string; var ssr_: char): bool;
+     var   s: long; c: int;
+     begin
+       ssr:= delchar(ssr,setPism_);
+       if (ssr<>'') and (length(ssr)<=KOD_7c) then ssr:= InsChar(ssr,KOD_7c,'0',0);
+       val(ssr,s,c);
+       format_ssr_ssr_:= c=0
+     end;
+
+  function format_ssr_(s: string; var ssr: string; var ssr_: char): bool;
+     begin
+       ssr := delchar(s,setPism_);
+       ssr_:= getchar(delchar(s,setCisl_));
+       format_ssr_:= format_ssr_ssr_(ssr, ssr_)
+     end;  format_ssr_
+  }
+
+
+ function decode_l4_7a (_7: string): string;
+    begin
+      decode_l4_7a:= getstr(_7,1,[icao_NXT])
+    end;
+
+ procedure decode_l4_7 (_7: string; var _7a,_7b,_7c: string);
+    begin
+      _7a:= getstr(_7,1,[icao_NXT]);
+      _7c:= getstr(_7,2,[icao_NXT]);
+      if (_7c<>'') and (not (_7c[1] in setDig)) then
+         begin
+           _7b:= _7c[1];
+           _7c:= copy(_7c,kod_7b+1,length(_7c)-kod_7b)
+         end
+      else _7b:='';
+    end;
+
+
+ { A3332 3422
+   3332
+   A 3422
+     3422
+
+ procedure decode_l4_7b (_7: string; var ssr: string; var ssr_: char; var ssr0: string);
+     var   t : string;
+     begin
+       ssr:= ''; ssr_:= ' '; ssr0:= ' ';
+       _7:= getstr(_7,2,[icao_NXT]);
+       t:= getstr(_7,1,[icao_NXIT]);
+       if (_7<>'') and (_7[1]<>icao_NXIT) and (t<>'') then
+          begin
+            if not (t[1] in setDig) then
+               begin
+                 ssr_:= t[1];
+                 t:= copy(t,2,length(t)-1)
+               end;
+            ssr:= t;
+            t:= getstr(_7,2,[icao_NXIT]);
+          end;
+       ssr0:= cut_(t)
+     end;
+ }

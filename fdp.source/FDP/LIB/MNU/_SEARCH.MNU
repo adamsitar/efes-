@@ -1,0 +1,32 @@
+{$I ..\lib\mnu\_search.h}
+
+procedure mnuNAJDI_init(MMenu: PSubmenu); far;
+    var   smnu : TPItems;
+          sbmnu : PSubMenu;
+          i,items,nl : int;
+          s : string;
+    begin
+      items:= 0; nl:= 0;
+
+      s:= _posledne+cut_(cstr(prehlad_arch_fn_cFPL,2))+_hod;
+
+      smnu[items]:= Item(PODLA_SSR, cmSEARCH_SSR, nil);
+      inc(items);
+      smnu[items]:= Item(PODLA_IDN, cmSEARCH_CODE,nil);
+      inc(items);
+      smnu[items]:= NewLine(nil);
+      inc(items);
+
+      smnu[items]:= SubMenu(UKONCENE, WinMenu(UKONCENE_, hlpmnuARCHIV,
+              {Item_(PODLA_SSR0+s, cmSEARCH_SSR_,      @ENABLE_FPLC,true,
+              Item_(UKONC_LETU+s, cmSEARCH_CODE_,     @ENABLE_FPLC,true,
+              NewLine2(0,}
+              Item_(CIVLETY+s,  cmLOAD_ARCHIV_cFPL,  @ENABLE_FPLC,true,
+              Item_(VOJLETY,    cmLOAD_ARCHIV_mFPL,  @ENABLE_FPLM,true,
+              Item_(INELETY,    cmLOAD_ARCHIV_oFPL,  @ENABLE_FPLM,true,
+              nil ) ) ) ),
+             nil);
+      inc(items);
+
+      for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i])
+    end;

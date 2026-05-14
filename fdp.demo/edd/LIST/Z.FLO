@@ -1,0 +1,112 @@
+ ZAC  ZAMBIA            ; ZAMBIA AIRWAYS                                                                                                                                                                              / ZAMBIA
+ ZAI  ZASAIR            ; ZAIRE AERO SERVICE (ZAS)                                                                                                                                                                    / ZAIRE
+ ZAN  ZANTOP            ; ZANTOP INTERNATIONAL AIRLINES, INC. (YPSILANTI, MI)                                                                                                                                         / UNITED STATES
+ ZAR  ZAIREAN           ; ZAIREAN AIRLINES                                                                                                                                                                            / ZAIRE
+ ZAS  ZAS AIRLINES      ; ZAS AIRLINES OF EGYPT                                                                                                                                                                       / EGYPT
+ ZAZ  APPROACH          ; APPROACH CONTROL OFFICE
+ ZAZ  APPROCHE          ; BUREAU DE CONTROLE D'APPROCHE
+ ZAZ  APROXIMACION      ; OFICINA DE CONTROL DE APROXIMACION
+                        ;
+ ZBA  BOSKY             ; Z. BOSKOVIC AIR CHARTERS LIMITED                                                                                                                                                            / KENYA
+ ZBZ  -                 ; BUREAU DES PLANS DE VOL REPETITIFS
+ ZBZ  -                 ; OFICINA DE PLANES DE VUELO REPETITIVOS
+ ZBZ  -                 ; REPETITIVE FLIGHT PLAN OFFICE
+                        ;
+ ZCA                    ; L O C K E D
+ ZCB                    ; L O C K E D
+ ZCC                    ; L O C K E D
+ ZCD                    ; L O C K E D
+ ZCE                    ; L O C K E D
+ ZCF                    ; L O C K E D
+ ZCG                    ; L O C K E D
+ ZCH                    ; L O C K E D
+ ZCI                    ; L O C K E D
+ ZCJ                    ; L O C K E D
+ ZCK                    ; L O C K E D
+ ZCL                    ; L O C K E D
+ ZCM                    ; L O C K E D
+ ZCN                    ; L O C K E D
+ ZCO                    ; L O C K E D
+ ZCP                    ; L O C K E D
+ ZCQ                    ; L O C K E D
+ ZCR                    ; L O C K E D
+ ZCS                    ; L O C K E D
+ ZCT                    ; L O C K E D
+ ZCU                    ; L O C K E D
+ ZCV                    ; L O C K E D
+ ZCW                    ; L O C K E D
+ ZCX                    ; L O C K E D
+ ZCY                    ; L O C K E D
+ ZCZ                    ; L O C K E D
+                        ;
+ ZDZ  -                 ; AIR TRAFFIC FLOW CONTROL UNIT
+ ZDZ  -                 ; DEPENDENCIA REGULADORA DE LA AFLUENCIA DEL  TRANSITO AEREO
+ ZDZ  -                 ; ORGANE DE REGULATION DE LA CIRCULATION AERIENNE
+                        ;
+ ZEZ  -                 ; BASE DE DATOS DE INFORMACION DE VUELO
+ ZEZ  -                 ; BASE DE DONNEES "INFORMATION DE VOL"
+ ZEZ  -                 ; FLIGHT INFORMATION DATA BASE
+                        ;
+ ZFZ  -                 ; CENTRE CHARGE D'UNE REGION D'INFORMATION DE VOL  OU D'UNE REGION SUPERIEURE D'INFORMATION DE VOL  (QU'IL S'AGISSE D'UN ACC OU D'UN FIC)  SI LE MESSAGE SE RAPPORTE A UN VOL VFR(VOIR ZQZ)
+ ZFZ  -                 ; CENTRE IN CHARGE OF A FLIGHT INFORMATION REGION  OR AN UPPER FLIGHT INFORMATION REGION  (WHETHER ACC OR FIC) WHEN THE MESSAGE  IS RELEVANT TO A VFR FLIGHT(SEE ZQZ)
+ ZFZ  -                 ; CENTRO ENCARGADO DE UNA REGION DE INFORMACION DE  VUELO O DE UNA REGION SUPERIOR DE INFORMACION  DE VUELO (YA SEA UN ACC O UN FIC) CUANDO EL  MENSAJE CORRESPONDE A UN VUELO VFR(VEASE ZQZ)
+                        ;
+ ZGZ  -                 ; AIR TRAFFIC CONTROL (IN GENERAL)
+ ZGZ  -                 ; CONTROL DE TRANSITO AEREO (EN GENERAL)
+ ZGZ  -                 ; CONTROLE DE LA CIRCULATION AERIENNE (EN GENERAL)
+                        ;
+ ZHZ  -                 ; CONTROL DE TRANSITO AEREO DE HELICOPTEROS
+ ZHZ  -                 ; CONTROLE DE LA CIRCULATION AERIENNE - HELICOPTERES
+ ZHZ  -                 ; HELICOPTER AIR TRAFFIC CONTROL
+                        ;
+ ZIZ  INFORMATION       ; CENTRE D'INFORMATION DE VOL
+ ZIZ  INFORMACION       ; CENTRO DE INFORMACION DE VUELO
+ ZIZ  INFORMATION       ; FLIGHT INFORMATION CENTRE
+                        ;
+ ZKC  -                 ; EUROCONTROL CFMU CENTRAL EXECUTIVE UNIT
+ ZKD  -                 ; EUROCONTROL CFMU DATABASE OPERATORS
+ ZKT  -                 ; EUROCONTROL CFMU TECHNICAL MONITORING TEAM
+                        ;
+ ZMF  -                 ; EUROCONTROL CFMU IFPU SYSTEM
+ ZMS  -                 ; EUROCONTROL CFMU STR SYSTEM
+ ZMT  -                 ; EUROCONTROL CFMU TAC SYSTEM
+                        ;
+ ZNN                    ; L O C K E D
+                        ;
+ ZOZ  OCEANA            ; OCEANIC AIR TRAFFIC CONTROL
+ ZOZ  OCEANA            ; CONTROL DE TRANSITO AEREO OCEANICO
+ ZOZ  OCEANA            ; CONTROLE DE LA CIRCULATION AERIENNE OCEANIQUE
+                        ;
+ ZPZ  -                 ; AIR TRAFFIC SERVICES REPORTING OFFICE
+ ZPZ  -                 ; BUREAU DE PISTE DES SERVICES DE LA  CIRCULATION AERIENNE
+ ZPZ  -                 ; OFICINA DE NOTIFICACION DE LOS SERVICIOS DE  TRANSITO AEREO
+                        ;
+ ZQZ  -                 ; CENTRE CHARGE D'UNE REGION D'INFORMATION DE VOL  OU D'UNE REGION SUPERIEURE D'INFORMATION DE VOL  (QU'IL S'AGISSE D'UN ACC OU D'UN FIC)  SI LE MESSAGE SE RAPPORTE A UN VOL IFR(VOIR ZFZ)
+ ZQZ  -                 ; CENTRE IN CHARGE OF FLIGHT INFORMATION REGION  OR AN UPPER FLIGHT INFORMATION REGION  (WHETHER ACC OR FIC) WHEN THE MESSAGE  IS RELEVANT TO AN IFR FLIGHT(SEE ZFZ)
+ ZQZ  -                 ; CENTRO ENCARGADO DE UNA REGION DE INFORMACION DE  VUELO O DE UNA REGION SUPERIOR DE INFORMACION  DE VUELO (YA SEA UN ACC O UN FIC) CUANDO EL  MENSAJE CORRESPONDE A UN VUELO IFR(VEASE ZFZ)
+                        ;
+ ZRZ  CONTROL           ; AREA CONTROL CENTRE
+ ZRZ  CONTROLE          ; CENTRE DE CONTROLE REGIONAL
+ ZRZ  CONTROL           ; CENTRO DE CONTROL DE AREA
+                        ;
+ ZSZ  -                 ; CENTRE SARSAT
+ ZSZ  -                 ; CENTRO SARSAT
+ ZSZ  -                 ; SARSAT CENTRE
+                        ;
+ ZTZ  TOWER             ; AERODROME CONTROL TOWER
+ ZTZ  TORRE/TOWER/TOUR  ; TORRE DE CONTROL DE AERODROMO
+ ZTZ  TOUR/TOWER/TORRE  ; TOUR DE CONTROLE D'AERODROME
+                        ;
+ ZUZ  -                 ; CENTRE DE CONTROLE REGIONAL SUPERIEUR
+ ZUZ  -                 ; CENTRO DE CONTROL DE AREA SUPERIOR
+ ZUZ  -                 ; UPPER AREA CONTROL CENTRE
+                        ;
+ ZYZ  -                 ; AERODROME SECURITY SERVICES
+ ZYZ  -                 ; SERVICES DE SURETE D'AERODROME
+ ZYZ  -                 ; SERVICIOS DE SEGURIDAD DE LOS AERODROMOS
+                        ;
+ ZZC                    ; L O C K E D
+ ZZM  -                 ; AGENCE NATIONALE DES AERODROMES ET  DE LA METEOROLOGIE (ANAM) COTE D'IVOIRE
+ ZZZ  -                 ; AERONAVE EN VUELO
+ ZZZ  -                 ; AERONEF EN VOL
+ ZZZ  -                 ; AIRCRAFT IN FLIGHT

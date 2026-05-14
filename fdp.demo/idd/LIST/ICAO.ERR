@@ -1,0 +1,296 @@
+; --------
+;  ICAO
+; --------
+
+ICAO-1    ; Spracovanie totho typu spr†vy nie je dovolenÇ
+ICAO-2    ; Pole nie je zap°sanÇ v s£lade s ICAO alebo inòmi pravidlami
+
+L4444-1   ; Chòba oznaáenie zaáiatku spr†vy "("
+L4444-2   ; Chòba oznaáenie konca spr†vy ")"
+L4444-50  ; Spracovanie tohto typu spr†vy nie je dovolenÇ
+l4444-51  ; Pole nie je zap°sanÇ v s£lade s ICAO alebo inòmi pravidlami
+L4444-52  ; V spr†ve sa nenach†dza deklarovanò poáet poloëiek
+
+L4444-100 ; Chyba v z†pise á°sla
+L4444-101 ; Nespr†vne zadanò áas
+L4444-102 ; Nespr†vne zadanò d†tum platnosti
+L4444-103 ; Neaktu†lny d†tum platnosti
+L4444-104 ; D†tum platnosti pl†nu uë bol zadanò
+
+L4444-200 ; Nespr†vny z†pis hodnoty vò®ky
+
+L4444-320 ; Äas ukonáenia nemìëe predch†dzaü áasu zaáiatku
+L4444-321 ; Prekroáenie povolenÇho áasu ukonáenia
+
+
+; --------
+;  TLG
+; --------
+
+TLG-1  ; Nie je uveden† priorita spr†vy
+TLG-2  ; T†to priorita nie je dovolen† pre t£to spr†vu
+
+TLG-3  ; Nie je uvedenò adres†t spr†vy
+TLG-4  ; Nespr†vna dçëka spr†vy [6..8]
+TLG-5  ; Priveåa adries  (9adries so 6-mi znakmi / adries so 6-mi znakmi)
+
+TLG-6  ; Nespr†vne zadan† alebo nezn†ma adresa
+
+TLG-9  ; Nevyplnen† spr†va nebude odoslan†
+TLG-10 ; Pr†zdne pole
+TLG-11 ; Chòbaj£ca alebo nespr†vna hodnota d†tumu ("DATE/...")
+TLG-12 ; Chòbaj£ca alebo nespr†vna hodnota áasu ("UTC/...")
+
+
+; --------
+;  FPL4
+; --------
+
+5a    ; 5a - Uncorrect describtion of emergency phase
+
+7a-1  ; 7a - Missing aircraft identification
+7a-2  ; 7a - Uncorrect length
+7b-1  ; 7b - SSR code is expected
+
+8a-1  ; Missing array "8"
+8a-2  ; 8 - Uncorrect array length
+8a-3  ; 8a - Unknown flight rules
+8a-11 ; 8a - Typ pl†nu (VFR) nezodpoved† profilu trate letu
+8b-12 ; 8a - Let je pl†novanò ako "VFR". Profil trate nezodpoved† typu letu.
+8b-1  ; 8b - Unknown type of flight
+
+9a    ; 9 - Error in number of aircraft
+9b    ; 9b - Unknown code of aircraft
+9b-1  ; 9b - Missing code of aircraft
+9c-1  ; 9c - Unkwnown value of wake turbulence cat
+9c-2  ; 9c - Other value of wake turbulence cat
+
+10a-1 ; 10a - Unknown equipment COM,NAV
+10a-2 ; 10a - Equipment "N" means no equipment on board
+10a-3 ; 10a - Unalowed equipment code or codes combination
+10b-1 ; 10b - Missing describtion of equipment SSR
+10b-2 ; 10b - Uncorrect length of equipment SSR array
+10b-3 ; 10b - Uncorrect equipment SSR
+
+13a   ; 13  - Array is not written according to ICAO rules
+13a-1 ; 13a - Departure aerodrome is not written according to ICAO rules
+13a-2 ; 13a - Invalid or missing value/format of estimated departure time
+13a-3 ; 13a - Missing departure aerodrome code
+13b-1 ; 13b - Invalid or missing value/format of real departure time
+
+14a   ; 14a - Unknown input/crossing point
+14b   ; 14b - Invalid or missing value of estimated time
+14c   ; 14c - Invalid or missing value of flight level
+14d   ; 14d - Invalid or missing value of first flight level
+14e   ; 14e - "A"scending or "B"ellow enabled
+
+15a   ; 15a - Invalid or missing value/format of cruising speed (i.e. K0900,N400,M0910)
+15a-1 ; 15a - Speed is to low
+15a-2 ; 15a - Speed is to high
+
+15b   ; 15b - Invalid or missing  value/format of flight level (i.e. F340,S1120,A045,M0900)
+15b-1 ; 15b - Altitude is to low
+15b-2 ; 15b - Altitude is to high
+
+15c-2 ; 15c - Point expected (i.e. C/POINT/K0650F340F360)
+15c-3 ; 15c - Speed expected (i.e. C/POINT/K0650F340F360)
+15c-4 ; 15c - Flight level value expected (i.e. C/POINT/K0650F340F360)
+15c-7 ; 15c - Expected cruise climb (K0760S0965)
+15c-8 ; 15c - Invalid or missing value/format of speed (i.e. K0900,N400,M0910)
+15c-9 ; 15c - Invalid or missing value/format of flight level (i.e. F340,S1120,A045,M0900)
+
+15c-10; 15c - Unknown code of point or route                             ; pri dekodovani neznamy bod medzi znamymi
+15c-11; 15c - Unable to decode known points or routes
+15c-12; 15c - There are no points on the route
+15c-15; 15c - Stopover is not enabled
+
+15c-25; 15c - There is not specified intersection points of routes
+15c-26; 15c - There more possible intersection points of routes
+15c-27; 15c - There is not intersection points of routes
+15c-28; 15c - The point not belong to the route, their distance is to large
+15c-29; 15c - The point not belong  of the route
+15c-30; 15c - Point does'nt belong on the route
+15c-31; 15c - Points does'nt belong to the same route, "DCT" is expected
+15c-32; 15c - Points are to be separated by "DCT"
+
+15c-36; 15c - Departure aerodrome is to far from first point of the route
+15c-37; 15c - Destination aerodrome is to far from route
+15c-38; 15c - Cannot determine input point on route
+15c-39; 15c - Cannot determine output point on route
+15c-40; 15c - Decoded route does'nt begin on aerodrome in or input into controlled area
+15c-41; 15c - Decoded route does'nt end on aerodrome in or output from controlled area
+15c-42; 15c - Internal flight with unknown points on the route
+15c-50; 15c - Cannot determine input or output point of the route
+
+16a   ; 16 - Array is not written according to ICAO rules
+16a-1 ; 16a - Destination aerodrome is not written according to ICAO rules
+16a-2 ; 16a - Invalid or missing value/format  of flight time
+16a-3 ; 13a - Missing arrival aerodrome code
+16b-1 ; 16b - Backup aerodromes are not written according to ICAO rules
+
+18    ; 18 - Other information
+18-1  ; 18 - Another keyword
+18-2  ; 18 - Expected
+18-3  ; 18 - is expected by 18 ("ZZZZ" is used)
+18-4  ;
+
+18-10 ; 18 - Departure aerodrome is not in FIR, there is expected EET/
+18-11 ; 18 - Invalid or missing format/time value of EET
+
+18-20 ; 18 - Invalid or missing date of flight
+18-21 ; 18 - Not actual date of flight
+
+18-50 ; Date of flight requested in format rrmmdd, i.e. 970531
+18-51 ; Last date of flight is before first one
+18-52 ; There is no flight planned during the week
+
+19-1  ; Empty array 19 ("SUPLEMENTARY INFORMATION")
+20-1  ; Empty array 20 ("ALERTING SEARCH AND RESCUE INFORMATION")
+21-1  ; Empty array 21 ("RADIO FAILURE INFORMATION")
+
+22-1  ; Error in array 22
+
+
+; --------
+;  SSR
+; --------
+
+SSR-1  ; Invalid number of digits or format in ssr code/board number
+SSR-2  ; ssr code allows the octal digits (0-7)
+SSR-3  ; Board number have to contain only digits
+
+SSR-10 ; This ssr code/board number is already used
+
+
+; --------
+; FUA
+; --------
+
+FUA-0  ; Neuvedenò k¢d priestoru
+FUA-1  ; Nespr†vne alebo neuvedenÇ vò®kovÇ ohraniáenie priestoru
+FUA-2  ; Priestor sa prideåuje od 06˙00 UTC d§a áinnosti maxim†lne na 24 hod°n
+FUA-3  ; Pl†n tohto priestoru na danò de§ by sa mal podaü do 12˙00 UTC d§a predch†dzaj£ceho
+FUA-4  ; Zmeny v tomto pl†ne priestoru je dovolenÇ vykonaü len do 07˙00 UTC d§a áinnosti
+FUA-5  ; Opravujete pl†n po limite pre jeho schv†lenie (12˙00 "D"-1)
+FUA-6  ; Pod†vate pl†n po limite pre jeho schv†lenie (07˙00 "D")
+FUA-7  ; Naozaj je áinnosü v priestore pl†novan† po polnoci?
+
+FUA-8  ; Pl†n tohto priestoru je moënÇ podaü/opraviü len dohodnutò term°n vopred
+
+FUA-20 ; Spodn† letov† hladina nesmie byü zmenen† pod schv†len£ hladinu
+FUA-21 ; Horn† letov† hladina nesmie byü zmenen† nad schv†len£ hladinu
+FUA-22 ; Povolenò áas zaáiatku vyuë°vania priestoru e®te nenastal
+FUA-23 ; Äas ukonáenia nemìëe predch†dzaü áasu zaáiatku
+FUA-24 ; Prekroáenò povolenò áas ukonáenia vyuë°vania priestoru
+
+FUA-30 ; Pl†n vyuëitia vzdu®nÇho priestoru nebol schv†lenò
+
+FUA-40 ; Neuvedenò alebo nespr†vny typ spr†vy
+FUA-41 ; Neuveden† alebo nespr†vna adresa odosielateåa
+FUA-42 ; NeuvedenÇ alebo nespr†vne adresy pr°jemcov spr†vy
+FUA-45 ; Nespr†vne uveden† alebo neaktu†lna platnosü spr†vy (pr. 9603200600 9603210600)
+
+
+; --------
+;  FDP
+; --------
+
+FDP-50  ; Prijat† spr†va od stanice, ktor† nem† opr†vnenie pre opravu d†t.
+
+FDP-100 ; Nen†jdenò pl†n letu.
+FDP-101 ; Pl†n tohoto typu nen° spracov†van.
+
+; --------
+; OPL
+; --------
+
+OPL-0  ; Nespr†vne uvedenò áas
+OPL-1  ; Nespr†vne uvedenÇ pravidl† letu
+OPL-2  ; Nepr°pustn† vò®ka letu
+OPL-3  ; Prev†dzkovateå nie je v á°seln°ku
+OPL-4  ; óloha nie je v á°seln°ku
+OPL-5  ; Chòbajóce £lohy
+OPL-6  ; NeuvedenÇ typy
+
+
+; --------
+; FPL-M
+; --------
+
+OPL-7  ; Chòbaj£ca alebo ne£pln† identifik†cia letu
+OPL-8  ; Identifik†cia letu m† zaá°naü k¢dom letiska
+OPL-9  ; Identifik†cia letu nezodpoved† typu letu
+
+OPL-10 ; Neuvedenò typ
+OPL-11 ; Typ nie je v á°seln°ku
+OPL-12 ; Typ a identifik†cia nezodpovedaj£
+OPL-13 ; Neuveden† alebo nespr†vne zap°san† ròchlosü
+OPL-14 ; Ròchlosü nezodpoved† typu
+OPL-15 ; Neuveden† alebo nespr†vne uveden† vò®ka letu
+OPL-16 ; Nepovolen† vò®ka letu
+OPL-17 ; Nespr†vne uveden† vò®ka (hladina) letu
+OPL-18 ; Neuveden† alebo nespr†vne uvedenò áas
+OPL-19 ; Typ letu a letisko ®tartu nezodpovedaj£
+
+OPL-20 ; NeuvedenÇ letisko
+OPL-21 ; Nem†te opr†vnenie pl†novaü let medzi tòmito letiskami
+OPL-22 ; Nezn†me letisko
+OPL-23 ; Nem†te opr†vnenie pl†novaü pre toto letisko
+OPL-24 ; Identifik†cia letu a letisko ®tartu by mali zodpovedaü
+OPL-26 ; Neuveden† traü letu
+OPL-29 ; Zadanò áas prist†tia je skor®°, ako vypoá°tanò
+
+
+; --------
+; FPL-M
+; --------
+
+OPL-50 ; Dva typy povolenÇ len pre vojenskò pl†n
+OPL-51 ; Nespr†vny popis ssr
+OPL-52 ; Nespr†vny k¢d ssr
+
+OPL-55 ; Nie je uvedenò bod medziprist†tia
+OPL-56 ; Chòba áas medziprist†tia alebo áas ®tartu po medziprist†ti
+OPL-57 ; Nepovolenò identifik†tor pri z†pise trate
+
+OPL-60 ; Nezn†me letisko ®tartu alebo chòba áas na prvom bode
+OPL-61 ; Chòba áas na bode
+OPL-62 ; Nezn†my bod ®tartu
+OPL-63 ; Nezn†my bod prist†tia
+OPL-65 ; Nezn†my bod na trati
+OPL-66 ; Nezn†my k¢d áinnosti na OB
+OPL-69 ; S£radnice mimo rozsah
+
+OPL-70 ; Chòbaj£ce alebo nepovolenÇ letisko
+
+OPL-80 ; Chyba v z†pise rozsahu vò®ok
+
+OPL-99 ; Neuvedenò alebo nespr†vny typ letu
+
+
+OPL-100 ; Chyba v z†pise á°sla
+OPL-101 ; Nespr†vne zadanò áas
+OPL-102 ; Nespr†vne zadanò d†tum platnosti
+OPL-103 ; Neaktu†lny d†tum platnosti
+OPL-104 ; D†tum platnosti pl†nu uë bol zadanò
+
+OPL-120 ; Z†pis hodnoty vò®ky nie je v s£lade s platnòmi pravidlami
+
+
+; --------
+; DVZ
+; --------
+
+OPL-300 ; NepovolenÇ diverznÇ letisko
+
+
+; --------
+; RTE
+; --------
+
+RTE-30  ; Nezn†my bod, nie je moënÇ prepoá°taü áasovò profil trate
+RTE-31  ; Neuvedenò áas na prvom/vstupnom bode trate
+RTE-32  ; Neuvedenò áas na nezn†mom bode trate
+RTE-33  ; Vzhåadom ku uráenÇmu áasu na poslednom bode trate pl†n nie je aktu†lny
+
+

@@ -1,0 +1,22 @@
+{
+  OPL:
+
+  (CPLPL/MI737                        ; asi nechodi
+   -DEDTR
+   -EDLP
+   -N0150F110 OKG/F110/T0540 RAK/T0601 OKL/T0609 VOZ/T0627 BODAL/T0642 TBV/T0658
+   -LKMT
+  )
+
+  (ESTPL/MI082
+   -ECA879/4557
+   -IS
+   -A320
+   -ESMX1455
+   -ZAB/1618F370
+   -K0840F370
+   -LCLK0354                          ;  ----> navyse do 22
+   -ZAB/F370/T1618 ZABJE/T1623
+   )
+
+}

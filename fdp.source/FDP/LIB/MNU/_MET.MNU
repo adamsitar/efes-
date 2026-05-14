@@ -1,0 +1,26 @@
+{$IFDEF MET}
+
+ { ------------------
+    MET
+   תתתתתתתתתתתתתתתתתת
+ }
+
+ {$I ..\lib\mnu\_MET.h}
+
+
+ procedure mnuMETvolby_init(MMenu: PSubmenu); far;
+     var   smnu : TPItems;
+           i,items,nl,ihk: int;
+     begin
+       items:= 0; nl:= 0; ihk:= 0;
+
+       smnu[items]:= NewTLine(mnuZOBRAZENIE,nil);
+       inc(items);
+
+       smnu[items]:= Switch2(' '+hk(ihk)+PISSYN, @pis_SYN_,nil);
+       inc(items);
+
+       for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i]);
+     end;
+
+{$ENDIF}

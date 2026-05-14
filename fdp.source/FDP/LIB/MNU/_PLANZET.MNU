@@ -1,0 +1,44 @@
+{$IFDEF MAPY}
+
+ {$I ..\lib\mnu\_planzet.h}
+
+ procedure mnuPLANZET_init(MMenu: PSubmenu); far;
+     var   smnu : TPItems;
+           sbmnu : PSubMenu;
+           i,items,nl : int;
+     begin
+       items:= 0; nl:= 0;
+
+       MAPYmenu_init(MAPY_M);
+       smnu[items]:= SubMenuInitialized(MAPYmenu,nil);
+       inc(items);
+
+       smnu[items]:= SubMenu(ROZSAH_V, WinMenu(MAPY_M_,hlpmnuMMI_MAPS_RANGE,
+                             Item(ROZSAH,   cmMAPA_ROZSAH,
+                             Item(PRIESTOR, cmMAPA_PRIESTOR,
+                             Item(VYSTRED,  cmMAPA_STRED,
+                             Item(CENTRUJ,  cmMAPA_CENTRUJ,
+                             nil) ) ) )
+                            ),nil);
+       inc(items);
+       smnu[items]:= SubMenu(KRESLENIE,
+                     OptMenu(KRESLENIE_,hlpmnuMMI_MAPS_DRAW, cmMAPA_init,
+                             Switch2(KRES_C, @draw_cFPL_en,
+                             Switch2(KRES_M, @draw_mFPL_en,
+                             {$IFDEF FPLO}
+                              Switch2(KRES_O, @draw_oFPL_en,
+                             {$ENDIF}
+                             NewLine2(0,
+                             Switch2(KRES_SSR, @draw_SSR,
+                             NewLine2(0,
+                             Switch2(KRES_TB,  @mark_typ,
+                             Switch2(KRES_PB,  @mark_txt,
+                             Switch2(KRES_8x8, @mark_8x8,
+                             nil) ) ) ) ) ) ) ) {$IFDEF FPLO} ) {$ENDIF}
+                            ),nil);
+       inc(items);
+
+       for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i])
+     end;
+
+{$ENDIF}

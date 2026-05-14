@@ -1,0 +1,15 @@
+{
+ (CLRPL/MI53           ; sprava o vyziadani pripomienky -> zmeni stav na cnst_prop...
+  -55201
+  -LKLN
+  -LKLN
+ )
+
+
+ (ABIPL/MI032
+  -6502/2461
+  -LKKV
+  -LKKV/F0600835       ; vyska + cas na vstupnom bode trate
+  -LKKB
+ )
+}

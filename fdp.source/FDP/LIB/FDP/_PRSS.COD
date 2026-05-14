@@ -1,0 +1,96 @@
+{ ---------------------
+  kodovanie
+  ---------------------
+}
+function code0_PRS_(PRS: PPRS): string;
+   var   s : string;
+   begin
+     with PRS^ do
+       begin
+         s:=   ZAC_SPR + ' '
+
+             + ODD_SPR + format_s(let)
+             + ODD_SPR + format_s(kod)
+
+             + ODD_SPR + TimeToStr(zac.h,zac.m,'')+' '+TimeToStr(kon.h,kon.m,'')
+             + ODD_SPR + format_s(vys1)
+             + icao_ARR + format_s(vys2)
+
+             + ODD_SPR + DateToStr(zac.den,zac.mes,zac.rok,0,'')
+             + ODD_SPR + format_s(code0_stat(stat))
+             + ODD_SPR + DateToStr(kon.den,kon.mes,kon.rok,0,'') { toto su nove polozky }
+
+             + ODD_SPR + format_s(copy(strpas(pozn),1,40))        { docasne riesenie, tak natvrdo }
+
+             + ODD_SPR + TimeToStr2(dap.h,dap.m,dap.s,'','')
+             + KON_SPR
+       end;
+     code0_PRS_:= s
+   end;
+
+procedure decode0_PRS_(s: string; PRS: PPRS);
+   var    t : string;
+          b : byte;
+   begin
+     fillchar(PRS^,sizeof(PRS^),0);
+     with PRS^ do
+       begin
+         let := GetStr(s,2,setLET_1_1);
+         kod := GetStr(s,3,setLET_1_1);
+
+         t   := GetStr(s,4,setLET_1_1);
+         GetTimeStr(zac.h,zac.m,b, Copy(t,1,4));
+         GetTimeStr(kon.h,kon.m,b, Copy(t,6,4));
+
+         t   := GetStr(s,5,setLET_1_1);
+         vys1:= GetStr(t,1,[icao_ARR]);
+         vys2:= GetStr(t,2,[icao_ARR]);
+
+         GetDateStr(zac.rok,zac.mes,zac.den, GetStr(s,6,setLET_1_1), false);
+         stat:= decode0_stat(GetStr(s,7,setLET_1_1));
+         GetDateStr(kon.rok,kon.mes,kon.den, GetStr(s,8,setLET_1_1), false);
+
+         pozn := strpasnew(getstr(s,9,setLET_1_1));
+
+         dap:= zac;
+         GetTimeStr(dap.h,dap.m,dap.s, GetStr(s,10,setLET_1_1));
+       end
+   end;
+
+
+{ ---------------------
+  kodovanie pre prenos
+  ---------------------
+}
+procedure code0_PRS(PRS: PPRS; var pkt: TNETpkt); far;
+    var   s : string;
+    begin
+      s:= code0_PRS_(PRS);
+      new_NETpkt_data (@s[1],length(s), pkt.pkt)
+    end;
+
+procedure decode0_PRS(const pkt: TNETpkt; PRS: PPRS);
+   begin
+     decode0_PRS_(init_str(@pkt.pkt.data^[0],pkt.pkt.dlz), PRS);
+     {$IFDEF NET}
+       rec_data(pkt.ods, PRS^.rec);
+     {$ENDIF}
+     format_PRS (PRS)
+   end;
+
+
+{ ---------------------
+  kluc
+  ---------------------
+}
+procedure decode0key_PRS(s: string; PRS: PPRS);
+    begin
+      with PRS^ do
+        begin
+          fillchar(PRS^,sizeof(PRS^),0);
+          kod:= getstr(s,1,setLET_1_1);
+          let:= getstr(s,2,setLET_1_1);
+          GetDateStr(zac.rok,zac.mes,zac.den, getstr(s,3,setLET_1_1), false);
+          GetTimeStr(dap.h,dap.m,dap.s, GetStr(s,4,setLET_1_1))
+        end
+    end;

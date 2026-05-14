@@ -1,0 +1,17 @@
+procedure mnuZOZNAMY_init(MMenu: PSubmenu);
+    var   smnu : TPItems;
+          i,items,ihk,nl : int;
+    begin
+      items:= 0; ihk:= 0; nl:= 0;
+
+      {smnu[items]:= Switch2(mnu_FPL4_PREA, @tab_FPL4prea, nil);
+      inc(items);}
+      smnu[items]:= Switch2(mnu_FPL4_PROP, @tab_FPL4prop, nil);
+      inc(items);
+      {smnu[items]:= Switch2(mnu_FPL4_COOR, @tab_FPL4coor,nil);
+      inc(items);}
+      smnu[items]:= Switch2(mnu_FPL4_COOR, @tab_FPL4coor,nil);
+      inc(items);
+
+      for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i])
+    end;

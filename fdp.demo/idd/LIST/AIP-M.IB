@@ -1,0 +1,14 @@
+;; ------------------------------------------------------------------------
+;; MILcode ICAOcode nazov ;suradnice     ;stred  ;typ     ; podriadnost
+;; ------------------------------------------------------------------------
+
+; --------------------------------------------
+; Vojensk‚ letisk 
+; --------------------------------------------
+
+  100  LZMC (Malacky)     ;482412 170712 ;207.57 ; AIP-M ;  ; SEC/TMALZMC ALT/S0-S0380
+  200  LZPP (Pie¨Ÿany)    ;483732 174951 ;165.00 ; AIP-M ;  ; SEC/CTRLZPP ALT/S0-S0380
+  250  LZTN (Tren‡¡n)     ;485153 175937 ;203.00 ; AIP-M ;  ; SEC/TMALZTN ALT/S0-S0150
+  300  LZSL (Slia‡)       ;483812 190809 ;316.00 ; AIP-M ;  ; SEC/TMALZSL ALT/S0-S0380
+  500  LZKZ (Ko¨ice)      ;484006 211440 ;230.00 ; AIP-M ;  ; SEC/TMALZKZ ALT/S0-S0380
+  600  LZPW (Pre¨ov)      ;490147 211856 ;321.00 ; AIP-M ;  ; SEC/CTRLZPW ALT/S0-S0150

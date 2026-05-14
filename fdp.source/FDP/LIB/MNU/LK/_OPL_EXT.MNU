@@ -1,0 +1,63 @@
+{$IFDEF CONNECT_TO_OPL_EXT}
+
+  procedure mnuOPL_OPT_init(MMenu: PSubmenu); far;
+      var   smnu    : TPItems;
+            i,items,nl,ihk : int;
+      begin
+        items:= 0; nl:= 0; ihk:= 0;
+
+       {$IFDEF RTZ}
+        smnu[items]:= Switch2(hk(ihk)+' ZPRACOVANã ZPRèVY RTZ ',           @OPL__PROCESS_RTZ,nil);
+        inc(items);
+        smnu[items]:= Switch2(hk(ihk)+' AUTOMATICKê VYíèDANã ZPRèVY RTZ ', @OPL__REQUEST_RTZ,nil);
+        inc(items);
+        smnu[items]:= SwitchI(hk(ihk)+' INTERVAL VYíèDANã ZPRèVY RTZ ',    @OPL__REQUEST_RTZi,tit_min,
+                                                                           OPL__REQUEST_RTZ_lo,OPL__REQUEST_RTZ_hi,nil);
+        inc(items);
+       {$ENDIF}
+
+       {$IFDEF PRS}
+        add_newline(nl,items, smnu);
+        {smnu[items]:= Switch2(hk(ihk)+' ZPRACOVANã ZPRèVY AUP ',           @OPL__PROCESS_AUP,nil);
+        inc(items);
+        smnu[items]:= Switch2(hk(ihk)+' AUTOMATICKâ VYíèDANã ZPRèVY AUP ', @OPL__REQUEST_AUP,nil);
+        inc(items);
+        smnu[items]:= SwitchI(hk(ihk)+' INTERVAL VYíèDANã ZPRèVY AUP ',    @OPL__REQUEST_AUPi,
+                                                                           OPL__REQUEST_AUP_lo,OPL__REQUEST_AUP_hi,nil);
+        inc(items);
+        }
+        smnu[items]:= SwitchI(hk(ihk)+' HODINA VYíèDANã ZPRèVY AUP', @aup_HOUR,tit_hod,0,23, nil);
+        inc(items);
+        smnu[items]:= SwitchI(hk(ihk)+' MINUTA VYíèDANã ZPRèVY AUP', @aup_MIN ,tit_min,0,59, nil);
+        inc(items);
+        smnu[items]:= Switch2(hk(ihk)+' ZPRACOVèNã ZPRèV ASM (AKTIVACE,...) ', @OPL__PROCESS_ASM,nil);
+        inc(items);
+        smnu[items]:= Switch2(hk(ihk)+' ZPRèVY ASM O AKTIVACI KONTROLOVAT NA FDO ', @OPL__PROCESS_ASMfda,nil);
+        inc(items);
+       {$ENDIF}
+
+        for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i]);
+      end;
+
+
+  procedure mnuOPL_COM_init(MMenu: PSubmenu); far;
+      var   smnu    : TPItems;
+            i,items,nl : int;
+            sbmnu : PSubMenu;
+      begin
+        items:= 0; nl:= 0;
+
+       {$IFDEF RTZ}
+        smnu[items]:= Item (' MANUèLNã VYíèDANã STAVU ~R~TZ PROSTûEDK¶  ', cmZIADOST_RTZ, nil);
+        inc(items);
+       {$ENDIF}
+
+       {$IFDEF PRS}
+        smnu[items]:= Item (' MANUèLNã VYíèDANã SEZNAMU AKTIVOVANùCH ~P~ROSTOR¶ ', cmZIADOST_AUP, nil);
+        inc(items);
+       {$ENDIF}
+
+       for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i]);
+     end;
+{$ENDIF}
+

@@ -1,0 +1,32 @@
+{$IFDEF X25}    {$DEFINE _X25} {$ENDIF}
+{$IFDEF BRIDGE} {$DEFINE _X25} {$ENDIF}
+
+
+{$O NET_def}
+{$O RTR_def}
+{$O Kody}
+
+{$O _RTR}
+
+{$IFDEF COM}
+  { O _COM}
+{$ENDIF}
+
+{$IFDEF PCTCP}
+  {$O _PCTCP}
+{$ENDIF}
+
+{$IFDEF IPX}
+  {$O IPX_def}
+{$ENDIF}
+{$O _IPX_ini}
+
+{$O _X25}
+{$IFDEF _X25}
+  { O X25_def}
+  {$IFDEF AdCOM2} { O AdCOM2} {$ENDIF}
+{$ENDIF}
+
+{$O _NET}
+{$O _NETack}
+{$O NET_utc}

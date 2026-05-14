@@ -1,0 +1,251 @@
+{ ---------------------
+  kodovanie ku RDP
+  ---------------------
+}
+
+{$IFDEF RDP}
+  { Konstanty su natvrdo, lebo tak je to odladene s Mirom
+  }
+  procedure code0_cFPL_RDP(FPL: PDcFPL; var pkt: TNETpkt);
+      var   s,a,t,sres : string;
+            w     : word;
+            i,z,p : int;
+            rvys  : long;
+            FPLi  : DcFPL;
+      begin
+        FPLi:= FPL^;
+        {$IFDEF SECTORS}
+          sektor_FPLc(@FPLi);
+        {$ENDIF}
+        with FPLi do
+          begin
+            s:= inschar(idn,10,' ',1);
+
+           {$IFNDEF GOST}
+             val(ssr,W,i);  s:= s + chr(lo(W)) + chr(hi(W));
+             val(ssr0,W,i); s:= s + chr(lo(W)) + chr(hi(W));
+           {$ELSE}
+             s:= s + InsChar(ssr, 5{KOD_SSR},' ',1)
+                   + InsChar(ssr0,5{KOD_SSR},' ',1);
+           {$ENDIF}
+
+            if not decode_l4_9 (typ, a,t,sres) then t:= getstr(typ,1,[icao_NXT]);
+            s:= s + inschar(t,4,' ',1);
+
+            s:= s + inschar(start.kod,4{KOD_AP},' ',1);
+            if (start_.h<>start.h) or (start_.m<>start.m)
+               then s:= s + chr(start_.h)  + chr(start_.m)
+            else s:= s + chr(start.h)  + chr(start.m);
+
+            s:= s + inschar(prist.kod,4{KOD_AP},' ',1);
+          { Miro nekontroluje plan postupne, ale na posledny bod }
+            (*
+            if     (get_OBind(prist.kod, AIP, AIPs)>-1)
+               and (start.h<>0) or (start.m<>0) or (prist.h<>0) or (prist.m<>0)
+               and (bodov>{=}0)
+               and (TimeToSec(trat[bodov{}-1].h,trat[bodov{}-1].m,0) > TimeToSec(prist.h,prist.m,0)) then
+                 begin
+                   s:= s + chr(trat[bodov{}-1].h) + chr(trat[bodov{}-1].m);
+                 end
+            else*) begin
+                   s:= s + chr(prist.h) + chr(prist.m);
+                 end;
+
+          { vyska je v desiatkach metrov, preto sa uz netransformuje }
+            rvys:= get_altM(vysOB,vys) div m_S;
+            s:= s + chr(lo(rvys)) + chr(hi(rvys)) + ' '{+ vys_a};
+            rvys:= get_altM(vysOB,vys1) div m_S;
+            s:= s + chr(lo(rvys)) + chr(hi(rvys)) + vys1_a;
+
+
+            w:= minimum(trunc(get_rych_kmh(rych,rych_, vys,vysOB)),high(w));
+            s:= s + chr(lo(w)) + chr(hi(w));
+
+            s:= s + chr(lo(RDP)) + chr(hi(RDP)); { if RDP<>0 then s:= s + is_ACC else s:= s + is_NAC; }
+            {s:= s + 'N';}
+
+           (*IFDEF SECTORS}
+             z:= B1; p:= Bn;
+             while (p-z+1<strip_max_bod) and (p-z+1<bodov) and ((p>0) or (z<bodov-1)) do
+               begin
+                 if (z>0) then dec(z);
+                 if (p<bodov-1) and (p-z+1<strip_max_bod) then inc(p)
+               end;
+           *)
+           {$IFDEF SECTORS}
+             z:= 0; if bodov>strip_max_bod then z:= minimum(N(B1-1),N(bodov-strip_max_bod));
+             p:= minimum(bodov-z,{$IFDEF FPLC_L} bodov {$ELSE} strip_max_bod {$ENDIF});
+           {$ELSE}
+             z:= 0; p:= minimum(bodov,{$IFDEF FPLC_L} bodov {$ELSE} strip_max_bod {$ENDIF});
+           {$ENDIF}
+
+            s:= s + chr(p);
+            for i:= z to p-1 do with trat[i] do
+                begin
+                  rvys:= get_altM(vysOB,vys) div m_S;
+                  s:= s + inschar(kod,5{KOD_OB},' ',1);
+                  s:= s + chr(h)  + chr(m);
+                  s:= s + chr(lo(rvys)) + chr(hi(rvys)) + vysab
+                end;
+
+            s:= s + chr(lo(vysO)) + chr(hi(vysO)) {+ vyso_a};
+            s:= s + chr(lo(vysH)) + chr(hi(vysH));
+
+            t:= cut_(typ)+NULL;
+            s:= s + t;
+
+            {$IFDEF RVSM}
+             t:= cut_(_81)+NULL;
+             s:= s + t;
+            {$ENDIF}
+          end;
+
+        new_NETpkt_data (@s[1],length(s), pkt.pkt)
+      end;
+
+
+ {$IFDEF DD_EXE}   {$DEFINE RDP_cFPL} {$ENDIF}
+ {$IFDEF TRENAZER} {$DEFINE RDP_cFPL} {$ENDIF}
+
+ {$IFDEF TRENAZER}
+   function get_word(s: string; pos: int): word;
+      var   w: word;
+      begin
+        s:= copy(s,pos,2);
+        w:= ord(s[2]) shl 8 + ord(s[1]);
+        get_word:= w
+      end;
+
+   procedure decode0_cFPL_RDP(const pkt: TNETpkt; FPL: PDcFPL);
+       var   strip     : string;
+             c,p,i,_1  : int;
+             kod1,kod2 : string[KOD_OB+1];
+             Bi : TsBod;
+             w  : word;
+       begin
+         {strip:= init_str(pkt.data^[0],pkt.dlz);}
+         strip:= get_str (pkt.pkt.data, pkt.pkt.dlz,1,[kbCR_,kbLF_], sizeof(string)-1);
+
+         fillchar(FPL^,sizeof(FPL^),0);
+
+         with FPL^ do
+           begin
+             stt := fpl_EST;
+             idn := cut_(copy(strip,1,10));  { 'C'->2 }
+
+             c:= 11;
+            (*{$IFNDEF GOST}*)
+              p   := get_word(strip,11);
+              str(p,ssr);
+              p   := get_word(strip,13);
+              if p=0 then ssr0:= '' else str(p,ssr0);
+              c:= 15;
+            (*{$ELSE}
+              ssr := copy(strip,c,KOD_SSR); inc(c,KOD_SSR);
+              ssr0:= copy(strip,c,KOD_SSR); inc(c,KOD_SSR);
+            {$ENDIF}*)
+
+             typ := copy(strip,c,4);
+             inc(c,4); { c=20 }
+
+             start.kod := cut_(ReplChar(copy(strip,c,4),[#0],' '));
+             start.h := byte(strip[c+4]); start_.h:= start.h;
+             start.m := byte(strip[c+5]); start_.m:= start.m;
+             inc(c,6); { c=26 }
+
+             prist.kod:= cut_(ReplChar(copy(strip,c,4),[#0],' '));
+             prist.h := byte(strip[c+4]);
+             prist.m := byte(strip[c+5]);
+             inc(c,6); { c=32 }
+
+             vys    := get_word(strip,c);
+             {vysab  := getchar(copy(strip,c+2,1));}
+             inc(c,3); { c=35 }
+
+             vys1   := get_word(strip,c);
+             vys1_a := getchar(copy(strip,c+2,1));
+             inc(c,3); { c=38 }
+
+             rych := get_word(strip,c);
+             rych_:= 'K';
+             inc(c,2); { c=40 }
+
+             w    := get_word(strip,c);      { RDP }
+             inc(c,2); { c=42 }
+
+           { Mato mi posle prvy bod na trati ako letisko startu,
+             i ked je to len otocny bod. To iste plati
+             i pre letisko pristatia
+           }
+             _1:= 0;
+             if (start.kod<>'') and (_OBind(start.kod, LK)<0) then
+                begin
+                  _1:= 1;
+                  {i:= 0; while (i<OBs) and (pos(start.kod,OB^[i].kod)=0) do inc(i);}
+                  i:= _OBind(start.kod, OB);
+                  if (i>=0) then
+                     begin
+                       OB^.read(i, Bi);
+                       trat[0].kod:= Bi.kod
+                     end
+                  else trat[0].kod:= start.kod;
+                  start.kod:= '';
+
+                  trat[0].h := start.h;
+                  trat[0].m := start.m;
+                  if vys1<>0 then trat[0].vys:= vys1
+                  else trat[0].vys:= vys;
+                  {trat[0].vysab := vysab}
+                end;
+
+             p:= byte(strip[c]);
+             inc(c); { c=43 }
+             bodov:= _1;
+             i:= 0;
+             while (i<p) {$IFNDEF FPLC_L} and (bodov<strip_max_bod) {$ENDIF}do
+               with trat[_1+i] do
+                 begin
+                   kod   := cut_(ReplChar(copy(strip,   c   + i*10,5),[#0],' '));
+                   h     := byte(strip[        c+5 + i*10]);
+                   m     := byte(strip[        c+6 + i*10]);
+                   vys   := get_word(strip,    c+7 + i*10);
+                   vysab := getchar(copy(strip,c+9 + i*10,1));
+
+                   inc(i);
+                   inc(bodov)
+                 end;
+             inc(c,i*10); { c=52+(i-1)*10 }
+
+             if (prist.kod<>'') and (_OBind(prist.kod, LK)<0) and (bodov<strip_max_bod-1) then
+                begin
+                  i:= _OBind(prist.kod, OB);
+                  if (i>=0) then
+                     begin
+                       OB^.read(i, Bi);
+                       trat[bodov].kod:= Bi.kod
+                     end
+                  else trat[bodov].kod:= prist.kod;
+                  prist.kod:= '';
+
+                  trat[bodov].h := prist.h;
+                  trat[bodov].m := prist.m;
+                  inc(bodov)
+                end;
+
+             {init_time(time, BIOS.hour,BIOS.min,0);}
+             init_date(date, BIOS.year,BIOS.month,BIOS.day)
+           end;
+
+           format_cFPL(FPL)
+         end;
+   {$UNDEF RDP_cFPL}
+ {$ENDIF}
+
+  procedure code0_cFPL_mess(FPL: PDcFPL; var pkt: TNETpkt);
+      var   s : string;
+      begin
+        s:= cut_(FPL^.idn)+NULL;
+        new_NETpkt_data (@s[1],length(s), pkt.pkt)
+      end;
+
+{$ENDIF}

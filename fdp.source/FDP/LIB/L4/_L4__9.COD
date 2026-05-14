@@ -1,0 +1,42 @@
+{ --------
+   9
+  --------
+}
+ function code_l4_9_(_9a,_9b,_9c: string): string;
+    var   s : string;
+    begin
+      if _9c<>'' then _9c:= icao_NXT+_9c;
+      code_l4_9_:= _9a+_9b+_9c
+    end;
+
+ function code_l4_9(_9: string; _l4: bool): string;
+    var   s : string;
+    begin
+      s:= cut_(_9);
+      if _l4 and ((s='') or (s=icao_NXT)) then _9:= ZZZZ+icao_NXT+trbl_M;
+      code_l4_9:= format_s(_9)
+    end;
+
+
+ function decode_l4_9(_9: string; var _9a,_9b,_9c: string): bool;
+    var   s : string;
+          i : int;
+    begin
+      _9:= cut_(_9);
+
+      s:= getstr(_9,1,[icao_NXT]);
+      i:= 1; while (i<=kod_9a) and (s<>'') and (s[i] in setCisl) do inc(i);
+      _9b:= copy(s,i,length(s)-i+1);
+      _9a:= cut_(copy(s,1,length(s)-length(_9b)));
+      _9c:= getstr(_9,2,[icao_NXT]);
+
+      decode_l4_9:=    ((_9a='')  or  (length(_9a)<=kod_9a))
+                   and ((_9b<>'') and (length(_9b)<=kod_9b))
+                   and ((_9c<>'') and (length(_9c) =kod_9c));
+
+     { orezanie }
+      if (_9a<>'') then _9a:= inschar(copy(_9a,1,kod_9a),kod_9a,'0',0);
+      _9b:= copy(_9b,1,kod_9b);
+      _9c:= copy(_9c,1,kod_9c);
+    end;
+

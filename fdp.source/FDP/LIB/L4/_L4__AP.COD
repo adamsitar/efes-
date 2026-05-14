@@ -1,0 +1,195 @@
+{ --------
+   13
+  --------
+}
+ function code_l4_13a (kod: string; _L4444M: bool): string;
+    begin
+      kod:= cut_(kod);
+      if _L4444M then kod:= inschar(kod,kod_AP,' ',1);
+      if length(kod)<>KOD_AP then kod:= ZZZZ;
+      code_l4_13a:= kod
+    end;
+
+ function code_l4_13 (kod: string; h,m, h_,m_: byte; _L4444M: bool): string;
+    begin
+      kod:= code_l4_13a(kod, _L4444M) + code_l4_utc(h,m);
+      if (h<>h_) or (m<>m_) then kod:= kod + icao_NXIT + code_l4_utc(h_,m_);
+      code_l4_13:= kod
+    end;
+
+
+ function decode_l4_13a (_13: string): string;
+    begin
+      _13:= copy(_13,1,KOD_AP);
+      decode_l4_13a:= cut_(_13)
+    end;
+
+
+ { LZKZ0230 0249,
+   v pripade neuspesneho dekodovania nastavi var ... na nepripustne hodnoty
+ }
+ function decode_l4_13_ (_13: string;
+                         var _13a: string; var h,m, h_,m_: byte;
+                         var _13b,_13c: string;
+                         var r13a,r13b,r13c: bool
+                        ): bool;
+    var   s : string;
+          b : byte;
+    begin
+       {_13:= cut_(_13);}
+
+     { letisko startu
+     } _13a:= decode_l4_13a(_13);
+       r13a:= _13a<>'';
+
+     { planovany cas startu   utime
+     } _13b:= copy(_13,KOD_AP{length(kod)}+1,KOD_TIME);
+       r13b:= (length(_13b)=(KOD_TIME)) and GetTimeStr(h,m,b, _13b);
+
+     { skutocny cas startu
+     } _13c:= getstr(_13,2,[icao_NXIT]);
+       if length(_13c)>0 then r13c:= (length(_13c)=(KOD_TIME)) and GetTimeStr(h_,m_,b,_13c)
+       else begin r13c:= true; h_:= h; m_:= m end;
+
+      decode_l4_13_:= r13a and r13b and r13c
+    end;
+
+ function decode_l4_13 (_13: string; var kod: string; var h,m, h_,m_: byte): bool;
+    var   _13b,_13c : string;
+          r13a,r13b,r13c : bool;
+    begin
+      decode_l4_13:= decode_l4_13_(_13, kod,h,m, h_,m_, _13b,_13c, r13a,r13b,r13c)
+    end;
+
+
+{ --------
+   16
+  --------
+  LKPR0230 LKKB LKXX
+}
+ function code_l4_16a (kod: string; _L4444M: bool): string;
+    begin
+      kod:= cut_(kod);
+      if _L4444M then kod:= inschar(kod,kod_AP,' ',1);
+      if length(kod)<>KOD_AP then kod:= ZZZZ;
+      code_l4_16a:= kod
+    end;
+
+ function code_l4_16 (kod: string; h,m: byte; kodb: string; hs,ms: byte; _L4444M: bool): string;
+    var   r  : real;
+    begin
+     r:= (TimeToSec(h,m,0)-TimeToSec(hs,ms,0));
+     if r<0 then r:= r+secDAY;
+     TimeFromSec(r, h,m,ms);
+     kod:= code_l4_16a(kod, _L4444M) + code_l4_utc(h,m);
+     if (cut_(kodb)<>'') and (kodb<>kod) then kod:= kod + icao_NXIT + kodb;
+     code_l4_16:= kod
+   end;
+
+
+ function decode_l4_16a(_16: string): string;
+    begin
+      _16:= copy(_16,1,KOD_AP);
+      decode_l4_16a:= cut_(_16)
+    end;
+
+ function decode_l4_16_ (_16: string; hs,ms: byte;
+                         var _16a: string;
+                         var _16b: string; var h,m, hl,ml: byte; { absolutny a relativny cas pristati }
+                         var _16c: string;
+                         var r16a,r16b,r16c: bool
+                        ): bool;
+    var   s_  : byte;
+          r   : real;
+          i,k : int;
+          s1,s2,s3 : string;
+    begin
+      {_16:= cut_(_16);}
+
+     { letisko pristatia
+     } _16a:= decode_l4_16a(_16);
+       r16a:= _16a<>'';
+
+     { planovany cas pristatia
+     } _16b:= copy(_16,KOD_AP+1,kod_TIME);
+       r16b:= GetTimeStr(h,m,s_, _16b);
+       if r16b then
+          begin
+          { absolutny cas pristatia
+          } hl:= h; ml:= m;
+            r:= (TimeToSec(hs,ms,0)+TimeToSec(h,m,0));
+            if r>secDAY then r:= r-secDAY;
+            TimeFromSec(r, h,m,s_);
+          end;
+
+     { zalozne letiska ?
+     } _16c:= ''; r16c:= true;
+       k:= pos(icao_NXIT,_16);
+       if k>0 then
+          begin
+            s1:= cut_(copy(_16,k+1,length(_16)-k)); s3:= '';
+          { zislo by sa osetrit este kotrolu spravnosti zaloznych letisk
+          } k:= getstritems(s1,[icao_NXIT]);
+            if k>0 then
+               begin
+                 i:= 1; while (i<=k) do
+                   begin
+                     s2:= getstr(s1,i,[icao_NXIT]);
+                     if (length(s2)<>KOD_AP) or (delchar(s2,setPism)<>'') then break;
+                     s3:= s3+s2+icao_NXIT;
+                     inc(i)
+                   end;
+                  r16c:= i>k;
+                  if r16c then _16c:= cut_(copy(s3,1,kod_APb))
+                end
+          end;
+
+      decode_l4_16_:= r16a and r16b and r16c
+    end;
+
+ function decode_l4_16 (_16: string; hs,ms: byte; var kod: string; var h,m, hl,ml: byte; var kodb: string{[kod_APb]}): bool;
+    var   _16b : string; r16a,r16b,r16c: bool;
+    begin
+      decode_l4_16:= decode_l4_16_
+                       (_16,hs,ms,
+                        kod,_16b,h,m,hl,ml,
+                        kodb,
+                        r16a,r16b,r16c
+                       );
+    end;
+
+
+{ --------
+   17
+  --------
+}
+ function  decode_l4_17_ (_17: string;
+                          var _17a,_17b: string; var h,m: byte; { absolutny a relativny cas pristati }
+                          var _17c: string;
+                          var r17a,r17b,r17c: bool
+                         ): bool;
+    var    b : byte;
+    begin
+     { letisko pristatia
+     } _17a:= cut_(copy(_17,1,KOD_AP));
+       r17a:= _17a<>'';
+
+     { skutocny cas pristatia
+     } _17b:= copy(_17,KOD_AP+1,KOD_TIME);
+       r17b:= GetTimeStr(h,m,b, _17b);
+
+     { plny nazov
+     } _17c:= get_strs0p ( @_17[1],length(_17),2,get_str_items(@_17[1],length(_17),[icao_NXIT]),[icao_NXIT]);
+       r17c:= (_17c<>ZZZZ) or (_17c='');
+
+      decode_l4_17_:= r17a and r17b and r17c
+    end;
+
+
+ function decode_l4_17 (_17: string; var kod: string; var h,m: byte; var name: string): bool;
+    var   _17b,_17c: string;
+          r17a,r17b,r17c: bool;
+    begin
+      decode_l4_17:= decode_l4_17_ (_17, kod,_17b,h,m, _17c, r17a,r17b,r17c)
+    end;
+

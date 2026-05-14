@@ -1,0 +1,413 @@
+{ DATE :
+  urcenie datumu, ktory moze byt zadany v poli 18
+}
+ function  _decode_FPL4_DATE (var  FPL : DFPL4;
+                              var  FDR : DFDR;
+
+                              f18_     : pchar;
+
+                              var  dd  : TFDR_decoded_data;
+                              var  res : string
+                             ): int;
+    var    ires : int;
+           bres : bool;
+           fdt  : TDate;
+           s : string;
+           p : pchar;
+
+    begin
+      ires:= 0; res:= '';
+
+     { Implicitne plati datum prijatia planu, ak nie je uvedene inak v poli 18.
+       Povolene su rozne formaty, pretoze datum sa zadava nejedoznacne :
+
+       - 12.01         Takyto datum musi lezat na prvej pozicii
+       - DATA/1202
+       - DATE 1202
+
+     }
+      if FPL.date.r=0 then init_date(FPL.date, year,month,day);
+
+      s:= getpstr(f18_,1,[icao_NXIT]);
+      if (length(s)=5) and (s[3]='.') then
+         begin
+         end
+      else begin
+             s:= ''; p:= nil;
+             {IFDEF A36YKA}
+              if FPL.stat=hd_PPL then p:= strpos(f18_,rmk_DATA)   { nekontrolujem na icao_NXT, lebo nechodi vzdy }
+              else
+             {ENDIF}
+             if p=nil then p:= strpos(f18_,rmk_DATE);
+             if p<>nil then
+                begin
+                  s:= GetPStr(p,1,[icao_NXT,icao_NXIT]);
+                  if (length(s) in [length(rmk_DATA),length(rmk_DATE)]) then s:= GetPStr(p,2,[icao_NXT,icao_NXIT])
+                  else s:= copy(s,length(s)-kod_TIME+1,kod_TIME);
+                end
+           end;
+
+      if s<>'' then
+         begin
+           if pos('.',s)>0 then bres:= GetDateStr(Fdt.r,Fdt.m,Fdt.d,s,false)
+           else bres:= decode_l4_date_r(s,Fdt,true);
+           if (not dd.check_en) or bres then dd.isDATE:= true
+           else ires:= l4_err(a_18,'',i_18,err_18_date_format, res);
+         end;
+
+      if dd.isDATE then
+         begin
+           if dd.check_en and _fpl4_date_all and (DateToSec(Fdt.r,Fdt.m,Fdt.d) < DateToSec(year,month,day))
+              then ires:= l4_err(a_18,'',i_18,err_18_date_not_actual, res)
+           else FPL.date:= Fdt
+         end;
+
+      FDR.date:= FPL.date;
+      if FDR.fpl<>nil then FDR.fpl^.date:= FDR.date;
+
+      _fpl4_date_all:= false;
+      _decode_FPL4_DATE:= ires
+    end;
+
+
+{ EET :
+  Urcenie casu vstupu, ak je uvedene;
+  musi predchadzat dekodovanie casov startu
+  a pristatia
+}
+ function  _decode_FPL4_EET (var  FPL : DFPL4;
+                             var  FDR : DFDR;
+
+                             f18_     : pchar;
+
+                             var  dd  : TFDR_decoded_data;
+                             var  res : string
+                            ): int;
+    var    sFIR,sEET, s,t,u : string;
+           pEET, p,p2  : pchar;
+           ires,i,k : int;
+           hh,mm,ss : byte;
+           B : TOBxy;
+           R : real;
+
+    label  L,X;
+
+    begin
+      _decode_FPL4_EET:= 0;
+      ires:= 0;
+
+      if FDR.fpl<>nil then with FDR.fpl^ do
+        begin
+          start.cas:= DTtoSec (date.r,date.m,date.d, start_.h,start_.m,0);
+          prist.cas:= DTtoSec (date.r,date.m,date.d, prist.h,prist.m,0);
+          if start.cas>prist.cas then prist.cas:= prist.cas+secDAY;
+        end;
+
+      if _cas_na_vstupnom_bode(FPL,FDR,dd,res,ires)=0 then Exit;
+
+     { a) vzlet z letiska vo FIRe cas na trati sa pocita od casu startu
+       b) prelet hranice -> vyznamny bod trate, od casu preletu EET/...
+       c) ak je zname letisko pristatia -> od casu pristatia, cas na trati
+     }
+
+      if dd.isDEP then
+         begin
+           dd.isEET:= true;
+           dd.isEET_DEP:= true;
+           if FDR.fpl<>nil then AP_to_OBxy(FDR.fpl^.start,dd.eet);
+         end;
+
+
+    { b) uvedeny cas preletu hranice, prip. znamy prvy bod pri jej prelete ?
+    }
+      sFIR:= '';
+      pEET:= strpos(f18_,rmk_EET+icao_NXT);
+
+
+      L: if (pEET=nil) and (not dd.isEET_DEP) then
+           if dd.isARR then
+              begin
+                dd.isEET:= true;
+                dd.isEET_ARR:= true;
+                if FDR.fpl<>nil then
+                   begin
+                     AP_to_OBxy(FDR.fpl^.prist,dd.eet);
+                     {dd.eet.kod:= ''; pre istotu, v krizovej casti som to opravil podmienkou }
+                   end;
+              end
+           else begin
+                  ires:= l4_err(a_18,FIR_adr,i_18,err_18_vyzaduje_specifikaciu_eet, res);
+                  if dd.check_en then goto X
+                end;
+
+      if pEET<>nil then
+        begin
+          sEET:= _item_18_(pEET,rmk_EET,1);
+          i:= 0; k:= getstritems(sEET,[icao_NXIT]);
+          repeat
+            inc(i); u:= getstr(sEET,i,[icao_NXIT]);
+            t:= copy(u,Maximum(length(u)-KOD_TIME+1,1),KOD_TIME);
+            u:= copy(u,1,length(u)-length(t));
+            if (u=FIR_adr) or (u=FIR_adr2) or get_OB_XY(u,B) then
+               begin
+                 if GetTimeStr(hh,mm,ss, t) then
+                    begin
+                      dd.isEET:= true;
+                      dd.isEET_18:= true;
+                      if FDR.fpl<>nil then R:= TimeToSec(FDR.fpl^.start_.h,FDR.fpl^.start_.m,0)
+                      else R:= TimeToSec(FDR.dep.h,FDR.dep.m,0);
+                      TimeFromSec(R+TimeToSec(hh,mm,ss), dd.eet.h,dd.eet.m,ss);
+                    end
+                 else begin
+                        ires:= l4_err(a_18,u+t,i_18,err_18_chyba_v_specifikacii_eet, res);
+                        if dd.check_en then goto X
+                      end
+               end
+          until (dd.isEET) or (res<>'') or (i>=k);
+
+          if (res='') and (not dd.isEET) then
+             begin
+              { EET moze byt uvadzane i vo formate EET/XXXX0200 EET/YYYY0230 :
+              }
+               inc(pEET,1);
+               pEET:= strpos(pEET,rmk_EET+icao_NXT);
+               goto L
+             end
+        end;
+
+      if (res='') and (not dd.isEET) then ires:= l4_err(a_18,FIR_adr,i_18,err_18_vyzaduje_specifikaciu_eet,res);
+      if dd.check_en and (res<>'') then goto X;
+
+      X: _decode_FPL4_EET:= ires;
+    end;
+
+
+ function  _decode_FPL4_18 (var FPL : DFPL4;
+                            var FDR : DFDR;
+
+                            var dd  : TFDR_decoded_data;
+                            var res : string
+                           ): int;
+    var    i,ires : int;
+           s,t,u  : string;
+           f18_   : pchar;
+
+    label  X;
+
+    begin
+      _decode_FPL4_18:= 0;
+      if res<>'' then if dd.check_en then Exit;
+      ires:= 0;
+
+      f18_:= l4line(FPL._18);
+
+     { -------------------------------------
+        DATE - datum letu
+       תתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתת
+     }
+       ires:= _decode_FPL4_DATE (FPL,FDR,f18_,dd,res);
+       if dd.check_en and (res<>'') then goto X;
+
+
+     { ------------------------------------
+        EET - vyznamne casy
+       תתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתת
+     }
+       ires:= _decode_FPL4_EET (FPL,FDR,f18_,dd,res);
+       if dd.check_en and (res<>'') then goto X;
+
+     { ------------------------------------
+        RPL,PLN,FPL - zdroje spracovania
+       תתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתת
+     }
+       (*with FDR do
+        begin
+          s:= _item_18_(f18_,rmk_RPL, 1);
+          if s<>'' then data:= StrNPCopy(data,icao_NXIT+rmk_RPL+icao_NXT+s,true,true);
+
+          s:= _item_18_(f18_,rmk_PLN, 1);
+          if s<>'' then data:= StrNPCopy(data,icao_NXIT+rmk_PLN+icao_NXT+s,true,true);
+
+          s:= _item_18_(f18_,rmk_FPL, 1);
+          if s<>'' then data:= StrNPCopy(data,icao_NXIT+rmk_FPL+icao_NXT+s,true,true);
+
+          s:= _item_18_(f18_,rmk_FDA, 1);
+          if s<>'' then data:= StrNPCopy(data,icao_NXIT+rmk_FDA+icao_NXT+s,true,true);
+
+          s:= _item_18_(f18_,hd_EST, 1);
+          if s<>'' then data:= StrNPCopy(data,icao_NXIT+hd_EST+icao_NXT+s,true,true);
+        end;*)
+
+
+      with FPL do
+       begin
+
+        { ------
+           RIF
+          תתתתתת
+           - udaje o trati ku zmenemu letisku urcenia
+             nasledovanene ICAO kodom letiska,
+             vyzaduje nove povolenie k letu
+        }
+         {s:= _item_18_(f18_,rmk_RIF, 1);
+         if s<>'' then
+            begin
+            end;}
+
+         { Generuje ziadost o povolenie k letu }
+
+
+        { -------
+           REG
+          תתתתתתת
+           - registracna znacka, ak je potrebna
+             a je odlisna od identifikacie
+        }
+         s:= _item_18_(f18_,rmk_REG, 1);
+         {if s<>'' then FDR.data:= StrNPCopy(FDR.data,icao_NXIT+rmk_REG+icao_NXT+s,true,true);}
+
+
+        { --------
+           SEL
+          תתתתתתת
+           - SELCALL kod, ako je prideleny sluzbou ATS
+        }
+         s:= _item_18_(f18_,rmk_SEL, 1);
+         {if s<>'' then FDR.data:= StrNPCopy(FDR.data,icao_NXIT+rmk_SEL+icao_NXT+s,true,true);}
+
+
+        { --------
+           OPR
+          תתתתתתתת
+           - nazov prevadzkovatela, ak to nie je zrejme
+             z identifikacie lietadla v poli 7
+        }
+         s:= _item_18_(f18_,rmk_OPR, 1);
+         {if s<>'' then FDR.data:= StrNPCopy(FDR.data,icao_NXIT+rmk_OPR+icao_NXT+s,true,true);}
+
+
+        { --------
+           STS
+          תתתתתתתת
+           - dovod pre zvlastnu obsluhu lietadla
+        }
+         s:= _item_18_(f18_,rmk_STS, 1);
+         if (FDR.fpl<>nil) then FDR.fpl^.inf:= s;
+
+
+        { --------
+           TYP
+          תתתתתתתת
+        }
+         if     dd.check_en
+            and _18_CHECK
+            and _18_TYPE_CHECK then
+            begin
+              decode_l4_9 (FDR.typ, s,t,u);
+              if (t=ZZZZ) {or ((typ2=ZZZZ)))} and (_item_18_(f18_,rmk_TYP, -1)='') then
+                 begin
+                   ires:= l4_err(a_18,rmk_TYP+icao_NXT+'...',i_18,err_18_zzzz_vyzaduje_specfikaciu, res);
+                   goto X
+                 end
+            end;
+
+
+        { ----------
+           COM, NAV
+          תתתתתתתתתת
+        }
+         if     dd.check_en
+            and _18_CHECK
+            and _18_COM_NAV_CHECK
+            and (pos(eqp_Z,_10)>0)
+            and (_item_18_(f18_,rmk_COM, -1)='')
+            and (_item_18_(f18_,rmk_NAV, -1)='') then
+            begin
+              ires:= l4_err(a_18,
+                            eqp_Z+' -> '+rmk_NAV+icao_NXT+'... ['+rmk_COM+icao_NXT+'...]',
+                            i_18,
+                            err_18_vyzaduje_specfikaciu_10,
+                            res
+                           );
+              goto X
+            end;
+
+
+        { ----------
+           DAT
+          תתתתתתתתתת
+        }
+         if     dd.check_en
+            and _18_CHECK
+            and _18_DAT_CHECK
+            and (pos(eqp_J,_10)>0)
+            and (_item_18_(f18_,rmk_DAT, 1)='') then
+            begin
+              ires:= l4_err(a_18,
+                            eqp_J+' -> '+rmk_DAT+icao_NXT+'... ',
+                            i_18,
+                            err_18_vyzaduje_specfikaciu_10,
+                            res
+                           );
+              goto X
+            end;
+
+
+        { -----------
+           DEP
+          תתתתתתתתתתת
+        }
+         if     dd.check_en
+            and _18_CHECK
+            and _18_DEP_CHECK
+            and ((FDR.dep.kod=ZZZZ) or (FDR.dep.kod=AFIL))
+            and (_item_18_(f18_,rmk_DEP, 1)='') then
+               begin
+                 ires:= l4_err(a_18,rmk_DEP+icao_NXT+'...',i_18,err_18_zzzz_vyzaduje_specfikaciu_ap, res);
+                 goto X
+               end;
+
+
+        { ------------
+           DEST
+          תתתתתתתתתתתת
+        }
+         if     dd.check_en
+            and _18_CHECK
+            and _18_DEST_CHECK
+            and (FDR.arr.kod=ZZZZ)
+            and (_item_18_(f18_,rmk_DEST,1)='') then
+               begin
+                 ires:= l4_err(a_18,rmk_DEST+icao_NXT+'...',i_18,err_18_zzzz_vyzaduje_specfikaciu_ap, res);
+                 goto X
+               end;
+
+
+        { ------------
+           ALTN
+          תתתתתתתתתתתת
+        }
+         if     dd.check_en
+            and _18_CHECK
+            and _18_ALTN_CHECK
+            and (pos(ZZZZ,dd.arr2)>0) then
+            if (_item_18_(f18_,rmk_ALTN,1)='') then
+               begin
+                 ires:= l4_err(a_18,rmk_ALTN+icao_NXT+'...',i_18,err_18_zzzz_vyzaduje_specfikaciu_ap, res);
+                 goto X
+               end;
+
+
+        { ------------
+           RALT
+          תתתתתתתתתתתת
+        }
+         {s:= _item_18_(f18_,rmk_RALT, -1);
+         }
+
+       end;
+
+      X: strdispose(f18_);
+         if (res<>'') then ires:= i_18;
+         _decode_FPL4_18:= ires;
+    end;

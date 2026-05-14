@@ -1,0 +1,50 @@
+{
+  CAMUS :
+
+  (CPLPR/MI001
+   -JAC1
+   -IS
+   -EA32/M
+   -EDDF
+   -EDDF/1100F000
+   -LZIB
+   -EDDF/F000/1100 BAY/F200/1119 OKG/F200/1124 BALTU/F200/1129 RAK/F200/1131 OKL/F200/1134 VLM/F200/1140 BODAL/F200/1145
+   -0
+   -NIL)
+
+  (ESTPR/MI126
+   -FIN7176/A3371
+   -IX
+   -DC9/M
+   -LKPR
+   -LKPR/0845F000
+   -LKTB
+   -LKPR/F000/0844 OKL/F035/0845 RATIS/F109/0849 VOZ/F190/0855 BODAL/F132/0900 LKTB/F000/0908
+   -0
+   -NIL
+  )
+
+  OPL :
+
+  (ESTPL/MI750
+   -DLH5702/3626
+   -IS
+   -CL65/
+   -EDDM0540
+   -GETSA/0618F230
+   -K0796F230
+   -LKPR0045
+   -GETSA/F230/T2318 RAK/F150/T2326
+   )
+
+  ==>
+
+  CACPL a CAEST su v podstate rovnake spravy. Rozdiel je
+    - EST ma priradeny SSR kod
+    - EST moze mat na prvej a poslednej polohe v trati DEP a ARR
+    - CPL ma v poli 14 bod a cas startu, EST bod vletu a hladinu letu
+
+
+  METODA JE VYUZIVANA OBJEKTOM O_OPL, O_CAMUS, O_AFTN
+
+}

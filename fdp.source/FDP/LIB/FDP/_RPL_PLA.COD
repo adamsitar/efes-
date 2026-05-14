@@ -1,0 +1,76 @@
+{ ---------------------
+   DB
+  ---------------------
+}
+
+ {$I _RPL_DB.cod}
+
+ procedure codeDB_RPLF(RPL: PRPLF; buff: PDB_buff; desc: PDB_head); far;
+     begin
+       _codeDBB_RPL (@RPL^.rpl,buff,desc);
+       _codeDBB_FPL4(@RPL^.fpl,@buff^[db_RPL_RIADKOV],desc);
+     end;
+
+ procedure decodeDB_RPLF(buff: PDB_buff; RPL: PRPLF; desc: PDB_head); far;
+     begin
+       _decodeDBB_RPL (buff,@RPL^.rpl,desc);
+       _decodeDBB_FPL4(@buff^[db_RPL_RIADKOV],@RPL^.fpl,desc);
+     end;
+
+
+{ nacitanie len udajov "rpl"
+}
+ procedure decodeDB_RPLF_rpl(buff: PDB_buff; RPL: PRPL; desc: PDB_head); far;
+     begin
+       _decodeDBB_RPL (buff,RPL,desc)
+     end;
+
+{ nacitanie len udajov "fpl"
+}
+ procedure decodeDB_RPLF_fpl(buff: PDB_buff; FPL: PFPL4; desc: PDB_head); far;
+     begin
+       _decodeDBB_FPL4 (@buff^[db_RPL_RIADKOV],FPL,desc);
+     end;
+
+{ nacitanie len udajov "fdr"
+}
+ procedure decodeDB_RPLF_fdr(buff: PDB_buff; FDR: PFDR; desc: PDB_head); far;
+     begin
+       decodeDB_FDR (@buff^[db_RPL_RIADKOV],FDR,desc);
+     end;
+
+
+{ ---------------------
+  kluc
+  ---------------------
+}
+{ pri zmene pozor na fciu "_spracovavany_ext_rpl"
+}
+ function  codekey_RPL (RPL: PRPL): string; far;
+    begin
+      with RPL^ do codekey_RPL:= _7a+icao_ARR+l4_format_s(_7x)+icao_ARR+_13a
+    end;
+
+ procedure _decodekey_RPL (s: string; var _7a: string; var _7x: char; var _13a: string); far;
+     begin
+       _7a := getstr(s,1,odd_ICAO);
+       _7x := getchar(decode_l4_s(getstr(s,2,odd_ICAO),true));
+       _13a:= getstr(s,3,odd_ICAO);
+     end;
+
+ procedure decodekey_RPL (s: string; RPL: PRPL); far;
+     begin
+       fillchar(RPL^,sizeof(RPL^),0); { nesmie sa zrusit ! }
+       with RPL^ do _decodekey_RPL (s, _7a,_7x,_13a);
+     end;
+
+ function  codekey_RPLF (RPL: PRPLF): string; far;
+    begin
+      codekey_RPLF:= codekey_RPL(@RPL^.rpl);
+    end;
+
+ procedure decodekey_RPLF (s: string; RPL: PRPLF); far;
+     begin
+       fillchar (RPL^,sizeof(RPL^),0); { nesmie sa zrusit ! }
+       decodekey_RPL (s, @RPL^.rpl);
+     end;

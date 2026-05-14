@@ -1,0 +1,137 @@
+{ -----------------
+   FPL
+ תתתתתתתתתתתתתתתתתת
+}
+{$IFDEF RPL}
+
+ {$I ..\lib\mnu\_RPL.h}
+
+ procedure mnuRPLvolby_init(MMenu: PSubmenu); far;
+     var   smnu : TPItems;
+           sbmnu : PSubMenu;
+           i,items,nl,ihk: int;
+           pb : bool;
+     begin
+       items:= 0; nl:= 0; ihk:= 0;
+       pb:= {$IFDEF BACKUP} true {$ELSE} true {$ENDIF};
+
+       smnu[items]:= NewTLine(mnuSPRACOVANIE,nil);
+       inc(items);
+
+       smnu[items]:= Switch2_(' '+hk(ihk)+RPLPEND, @rpl_PND, @SERVERstatus,pb, nil);
+       inc(items);
+
+       smnu[items]:= SwitchI_(' '+hk(ihk)+RPLHOUR, @rpl_HOUR,tit_hod,15,22, @SERVERstatus,pb, nil);
+       inc(items);
+       smnu[items]:= SwitchI_(' '+hk(ihk)+RPLMIN,  @rpl_MIN ,tit_min,0, 59, @SERVERstatus,pb, nil);
+       inc(items);
+
+       {$IFDEF PROCESS_RPL}
+        smnu[items]:= Switch2_(' '+hk(ihk)+RPLERR, @rpl_ERR, @SERVERstatus,pb, nil);
+        inc(items);
+       {$ENDIF}
+
+       smnu[items]:= Switch2_(' '+hk(ihk)+RPLAS15, @rpl_assign_15, @SERVERstatus,pb, nil);
+       inc(items);
+
+       add_newline_(0,nl,items,smnu);
+       smnu[items]:= NewTLine(mnuZOBRAZENIE,nil);
+       inc(items);
+
+       smnu[items]:= Switch2(' '+hk(ihk)+PLANL,   @bminiRPL,nil);
+       inc(items);
+       smnu[items]:= SwitchI(' '+hk(ihk)+RPLL15, @max_RPL_15_rm,'',max_RPL_15_r_lo,max_RPL_15_r_hi,nil);
+       inc(items);
+       smnu[items]:= SwitchI(' '+hk(ihk)+RPLL18, @max_RPL_18_rm,'',max_RPL_18_r_lo,max_RPL_18_r_hi,nil);
+       inc(items);
+
+       smnu[items]:= Switch2 (' '+hk(ihk)+RPLA36YKA, @RUSSIAN_RPL,nil);
+       inc(items);
+
+       add_newline_(0,nl,items,smnu);
+       smnu[items]:= NewTLine(mnuTLAC,nil);
+       inc(items);
+       smnu[items]:= Switch2(' '+hk(ihk)+RPLPRNIFPS, @prn_RPL_IFPS, nil);
+       inc(items);
+
+       for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i]);
+     end;
+
+
+ procedure mnuRPLdb_init(MMenu: PSubmenu); far;
+     var   smnu : TPItems;
+           sbmnu : PSubMenu;
+           i,items,nl,ihk: int;
+           b : bool;
+     begin
+       items:= 0; nl:= 0; ihk:= 0;
+
+       smnu[items]:= Item (mnu_RPL_ADD,     cm_RPLadd,     nil);
+       inc(items);
+       smnu[items]:= Item (mnu_RPL_REPLACE, cm_RPLreplace, nil);
+       inc(items);
+       smnu[items]:= Item_(mnu_RPL_UPDATE_, cm_RPLdokonci, @is_RPLDB,true, nil);
+       inc(items);
+       add_newline_(0,nl,items,smnu);
+       smnu[items]:= Item_(mnu_RPL_ERRORS_, cm_RPLchyby, @is_RPLDBERR,true, nil);
+       inc(items);
+       b:= is_RPLDBERR {$IFDEF DEBUG} or true {$ENDIF};
+       smnu[items]:= Item_(mnu_RPL_CORRECT_, cm_RPLcorrect, @b,true, nil);
+       inc(items);
+       add_newline_(2,nl,items,smnu);
+       smnu[items]:= Item (mnu_RPL_RESTORE, cm_RPLrestore, nil);
+       inc(items);
+
+       for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i]);
+     end;
+
+
+ procedure mnuRPL_init(MMenu: PSubmenu); far;
+     var   smnu  : TPItems;
+           sbmnu : PSubMenu;
+           i,items,nl : int;
+     begin
+       items:= 0; nl:= 0;
+
+       {$IFDEF PROCESS_RPL}
+        smnu[items]:= Item (mnu_RPL_F2,  cm_RPL,nil);
+        inc(items);
+        smnu[items]:= Item (mnu_RPL_CHG, cm_RPLchg,nil);
+        inc(items);
+        smnu[items]:= Item (mnu_RPL_BRK, cm_RPLbrk,nil);
+        inc(items);
+        smnu[items]:= Item (mnu_RPL_CNT, cm_RPLcnt,nil);
+        inc(items);
+        add_newline_(0,nl,items,smnu);
+       {$ENDIF}
+
+       smnu[items]:= Item  (mnu_FPL_MAKE,cm_RPLspracuj,nil);
+       inc(items);
+       smnu[items]:= Item  (mnu_RPL_MAKE,cm_RPLmake,nil);
+       inc(items);
+       smnu[items]:= Item_ (mnu_RPL_MAKE_,cm_RPLpended,@is_RPL,true,nil);
+       inc(items);
+
+       add_newline_(0,nl,items,smnu);
+       {$IFDEF PROCESS_RPL}
+        sbmnu:= SubMenu(mnu_RPL_UPDATE, WinMenu(tit_OPTi,hlp_RPL_DB,nil),nil);
+        sbmnu^.PMenu_init:= @mnuRPLdb_init;
+        smnu[items]:= SubMenuInitialized(sbmnu,nil);
+        inc(items);
+       {$ENDIF}
+       smnu[items]:= Item  (tit_DNES, cmPREHLAD_RPL,  nil);
+       inc(items);
+
+       if not mnu_data_opt_common then
+          begin
+            add_newline_(2,nl,items,smnu);
+            sbmnu:= SubMenu(cut_r(mnu_OPTi)+'... ', OptMenu_S(tit_OPTi,hlp_mnu_RPL_NASTAV,cmNASTAV_SPRACOVANIE,15,nil),nil);
+            sbmnu^.PMenu_init:= @mnuRPLvolby_init;
+            smnu[items]:= SubMenuInitialized(sbmnu,nil);
+            inc(items);
+          end;
+
+       for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i])
+     end;
+
+{$ENDIF}

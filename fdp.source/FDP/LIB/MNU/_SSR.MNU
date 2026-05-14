@@ -1,0 +1,57 @@
+{ -----------------
+   SSR
+ תתתתתתתתתתתתתתתתתת
+}
+{$IFDEF SSR_MANAGEMENT}
+
+ {$I ..\lib\mnu\_SSR.h}
+
+ procedure mnuSSRvolby_init(MMenu: PSubmenu); far;
+     var   smnu : TPItems;
+           sbmnu : PSubMenu;
+           i,items,nl,ihk: int;
+           pb : bool;
+     begin
+       items:= 0; nl:= 0; ihk:= 0;
+       pb:= {$IFDEF BACKUP} false {$ELSE} true {$ENDIF};
+
+       (*{ IFDEF PROCESS_SSR}
+        smnu[items]:= Switch2_(' '+hk(ihk)+SSRPEND, @SSR_PND, @SERVERstatus,pb, nil);
+        inc(items);
+        smnu[items]:= Switch2_(' '+hk(ihk)+SSRADR,  @SSR_ADR, @SERVERstatus,pb, nil);
+        inc(items);
+        smnu[items]:= Switch2_(' '+hk(ihk)+SSRFPL,  @SSR_FPL, @SERVERstatus,pb, nil);
+        inc(items);
+        smnu[items]:= Switch2_(' '+hk(ihk)+SSRERR,  @SSR_ERR, @SERVERstatus,pb, nil);
+        inc(items);
+        add_newline_(0,nl,items,smnu);
+        smnu[items]:= Switch2 (' '+hk(ihk)+SSRA36YKA, @RUSSIAN_SSR,nil);
+        inc(items);
+       { ENDIF}*)
+
+       for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i]);
+     end;
+
+(*
+ procedure mnuSSRprehlad_init(MMenu: PSubmenu); far;
+     var   smnu    : TPItems;
+           sbmnu : PSubMenu;
+           i,items,nl : int;
+     begin
+       items:= 0; nl:= 0;
+
+       for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i]);
+     end;
+
+
+ procedure mnuSSR_init(MMenu: PSubmenu); far;
+     var   smnu  : TPItems;
+           sbmnu : PSubMenu;
+           i,items,nl : int;
+     begin
+       items:= 0; nl:= 0;
+
+       for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i])
+     end;
+*)
+{$ENDIF}

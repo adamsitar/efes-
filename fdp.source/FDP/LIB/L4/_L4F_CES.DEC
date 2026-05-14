@@ -1,0 +1,241 @@
+ { Zatial, kym sa vsetky vysky uvadzaju v desiatkach metrov
+ }
+  function _eto (s: string; var h,m: byte): bool;
+     var   b : byte;
+     begin
+       _eto:= GetTimeStr(h,m,b, delchar(getstr(s,3,[icao_NXT]),setPism))
+     end;
+
+  { HDO/330/0932
+    HDO/S1190/0612
+  }
+  function O_L4_FDP._include_ESTc_bod(kod: string): bool;
+     begin
+       _include_ESTc_bod:= true
+     end;
+
+  function O_L4_FDP._decode_ESTc_bod(s: string; vys: word; vys_: char; var bod: TOBxy; poloziek: int; var res: string): bool;
+     var   t,u : string;
+           v : word;
+           b : byte;
+           v_: char;
+           j,p : int;
+     begin
+       _decode_ESTc_bod:= false;
+       fillchar(bod,sizeof(bod),0);
+       bod.kod:= getstr(s,1,[icao_NXT]);
+       get_OB_XYM(bod.kod, bod);
+       bod.vys := vys;
+       bod.vys_:= vys_;
+       p:= getstritems(s,[icao_NXT]);
+       if (poloziek>1) and (poloziek<>p) then
+          begin
+            l4_err (a_RTE,s,0,err_RTE_neuplny_bod,res);
+            Exit
+          end;
+       if p>2 then
+         begin
+         { vyska }
+           u:= cut_(getstr(s,2,[icao_NXT]));
+           t:= delchar(u,setDig);
+           if t='' then u:= est_alt_+u;
+           decode_l4_vyss (u,bod.vys,bod.vys_,@v_); {then bod.vys:= _vys_OB (v,v_); VFR -> vyhodnoti spravne ... ? }
+           j:= 3
+         end
+       else j:= 2;
+       GetTimeStr(bod.h,bod.m,b, delchar(getstr(s,j,[icao_NXT]),setPism));
+       _decode_ESTc_bod:= true
+     end;
+
+
+
+  function O_L4_FDP._insert_FPLC_route (var _OBs: TOBxys; var _bodov: int; var FPLc: DcFPL): bool;
+     var   i: int;
+     begin
+       FPLc.bodov:= 0;
+       fillchar(FPLc.trat,sizeof(FPLc.trat),0);
+       for i:= 0 to _bodov-1 do
+         begin
+           if (i=0) and (FPLc.start.kod=_OBs[i].kod) then continue;
+           if (i=_bodov-1) and (FPLc.prist.kod=_OBs[i].kod) then break;
+           if FPLc.bodov=max_bod_FPLC then break;
+           if _include_ESTc_bod(_OBs[i].kod) then
+              begin
+                OBxy_to_OB(_OBs[i],FPLc.trat[FPLc.bodov]);
+                inc(FPLc.bodov)
+              end
+         end;
+     end;
+
+
+  function O_L4_FDP._decode_ESTc (var FPL: DFPL4; var FPLc: DcFPL; var res: string): bool;
+
+     var   s,t,u    : string;
+           i,k,ires : int;
+           p        : pchar;
+           r,ri     : single;
+           v,vi     : word;
+           v_,vi_,v1_,r_: char;
+           h,m      : byte;
+           dS,dSi   : real;
+
+           kod1     : string;
+           h1,m1    : byte;
+
+           _OBs     : POBxys;
+           _bodov   : int;
+
+           br1,br2,br3 : bool;
+
+     label X;
+
+     begin
+       res:= ''; ires:= 0;
+       _decode_ESTc:= false;
+       FillChar(FPLc,sizeof(FPLc),0);
+
+       New(_OBs); fillchar(_OBs^,sizeof(_OBs^),0);
+
+       with FPLc do
+         begin
+
+          { 7 identifikacia ...
+          }
+           stt := copy(FPL._3,1,kod_HEAD);
+
+           decode_l4_7(FPL._7,idn,ssr_,ssr);
+           ssr:= code_l4_7c(ssr);
+           {if find then
+              begin
+                _decode_CA_CPL_FPL:= _decode_CA_CPL_mFPL(FPL)
+                goto X
+              end;}
+
+          { 8 pravidla a typ letu...
+          } decode_l4_8  (FPL._8, _8a,_8b);
+
+          { 9 typ ...
+          } typ := FPL._9;
+            if decode_l4_9 (FPL._9, s,t,u) and ((t=ZZZZ) or (t='')) then
+               begin
+                 t:= _item_18(FPL._18,rmk_TYP,1);
+                 if s<>'' then t:= s + t;
+                 if u<>'' then t:= t + icao_NXT + u;
+                 typ:= t
+               end;
+
+          { 10 com ...
+          } com_ := FPL._10;
+
+          { 13 start ...
+          } decode_l4_13 (FPL._13, start.kod,start.h,start.m, start_.h,start_.m);
+            if (start.kod=ZZZZ) or (start.kod='') then start.kod:= _item_18(FPL._18,rmk_DEP,1);
+            {if start.kod=_13 then begin start.h:= 0; start.m:= 0; end;}
+
+          { 16 prist ...
+          } decode_l4_16_ (FPL._16, start.h,start.m, prist.kod, s,prist.h,prist.m,h,m, t, br1,br2,br3);
+            if (prist.kod=ZZZZ) or (prist.kod='') then prist.kod:= _item_18(FPL._18,rmk_DEST,1);
+            {if prist.kod=_16 then begin prist.h:= 0; prist.m:= 0; end;}
+
+          { 14 vstupny bod
+          }
+            if     (FPL._14<>'')
+               and decode_l4_14 (FPL._14, kod1,eet.h,eet.m,vys,v_, true, vys1,v1_,vys1_a)
+                   then
+              begin
+                vys := _vys_OB(vys ,v_);
+                if vys1<>0 then vys1:= _vys_OB(vys1,v1_)
+                else {begin vys1:= vys; vys1_a:= ' ' end};
+
+                if (s=start.kod) and (TimeToSec(start.h,start.m,0) = TimeToSec(prist.h,prist.m,0)) then
+                   begin
+                     start.h:= h;
+                     start.m:= m;
+                   end
+              end;
+
+          { vyhladanie vstupneho bodu, urcenie profilu trate ...
+            - na prvom mieste sa moze nachadzat rychlost a vyska letu
+          }
+            p:= FPL._15; k:= GetPStrItems(p,[icao_NXIT]);
+            i:= 1; _bodov:= 0;
+            vi:= vys; vi_:= vysOB;
+            while (i<=k) and (_bodov<max_OB) do
+              begin
+                s:= GetPStr(p,i,[icao_NXIT]);
+                if (i=1) and decode_l4_rych_vys(s, r,r_, v,v_) then
+                   begin
+                     vys:= _vys_OB(v,v_);
+                     rych:= r; rych_:= r_;
+                     vi:= v; vi_:= v_
+                   end
+                else begin
+                       t:= getstr(s,1,[icao_NXT]);
+                       if (i=1) and (t=start.kod) then
+                          begin
+                            if length(getstr(FPL._13,1,[icao_NXIT]))=kod_AP then _eto(s, start.h,start.m)
+                          end
+                       else if (t=prist.kod) and (i=k) then
+                               begin
+                                 if length(getstr(FPL._16,1,[icao_NXIT]))=kod_AP then _eto(s, prist.h,prist.m)
+                               end
+                       else if     _include_ESTc_bod(t)
+                               and _decode_ESTc_bod(s,vi,vi_, _OBs^[_bodov], poloziek_ESTc_bodov, res) then
+                               begin
+                                 inc(_bodov);
+                                 vi:= _OBs^[_bodov].vys;
+                                 vi_:= _OBs^[_bodov].vys_;
+                               end;
+                       if res<>'' then goto X
+                     end;
+                inc(i)
+              end;
+
+          {if (kod1=_OBs^[0].kod) and (vys1=vys) and (vys1<>_OBs^[0].vys) then vys1:= _OBs^[0].vys;}
+
+          _urc_trat_FPLC (_OBs^,_bodov, _exclude_uknown_points);
+
+          { prepocet tratovej rychlosti, ak nie je uvedena (=0)
+          }
+            if (rych=0) and (_bodov>1) then
+               begin
+                 rych_:= spdK; dS:= 0;
+                 for i:= 0 to _bodov-2 do
+                   if (_OBs^[i].x<>0) and (_OBs^[i].y<>0) and (_OBs^[i+1].x<>0) and (_OBs^[i+1].y<>0) then
+                      dS:= dS+vzdialenost(_OBs^[i].x,_OBs^[i].y, _OBs^[i+1].x,_OBs^[i+1].y);
+                 dSi:= TimeToSec(_OBs^[_bodov-1].h,_OBs^[_bodov-1].m,0)-TimeToSec(_OBs^[0].h,_OBs^[0].m,0);
+                 if dSi<0 then dSi:= dSi+secDay;
+                 if dSi>0 then rych:= (secHour/1000)*(dS/dSi)
+                 else rych:= 0;
+                 if rych>3000 then rych:= 0;
+               end;
+
+
+          { trat...
+          }
+           _insert_FPLC_route (_OBs^,_bodov, FPLc);
+
+           start_.h:= start.
+           h; start_.m:= start.m;
+
+           {if (FPL._14<>'') and (bodov>0) and (eet.h<>0) and (eet.m<>0) then begin trat[0].h:= eet.h; trat[0].m:= eet.m end;}
+
+           init_date(FPLc.date, year,month,day);
+           datum_cFPL(FPLc);
+
+           ires:= regularita_casov_na_bodoch_cFPL (@FPLc,true);
+           if ires>-1 then
+              begin
+                l4_err(a_15c,'',i_15c,err_15c_nespravny_casovy_profil, s);
+                writeln_pkt(nil,0,arch_SYS,s,cl_SYS,false,true);
+              end;
+
+           format_cFPL(@FPLc);
+
+           {if (not br2) then pristatie_cFPL(@FPLc);}
+         end;
+
+       X: Dispose(_OBs);
+       if res<>'' then res:= FPLc.idn+icao_NXT+FPLc.start.kod + icao_ARR + res;
+       _decode_ESTc:= res=''
+     end;

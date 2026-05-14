@@ -1,0 +1,82 @@
+{$IFDEF FPL4}
+
+{ תתתתתתתתתתתתתתתתתת
+   EST
+  תתתתתתתתתתתתתתתתתת
+}
+
+ function O_OPL._code_EST (var FPL: DFPL4): pchar;
+    var   pch: pchar;
+    begin
+      with FPL do pch:= StrPasNew
+        (
+                     _7
+         +icao_ARR + _8
+         +icao_ARR + format_s(_9)
+         +icao_ARR + _13
+         +icao_ARR + _14
+         +icao_ARR + StrPas(_22)
+         +icao_ARR + _16
+         +icao_ARR
+        );
+      pch:= StrNCopy(pch,FPL._15,true,false);
+
+      _code_EST:= pch
+    end;
+
+
+ function O_OPL._code_ESTc(var FPLc: DcFPL; var FPL: DFPL4): bool;
+    var   hh,mm,ss : byte;
+          s,t,u    : string;
+          i        : int;
+          vys_     : char;
+    begin
+      fillchar(FPL,sizeof(FPL),0);
+
+      with FPLc do
+        begin
+
+          FPL._7 := code_l4_7(idn,mod_A,ssr);
+
+          { 8 pravidla a typ letu...
+          } FPL._8 := code_l4_8(_8a,_8b, _l4444m);
+
+          { 9 typ ...
+          } FPL._9 := _code_9_by8643(typ,false);
+
+          { 10 com ...
+          } FPL._10:= code_l4_10(com_,ssr_);
+
+          FPL._13:= code_l4_13a(start.kod,false);
+          FPL._16:= code_l4_16a(prist.kod,false);
+          if (start_.h<>0) or (start_.m<>0) then
+             begin
+               FPL._13:= FPL._13+TimeToStr(start.h,start.m,'');
+               if (prist.h<>0) or (prist.m<>0) then
+                  begin
+                    TimeFromSec(Abs(TimeToSec(prist.h,prist.m,0)-TimeToSec(start.h,start.m,0)),hh,mm,ss);
+                    FPL._16:= FPL._16+TimeToStr(hh,mm,'');
+                  end;
+             end;
+
+          if bodov>0 then with trat[0] do FPL._14:= kod+icao_NXT+TimeToStr(h,m,'')+code_l4_vys_(vys,vysOB,FL_from_alt,false)
+          else with start do FPL._14:= kod+icao_NXT+TimeToStr(h,m,'')+code_l4_vys_(vys,vysOB,FL_from_alt,false);
+
+          if bodov>0 then
+             begin
+               with trat[0] do
+                   FPL._15:= StrNPCopy(FPL._15,code_l4_bod(kod, vys,vysOB, FL_from_alt,alt_VFR_sym, h,m),true,true);
+               for i:= 1 to bodov-1 do with trat[i] do
+                   FPL._15:= StrNPCopy(FPL._15,icao_NXIT+code_l4_bod(kod, vys,vysOB, FL_from_alt,alt_VFR_sym, h,m),true,true);
+             end;
+
+          s:= cut_(inf);
+          if s<>'' then s:= rmk_STS + icao_NXT + s;
+          FPL._18:= strpasnew(l4_format_s_(s,RMK_0));
+
+          FPL._22:= StrPasNew(code_l4_rych_vys(rych,rych_, vys,vysOB, FL_from_alt,alt_VFR_sym));
+        end;
+      _code_ESTc:= true
+    end;
+
+{$ENDIF}

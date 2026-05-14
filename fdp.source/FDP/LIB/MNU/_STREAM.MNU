@@ -1,0 +1,343 @@
+const is_letvis_menu: bool = false;
+
+{$I ..\lib\mnu\_stream.h}
+
+
+{$I ..\lib\mnu\_aftn.mnu}
+{$I ..\lib\mnu\_oldi.mnu}
+{$I ..\lib\mnu\_asoc.mnu}
+{$I ..\lib\mnu\lk\_opl_ext.mnu}
+
+{$I ..\lib\mnu\_nodes.mnu}        { inicializacia uzlov }
+
+
+procedure mnuS_EN_init(MMenu: PSubmenu); far;
+    var   smnu : TPItems;
+          i,items,nl : int;
+
+    begin
+      items:= 0; nl:= 0;
+
+      {$IFDEF CONNECT_TO_AFTN}
+       smnu[items] := Switch2  (M_AFTN, @power_AFTN, nil);
+       inc(items);
+      {$ENDIF}
+
+      {$IFDEF CONNECT_TO_ASTA_EXT}
+       smnu[items] := Switch2  (M_ASTA, @power_ASTA, nil);
+       inc(items);
+       {$IFDEF ASTA_FDP} {$IFDEF ASTA_PRN}
+        smnu[items] := Switch2  (M_ASTA_FDP, @power_ASTA_FDP, nil);
+        inc(items);
+        smnu[items] := Switch2  (M_ASTA_PRN, @power_ASTA_PRN, nil);
+        inc(items);
+       {$ENDIF} {$ENDIF}
+
+      {$ENDIF}
+
+      {$IFDEF CONNECT_TO_CAMUS}
+       smnu[items]:= Switch2 (M_CAMUS, @power_CAMUS, nil);
+       inc(items);
+      {$ENDIF}
+
+      {$IFDEF CONNECT_TO_OPL_EXT}
+       smnu[items] := Switch2  (M_OPL+' - '+M_LINEM, @line_master_OPL, nil);
+       inc(items);
+       {$IFDEF OPL_EXT_ASYNC}
+        smnu[items] := Switch2  (delchar(M_OPL,[cnst_HotKey])+' - as~y~nc ', @power_OPL_async, nil);
+        inc(items);
+       {$ENDIF}
+       {$IFDEF OPL_EXT_UDP} {$IFDEF UDP}
+        smnu[items] := Switch2  (delchar(M_OPL,[cnst_HotKey])+' ~-~ '+inet_ntoa(OPLadr_ip)+' ', @power_OPL_udp, nil);
+        inc(items);
+       {$ENDIF} {$ENDIF}
+      {$ENDIF}
+
+      {$IFDEF CONNECT_TO_ASOC}
+       smnu[items] := Switch2  (M_ASOC,  @power_ASOC, nil);
+       inc(items);
+      {$ENDIF}
+
+      {$IFDEF CONNECT_TO_VERA} {$IFDEF UDP}
+       smnu[items] := Switch2  (M_VERA+' - '+inet_ntoa(VERAadr_ip)+' ',@power_VERA,nil);
+       inc(items);
+      {$ENDIF} {$ENDIF}
+
+      for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i]);
+    end;
+
+
+procedure mnuS_OPT_init(MMenu: PSubmenu); far;
+    var   smnu : TPItems;
+          sbmnu : PSubMenu;
+          i,items,nl, p,j : int;
+    begin
+      items:= 0; nl:= 0;
+
+      {$IFDEF CONNECT_TO_AFTN} {$IFDEF BACKUP_AFTN}
+       sbmnu:= SubMenu(cut_r(M_AFTN)+'... ', WinMenu(M_AFTN, hlpmnuSYSTEM_EXT_AFTN,nil),nil);
+       sbmnu^.PMenu_init:= @mnuAFTN_OPT_init;
+       smnu[items]:= SubMenuInitialized(sbmnu,nil);
+       inc(items);
+      {$ENDIF} {$ENDIF}
+
+      {IFDEF CONNECT_TO_CAMUS IFDEF OLDI
+       sbmnu:= SubMenu(cut_r(M_CAMUS)+'... ', WinMenu(M_CAMUS, hlpmnuSYSTEM_EXT_CAMUS,nil),nil);
+       sbmnu^.PMenu_init:= @mnuOLDI_init;
+       smnu[items]:= SubMenuInitialized(sbmnu,nil);
+       inc(items);
+      ENDIF}
+
+      {$IFDEF CONNECT_TO_OPL_EXT}
+       sbmnu:= SubMenu(cut_r(M_OPL)+'... ', OptMenu_S(M_OPL, hlpmnuSYSTEM_EXT_OPL,cmDefault,15,nil),nil);
+       sbmnu^.PMenu_init:= @mnuOPL_OPT_init;
+       smnu[items]:= SubMenuInitialized(sbmnu,nil);
+       inc(items);
+      {$ENDIF}
+
+      {IFDEF CONNECT_TO_ASOC
+       sbmnu:= SubMenu(cut_r(M_ASOC)+'... ',WinMenu(M_ASOC, hlpmnuSYSTEM_EXT_ASOC,nil),nil);
+       sbmnu^.PMenu_init:= @mnuASOC_init;
+       smnu[items]:= SubMenuInitialized(sbmnu,nil);
+       inc(items);
+      ENDIF}
+
+      for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i]);
+    end;
+
+
+procedure mnuS_COM_init(MMenu: PSubmenu); far;
+    var   smnu : TPItems;
+          sbmnu : PSubMenu;
+          i,items,nl, p,j : int;
+    begin
+      items:= 0; nl:= 0;
+
+      { IFDEF CONNECT_TO_AFTN
+       sbmnu:= SubMenu(cut_r(M_AFTN)+'... ', WinMenu(M_AFTN, hlpmnuSYSTEM_EXT_AFTN,nil),nil);
+       sbmnu^.PMenu_init:= @mnuAFTN_init;
+       smnu[items]:= SubMenuInitialized(sbmnu,nil);
+       inc(items);
+      ENDIF}
+
+      {$IFDEF CONNECT_TO_CAMUS} {$IFDEF OLDI}
+       sbmnu:= SubMenu(cut_r(M_CAMUS)+'... ', WinMenu(M_CAMUS, hlpmnuSYSTEM_EXT_CAMUS,nil),nil);
+       sbmnu^.PMenu_init:= @mnuOLDI_COM_init;
+       smnu[items]:= SubMenuInitialized(sbmnu,nil);
+       inc(items);
+      {$ENDIF} {$ENDIF}
+
+      {$IFDEF CONNECT_TO_OPL_EXT}
+       sbmnu:= SubMenu(cut_r(M_OPL)+'... ', WinMenu(M_OPL, hlpmnuSYSTEM_EXT_OPL,nil),nil);
+       sbmnu^.PMenu_init:= @mnuOPL_COM_init;
+       smnu[items]:= SubMenuInitialized(sbmnu,nil);
+       inc(items);
+      {$ENDIF}
+
+      {$IFDEF CONNECT_TO_ASOC}
+       sbmnu:= SubMenu(cut_r(M_ASOC)+'... ',WinMenu(M_ASOC, hlpmnuSYSTEM_EXT_ASOC,nil),nil);
+       sbmnu^.PMenu_init:= @mnuASOC_COM_init;
+       smnu[items]:= SubMenuInitialized(sbmnu,nil);
+       inc(items);
+      {$ENDIF}
+
+      {$IFDEF CONNECT_TO_VERA}
+       {sbmnu:= SubMenu(cut_r(M_VERA)+'... ',WinMenu(M_VERA, hlpmnuSYSTEM_EXT_VERA,nil),nil);
+       sbmnu^.PMenu_init:= @mnuVERA_COM_init;
+       smnu[items]:= SubMenuInitialized(sbmnu,nil);
+       inc(items);}
+      {$ENDIF}
+
+      for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i]);
+    end;
+
+
+procedure mnuS_VYPIS_init(MMenu: PSubmenu); far;
+    var   smnu : TPItems;
+          i,items,nl : int;
+
+    begin
+      items:= 0; nl:= 0;
+
+      smnu[items] := Switch2 (V_PKT,     @WRITELN_FLOW, nil);
+      inc(items);
+
+      {$IFDEF CONNECT_TO_ASTA_EXT}
+        {add_newline(nl,items,smnu);}
+        smnu[items] := Switch2 (V_ASTA,    @writeln_ASTA, nil);
+        inc(items);
+      {$ENDIF}
+
+      {$IFDEF CAMUS}
+        {add_newline(nl,items,smnu);}
+        smnu[items] := Switch2  (V_CAMUS,  @writeln_CAMUS, nil);
+        inc(items);
+      {$ENDIF}
+
+      {$IFDEF CONNECT_TO_OPL_EXT}
+        {add_newline(nl,items,smnu);}
+        smnu[items] := Switch2  (V_OPL,    @writeln_OPL, nil);
+        inc(items);
+        smnu[items] := Switch2  (V_OPLhb,  @writeln_OPL_HeartBeat, nil);
+        inc(items);
+      {$ENDIF}
+
+      {$IFDEF CONNECT_TO_ASOC}
+        {add_newline(nl,items,smnu);}
+        smnu[items] := Switch2  (V_ASOC,   @writeln_ASOC, nil);
+        inc(items);
+      {$ENDIF}
+
+      {$IFDEF CONNECT_TO_VERA}
+        {add_newline(nl,items,smnu);}
+        smnu[items] := Switch2  (V_VERA,   @writeln_VERA, nil);
+        inc(items);
+      {$ENDIF}
+
+      {$IFDEF WRITELN_NET}
+        add_newline(nl,items,smnu);
+        smnu[items] := Switch2 (V_FDPrec,  @writeln_NET_REC,  nil);
+        inc(items);
+        smnu[items] := Switch2 (V_FDPsen,  @writeln_NET_SEND, nil);
+        inc(items);
+        smnu[items] := Switch2 (V_FDPdat,  @writeln_NET_DATA, nil);
+        inc(items);
+        smnu[items] := Switch2 (V_FDPack,  @writeln_NET_ACK, nil);
+        inc(items);
+        smnu[items] := Switch2 (V_FDPhb,   @writeln_NET_HeartBeat, nil);
+        inc(items);
+        {smnu[items] := Switch2 (V_FDPhba,  @archive_NET_HeartBeat, nil);
+        inc(items);}
+        smnu[items] := Switch2 (V_MEM,     @writeln_MEM, nil);
+        inc(items);
+      {$ENDIF}
+
+      {$IFDEF X25}
+        smnu[items] := Switch2 (A_X25,     @X25_archive, nil);
+        inc(items);
+      {$ENDIF}
+
+      for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i]);
+    end;
+
+
+procedure mnuS_ARCH_init(MMenu: PSubmenu); far;
+    var   smnu       : TPItems;
+          i,items,nl : int;
+    begin
+      items:= 0; nl:= 0;
+
+      {$IFDEF ARCHIVE_AFTN}
+       smnu[items] := Item   (M_AFTN,  cmARCHIV_AFTN,nil);
+       inc(items);
+      {$ENDIF}
+
+      {$IFDEF ARCHIVE_ASTA}
+       smnu[items] := Item   (M_ASTA,  cmARCHIV_ASTA, {@enASTA_ARCH, true,}nil);
+       inc(items);
+      {$ENDIF}
+
+      {$IFDEF ARCHIVE_CAMUS}
+       smnu[items] := Item   (M_CAMUS, cmARCHIV_CAMUS,nil);
+       inc(items);
+      {$ENDIF}
+
+      {$IFDEF ARCHIVE_ASOC}
+       smnu[items] := Item   (M_ASOC,  cmARCHIV_ASOC,nil);
+       inc(items);
+      {$ENDIF}
+
+      {$IFDEF ARCHIVE_VERA}
+       smnu[items] := Item   (M_VERA,  cmARCHIV_VERA,nil);
+       inc(items);
+      {$ENDIF}
+
+      {$IFDEF ARCHIVE_OPL}
+       smnu[items] := Item   (M_OPL,   cmARCHIV_OPL,nil);
+       inc(items);
+       (*{$IFDEF OPL__SAVE_STREAM}
+        smnu[items] := Item_ (S_OPLstr, cmARCHIV_OPS, @OPL__SAVE_STREAM, true,nil);
+        inc(items);
+       {$ENDIF}*)
+      {$ENDIF}
+
+      {$IFDEF MET} {$IFDEF MET_RLI}
+       smnu[items]:= Item    (AMRL, cmARCHIV_MRL, nil);
+       inc(items);
+      {$ENDIF} {$ENDIF}
+
+      add_newline(nl,items,smnu);
+      {$IFDEF ARCHIVE_DAR}
+       smnu[items] := Item   (M_RLIbrc, cmARCHIV_DAR,  {@enRLI_ARCH,  true,}nil);
+       inc(items);
+      {$ENDIF}
+
+      {$IFDEF ARCHIVE_NET}
+       smnu[items] := Item   (M_FDPnet, cmARCHIV_NET,  {@enNET_ARCH,  true,}nil);
+       inc(items);
+      {$ENDIF}
+      smnu[items]:= Item     (M_LOG, cmARCHIV_COM,nil);
+      inc(items);
+
+      for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i]);
+    end;
+
+
+procedure mnuSTREAM_init(MMenu: PSubmenu); far;
+    var   smnu  : TPItems;
+          sbmnu : PSubMenu;
+          i,j,p,items,nl : int;
+    begin
+      items:= 0; nl:= 0;
+
+      p:= 0; j:= 0;
+      while (j<NODEpoc) do
+        begin
+          if (NODEs^[j].desc.nd in [master,slave]) then inc(p);
+          inc(j)
+        end;
+      if p>0 then
+         begin
+           add_newline(nl,items,smnu);
+           sbmnu:= SubMenu(cut_r(S_LETVIS)+'...', WinMenu(S_LETVIS, hlpmnuSYSTEM_NET,nil),nil);
+           sbmnu^.PMenu_init:= @mnuNET_init;
+           smnu[items]:= SubMenuInitialized(sbmnu,nil);
+           inc(items);
+         end;
+
+      {$IFDEF EXTERNAL_NET}
+       {$IFDEF EXT_ONOFF}
+        sbmnu:= SubMenu(cut_r(S_EXTEN)+'... ', OptMenu_S(S_EXTEN,hlpmnuSYSTEM_EXT_ON,cmDefault,15,nil),nil);
+        sbmnu^.PMenu_init:= @mnuS_EN_init;
+        smnu[items]:= SubMenuInitialized(sbmnu,nil);
+        inc(items);
+       {$ENDIF}
+
+       {$IFDEF EXT_COM}
+        sbmnu:= SubMenu(cut_r(S_EXTCOM)+'... ', WinMenu(S_EXTCOM,hlpmnuSYSTEM_EXT_COM,nil),nil);
+        sbmnu^.PMenu_init:= @mnuS_COM_init;
+        smnu[items]:= SubMenuInitialized(sbmnu,nil);
+        inc(items);
+       {$ENDIF}
+
+       {$IFDEF EXT_OPTIONS}
+        sbmnu:= SubMenu(cut_r(S_EXTOPT)+'... ', WinMenu(S_EXTOPT,hlpmnuSYSTEM_EXT_OPT,nil),nil);
+        sbmnu^.PMenu_init:= @mnuS_OPT_init;
+        smnu[items]:= SubMenuInitialized(sbmnu,nil);
+        inc(items);
+       {$ENDIF}
+      {$ENDIF}
+
+      sbmnu:= SubMenu(cut_r(S_VYPIS)+'... ', OptMenu_S(S_VYPIS,hlpmnuSYSTEM_VYPIS,cmDefault,15,nil),nil);
+      sbmnu^.PMenu_init:= @mnuS_VYPIS_init;
+      smnu[items]:= SubMenuInitialized(sbmnu,nil);
+      inc(items);
+
+      sbmnu:= SubMenu(cut_r(S_ARCH)+'... ',   WinMenu(S_ARCH,hlpmnuSYSTEM_ARCH,nil),nil);
+      sbmnu^.PMenu_init:= @mnuS_ARCH_init;
+      smnu[items]:= SubMenuInitialized(sbmnu,nil);
+      inc(items);
+
+
+      for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i]);
+    end;

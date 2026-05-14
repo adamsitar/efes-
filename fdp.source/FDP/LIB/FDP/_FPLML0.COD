@@ -1,0 +1,296 @@
+{ ---------------------------------------------
+  dekodovanie povodneho datoveho formatu kvoli
+   - konverzii suborov pri instalacii
+   - konverzii pri komunikacii so starsim sw
+
+}
+
+ function code0_mFPL_1(FPL: PDmFPL): string;
+    var   s,t : string;
+          i   : int;
+          v   : word;
+          v_  : char;
+
+    function code_typ(typ: string): string;
+       var   _9a,_9b,_9c : string;
+       begin
+         _9b:= typ;
+         {$IFDEF CZ}
+          decode_l4_9 (typ, _9a,_9b,_9c);
+          if _9a<>'01' then _9b:= _9a+_9b;
+         {$ENDIF}
+         code_typ:= format_s(_9b)
+       end;
+
+    begin
+      with FPL^ do
+        begin
+          s:= ZAC_SPR     + format_s(idn)+'-'
+              + {$IFNDEF L4444M} format_(idn_) {$ELSE} ' ' {$ENDIF}
+              ; {   + 5+1 }
+          s:= s + ODD_SPR + format_s(ssr_)+'-'+format_s(ssr);    {   + 1+4 }
+          s:= s + ODD_SPR + code_typ(typ)+'-'+code_typ(typ2)+'-' + format_(rych_);   {   + 4+4+1 }
+          str(rych:RYCH_C:RYCH_D,t);
+          s:= s + t +'-'+format_(_8a);                           {   + 5+1 }
+          s:= s + ODD_SPR + code_l4_vys_(vys,vys_,0,alt_VFR_rdp);      { vys_+inttostr(vys,4,0); + 1+4 }
+          s:= s + ODD_SPR + code_l4_vys_(vys2,vys2_,0,alt_VFR_rdp);    { vys2_+inttostr(vys2,4,0); }
+          s:= s + ODD_SPR + format_s(start.kod)+'-'+TimeToStr(start.h,start.m,''); {  + 4+4 }
+          s:= s + ODD_SPR + format_s(prist.kod)+'-'+TimeToStr(prist.h,prist.m,''); {  + 4+4 }
+          s:= s + ODD_SPR + format_s(VU);              {   +   2 }
+          s:= s + ODD_SPR + format_s(let);             {   +   4 }
+          s:= s + ODD_SPR; for i:= 0 to max_ulohy_FPLm-1 do s:= s + ulohy[i] + ' '; { + 6*2 }
+          s:= s + ODD_SPR + DateToStr(date.d,date.m,date.r,0,'');
+          s:= s + ODD_SPR + code0_stat(format_s(stat))
+        end;
+      code0_mFPL_1:= s
+    end;
+
+ function code0_mFPL_2(FPL: PDmFPL): string;
+    var   s,t : string;
+    begin
+      with FPL^ do
+        begin
+          s:=     ODD_SPR + format_s(strpas(trat));
+          s:= s + ODD_SPR + format_s(strpas(pozn));
+          s:= s + ODD_SPR + _8b               { neskoro pridane }
+                + ODD_SPR + com_              { neskoro pridane }
+                + ODD_SPR + format_s(prist_)  { neskoro pridane }
+                + KON_SPR
+        end;
+      code0_mFPL_2:= s
+    end;
+
+
+ procedure decode0_mFPL_1(s: string; FPL: PDmFPL);
+     var   i,ii,c,p  : int;
+           t,t1,t2   : string;
+           pom       : byte;
+     begin
+       fillchar(FPL^,sizeof(DmFPL),0);
+     { 1. cast --------------------------------------------- }
+       with FPL^ do
+         begin
+           t    := getstr(s,1,setLET_1_1);
+           idn  := cut_(getstr(t,1,['-']));
+           idn_ := getcharu(getstr(t,2,['-']));
+
+           t    := getstr(s,2,setLET_1_1);
+           ssr_ := getcharu(getstr(t,1,['-']));
+           ssr  := getstr(t,2,['-']);
+
+           t    := getstr(s,3,setLET_1_1);
+           typ  := getstr(t,1,['-']);
+           typ2 := getstr(t,2,['-']);
+           t1   := getstr(t,3,['-']);
+           rych_:= t1[1];
+           t2   := copy(t1,2,length(t1)-1);
+           val(t2,rych,c);
+           _8a  := getcharu(getstr(t,4,['-']));
+
+           {
+           t    := getstr(s,4,setLET_1_1);
+           vys_ := getcharu(t[1]);
+           vys  := scis(t,2,length(t)-1);
+           }
+           decode_l4_vys_(getstr(s,4,setLET_1_1),vys,vys_,nil,p,true);
+
+           {
+           t    := getstr(s,5,setLET_1_1);
+           vys2_:= getcharu(t[1]);
+           vys2 := scis(t,2,length(t)-1);
+           }
+           decode_l4_vys_(getstr(s,5,setLET_1_1),vys2,vys2_,nil,p,true);
+
+           t:= getstr(s,6,setLET_1_1);
+           start.kod:= getstr(t,1,['-']);
+           GetTimeStr(start.h,start.m,pom, getstr(t,2,['-']));
+
+           t:= getstr(s,7,setLET_1_1);
+           prist.kod:= getstr(t,1,['-']);
+           GetTimeStr(prist.h,prist.m,pom, getstr(t,2,['-']));
+
+           VU:= getstr(s,8,setLET_1_1);
+
+           let:= cut_(getstr(s,9,setLET_1_1));
+
+           t := getstr(s,10,setLET_1_1);
+           for i:= 0 to max_ulohy_FPLm-1 do ulohy[i]:= getstr(t,i+1,set_);
+
+           GetDateStr(date.r,date.m,date.d, getstr(s,11,setLET_1_1),false);
+           stat := decode0_stat(getstr(s,12,setLET_1_1))
+         end
+     end;
+
+ procedure decode0_mFPL_2(s: string; FPL: PDmFPL);
+
+     function snl(s: string): string;
+        var   i,p : int;
+        begin
+          if length(s)>dlz_rdk_FPLm then
+             begin
+               p:= dlz_rdk_FPLm;
+               while (p>1) and (not (s[p] in[' ',kbCRLF])) do dec(p);
+               if p>1 then s[p]:= kbCRLF
+            end;
+          snl:= s
+        end;
+
+     begin
+     { 2. cast --------------------------------------------- }
+       with FPL^ do
+         begin
+           trat   := strpasnew(snl(getstr(s,1,setLET_1_1)));
+           pozn   := strpasnew(snl(getstr(s,2,setLET_1_1)));
+           _8b := getchar(getstr(s,3,setLET_1_1));
+           com_  := getstr(s,4,setLET_1_1);
+           prist_:= cut_(getstr(s,5,setLET_1_1))
+         end
+     end;
+
+{ ---------------------
+  Prenos
+  ---------------------
+}
+ procedure code0_mFPL(FPL: PDmFPL; var pkt: TNETpkt); far;
+     var   s1,s2 : string;
+           p : word;
+     begin
+       s1:= code0_mFPL_1(FPL);
+       s2:= code0_mFPL_2(FPL);
+
+       if not new_NETpkt_data (nil,length(s1)+length(s2), pkt.pkt) then Exit;
+       move(s1[1],pkt.pkt.data^[0],length(s1)); p:= length(s1);
+       move(s2[1],pkt.pkt.data^[p],length(s2));
+     end;
+
+ procedure code0NX_mFPL(FPL: PDmFPL; var pkt: TNETpkt); far;
+     var   s1,s2 : string;
+           p : word;
+           pch: pchar;
+     begin
+       s1:= code0_mFPL_1(FPL);
+       s2:= replchar(code0_mFPL_2(FPL),[kbCRLF],icao_NXIT);
+
+       if not new_NETpkt_data (nil,length(s1)+length(s2), pkt.pkt) then Exit;
+       move(s1[1],pkt.pkt.data^[0],length(s1)); p:= length(s1);
+       move(s2[1],pkt.pkt.data^[p],length(s2));
+     end;
+
+ procedure decode0_mFPL(const pkt: TNETpkt; FPL: PDmFPL);
+     var   s  : string;
+           ii : int;
+     begin
+       ii:= pkt_split(pkt.pkt, 12);
+
+       s:= init_str(@pkt.pkt.data^[0],ii);
+       decode0_mFPL_1(s, FPL);
+
+       s:= init_str(@pkt.pkt.data^[ii],pkt.pkt.dlz-ii+1);
+       decode0_mFPL_2(s, FPL);
+
+       {init_time(FPL^.time, hour,min, sec);}
+       format_mFPL(FPL);
+       {$IFDEF NET}
+         rec_data(pkt.ods, FPL^.rec);
+       {$ENDIF}
+     end;
+
+
+{ ---------------------
+  DB
+  ---------------------
+}
+ procedure _codeDB0_FPLM(FPL: PDmFPL; buff: PDB_buff; head: PDB_head); far;
+     var   s : string;
+     begin
+       s:= code0_mFPL_1(FPL);
+       {$IFDEF NET} s:= s+KON_SPR+rectostr(FPL^.rec); {$ENDIF}
+       str_toDBstr(s,buff^[0]);
+
+       s:= code0_mFPL_2(FPL);
+       {$IFDEF NET} s:= s+KON_SPR+inttostr(FPL^.cor_,1,1); {$ENDIF}
+       str_toDBstr(s,buff^[1]);
+     end;
+
+ procedure _decodeDB0_FPLM(buff: PDB_buff; FPL: PDmFPL; head: PDB_head); far;
+     {var   s : string;
+     begin
+       Move(buff^[0],s[0],ord(buff^[0][0])+1);
+       decode0_mFPL_1(s, FPL);
+
+       Move(buff^[1],s[0],ord(buff^[1][0])+1);
+       decode0_mFPL_2(s, FPL);
+       FPL^.cor_:= byte(getint(s,getstritems(s,setLET_1_1),setLET_1_1));}
+
+     var   s,t : string;
+           i : int;
+           p : pchars;
+     begin
+       fillchar(FPL^,sizeof(FPL^),0);
+       with FPL^ do
+         begin
+          { data
+          }
+           s:= DBstr_to_str_ (buff^[db_mFPL_data]); p:= @s[1];
+
+           get_s(p, @idn[0],sizeof(idn));
+           get_s(p, @idn_, sizeof(idn_));
+           get_s(p, @ssr[0],sizeof(ssr));
+
+           get_s(p, @_8a,sizeof(_8a));
+           get_s(p, @_8b,sizeof(_8b));
+
+           get_s(p, @com_[0],sizeof(com_));
+           get_s(p, @ssr_[0],sizeof(ssr_));
+
+           get_s(p, @typ[0],sizeof(typ));
+           get_s(p, @typ2[0],sizeof(typ2));
+
+           get_s(p, @rych,sizeof(rych));
+           get_s(p, @rych_,sizeof(rych_));
+
+           get_s(p, @vys,sizeof(vys));
+           get_s(p, @vys_,sizeof(vys_));
+           get_s(p, @vys2,sizeof(vys2));
+           get_s(p, @vys2_,sizeof(vys2_));
+
+           get_s(p, @start,sizeof(start));
+           get_s(p, @prist,sizeof(prist));
+           get_s(p, @prist_[0],sizeof(prist_));
+
+           get_s(p, @vu[0],sizeof(vu));
+           get_s(p, @ulohy,sizeof(ulohy));
+
+
+          { trat
+          }
+           FPL^.trat:= decode_line_i (DBstr_to_str(buff^[db_mFPL_15_1]), FPL^.trat,[]);
+           FPL^.trat:= decode_line_i (DBstr_to_str(buff^[db_mFPL_15_2]), FPL^.trat,[]);
+
+
+          { pozn
+          }
+           {FPL^.pozn:= decode_line_i (DBstr_to_str(buff^[db_mFPL_18]), FPL^.pozn,[]);}
+           FPL^.pozn:= strpasnew (DBstr_to_str(buff^[db_mFPL_18]));
+
+
+          { ine udaje
+          }
+           s:= DBstr_to_str_ (buff^[db_mFPL_19]); p:= @s[1];
+           get_s(p, @date,sizeof(date));
+           get_s(p, @dap,sizeof(dap));
+           get_s(p, @let[0],sizeof(let));
+
+           get_s(p, @stat[0],sizeof(stat)); stat:= cnst_active;
+
+           get_s(p, @cor_,sizeof(cor_));
+           get_s(p, @TRG,sizeof(TRG));
+           get_s(p, @RDP,sizeof(RDP));
+           get_s(p, @LAM,sizeof(LAM));
+
+          { prevzatie spravy
+          }
+           s:= DBstr_to_str_ (buff^[db_mFPL_ine]); p:= @s[1];
+           get_s(p, @rec,sizeof(rec));
+         end;
+     end;

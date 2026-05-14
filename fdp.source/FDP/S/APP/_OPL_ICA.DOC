@@ -1,0 +1,37 @@
+{
+  Spravy ICAO prijimane/vysielane ku OPL
+
+  (FPLPL/MI023
+   -6502
+   -IF
+   -01MI17/M
+   -S/C
+   -LKPO0830
+   -K0200F060 EKROT
+   -LKKB0120 LKPO
+   -OPR/33 RMK/UKOL03 RMK/MNM0506
+  )
+
+
+  (CHGPL/MI6
+   -2504
+   -LKKV
+   -LKKB
+   -15/K0400F080 MZ140 9/MG15/M 16/LKKB0158
+  )
+
+
+  (CNLPL/MI13
+   -2514
+   -LKKV
+   -LKKB
+  )
+
+
+  (DLAPL/MI3
+   -2504
+   -LKKV2150
+   -LKKB
+  )
+
+}

@@ -1,0 +1,25 @@
+{$IFDEF PRN}
+ {$IFDEF PRN_SERVER}
+   function print_PRS(PRS: PPRS): bool;
+      begin
+        print_PRS:= true
+      end;
+ {$ELSE}
+   function print_PRS(PRS: PPRS): bool;
+      var   s: array[0..15] of string;
+            t: string;
+            i: int;
+      begin
+        with PRS^ do
+          begin
+            s[0]:= _LF+_LSi+#10+_CE;
+            s[1]:= _PRN_TAB + '('+_TS+_MS +   let+' '+kod+_TE+_ME
+                                          +'-'+timetostr(zac.h,zac.m,'')
+                                          +' '+timetostr(kon.h,kon.m,'')
+                                          +'-'+{vys_+' '}+vys+')'+_LF;
+            s[2]:= _LF;
+          end;
+         print_PRS:= print_strs(PortNo,@s,3)
+       end;
+ {$ENDIF}
+{$ENDIF}

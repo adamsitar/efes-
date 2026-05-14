@@ -1,0 +1,5 @@
+- button pre kontrolu regularity ? alebo spyta sa, ci ma ?
+- vyskovy rozsah zakazanych priestorov
+- zadanie trate (i iopacne)
+- priletove trate
+- neponukne zadanie ARR pre let cez polnoc

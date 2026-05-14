@@ -1,0 +1,103 @@
+ {$I ..\lib\mnu\_zobrazenie.mnu}
+ {$I ..\lib\mnu\_planzet.mnu}
+
+
+ var  MMI_MAPA: bool;
+
+ procedure mnuMMI_init(MMenu: PSubmenu); far;
+     var   smnu : TPItems;
+           sbmnu : PSubMenu;
+           i,items,nl : int;
+           b : bool;
+     begin
+       items:= 0; nl:= 0;
+
+       if STRIP_MMI_menu then
+          begin
+            {$IFDEF EDD}
+             sbmnu:= SubMenuInitialized(STRIPs_menu_init(' '+mnu_STRIP+'... ',tit_STRIP),nil);
+             smnu[items]:= SubMenuInitialized(sbmnu,nil);
+             inc(items);
+
+             sbmnu:=  {$IFDEF MAPY} SubMenu_
+                      {$ELSE}       SubMenu
+                      {$ENDIF}
+                        (' '+cut_r(mnu_BOARD)+'... ',
+                         {$IFDEF MAPY}  @TABLET_EDD,true,
+                         {$ELSE}
+                         {$ENDIF}
+                         WinMenu (tit_BOARD, hlpmnuBOARD,nil),nil
+                        );
+             sbmnu^.PMenu_init:= @mnuBOARD_init;
+             smnu[items]:= SubMenuInitialized(sbmnu,nil);
+             inc(items);
+            {$ENDIF}
+         end;
+
+       {$IFDEF MAPY}
+        b:= true;
+        {$IFDEF EDD} b:= STRIP_MMI_menu; {$ENDIF}
+        if b then
+           begin
+             MMI_MAPA:= PLANZET_MAPA or MAPS_DATA;
+             sbmnu:= {$IFDEF MAPY}  SubMenu_
+                     {$ELSE}        SubMenu
+                     {$ENDIF}
+                        (' '+cut_r(mnu_PLANZET)+'... ',
+                         {$IFDEF MAPY}  @MMI_MAPA,true,
+                         {$ELSE}
+                         {$ENDIF}
+                         WinMenu(tit_PLANZET, hlpmnuMMI_MAPS, nil),nil
+                        );
+             sbmnu^.PMenu_init:= @mnuPLANZET_init;
+             smnu[items]:= SubMenuInitialized(sbmnu,nil);
+             inc(items);
+           end;
+       {$ENDIF}
+
+       {$IFDEF ZOZNAMY}
+        sbmnu:= SubMenu(cut_r(ZOZNAMY)+'... ',OptMenu_S(ZOZNAMY, hlpmnuMMI_ZOZNAMY, cmZOZNAM_FPL,15,nil),nil);
+        sbmnu^.PMenu_init:= @mnuZOZNAMY_init;
+        smnu[items]:= SubMenuInitialized(sbmnu,nil);
+        inc(items);
+       {$ENDIF}
+
+
+       {add_newline_(0,nl,items,smnu);}
+
+       sbmnu:= SubMenu(cut_r(PROSTREDIE)+'... ',OptMenu_S(PROSTREDIE, hlpmnuMMI_OPTIONS,cmDefault,15,nil),nil);
+       sbmnu^.PMenu_init:= @mnuPROSTREDIE_init;
+       smnu[items]:= SubMenuInitialized(sbmnu,nil);
+       inc(items);
+
+
+       sbmnu:= SubMenu(cut_r(ZOBRAZENIE)+'... ',OptMenu_S(ZOBRAZENIE, hlpmnuMMI_OPTIONS_DATA,cmNASTAV_SPRACOVANIE,15,nil),nil);
+       sbmnu^.PMenu_init:= @mnuZOBRAZENIE_init;
+       smnu[items]:= SubMenuInitialized(sbmnu,nil);
+       inc(items);
+
+       add_newline_(0,nl,items,smnu);
+       {$IFDEF DISPLAY_MNU}
+        smnu[items]:= {$IFNDEF DISPLAY_MNU_} SubMenu (DISPLAY,
+                      {$ELSE}                SubMenu_(DISPLAY, @PLANZET_MAPA, true,
+                      {$ENDIF}               OptMenu (DISPLAY_,nil, cmGraphModeChanged,
+                         Radio(DISPLAY_, @GraphMode,1,
+                           RadioItem(_2,
+                           RadioItem(_3,
+                           RadioItem(_4,
+                          {$IFDEF _1280x1024}
+                           RadioItem(_5,
+                          {$ENDIF}
+                           nil ) ) ) {$IFDEF _1280x1024} )   {$ENDIF},
+                         nil)
+                        ),nil);
+        inc(items);
+       {$UNDEF DISPLAY_MNU}
+       {$UNDEF DISPLAY_MNU_}
+       {$ENDIF}
+
+       smnu[items]:= Item (RFSH, cmRefresh, nil);
+       inc(items);
+
+       for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i])
+     end;

@@ -1,0 +1,48 @@
+{ Vypocet platnosti planu v zavislosti
+    - na stave spracovania
+    - na mieste spracovania
+    - schvaleni
+    a case
+  pre urcenie kriteria PROPOSED or ACTIVE
+  kvoli zaradeniu planu do aktivnych;
+
+  takmer identicky s _platny_plan...
+}
+{$IFDEF DEBUG}
+ {$I _FDP_poz.inc}    { poz  }
+{$ENDIF}
+
+ function stav_PRS(PRS: PPRS; cas: real; var zmena: bool): TPoz;
+    var   npoz : Tpoz;
+    begin
+      with PRS^ do
+       {$IFDEF FUA}
+        if cas_FUA_24H_EN and (_decode_stav(PRS^.stat) in [_ziadost]) then
+           begin
+             if plan_pred_poslednym_schvalenim(PRS) then npoz:= poz_PLAN
+             else npoz:= poz_NOT_ACTUAL
+           end
+        else
+       {$ENDIF}
+      npoz:= platny_plan(cas, zac,kon, stat, dt_propose_PRS,dt_unactive_PRS,dt_deactive_PRS);
+      zmena:= npoz<>PRS^.poz;
+      PRS^.poz:= npoz;
+      stav_PRS:= npoz
+    end;
+
+
+ function est_PRS(PRS: PPRS): bool;
+    var   zmena: bool;
+    begin
+      est_PRS:= stav_PRS(PRS, absTime, zmena) in poz_est_PRS
+    end;
+
+
+{ function act_PRS(PRS: PPRS): real;
+    var   rres: real;
+    begin
+      rres:= dT_propose_PRS*60;
+      act_PRS:= DatumToSec(PRS^.zac) - rres;
+    end;
+}
+

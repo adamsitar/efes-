@@ -1,0 +1,175 @@
+{$IFDEF PRZ}
+
+ { ------------------
+    PRZ
+   תתתתתתתתתתתתתתתתתת
+ }
+
+ {$I ..\lib\mnu\_PRZ.h}
+
+ procedure mnuPRZvolby_init(MMenu: PSubmenu); far;
+     var   smnu : TPItems;
+           i,items,nl,ihk: int;
+     begin
+       items:= 0; nl:= 0; ihk:= 0;
+
+       {$IFDEF NOTAM}
+        i:= ihk;
+        {smnu[items]:= NewTLine(' '+hk(ihk)+PRNT1,nil);
+        inc(items);}
+        smnu[items]:= Switch2(' '+hk(ihk)+PRNT1, @bminiNTM,nil);
+        smnu[items]^.kbHot:= upcase(hk_(i));
+        inc(items);
+
+        smnu[items]:= SwitchI (' '+hk(ihk)+PRNLD,@max_NTM_D_rm,'',max_NTM_D_r_lo,max_NTM_D_r_hi,nil);
+        inc(items);
+        smnu[items]:= SwitchI (' '+hk(ihk)+PRNLE,@max_NTM_E_rm,'',max_NTM_E_r_lo,max_NTM_E_r_hi,nil);
+        inc(items);
+       {$ENDIF}
+
+       for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i]);
+     end;
+
+
+  procedure mnuPRZ_init_(var smnu: TPItems; var items,nl: int); far;
+      var   sbmnu : PSubMenu;
+      begin
+
+        {sbmnu:= SubMenu(cut_r(mnuPREHLAD)+'... ', WinMenu(titPRZ_PLANY, nil,nil),nil);
+        sbmnu^.PMenu_init:= @mnuPRZprehlad_init;
+        smnu[items]:= SubMenuInitialized(sbmnu,nil);
+        inc(items);}
+
+        (*smnu[items]:= SubMenu (tit_PRIP_, WinMenu(tit_ARCH,nil,
+                              {$IFDEF VLASTNE_PLANY}
+                               Item   (cut_r(tit_VLASTNE)+PRZ_PLAN, cmPREHLAD_PRZ_PPL_nase,
+                               Item   (cut_r(tit_VSETKY) +PRZ_PLAN, cmPREHLAD_PRZ_PPL,
+                              {$ELSE}
+                               Item   (PRZ_PLANY,   cmPREHLAD_PRZ_PPL,
+                              {$ENDIF}
+                              NewLine2(0,
+                              Item    (PRZ_VLIS_NAR,   cmPREHLAD_VLIS_PPL,
+                              Item    (PRZ_VLIS_NOTAM, cmPREHLAD_PRN_PPL,
+                              nil {$IFDEF VLASTNE_PLANY} ) {$ENDIF} ) ) ) )
+                             ),nil);
+        inc(items);*)
+
+        smnu[items]:= SubMenu (tit_ARCH_, WinMenu(tit_ARCH,nil,
+                              {$IFDEF VLASTNE_PLANY}
+                               Item   (cut_r(PLA_)+PRZ_PLAN, cmPREHLAD_PRZ_ARCH_nase,
+                               Item   (cut_r(tit_VSETKY)+PRZ_PLAN,  cmPREHLAD_PRZ_ARCH,
+                              {$ELSE}
+                               Item   (cut_r(PLA_)+PRZ_PLAN,  cmPREHLAD_PRZ_ARCH,
+                              {$ENDIF}
+                              NewLine2(0,
+                              Item    (PRZ_VLIS_NAR,   cmPREHLAD_VLIS_ARCH,
+                              Item    (PRZ_VLIS_NOTAM, cmPREHLAD_PRN_ARCH,
+                              nil {$IFDEF VLASTNE_PLANY} ) {$ENDIF} ) ) ) )
+                             ),nil);
+        inc(items);
+
+        {$IFDEF OPL} {$IFDEF PROCESS_PRZ}
+         smnu[items]:= Item (tit_SAMPLE, cmPREHLAD_PRZ_RPL, nil);
+         inc(items);
+        {$ENDIF} {$ENDIF}
+
+        if not mnu_data_opt_common then
+           begin
+             add_newline_(2,nl,items,smnu);
+             sbmnu:= SubMenu(cut_r(mnu_OPTi)+'... ', OptMenu_S(tit_OPTi, hlp_mnu_PRZ_NASTAV,cmNASTAV_SPRACOVANIE,15,nil),nil);
+             sbmnu^.PMenu_init:= @mnuPRZvolby_init;
+             smnu[items]:= SubMenuInitialized(sbmnu,nil);
+             inc(items);
+           end;
+      end;
+
+
+  {$IFDEF MACC_MENU}
+   procedure _mnuMACC_PRZ_init(MMenu: PSubmenu); far;
+       var   smnu : TPItems;
+             sbmnu : PSubMenu;
+             i,items,nl : int;
+       begin
+         items:= 0; nl:= 0;
+
+         {$IFDEF PRZ_REQUEST}
+          smnu[items]:= SubMenu (cut_r(PRZPLAN)+'... ', WinMenu(cut_3(PRZPLAN,length(PRZPLAN)),hlpmnuPRZ,
+                                 Item(PRZPLAN,  cmPRZ,
+                                 Item(PRZCHG,   cmPRZ_CHG,
+                                 Item(PRZCNL,   cmPRZ_CNL,
+                                nil ) ) )
+                                ), nil);
+          inc(items);
+          add_newline_(2,nl,items,smnu);
+         {$ENDIF}
+
+         {$IFDEF VLASTNE_PLANY}
+          smnu[items]:= Item (cut_r(PLA_)+PRZ_PLAN, cmPREHLAD_PRZ_PPL_nase,nil);
+          inc(items);
+          smnu[items]:= Item (cut_r(tit_VSETKY)+PRZ_PLAN,  cmPREHLAD_PRZ_PPL,nil);
+          inc(items);
+         {$ELSE}
+          smnu[items]:= Item (cut_r(PLA_)+PRZ_PLAN, cmPREHLAD_PRZ_PPL, nil);
+          inc(items);
+         {$ENDIF}
+
+         add_newline_ (0,nl,items,smnu);
+         smnu[items]:= Item (PRZ_VLIS_NAR,    cmPREHLAD_VLIS_PPL,nil);
+         inc(items);
+         smnu[items]:= Item (PRZ_VLIS_NOTAM,  cmPREHLAD_PRN_PPL,nil);
+         inc(items);
+
+         add_newline_ (2,nl,items,smnu);
+         mnuPRZ_init_(smnu,items,nl);
+
+         for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i]);
+       end;
+  {$ENDIF}
+
+  procedure _mnuPRZ_init(MMenu: PSubmenu); far;
+      var   smnu : TPItems;
+            sbmnu : PSubMenu;
+            i,items,nl : int;
+      begin
+        items:= 0; nl:= 0;
+
+        {$IFDEF PRZ_REQUEST}
+         smnu[items]:= Item(PRZPLAN,  cmPRZ, nil);
+         inc(items);
+         smnu[items]:= Item(PRZCHG,   cmPRZ_CHG, nil);
+         inc(items);
+         smnu[items]:= Item(PRZCNL,   cmPRZ_CNL, nil);
+         inc(items);
+         add_newline_(2,nl,items,smnu);
+        {$ENDIF}
+
+        smnu[items]:= SubMenu (cut_r(PREHLADREQ_)+'... ', WinMenu(PREHLADREQ_,nil,
+                              {$IFDEF VLASTNE_PLANY}
+                               Item (cut_r(PLA_)+PRZ_PLAN, cmPREHLAD_PRZ_PPL_nase,
+                               Item (cut_r(tit_VSETKY)+PRZ_PLAN,  cmPREHLAD_PRZ_PPL,
+                              {$ELSE}
+                               Item (cut_r(PLA_)+PRZ_PLAN, cmPREHLAD_PRZ_PPL,
+                              {$ENDIF}
+                              NewLine2(0,
+                              Item (PRZ_VLIS_NAR,    cmPREHLAD_VLIS_PPL,
+                              Item (PRZ_VLIS_NOTAM,  cmPREHLAD_PRN_PPL,
+                              nil {$IFDEF VLASTNE_PLANY} ) {$ENDIF} ) ) ) )
+                              ), nil);
+        inc(items);
+        mnuPRZ_init_(smnu,items,nl);
+
+        for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i]);
+      end;
+
+
+ procedure mnuPRZ_init(MMenu: PSubmenu); far;
+     begin
+      {$IFDEF MACC_MENU}
+       if MENU_MACC then _mnuMACC_PRZ_init(MMenu)
+       else _mnuPRZ_init(MMenu);
+      {$ELSE}
+       _mnuPRZ_init(MMenu);
+      {$ENDIF}
+     end;
+
+{$ENDIF}

@@ -1,0 +1,49 @@
+  function print_RTZ(RTZ: PRTZ): bool;
+     const max_s = 20;
+     var   zacp,konp: pchar;
+           s : array[0..max_s-1] of string;
+           t : string;
+           l,r : int;
+           b : bool;
+     begin
+      {$IFDEF PRN}
+       s[0]:= _LF+_LSi+#10+_CE;
+
+       t:= ' ' + tit_RTZ + ' ' + tit_na + ' ' + RTZ^.id + ', '+DateToStrS(RTZ^.date.d,RTZ^.date.m,RTZ^.date.r);
+       s[1]:= _PRN_TAB + _TS+_MS+ t +_TE+_ME;
+       s[2]:= _PRN_TAB + ' ' + _line_rtz_data(RTZ^.data, rtz_DIR,rtz_CR,rtz_VPD ,zacp,konp, false);
+       s[3]:= _PRN_TAB + ' ' + _line_rtz_data(zacp, rtz_CR,rtz_VPD,rtz_ALS ,zacp,konp, false);
+       s[4]:= _PRN_TAB + ' ' + _line_rtz_data(zacp, rtz_VPD,rtz_ALS,rtz_DMK,zacp,konp, false);
+       s[5]:= _PRN_TAB + ' ' + _line_rtz_data(zacp, rtz_ALS,rtz_DMK,rtz_BMK,zacp,konp, false);
+       s[6]:= _PRN_TAB + ' ' + _line_rtz_data(zacp, rtz_DMK,rtz_BMK,rtz_W_,zacp,konp, false);
+       s[7]:= _PRN_TAB + ' ' + _line_rtz_data(zacp, rtz_BMK,rtz_W_,rtz_QB,zacp,konp, false);
+       s[8]:= _PRN_TAB + ' ' + _line_rtz_data(zacp, rtz_W_,rtz_QB,rtz_T,zacp,konp, false);
+       s[9]:= _PRN_TAB + ' ' + _line_rtz_data(zacp, rtz_QB,rtz_T,rtz_QNH,zacp,konp, false);
+       s[10]:= _PRN_TAB + ' ' + _line_rtz_data(zacp, rtz_T,rtz_QNH,rtz_QFE,zacp,konp, false);
+       s[11]:= _PRN_TAB + ' ' + _line_rtz_data(zacp, rtz_QNH,rtz_QFE,rtz_TREND,zacp,konp, false);
+       s[12]:= _PRN_TAB + ' ' + _line_rtz_data(zacp, rtz_QFE,rtz_TREND,'',zacp,konp, false);
+       s[13]:= _PRN_TAB + ' ' + _line_rtz_data(zacp, rtz_TREND,'','',zacp,konp, false);
+       r:= 14;
+
+       b:= print_strs(PortNo,@s,r);
+       if b then for r:= 0 to 0 do print_str(PortNo,kbNL);
+       print_RTZ:= b
+      {$ENDIF}
+     end;
+
+
+  procedure print_RTZs(RTZs: Pptrs; top: pointer; title: string); far;
+      var   i: int;
+      begin
+       {$IFDEF PRN}
+        if print_head(PortNo, title) then
+           begin
+             i:= 0;
+             while (i<=int(top^)) and print_RTZ(RTZs^[i]) do
+               begin
+                 CheckProcesses;
+                 inc(i)
+               end
+           end
+       {$ENDIF}
+      end;

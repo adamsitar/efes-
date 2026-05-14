@@ -1,0 +1,187 @@
+{ (O1111/99 NOTAMN-LZIB/QS/V/N/W/100/200-...)
+  (O2222/99 NOTAMR O1111/99-...)
+  (O2223/99 NOTAMC O1111/99-...)
+}
+
+{ vrati cislo NOTAMu
+}
+ function cislo_NTM(NTM: PNTM): string;
+    var   s : string;
+          i : int;
+    begin
+      s:= strpas(NTM^._NTM);
+      i:= pos(NOTAMi,s);
+      if i>0 then s:= copy(s,1,i-1);
+      cislo_NTM:= delchar(s,[icao_NXIT])
+    end;
+
+{ vrati cislo opravovaneho NOTAMu
+}
+ function stary_NTM(_NTM: string): string;
+    var   i : int;
+    begin
+      i:= pos(NOTAMi,_NTM);
+      if i>0 then _NTM:= cut_(copy(_NTM,i,length(_NTM)-i+1))
+      else _NTM:= '';
+      stary_NTM:= _NTM
+    end;
+
+
+function key_NTM_(NTM: string): string;
+    var   i : int;
+    begin
+      if (pos(NOTAMC,NTM)>0) or (pos(NOTAMR,NTM)>0) then i:= 3 else i:= 1;
+      key_NTM_:= cut_(getstr(NTM,i,[icao_NXIT]))
+    end;
+
+ function key_NTM (NTM: PNTM): string;
+    begin
+      {$IFDEF ALL_NOTAM}
+        key_NTM:= cislo_NTM (NTM)
+      {$ELSE}
+        key_NTM:= key_NTM_ (strpas(NTM^._NTM))
+      {$ENDIF}
+    end;
+
+
+{ function rok_NTM(NTM: PNTM): word;
+    var   v : word;
+          i : int;
+          s : string;
+    begin
+      s:= getstr(key_NTM(NTM),1,[icao_NXT]);
+      if s<>'' then val(s,v,i) else i:= 1;
+      if i<>0 then v:= year
+      else MilleniumDate(v);
+      rok_NTM:= v
+    end;
+}
+
+{ Pre korektne spracovanie notamu je potrebne
+  urcit spravny subor pre ulozenie, pretoze sa ukladaju
+  do mesacnych suborov
+}
+ procedure format_NTM_ (NTM: PNTM{; path,ext: string; riadkov: byte});
+     var   FN   : string;
+           ires : long;
+           d    : TDate;
+     begin
+       with NTM^ do
+         begin
+         { urcenie stavu sprcovania
+
+           if strpos(_NTM,NOTAMC)<>nil then NTM^.stt:= cnst_cnl
+           else if strpos(_NTM,NOTAMR)<>nil then NTM^.stt:= add_stat(NTM^.stt,cnst_chg)
+           else if NTM^.stt='' then NTM^.stt:= cnst_sended;
+         }
+
+           if (dav.r<>0) and (dav.r<>1900) then Exit;
+
+           {if    (not ((strpos(_NTM,NOTAMC)<>nil) or (strpos(_NTM,NOTAMR)<>nil)))
+              or (path='')
+              or (ext='') then}
+              begin
+                if not decode_l4_date (_B,dav) then init_date(dav,year,month,day);
+                dav.d:= not_archive_day;
+                Exit;
+              end;
+         {
+           ires:= -1;
+           dav.r:= rok_NTM(NTM);
+           dav.d:= not_archive_day;
+           dav.m:= 12; while (ires<0) and (dav.m>0) do
+             begin
+               FN:= get_DBfn(dav,path,ext);
+               ires:= DB_najdi_(NTM,FN,riadkov,nil,nil,false,nil,@key_NTM_,'');
+               dec(dav.m)
+             end;
+
+           if ires<0 then
+              begin
+                if not decode_l4_date (_B,d) then d.m:= month;
+                dav.m:= d.m
+              end;
+         }
+         end;
+     end;
+
+ function modify_head_NOTAM (NTM: PNTM; _stat: string): bool;
+     var  bres : bool;
+          stt,sttp : string;
+     begin
+       NTM^.stt:= _stat; stt:= '';
+       if _stat=cnst_cnl then stt:= NOTAMC
+       else if pos(cnst_chg,_stat)>0 then stt:= NOTAMR
+       else stt:= NOTAMN;
+       bres:= stt<>stary_NTM(strpas(NTM^._NTM));
+       if bres then
+          begin
+            stt:= stt + icao_NXIT + cislo_NTM(NTM);
+            strdispose(NTM^._NTM);
+            NTM^._NTM:= StrPasNew(stt)
+          end;
+       modify_head_NOTAM:= bres
+     end;
+
+
+ function _check_NTM(NTM,NTMp: PNTM; var res: string; var ires: int; form: pointer): bool;
+    var   s        : string;
+          v1, v2   : word;
+          v1_,v2_  : char;
+          v1s,v2s  : string[kod_VYS+2];
+          i,r      : int;
+          r1,r2: word; m1,m2,d1,d2: byte;
+
+    begin
+      res:= ''; ires:= -1;
+      with NTM^ do
+        begin
+
+        { Casove rozpatie
+        }
+          if     (not GetDateStr_(r1,m1,d1, copy(_B,1,kod_date),true,[]))
+             or  (DateToSec(r1,m1,d1) < DateToSec(Year,Month,Day))
+             then ires:= l4_err(a_L4,_B,it_B,err_l4444_date, res);
+
+          {if      not GetTimeStr(_B.h,_B.m,_B.s,_it(it_B2)) then
+             begin ires:= l4_err(a_L4,_it(it_B2),it_B2,err_l4444_time, res); goto X end;}
+
+          if     (ires=-1)
+             and (_C<>cas_PERM)
+             and (   (not GetDateStr_(r2,m2,d2, copy(_C,1,kod_date), true,[]))
+                  or (DateToSec(r2,m2,d2) < DateToSec(Year,Month,Day))
+                  or (DateToSec(r2,m2,d2) < DateToSec(r1,m1,d1))
+                 )
+             then ires:= l4_err(a_L4,_C,it_C,err_l4444_date, res);
+
+          {if     (s<>cas_PERM)
+             and (not GetTimeStr(_C.h,_C.m,_C.s, _it(it_C2))) then
+             begin ires:= l4_err(a_L4,_it(it_C2),it_C2,err_l4444_time, res); goto X end;}
+
+
+         { Vyskove rozhranie
+         }
+          {if _F<>'' then}
+             begin
+               if     (ires=-1)
+                  and (not decode_l4_vyss(_F, v1, v1_, nil))
+                  then ires:= l4_err(a_L4,_F,it_F,err_l4444_vyska_chyba, res);
+             end
+          {else _F:= vys_GND};
+
+          {if _G<>'' then}
+             begin
+               if     (ires=-1)
+                  and (not decode_l4_vyss(_G, v2, v2_, nil))
+                  then ires:= l4_err(a_L4,_G,it_G,err_l4444_vyska_chyba, res);
+             end
+          {else _G:= vys_UNL};
+
+          if     (ires=-1)
+             and (get_altM (v1_,v1) >= get_altM (v2_,v2))
+             then ires:= l4_err(a_OPL,_F+icao_NXIT+_G,it_F,err_OPL_vysky_rozsah, res);
+
+          _check_NTM:= ires=-1
+        end
+    end;
+

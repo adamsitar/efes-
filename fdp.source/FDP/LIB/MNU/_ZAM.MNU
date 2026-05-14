@@ -1,0 +1,223 @@
+{ ------------------
+   ZAM
+  ˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙
+}
+{$I ..\lib\mnu\_ZAM.h}
+
+{$IFDEF ZAM}
+
+ procedure mnuZAMvolby_init(MMenu: PSubmenu); far;
+     var   smnu : TPItems;
+           i,items,nl,ihk: int;
+     begin
+       items:= 0; nl:= 0; ihk:= 0;
+
+       smnu[items]:= NewTLine(mnuSPRACOVANIE,nil);
+       inc(items);
+
+       {$IFDEF ZAM_REPORT}
+        smnu[items]:= Switch2 (' '+hk(ihk)+ZAMREP, @hlas_ZAM,nil);
+        inc(items);
+        smnu[items]:= Switch2 (' '+hk(ihk)+ZAMVAR, @varovanie_ZAM,nil);
+        inc(items);
+       {$ENDIF}
+
+       smnu[items]:= SwitchI (' '+hk(ihk)+ZAMPRE, @dt_propose_ZAM,tit_min,dt_propose_ZAM_lo,dt_propose_ZAM_hi,nil);
+       inc(items);
+       smnu[items]:= SwitchI (' '+hk(ihk)+ZAMDEL, @dt_deactive_ZAM,tit_min,dt_deactive_ZAM_lo,dt_deactive_ZAM_hi,nil);
+       inc(items);
+
+
+       add_newline_(2,nl,items,smnu);
+       smnu[items]:= NewTLine(mnuZOBRAZENIE,nil);
+       inc(items);
+
+
+       smnu[items]:= Switch2 (' '+hk(ihk)+cut_(ZAMstrip), @pis_STRIP_ZAM,nil);
+       inc(items);
+       smnu[items]:= SubMenu (hk(ihk)+cut_(mnu_miniSTRIP)+'... ', OptMenu (mnu_miniSTRIP,nil,cmDefault,
+                        Radio(mnu_miniSTRIP, @miniSTRIP_ZAM,0,
+                          RadioItem(mnu_MINI,
+                          RadioItem(mnu_SHORT,
+                          RadioItem(mnu_LARGE,
+                          nil ) ) ),
+                         nil)
+                        ),nil);
+       inc(items);
+
+       {add_newline_(2,nl,items,smnu);
+       smnu[items]:= NewTLine(mnuTLAC,nil);
+       }
+
+       for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i]);
+     end;
+
+
+ procedure mnuZAM_init_(var smnu: TPItems; var items,nl: int);
+     var   sbmnu : PSubMenu;
+     begin
+
+       {sbmnu:= SubMenu(cut_r(mnuPREHLAD)+'... ', WinMenu('PLèNY ZAMESTNANã LETãSK', nil,nil),nil);
+       sbmnu^.PMenu_init:= @mnuZAMprehlad_init;
+       smnu[items]:= SubMenuInitialized(sbmnu,nil);
+       inc(items);}
+
+       {$IFDEF VLASTNE_PLANY}
+        smnu[items]:= SubMenu (tit_PRED_, WinMenu(tit_PRED,nil,
+                               Item (tit_VLASTNE+PLANY_, cmPREHLAD_ZAM_PPL_nase,
+                               Item (tit_VSETKY +PLANY_, cmPREHLAD_ZAM_PPL,
+                               nil ) )
+                              ),nil);
+        inc(items);
+        smnu[items]:= SubMenu (tit_ARCH_, WinMenu(tit_ARCH,nil,
+                               Item (tit_VLASTNE+PLANY_, cmPREHLAD_ZAM_ARCH_nase,
+                               Item (tit_VSETKY +PLANY_, cmPREHLAD_ZAM_ARCH,
+                               nil ) )
+                              ),nil);
+        inc(items);
+       {$ELSE}
+        smnu[items]:= Item (tit_PRED, cmPREHLAD_ZAM_PPL, nil);
+        inc(items);
+        smnu[items]:= Item (tit_ARCH, cmPREHLAD_ZAM_ARCH,nil);
+        inc(items);
+       {$ENDIF}
+
+       {$IFDEF OPL} {$IFDEF PROCESS_ZAM}
+        smnu[items]:= Item (tit_SAMPLE, cmPREHLAD_ZAM_RPL, nil);
+        inc(items);
+       {$ENDIF} {$ENDIF}
+
+       if not mnu_data_opt_common then
+          begin
+            add_newline_(2,nl,items,smnu);
+            sbmnu:= SubMenu(cut_r(mnu_OPTi)+'... ', OptMenu_S(tit_OPTi, hlp_mnu_ZAM_NASTAV,cmNASTAV_SPRACOVANIE,15,nil),nil);
+            sbmnu^.PMenu_init:= @mnuZAMvolby_init;
+            smnu[items]:= SubMenuInitialized(sbmnu,nil);
+            inc(items);
+          end;
+     end;
+
+
+ {$IFDEF MACC_MENU}
+  procedure _mnuMACC_ZAM_init(MMenu: PSubmenu); far;
+      var   smnu  : TPItems;
+            sbmnu : PSubMenu;
+            i,ihk,items,nl : int;
+      begin
+        items:= 0; nl:= 0;
+
+        {$IFDEF PROCESS_ZAM}
+         smnu[items]:= SubMenu (mnu_ZAM_PLAN, WinMenu(mnu_ZAM_PLAN,nil,
+                               Item(ZAMPLAN, cmZAM,
+                               Item(ZAMCHG,  cmZAMzme,
+                               Item(ZAMCNL,  cmZAMzru,
+                               NewLine2(0,
+                               Item(ZAMDEP,  cmZAMzac,
+                               Item(ZAMBRK,  cmZAMpre,
+                               Item(ZAMCNT,  cmZAMpok,
+                               Item(ZAMARR,  cmZAMkon,
+                               {$IFDEF STATISTIKA_OPL}
+                                NewLine2(0,
+                                Item(ZAMAKT,cmZAMlet,
+                               {$ENDIF}
+                               nil ) ) ) ) ) ) ) )
+                               {$IFDEF STATISTIKA_OPL}
+                                ) )
+                               {$ENDIF}
+                               ),nil);
+         inc(items);
+         add_newline_(2,nl,items,smnu);
+        {$ENDIF}
+
+        ihk:= 0;
+
+        {$IFDEF VLASTNE_PLANY}
+         smnu[items]:= Item (' '+hki(ihk)+PLA_PLA, cmPREHLAD_ZAM_plan_nase,nil);
+         inc(items);
+         smnu[items]:= Item (' '+hki(ihk)+tit_VSETKY+PLANY_, cmPREHLAD_ZAM_plan, nil);
+         inc(items);
+        {$ELSE}
+         smnu[items]:= Item (' '+hki(ihk)+PLA_PLA, cmPREHLAD_ZAM_plan,nil);
+         inc(items);
+        {$ENDIF}
+
+        smnu[items]:= Item (' '+hki(ihk)+ZAM_ACT, cmPREHLAD_ZAM_act, nil);
+        inc(items);
+        smnu[items]:= Item (' '+hki(ihk)+ZAM_ARR, cmPREHLAD_ZAM_arr, nil);
+        inc(items);
+        smnu[items]:= Item (' '+hki(ihk)+PLA_ALL+ctrlZAM, cmPREHLAD_ZAM_all, nil);
+        inc(items);
+
+        add_newline_(0,nl,items,smnu);
+        mnuZAM_init_(smnu, items,nl);
+
+        for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i])
+      end;
+ {$ENDIF}
+
+ procedure _mnuZAM_init(MMenu: PSubmenu); far;
+     var   smnu  : TPItems;
+           sbmnu : PSubMenu;
+           i,ihk,items,nl : int;
+     begin
+       items:= 0; nl:= 0;
+
+       {$IFDEF PROCESS_ZAM}
+        smnu[items]:= Item(ZAMPLAN, cmZAM, nil);
+        inc(items);
+        smnu[items]:= Item(ZAMCHG,  cmZAMzme, nil);
+        inc(items);
+        smnu[items]:= Item(ZAMCNL,  cmZAMzru, nil);
+        inc(items);
+        smnu[items]:= NewLine2(0, nil);
+        inc(items);
+        smnu[items]:= Item(ZAMDEP,  cmZAMzac, nil);
+        inc(items);
+        smnu[items]:= Item(ZAMBRK,  cmZAMpre, nil);
+        inc(items);
+        smnu[items]:= Item(ZAMCNT,  cmZAMpok, nil);
+        inc(items);
+        smnu[items]:= Item(ZAMARR,  cmZAMkon, nil);
+        inc(items);
+        {$IFDEF STATISTIKA_OPL}
+         smnu[items]:= NewLine2(0, nil);
+         inc(items);
+         smnu[items]:= Item(ZAMAKT,cmZAMlet, nil);
+         inc(items);
+        {$ENDIF}
+       {$ENDIF}
+
+       add_newline_(2,nl,items,smnu);
+       ihk:= 0;
+       smnu[items]:= SubMenu (cut_r(PREHLADPLA_)+'... ', WinMenu(PREHLADPLA_,nil,
+                               {$IFDEF VLASTNE_PLANY}
+                                Item (' '+hki(ihk)+PLA_PLA, cmPREHLAD_ZAM_plan_nase,
+                                Item (' '+hki(ihk)+tit_VSETKY+PLANY_, cmPREHLAD_ZAM_plan,
+                               {$ELSE}
+                                Item (' '+hk(ihk)+PLA_PLA, cmPREHLAD_ZAM_plan,
+                               {$ENDIF}
+                               {Item (PLA_SCH, cmPREHLAD_ZAM_acc, nil);}
+                               Item (' '+hki(ihk)+ZAM_ACT, cmPREHLAD_ZAM_act,
+                               Item (' '+hki(ihk)+ZAM_ARR, cmPREHLAD_ZAM_arr,
+                               Item (' '+hki(ihk)+PLA_ALL+ctrlZAM, cmPREHLAD_ZAM_all,
+                              nil {$IFDEF VLASTNE_PLANY} ) {$ENDIF} ) ) ) )
+                             ), nil);
+       inc(items);
+
+       mnuZAM_init_(smnu, items,nl);
+
+       for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i])
+     end;
+
+
+ procedure mnuZAM_init(MMenu: PSubmenu); far;
+     begin
+      {$IFDEF MACC_MENU}
+       if MENU_MACC then _mnuMACC_ZAM_init(MMenu)
+       else _mnuZAM_init(MMenu);
+      {$ELSE}
+       _mnuZAM_init(MMenu);
+      {$ENDIF}
+     end;
+
+{$ENDIF}

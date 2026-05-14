@@ -1,0 +1,68 @@
+  {function print_QGO(QGO: PQGO): bool;
+     var   s: array[0..15] of string;
+           t: string;
+           i: int;
+     begin
+       with QGO^ do
+         begin
+           t:= ' SCHOPNOST '+kod+' na '+DateToStr2(date.d,date.m,0);
+
+           s[0]:= _LF+_LSi+#10+_CE;
+           s[1]:= _PRN_TAB + _TS+_MS+ t +_TE+_ME+_LF;
+           s[2]:= _PRN_TAB + ' Prostriedky  : '+strpas(pros)+_LF;
+           s[3]:= _PRN_TAB + ' Aktivovane   : '+strpas(zap) +_LF;
+           s[4]:= _PRN_TAB + ' TQGO         : '+TQGO+' '+strpas(TQGO_)+' '+TQGOc+_LF;
+           s[5]:= _PRN_TAB + ' MQGO         : '+cut_(MQGO+' '+strpas(MQGO_))+' '+MQGOc+_LF;
+           s[6]:= _LF;
+         end;
+        print_QGO:= print_strs(PortNo,@s,7)
+      end;
+  }
+
+  function print_QGO(QGO: PQGO): bool;
+     const max_s = 16;
+     var   s : array[0..max_s-1] of string;
+           t : string;
+           l,r : int;
+           b : bool;
+     begin
+      {$IFDEF PRN}
+       s[0]:= _LF+_LSi+#10+_CE;
+       t:= ' ' + tit_schopnost + ' ' + QGO^.kod + ' ' + tit_na + ' ' + code_l4_date(QGO^.date);
+       s[1]:= _PRN_TAB + _TS+_MS+ t +_TE+_ME;
+       l:= maximum(length(tit_stav_),length(tit__prostriedkov));
+       s[2]:= _PRN_TAB + ' '+inschar(tit_stav_,l,' ',1)+': '+get_line_i(QGO^.stav,1);
+       s[3]:= _PRN_TAB + ' '+inschar(tit__prostriedkov,l,' ',1)+': '+get_line_i(QGO^.stav,2);
+       s[4]:= _PRN_TAB + ' '+inschar(tit_TQGO,l,' ',1)+': '+QGO^.TQGO+' '+strpas(QGO^.TQGO_)+' '+QGO^.TQGOc;
+       s[5]:= _PRN_TAB + ' '+inschar(tit_MQGO,l,' ',1)+': '+QGO^.MQGO+' '+strpas(QGO^.MQGO_)+' '+QGO^.MQGOc;
+       r:= 6;
+
+      {IFDEF DEBUG
+       assign(t,'1.bak');
+       rewrite(t);
+       for i:= 0 to p-1 do writeln(t,s[i]);
+       close(t);
+      ENDIF}
+
+       b:= print_strs(PortNo,@s,r);
+       if b then for r:= 0 to 0 do print_str(PortNo,kbNL);
+       print_QGO:= b
+      {$ENDIF}
+     end;
+
+
+  procedure print_QGOs(QGOs: Pptrs; top: pointer; title: string); far;
+      var   i: int;
+      begin
+       {$IFDEF PRN}
+        if print_head(PortNo, title) then
+           begin
+             i:= 0;
+             while (i<=int(top^)) and print_QGO(QGOs^[i]) do
+               begin
+                 CheckProcesses;
+                 inc(i)
+               end
+           end
+       {$ENDIF}
+      end;

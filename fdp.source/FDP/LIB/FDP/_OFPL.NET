@@ -1,0 +1,23 @@
+{  function  decode_ack_iFPL(key: string; nd: int; iFPL: P_OFPL; p_codekey: PSFunc_p): bool;
+      var   FPL  : pointer;
+            rec  : Pplan_rec;
+            i    : int;
+      begin
+        decode_ack_iFPL:= false;
+        if (iFPL=nil) or (p_codekey=nil) then Exit;
+
+        i:= 0; while (i<=iFPL^.top) and (key<>TSFunc_p(p_codekey)(iFPL^.ap^[i])) do inc(i);
+        if i<=iFPL^.top then
+           begin
+             rec:= iFPL^.get_rec(iFPL^.ap^[i]);
+             if rec<>nil then rec_pkt(nd,rec^,is_ack);
+             if (NODEs^[nd].desc.typ<>RDP) then
+                begin
+                  iFPL^.vypis_plan(i, false,false);
+                  iFPL^.uloz(iFPL^.ap^[i])
+                end;
+             decode_ack_iFPL:= true
+           end
+      end;
+
+}

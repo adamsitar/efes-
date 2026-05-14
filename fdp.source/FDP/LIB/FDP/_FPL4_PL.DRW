@@ -1,0 +1,162 @@
+ function dxi_FPL4: int;
+    begin
+      if bminiFPL4 then dxi_FPL4:= dxm_FPL4 else dxi_FPL4:= dxf_FPL4
+    end;
+
+ function dyi_FPL4: int;
+    begin
+      if bminiFPL4 then
+         begin
+         { vyska by samohla vypocitat ako fcia poctu riadkov
+         } dyi_FPL4:= dym_FPL4 + (max_FPL4_15_rm+max_FPL4_18_rm)*10
+         end
+      else dyi_FPL4:= dyf_FPL4
+    end;
+
+
+ function _lat_FPL4(s: string): string;
+    begin
+      if RUSSIAN_FPL then _lat_FPL4:= s else _lat_FPL4:= mtks_rus_to_lat(s)
+    end;
+
+
+ {procedure WriteStrF(x: int; y: int; s: string; l: int; c1,c2: byte);
+    begin
+      outtextxy(x,y,s);
+    end;}
+
+
+ procedure plani_FPL4(FPL: PFPL4; x,y: int; b,mini: bool);
+     var   i,j, k1,k2, dx_plan,dy_plan, dx,dy, _15_r,_18_r : int;
+           s,r : string;
+           pb  : bool;
+           bi,bk : byte;
+     begin
+       bk:= bkPLAN_[b];
+
+       pb:= bminiFPL4; bminiFPL4:= mini;
+       dx_plan:= dxi_FPL4; dy_plan:= dyi_FPL4;
+       bminiFPL4:= pb;
+
+       BGIgraph.button(x,y,x+dx_plan,y+dy_plan, bk, btSmall, btOFF);
+       with FPL^ do
+         begin
+           {FPL,ACT...outtextxy(10,10,  _7);}
+
+           if mini then
+              begin
+               _15_r:= max_FPL4_15_rm;
+               _18_r:= max_FPL4_18_rm;
+               _lineh(x+5,x+dx_plan-5,y+28,bk);
+               _lineh(x+5,x+dx_plan-5,y+35+max_FPL4_15_rm*10,bk);
+               _linev(x+244,y+3,y+28,bk)
+              end
+           else begin
+                 _15_r:= max_FPL4_15_r_hi;
+                 _18_r:= max_FPL4_18_r_hi;
+                 _lineh(x+5,x+320,       y+28,  bk);
+                 _lineh(x+5,x+dx_plan-5, y+58,  bk);
+                 _lineh(x+5,x+dx_plan-5, y+124, bk);
+                end;
+
+           if fpl_approved(FPL^.src,_FPL4_APROVED_DISPLAY) then bi:= cl_DATA+1 else bi:= red;
+           WriteStrF(x+5,   y+5,  _lat_FPL4(_7),  length(_7), bi,bk-1);
+           setcolor(cl_DATA+1);
+           OutTextXY{WriteStrF}(x+167, y+5,  _lat_FPL4(_8){, sizeof(_8)-1, cl_DATA+1,bk-1});
+           OutTextXY{WriteStrF}(x+5,   y+17, _lat_FPL4(_9){,  sizeof(_9)-1, cl_DATA+1,bk-1});
+           OutTextXY{WriteStrF}(x+95,  y+17, _lat_FPL4(_10){, sizeof(_10)-1,cl_DATA+1,bk-1});
+
+           setcolor(cl_DATA-2);
+           dx:= dx_plan-34;
+           dy:= 10;
+           if ZDROJ_PLANU then
+              begin
+                OutTextXY(x+dx, y+17, fplsrc_idn(src));
+                dy:= 7
+              end;
+           setcolor(cl_DATA+1);
+           if STAV_PLANU then OutTextXY(x+dx,y+dy,_lat_FPL4(stat));
+
+           if mini then begin dx:= 250; dy:= 5 end
+           else begin dx:= 5; dy:= 34 end;
+
+           OutTextXY{WriteStrF}(x+dx,    y+dy ,   _lat_FPL4(_13){, sizeof(_13)-1,cl_DATA+1,bk-1});
+           if (getstr(_14,1,[icao_NXT])<>'') then OutTextXY (x+dx+110, y+dy , _lat_FPL4(_14));
+           OutTextXY{WriteStrF}(x+dx,    y+dy+12, _lat_FPL4(_16){, length(_16), cl_DATA+1,bk-1});
+           OutTextXY{WriteStrF}(x+dx+110, y+dy+12, _lat_FPL4(strpas(_17)){, length(_17), cl_DATA+1,bk-1});
+
+           dx:= (dx_plan-5) shr 3;
+           dy:= y+dy+29;
+
+           k1:= get_lines_i_(_15);
+           {if not bminiFPL4 then FillWin(x+5,dy+9,x+dx_plan-5,dy+10*(_15_r)-2, bk-1);}
+           for i:= 1 to minimum(k1,_15_r) do
+             begin
+               s:= _lat_FPL4(get_line_i(_15,i));
+               if i=1 then
+                  begin
+                    r:= getstr (s,1,[icao_NXIT]);
+                    s:= copy (s,length(r)+2,length(s)-length(r)-1);
+                    OutTextXY (x+5,dy-2,r);
+                    OutTextXY (x+5+((length(r)+2) shl 3),dy, s);
+                  end
+               else OutTextXY(x+7,dy,s);
+               inc(dy,10)
+             end;
+           for i:= i+1 to _15_r do inc(dy,10);
+           if mini then inc(dy,5) else inc(dy,5);
+
+           k2:= get_lines_i_(_18);
+           for i:= 1 to minimum(k2,_18_r) do
+             begin
+               OutTextXY(x+5,dy,_lat_FPL4(get_line_i(_18,i)));
+               inc(dy,10)
+             end;
+
+           if (k1>_15_r) or (k2>_18_r) then OutTextXY(x+dx_plan-34,dy-5, '...');
+         end
+     end;
+
+ procedure plan_FPL4(FPL: PFPL4; x,y: int; b: bool);
+     begin
+       plani_FPL4(FPL, x,y, b,bminiFPL4)
+     end;
+
+
+ procedure _info_FPL4(x0,y0,x1,y1: int; FPL: PFPL4); far;
+     begin
+       plani_FPL4(FPL, x0+(x1-x0-dxf_FPL4) shr 1, y0{+winHEIGHT},false,false)
+     end;
+
+ function  info_FPL4 (FPL: PFPL4; title: string): bool;
+    begin
+      if title='' then title:= FPL^._7;
+      info_FPL4:= Info(title, @_info_FPL4, FPL,dxf_FPL4+20,dyf_FPL4+10, nil,0)
+    end;
+
+
+{ ----------------------------
+   vykreslenie trate
+  ----------------------------
+}
+
+{$IFDEF MAPY}
+  procedure zobraz_trat_FPL4(FPL: PFPL4);
+      var   FPLi : DFPL4;
+            res  : string;
+      begin
+        new_FPL4(FPL,@FPLi);
+        if (FPLi.data=nil) or (FPLi.data^.fdr=nil) or (FPLi.data^.fdr^.bodov=0) then
+           begin
+             _decode_FPL4 (FPLi,false,res)
+           end
+        else res:= '';
+        if res<>'' then res:= ' ('+res+')';
+        res:= FPLi.data^.fdr^.idn+'-'+FPLi.data^.fdr^.dep.kod+res;
+        zobraz_trat(cut_3(res,dx_ZOBRAZ_TRAT shr 3),
+                    FPLi.data^.fdr^.rte,FPLi.data^.fdr^.bodov,
+                    dx_ZOBRAZ_TRAT,dy_ZOBRAZ_TRAT, cl_zobraz_trat_FPL
+                   );
+        disp_FPL4(@FPLi)
+      end;
+{$ENDIF}

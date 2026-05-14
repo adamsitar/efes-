@@ -1,0 +1,26 @@
+procedure mnuDEKODOVANIE_init(MMenu: PSubmenu); far;
+    var   smnu : TPItems;
+          i,items,ihk,nl : int;
+    begin
+      items:= 0; ihk:= 0; nl:= 0;
+
+     {$IFDEF LKPR_MACC}  { Server EDD, MACC Praha, vole }
+      {$IFDEF CONNECT_TO_OPL_EXT}
+       smnu[items]:= Switch2 ('~'+hk(ihk)+'ZPRACOVèNã NEóPLNê ZPRèVY ', @OPL__UNCOMPLETE_PKT,nil);
+       inc(items);
+       smnu[items]:= Switch2 ('~'+hk(ihk)+'POTVRZENã ZPRèVY PRO NENALEZEN PLèN ', @OPL__LAM_NOT_FOUND,nil);
+       inc(items);
+       smnu[items]:= NewLine(nil);
+       inc(items);
+      {$ENDIF}
+       smnu[items]:= Switch2 ('~'+hk(ihk)+'ZPRACOVèNã ZPRèVY CPL',     @_FPL4_CPL_ENABLE,nil);
+       inc(items);
+       add_newline(nl,items, smnu);
+       smnu[items]:= Switch2 ('~'+hk(ihk)+'ZPRACOVèNã LET¶ "G","X" ',  @_FPL4_XG_ENABLE,nil);
+       inc(items);
+       smnu[items]:= Switch2 ('~'+hk(ihk)+'KONTROLA POLE 18 ',         @_18_CHECK,nil);
+       inc(items);
+     {$ENDIF}
+
+      for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i])
+    end;

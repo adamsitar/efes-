@@ -1,0 +1,57 @@
+{ OKR1231 SEMEN/1234
+}
+ function _lat_PLN(s: string): string;
+    begin
+      if RUSSIAN_PLN then _lat_PLN:= s else _lat_PLN:= mtks_rus_to_lat(s)
+    end;
+
+
+ procedure _plan_PLN_(PLN: PPLN; x,y: int; b: bool); far;
+     var   dx : int;
+           s  : string;
+     begin
+       with PLN^ do
+         begin
+           SetColor (cl_DATA);
+           outtextxy(x,   y+1, _lat_PLN(idn));  dx:= (kod_7a+2) shl 3;
+           outtextxy(x+dx,y+1, _lat_PLN(typ));  inc(dx,(kod_9b+2) shl 3);
+           outtextxy(x+dx,y+1, _lat_PLN(code_bod_ (dep.kod,kod_AP,  dep.h,dep.m)));  inc(dx,(sizeof_PLNbod+1) shl 3);
+           outtextxy(x+dx,y+1, _lat_PLN(code_bod_ (eet.kod,kod_NDB, eet.h,eet.m)));  inc(dx,(sizeof_PLNbod+1) shl 3);
+           outtextxy(x+dx,y+1, _lat_PLN(code_bod_ (exi.kod,kod_NDB, exi.h,exi.m)));  inc(dx,(sizeof_PLNbod+1) shl 3);
+           outtextxy(x+dx,y+1, _lat_PLN(code_bod_ (arr.kod,kod_AP,  arr.h,arr.m)));  inc(dx,(sizeof_PLNbod+1) shl 3);
+           SetColor (cl_DATA+3);
+           outtextxy(x+dx,y+1, strpas(src));
+         end
+     end;
+
+
+ procedure _plan_PLN(PLN: PPLN; x,y: int; b: bool); far;
+     var   bk : byte;
+           dx : int;
+     begin
+       if b then bk:= bkPLAN_[b] else bk:= black;
+       FillWin(x-1,y,x+dx_plan_PLN,y+dy_plan_PLN,bk);
+       _plan_PLN_(PLN, x,y, b)
+     end;
+
+
+ procedure plan_PLN(PLN: PPLN; x,y: int; b: bool); far;
+     var   bk : byte;
+           dx : int;
+     begin
+       bk:= bkPLAN_[b];
+       BGIgraph.button(x,y,x+dx_plan_PLN, y+dy_plan_PLN, bk, btSmall, btOFF);
+       _plan_PLN_(PLN, x+5,y+2, b);
+       _linev(x+((kod_7a+1+kod_9a+kod_9b+1+kod_9c+1) shl 3),y+2,y+dy_plan_PLN-2,bk)
+     end;
+
+ procedure _info_PLN(x0,y0,x1,y1: int; PLN: PPLN);
+     begin
+       plan_PLN(PLN, x0+(x1-x0-dx_plan_PLN) shr 1,y0,false)
+     end;
+
+ function info_PLN(PLN: PPLN; title: string): bool;
+     begin
+       if title='' then title:= PLN^.idn;
+       info_PLN:= Info(title, @_info_PLN, PLN,dx_plan_PLN+20,dy_plan_PLN+5, nil,0)
+     end;

@@ -1,0 +1,38 @@
+{ O typedef}
+
+{$O BGIgraph}
+{$IFDEF BGI}
+  {$O BGItext}
+{$ENDIF}
+{$O BIOS}
+{$O SVGA}
+
+{$O COMs}
+{ O CRTII}
+{$O DB}
+
+{$O dyn_zoz}
+
+{$O graph_h}
+{$IFDEF SPEA}
+  {$O graphs}
+{$ENDIF}
+
+{$O io}
+{$O keyb}
+
+{$O math}
+{$O mess}
+{ O mouse}
+{$O msg}
+
+{$IFDEF PRN}
+  {$O PRNT}
+{$ENDIF}
+
+{$O sets}
+{$O sort}
+{$IFDEF SERVER}
+ {$O str0}
+{$ENDIF}
+{$O utime}

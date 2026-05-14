@@ -1,0 +1,298 @@
+{$IFOPT R+}
+   {$DEFINE R}
+   {$R-}
+{$ENDIF}
+
+
+{ ------------------------------------------
+   SYN
+  ------------------------------------------ }
+
+function code_SYN_(SYN: PSYN): string;
+   var   s,r,g: string;
+         i : int;
+   begin
+     with SYN^ do
+       begin
+         s:=  ZAC_SPR + IntToStr(ident,5,0)
+             +ODD_SPR + format_s(let)
+             +ODD_SPR + format_s(strpas(nazov));
+
+         r:= '';
+         str(date.r mod 100:2,g); r:= r + g;
+         str(date.m:2,g); r:= r + g;
+         str(date.d:2,g); r:= r + g;
+         str(time.h:2,g); r:= r + g;
+
+         s:= s
+             +ODD_SPR + r
+             +ODD_SPR + format_s(qnh_+qnh)
+             +ODD_SPR + format_s(qmu_+qmu)
+             +ODD_SPR + format_s(qan_qnt_+qan_qnt)
+             +ODD_SPR + format_s(qba_+qba)
+             +ODD_SPR + format_s(n_+n)
+             +ODD_SPR + format_s(qbb_+strpas(qbb))
+             +ODD_SPR + format_s(stav_+strpas(stav))
+             +ODD_SPR + format_s(qfe_+qfe)
+             +KON_SPR
+       end;
+     code_SYN_:= s
+   end;
+
+procedure decode_SYN_(s: string; SYN: PSYN);
+   var    r  : string;
+          b  : byte;
+          i,c: int;
+   begin
+     fillchar(SYN^,sizeof(TSYN),0);
+     with SYN^ do
+       begin
+         ident:= getint(s,1,setLET_1_1);
+         let  := getstr(s,2,setLET_1_1);
+         nazov:= strpasnew(getstr(s,3,setLET_1_1));
+
+         r    := getstr(s,4,setLET_1_1);
+         date.r  := scis(r,1,2) + (year div 100)*100;
+         date.m  := scis(r,3,2);
+         date.d  := scis(r,5,2);
+         time.h  := scis(r,7,2);
+         time.m  := 0;
+         time.s  := 0;
+
+         r    := getstr(s,5,setLET_1_1);
+         qnh_ := r[1];
+         qnh  := copy(r,2,length(r)-1);
+         r    := getstr(s,6,setLET_1_1);
+         qmu_ := r[1];
+         qmu  := copy(r,2,length(r)-1);
+         r    := getstr(s,7,setLET_1_1);
+         qan_qnt_ := r[1];
+         qan_qnt  := copy(r,2,length(r)-1);
+         r    := getstr(s,8,setLET_1_1);
+         qba_ := r[1];
+         qba  := copy(r,2,length(r)-1);
+         r    := getstr(s,9,setLET_1_1);
+         n_   := r[1];
+         n    := copy(r,2,length(r)-1);
+         r    := getstr(s,10,setLET_1_1);
+         qbb_ := r[1];
+         qbb  := strpasnew(cut_(copy(r,2,length(r)-1)));
+         r    := getstr(s,11,setLET_1_1);
+         stav_:= r[1];
+         stav := strpasnew(cut_(copy(r,2,length(r)-1)));
+         r    := getstr(s,12,setLET_1_1);
+         qfe_ := r[1];
+         qfe  := copy(r,2,length(r)-1)
+       end
+   end;
+
+
+{ ---------------------
+  kodovanie pre DB
+  --------------------- }
+
+procedure codeDB_SYN(SYN: PSYN; buff: PDB_buff; desc: PDB_head);
+    var   s : string;
+    begin
+      s:= code_SYN_(SYN);
+      {$IFDEF NET}
+        s:= s + rectostr(SYN^.rec) + KON_SPR;
+      {$ENDIF}
+      Move(s[0],buff^[0],length(s)+1);
+    end;
+
+procedure decodeDB_SYN(buff: PDB_buff; SYN: PSYN; desc: PDB_head);
+    var   s : string;
+    begin
+      Move(buff^[0],s[0],ord(buff^[0][0])+1);
+      decode_SYN_(s, SYN);
+     {$IFDEF NET}
+      strtorec(getstr(s,2,[KON_SPR]), SYN^.rec)
+     {$ENDIF}
+    end;
+
+
+{ ---------------------
+   prenos
+  --------------------- }
+
+procedure code_SYN(SYN: PSYN; var pkt: TNETpkt); far;
+    var   s : string;
+    begin
+      s:= code_SYN_(SYN);
+      new_NETpkt_data (@s[1],length(s), pkt.pkt)
+    end;
+
+procedure decode_SYN(const pkt: TNETpkt; SYN: PSYN);
+   begin
+     decode_SYN_(init_str(@pkt.pkt.data^[0],pkt.pkt.dlz), SYN);
+     {$IFDEF NET}
+       rec_data(pkt.ods, SYN^.rec);
+     {$ENDIF}
+   end;
+
+
+{ ---------------------
+   kluc
+  --------------------- }
+
+function codekey_SYN(SYN: PSYN): string;
+    begin
+      with SYN^ do
+        begin
+          codekey_SYN :=             IntToStr(ident,5,0)
+                         + ODD_SPR + format_s(let)
+                         + ODD_SPR + TimeToStr(time.h,time.m,'')
+                         + ODD_SPR + DateToStr(date.d,date.m,date.r,0,'')
+        end
+    end;
+
+procedure decodekey_SYN(s: string; SYN: PSYN);
+    var   b: byte;
+    begin
+      fillchar(SYN^,sizeof(SYN^),0);
+      with SYN^ do
+        begin
+          ident:= GetInt(s,1,setLET_1_1);
+          let  := getstr(s,2,setLET_1_1);
+          GetTimeStr(time.h,time.m,b, getstr(s,3,setLET_1_1));
+          GetDateStr(date.r,date.m,date.d, getstr(s,4,setLET_1_1),false)
+        end
+    end;
+
+
+{ ------------------------------------------
+   MET
+  ------------------------------------------ }
+(*
+function code_MET_(MET: PMET): string;
+   var   s,r,g : string;
+   begin
+     with MET^ do
+       begin
+         s:=  ZAC_SPR + IntToStr(ident,5,0)
+             +ODD_SPR + let+' '
+             +ODD_SPR + strpas(nazov)+' ';
+
+         r:= '';
+         str(date.r mod 100:2,g); r:= r + g;
+         str(date.m:2,g); r:= r + g;
+         str(date.d:2,g); r:= r + g;
+         str(time.h:2,g); r:= r + g;
+
+         s:= s
+             +ODD_SPR + r
+             +ODD_SPR + strpas(line1)+' '
+             +ODD_SPR + strpas(line2)+' '
+             +KON_SPR;
+       end;
+
+     code_MET_:= s
+   end;
+
+procedure decode_MET_(s: string; MET: PMET);
+   var    t,r  : string;
+          b    : byte;
+          i    : int;
+   begin
+     fillchar(MET^,sizeof(TMET),0);
+     with MET^ do
+       begin
+         ident:= getint(s,1,setLET_1_1);
+         let  := getstr(s,2,setLET_1_1);
+         nazov:= strpasnew(cut_(getstr(s,3,setLET_1_1)));
+
+         r    := getstr(s,4,setLET_1_1);
+         date.r  := scis(r,1,2) + (year div 100)*100;
+         date.m  := scis(r,3,2);
+         date.d  := scis(r,5,2);
+         time.h  := scis(r,7,2);
+         time.m  := 0;
+         time.s  := 0;
+
+         line1:= strpasnew(cut_(getstr(s,5,setLET_1_1)));
+         line2:= strpasnew(cut_(getstr(s,6,setLET_1_1)));
+       end;
+   end;
+
+
+{ ---------------------
+   DB
+  --------------------- }
+
+procedure codeDB_MET(MET: PMET; buff: PDB_buff; desc: PDB_head);
+    var   s : string;
+    begin
+      s:= code_MET_(MET);
+      {$IFDEF NET}
+        s:= s + rectostr(MET^.rec) + KON_SPR;
+      {$ENDIF}
+      Move(s[0],buff^[0],length(s)+1);
+    end;
+
+procedure decodeDB_MET(buff: PDB_buff; MET: PMET; desc: PDB_head);
+    var   s : string;
+    begin
+      Move(buff^[0],s[0],ord(buff^[0][0])+1);
+      decode_MET_(s, MET);
+     {$IFDEF NET}
+       strtorec(getstr(s,2,[KON_SPR]), MET^.rec)
+     {$ENDIF}
+    end;
+
+
+{ ---------------------
+   prenos
+  --------------------- }
+
+procedure code_MET(MET: PMET; pkt: PNETpacket);
+    var   s : string;
+    begin
+      s:= code_MET_(MET);
+      Move(s[1],pkt^.data[0],length(s));
+      pkt^.head.dlz:= length(s)
+    end;
+
+procedure decode_MET(pkt: PNETpacket; MET: PMET);
+    var    s : string;
+    begin
+      init_str(@pkt^.data[0],pkt^.head.dlz, s);
+      decode_MET_(s, MET)
+      {$IFDEF NET};
+        pkt_sender(pkt, MET^.rec);
+      {$ENDIF}
+    end;
+
+
+{ ---------------------
+   kluc
+  --------------------- }
+
+function codekey_MET(MET: PMET): string;
+   var   s : string;
+   begin
+     with MET^ do
+       begin
+         codekey_MET :=             IntToStr(ident,5,0)
+                        + ODD_SPR + TimeToStr(time.h,time.m,'')
+                        + ODD_SPR + DateToStr(date.d,date.m,date.r,0,'')
+       end
+   end;
+
+procedure decodekey_MET(s: string; MET: PMET);
+    var   b: byte;
+    begin
+      fillchar(MET^,sizeof(TMET),0);
+      with MET^ do
+        begin
+          ident:= GetInt(s,1,setLET_1_1);
+          GetTimeStr(time.h,time.m,b, getstr(s,2,setLET_1_1));
+          GetDateStr(date.r,date.m,date.d, getstr(s,3,setLET_1_1))
+        end
+    end;
+*)
+
+{$IFDEF R}
+   {$R+}
+{$ENDIF}
+

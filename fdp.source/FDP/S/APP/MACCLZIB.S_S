@@ -1,0 +1,91 @@
+procedure STATUS_init(_App: PApp {$IFDEF DATA_WRITTEN_IN_APP}; _AppGui: PAppGui{$ENDIF});
+    var   hi_,i,dx : int;
+          s  : string;
+          c  : char;
+          pG : PGroup;
+    begin
+      hi_:= 163;
+
+      {$IFDEF OLDI}
+        btOLDI:= New(PTButton,Init(_App,
+                     hi_+1, MaxY-16, Length('PENDING') shl 3 + 4,15,
+                     kbNoKey,cmNil, ' OLDI  ',1, {$IFDEF _X25} clGRe,clGRe {$ELSE} clGR7, clGR7 {$ENDIF},clBUTTON_COLOR,
+                     nil,true, hi_, true)
+                    );
+        btOLDI^.btSize := btSmall;
+        btOLDI^.visible:= true;
+        addStatIndicator(btOLDI);
+        hi_:= btOLDI^.x1;
+      {$ENDIF}
+
+      {$IFDEF BACKUP}
+        {$IFDEF OLDI}
+         btOLDIBCK:= New(PFButton,Init(_App,
+                     hi_+1, MaxY-16, Length(cbtOLDIBCK) shl 3 + 4 - 10,15,
+                     kbNoKey, cmSERVER_BCK, cbtOLDIBCK, 1,white,clGRc,red)
+                    );
+         btOLDIBCK^.visible:= false;
+         btOLDIBCK^.bk0:= black;
+         btOLDIBCK^.kbHot:= getaltchar(btOLDIBCK^.kbHot);
+         hi_:= btOLDIBCK^.x1+1;
+         addStatIndicator(btOLDIBCK);
+       {$ENDIF}
+
+       btBCK:= New(PIButton,Init(_App,
+                   hi_+1, MaxY-16, Length(cbtBCK) shl 3 + 4 - 10,15,
+                   kbNoKey, cmSERVER_BCK, cbtBCK,
+                   1,white,clGRc,red,
+                   @SERVERstatus,false,hi_,false)
+                  );
+       btBCK^.bk0:= black;
+       addStatIndicator(btBCK);
+       hi_:= btBCK^.x1;
+      {$ENDIF}
+
+      {$IFDEF SPR}
+       btMES:= New(PTButton,Init(_App,
+                   hi_+4, MaxY-16, Length(cbtMES) shl 3 + 4 - 10,15,
+                   kbNoKey, cmPREHLAD_SPR_dor, cbtMES, 1, clGRf,clGRc,clBUTTON_COLOR,
+                   @isSPR,true, hi_, true)
+                  );
+       addStatIndicator(btMES);
+       hi_:= btMES^.x1;
+      {$ENDIF}
+
+       btDBis:=  New(PFButton,Init(_App,
+                     hi_+1, MaxY-16, Length(cbtDBis) shl 3  + 20,15,
+                     kbNoKey, cmDefault, cbtDBis,
+                     1,white,clGRc,48)
+                    );
+       btDBis^.bk0:= black;
+       btDBis^.visible:= false;
+       cntrDB:= 0;
+       addStatIndicator(btDBis);
+       hi_:= btDBis^.x1;
+
+      {$IFDEF NET}
+        btNETis:= New(PFButton,Init(_App,
+                      hi_+1, MaxY-16, Length(cbtNETis) shl 3 + 8,15,
+                      kbNoKey, cmDefault, cbtNETis,
+                      1,white,clGRc,48)
+                     );
+        btNETis^.bk0:= black;
+        btNETis^.visible:= false;
+        cntrNET:= 0;
+        addStatIndicator(btNETis);
+        hi_:= btNETis^.x1;
+      {$ENDIF}
+
+      {$IFDEF EXTERNAL_NET}
+        btEXTis:= New(PFButton,Init(_App,
+                      hi_+1, MaxY-16, Length(cbtEXTis) shl 3 + 8,15,
+                      kbNoKey, cmDefault, cbtEXTis,
+                      1,white,clGRc,48)
+                     );
+        btEXTis^.bk0:= black;
+        btEXTis^.visible:= false;
+        cntrEXT:= 0;
+        addStatIndicator(btEXTis);
+        hi_:= btEXTis^.x1;
+      {$ENDIF}
+    end;

@@ -1,0 +1,352 @@
+{ ----------------------------
+  Kontrola spravnosti planu
+  ----------------------------
+}
+ function syntax_mFPL (FPL,FPLp: PDmFPL;
+                       KRIDLO, vlastne, prist_prepocet : bool;
+                       var res: string; var ires: int;
+                       form: PFDP_AForm
+                      ): bool;
+
+    var   IDNT,IDNT_LET,IDNT_INX, IS_MIL: bool;
+
+          i   : int;
+          ss  : byte;
+          p   : pchar;
+
+          podany : real;
+          b,novy : bool;
+          s      : string;
+
+          _OBs   : POBxys;
+          _OBxy  : TOBxy;
+          _bodov : int;
+
+          L   : PList;
+          ans : TAnswer;
+
+
+    function syntax_9(typ,typ0: string; _ires: int) : bool;
+       var   b1,b2 : bool;
+       begin
+         syntax_9:= false;
+
+         b1:= vojensky_kod_typu_lietadla(typ);
+         b2:= iny_kod_typu_lietadla(typ);
+
+         if (not (b1 or b2)) then
+            begin
+              ires:= l4_err(a_FPLM,typ,_ires,err_FPLM_9b_neznamy_typ, res);
+              if (form<>nil) then
+                 if (form^.Ask(i_9Mb,msgVERIPHY, res)<>ansAno) then Exit
+                 else res:= ''
+            end;
+
+           {$IFDEF LZ}
+            if    (typ0='')
+               or (   (b1<>vojensky_kod_typu_lietadla(typ0))
+                   or (b2<>iny_kod_typu_lietadla(typ0))
+                  )
+               then
+             begin
+               if ((not IS_MIL) and b1) then
+                  begin
+                    ires:= l4_err(a_FPLM,typ,_ires,err_FPLM_9b_vojensky_typ, res);
+                    if (form<>nil) then
+                       if (form^.Ask(i_9Mb,msgVERIPHY, res)<>ansAno) then Exit
+                       else res:= ''
+                  end;
+
+               if (IS_MIL and b2) then
+                  begin
+                    ires:= l4_err(a_FPLM,typ,_ires,err_FPLM_9b_nevojensky_typ, res);
+                    if (form<>nil) then
+                       if (form^.Ask(i_9Mb,msgVERIPHY,res)<>ansAno) then Exit
+                       else res:= ''
+                  end;
+            end;
+           {$ENDIF}
+
+         syntax_9:= res=''
+       end;
+
+    label X,E;
+
+    begin
+      syntax_mFPL:= false;
+      res:= ''; ires:= -1;
+      novy:= (FPLp=nil) or (code_FPLM_7a(FPLp)<>code_FPLM_7a(FPL)) or ((form<>nil) and (form^.novy));
+
+      with FPL^ do
+        begin
+
+        (*------------------
+          identifikacia
+          ------------------
+
+          KRIDLO:= false;
+          if (form<>nil) then
+             begin
+               if (form^.itemd^[i_7Ma].legal<>@setNil) then
+                  begin
+                   {$IFDEF PROCESS_KRL}
+                     if cut_(idn)='' then KRIDLO:= form^.Ask(i_7Ma,msgVERIPHY,ask_kridlo)=ansAno;
+                   {$ENDIF}
+
+                   if (not KRIDLO) and (length(cut_(idn))=0) then
+                      begin
+                        ires:= l4_err(a_FPLM,idn,i_7Ma,err_FPLM_7a_chyba, res);
+                        if form^.Ask(i_7Ma,msgVERIPHY,res)<>ansAno then goto E
+                        else res:= ''
+                      end;
+                  end;
+             end;
+        *)
+
+        { --------------
+          ssr
+          --------------
+        }
+         (*{$IFDEF SSR_MANAGEMENT}
+          if (ssr<>'') and FPLM_SSR then
+           begin
+             if is_ssr (ssr, {$IFDEF GOST} true {$ELSE} false {$ENDIF}, res) then res:= ssr_in_use (idn,ssr,true);
+             if res<>'' then begin ires:= i_7Mc; goto X end
+           end;
+         {$ENDIF}*)
+
+
+        { --------------
+          typ letu
+          --------------
+        }
+          if     (not KRIDLO)
+             and (not _in_list(_8a, @fn_8a,[], 1,nil))
+                  then
+                    begin
+                      ires:= l4_err(a_FPLM,_8a,i_8Ma,err_FPLM_8a, res);
+                      goto X
+                    end;
+
+          {$IFDEF L4444M}
+            _8b:= getcharu(form^._it_i(i_8Mb));
+            if (not KRIDLO) and (not (_8b in set_8bM)) then
+                begin
+                  ires:= l4_err(a_FPLM,_8b,i_8Mb,err_FPLM_8b, res);
+                  goto X
+                end;
+            {if     (not KRIDLO)
+               and (not _in_list(_8b, @fn_8bM,[], 1))
+                    then begin ires:= l4_err(a_OPL,_8b,i_8Mb,99, res); goto X end;}
+          {$ENDIF}
+
+
+        { --------------
+          typy letunov
+          --------------
+        }
+          if typ='' then begin ires:= l4_err(a_OPL,idn,i_9Mb,err_OPL_neuvedeny_typ, res); goto X; end;
+          IS_MIL:= is_mFPL(FPL);
+
+          if vlastne and (not KRIDLO) then
+             begin
+               if FPLp<>nil then s:= FPLp^.typ else s:= '';
+               if not syntax_9(typ,s,i_9Mb) then goto X;
+
+               if FPL^.typ2<>'' then
+                  begin
+                    if FPLp<>nil then s:= FPLp^.typ2 else s:= '';
+                    if not syntax_9(typ2,s,i_9Me) then goto X;
+                  end;
+             end;
+
+
+
+        { ------------
+           rychlost
+          ------------
+        }
+         { if (rych<100) or (rych>3000) then begin set_rk(r,k, 7,14); goto X end;}
+          if ((not KRIDLO) and (rych=0)) then begin ires:= l4_err(a_L4,'',i_15Ma,err_l4444_rych_chyba, res); goto X end;
+
+
+        { -----------------
+           letisko startu
+          -----------------
+        }
+         {$IFNDEF TRENAZER}
+           if (start.kod='') then begin ires:= l4_err(a_FPLM,idn,i_13Ma,err_FPLM_nezname_dep,res); goto X end;
+           if not get_OB_XYM(start.kod, _OBxy) then
+              begin
+                ires:= l4_err(a_FPLM,start.kod,i_13Ma,err_FPLM_nezname_dep,res);
+                goto X
+              end;
+
+          {$IFDEF AIRBASE}
+           { let moze startovat moze len
+             z letisk jemu podriadenych
+           } if    vlastne
+               and IS_MIL
+               and (not (KRIDLO))
+               and ((FPLp=nil) or (start.kod<>FPLp^.start.kod))
+               and (not podriadene_letisko(start.kod))
+                   then
+                    begin
+                      ires:= l4_err(a_OPL,start.kod,i_13Ma,err_OPL_neopravnene_letisko,res);
+                      if (form<>nil) then
+                         if (form^.Ask(i_13Ma,msgVERIPHY,res+' '+tit_EXCEPTION)<>ansAno) then goto E
+                         else res:= ''
+                    end;
+          {$ENDIF}
+         {$ENDIF}
+
+
+        { -------------------
+           letisko pristatia
+          -------------------
+        }
+         {$IFNDEF TRENAZER}
+          if prist.kod='' then begin ires:= l4_err(a_FPLM,idn,i_16Ma,err_FPLM_nezname_arr,res); goto X end;
+          if not get_OB_XYM(prist.kod, _OBxy) then
+             begin
+               ires:= l4_err(a_FPLM,prist.kod,i_16Ma,err_FPLM_nezname_arr,res);
+               goto X
+             end;
+
+          {$IFDEF AIRBASE}
+           { let pristava len na
+             podriadenych letiskach FIRu
+           } if     IS_MIL
+               and  (not (KRIDLO))
+               and  ((FPLp=nil) or (prist.kod<>FPLp^.prist.kod))
+               and  (not (   vojenske_letisko(prist.kod)
+                          or ine_letisko(prist.kod))
+                          or civilne_letisko(prist.kod)
+                         )
+                     then
+                     begin
+                       ires:= l4_err(a_OPL,prist.kod,i_16Ma,err_OPL_neopravnene_letisko,res);
+                       if (form<>nil) then
+                          if (form^.Ask(i_16Ma,msgVERIPHY,res+' '+tit_EXCEPTION)<>ansAno) then goto E
+                          else res:= ''
+                     end;
+          {$ENDIF}
+         {$ENDIF}
+
+
+        { -------------------
+           vyska
+          -------------------
+        }
+          if ((not KRIDLO) and (vys=0)) then begin ires:= l4_err(a_L4,'',i_15Mb1,err_l4444_vyska_chyba,res); goto X end;
+
+
+        { -------------------
+           VU
+          -------------------
+        }
+         {$IFNDEF L4444M}
+           if (VU='') or (not _in_list(VU, @fnPrevM,[], 1,nil)) then
+              begin
+                ires:= l4_err(a_OPL,'',i_OPM,err_OPL_neznamy_prev,res);
+                goto X
+              end;
+         {$ENDIF}
+
+
+        { -------------------
+           Ulohy
+          -------------------
+        }
+          b:= false;
+          for i:= 0 to max_ulohy_FPLm-1 do
+              begin
+                if not b then b:= ulohy[i]<>'';
+                if     (ulohy[i]<>'')
+                   and (not _in_list(ulohy[i], @fnUlohyM,[], 1,nil))
+                       then begin
+                              ires:= l4_err(a_OPL,ulohy[i],i_TSKM,err_OPL_neznamy_task,res);
+                              goto X
+                            end
+              end;
+          {$IFNDEF  L4444M}
+           if (not b) then begin ires:= l4_err(a_OPL,'',i_TSKM,err_OPL_chyba_task,res); goto X end;
+          {$ENDIF}
+
+
+        { -------------------
+           Trat
+          -------------------
+        }
+          New(_OBs); fillchar(_OBs^,sizeof(_OBs^),0); _bodov:= 0;
+          res:= _decode_FPL0_15
+                   (trat, start,prist,
+                    _OBs^,_bodov, rych,rych_, vys,vys_, date,
+                    true,false, true,false,prist_prepocet
+                   );
+          Dispose(_OBs);
+          if (res<>'') then goto X;
+
+
+        { -----------------------------------------------
+           Spravnost podania planu
+          -----------------------------------------------
+        }
+
+         { --------------------------------------------
+           Kontrola na spravnost zadania identifikacie:
+           --------------------------------------------
+           500 - 1     :  let nenarusa iny letiskovy priestor a vracia sa - "kolecko"
+           500 - 3,7,9 :  let narusa iny letiskovy priestor a vracia sa - "kolecko"
+           500 - 0,5   :  prelet
+
+           iXXX        : musi byt planovany ako let do TSA...
+         }
+         {$IFDEF SK}
+           IDNT_LET:= _identifikacia_mimoletiskoveho_letu(FPL);
+           IDNT_INX:= _identifikacia_letu_do_tsa(FPL);
+
+           if novy and (IDNT_LET or IDNT_INX) and (not IS_MIL) and (not KRIDLO) then
+              begin
+                ires:= l4_err(a_FPLM,'',i_7Ma,err_FPLM_7a_iny,res);
+                if form^.Ask(i_7Ma,msgVERIPHY,res+' '+ask_CORRECT_IDN)<>ansAno then goto E
+                else res:= ''
+              end;
+
+           b:= (IS_MIL and vlastne and (not KRIDLO));
+           IDNT:= false;
+           if novy and (not (IDNT_LET or IDNT_INX)) and (IS_MIL and vlastne and (not KRIDLO)) then
+              begin
+                ires:= l4_err(a_FPLM,'',i_7Ma,err_FPLM_7a_vojensky,res);
+                IDNT:= form^.Ask(i_7Ma,msgVERIPHY,res+' '+ask_CORRECT_IDN)=ansAno;
+                if not IDNT then goto E
+                else res:= ''
+              end;
+
+           if IS_MIL and vlastne and (not (KRIDLO or IDNT)) then
+              begin
+                ires:= -1;
+
+                if IDNT_LET then
+                  begin
+                    case idn[length(idn)] of
+                      '1','3','7','9' : if _mairbase(start.kod)<>_mairbase(prist.kod)  then ires:= err_FPLM_7a_prelet;
+                      '0','5'         : if _mairbase(start.kod)=_mairbase(prist.kod) then ires:= err_FPLM_7a_letlet;
+                      else ires:= err_FPLM_7a_mimolet
+                    end;
+                  end;
+
+                if IDNT_INX and (not _let_do_priestoru(FPL)) then ires:= err_FPLM_7a_chybaTSA;
+
+                if ires>-1 then begin ires:= l4_err(a_FPLM,'',i_7Ma,ires,res); goto X end
+              end;
+         {$ENDIF}
+        end;
+
+      X: if ires=-1 then ires:= i_15M;
+         syntax_mFPL:= res='';
+         Exit;
+
+      E: res:= ''
+    end;
+

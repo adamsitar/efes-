@@ -1,0 +1,74 @@
+
+  function print_SYN(SYN: PSYN): bool;
+     var   s: array[0..15] of string;
+           t: string;
+           i: int;
+     begin
+      {$IFDEF PRN}
+       with SYN^ do
+         begin
+           t:= inttostr(ident,4,1)+' '+let+' '+strpas(nazov);
+           s[0]:= _LF+_LSi+#10+_CE;
+           s[1]:= _PRN_TAB + _TS+_MS +  t +_TE+_ME+' od '+inttostr(time.h,1,1)+' hod'+_LF;
+           s[2]:= _PRN_TAB + ' QNH           : '+qnh+_LF;
+           s[3]:= _PRN_TAB + ' QMU   QAN-QNT : '+qmu+'-'+qan_qnt+_LF;
+           s[4]:= _PRN_TAB + ' QBA  n/8  QBB : '+qba+' '+n+' '+strpas(qbb)+_LF;
+           s[5]:= _PRN_TAB + ' STAV POCASIA  : '+cut_(strpas(stav))+_LF;
+           s[6]:= _LF;
+         end;
+        print_SYN:= print_strs(PortNo,@s,7)
+       {$ENDIF}
+      end;
+
+
+  procedure print_SYNs (SYNs: PSYNs; top: pointer; title: string); far;
+      var   i: int;
+      begin
+       {$IFDEF PRN}
+        if print_head(PortNo, title) then
+           begin
+             i:= 0;
+             while (i<=int(top^)) and print_SYN(SYNs^[i]) do
+               begin
+                 CheckProcesses;
+                 inc(i)
+               end
+           end
+       {$ENDIF}
+      end;
+
+
+(*
+  function print_MET(MET: PMET): bool;
+     var   s: array[0..15] of string;
+           t: string;
+           i: int;
+     begin
+      {$IFDEF PRN}
+       with MET^ do
+         begin
+           t:= inttostr(ident,4,1)+' '+let+' '+strpas(nazov);
+           s[0]:= _LF+_LSi+#10+_CE;
+           s[1]:= _PRN_TAB + _TS+_MS + t +_TE+_ME+' od '+inttostr(time.h,1,1)+' hod'+_LF;
+           s[2]:= _PRN_TAB + '-'+strpas(line1)+_LF;
+           s[3]:= _PRN_TAB + '-'+strpas(line2)+_LF;
+           s[4]:= _LF;
+         end;
+        print_MET:= print_strs(PortNo,@s,5)
+      {$ENDIF}
+      end;
+
+  procedure print_METs (METs: PMETs; top: pointer; title: string); far;
+      var   i: int;
+      begin
+        if print_head(PortNo, title) then
+           begin
+             i:= 0;
+             while (i<=int(top^)) and print_MET(METs^[i]) do
+               begin
+                 Main0;
+                 inc(i)
+               end
+           end
+      end;
+*)

@@ -1,0 +1,61 @@
+; -----------------------------------------
+;  FDP/OPL - RDC-100
+; =========================================
+
+; --------------------------------------------------------------------------------------------------------------------------------
+; Pracovisko ; Adresa logicka,   RTR, IP        ; Protokol ; Stanica  ; informacie                               ; ine nastavenia
+; --------------------------------------------------------------------------------------------------------------------------------
+
+; ----------------------------
+; SRLP
+; ----------------------------
+  BRIDGE     ; StrRLP BRIDGE ,   192.100.141.35 ; ~UDX  L  ; @BRIDGE  ; -heartbeat  MSG
+  SERVER     ; StrRLP S1     ,   192.100.141.32 ; ~UDP ~L  ; @SERVER  ; -master     MSG  ALL \KRL \SYN \FUA ; timeout=3
+  RTZ        ; StrRLP S2     ,   192.100.141.33 ; ~UDP ~L  ; @BSERVER ; -backup     MSG  ALL \KRL \SYN \FUA ; timeout=3
+
+  SOD        ; StrRLP SOD    ,   192.100.141.42 ; ~UDP ~L  ; @OPL     ; -heartbeat  MSG  ; timeout=3
+  SMD        ; StrRLP SMD    ,   192.100.141.41 ; ~UDP ~L  ; @OPL     ; -heartbeat  MSG  ; timeout=3
+
+; ----------------------------
+; SAR
+; ----------------------------
+  SAR        ; SAR OPL       ,   192.100.143.32 ; ~UDP  L  ; @OPL     ; -heartbeat  MSG  ; timeout=3
+
+
+; ----------------------------
+; VLIS
+; ----------------------------
+; VLIS       ; VLIS          ,   192.100.142.06 ; ~UDP ~L  ; @LIS     ; MSG ; timeout=6
+
+
+; ----------------------------
+; Letiska
+; ----------------------------
+  100        ; 100 OPL       ,   192.100.037.32 ; ~UDP ~L  ; @OPL   ; -heartbeat -ap MSG      ; timeout=6
+  200        ; 200 OPL       ,   192.100.035.32 ; ~X25  L  ; @OPL   ; -heartbeat -ap MSG      ; timeout=6
+  250        ; 250 OPL       ,   192.100.013.32 ; ~UDP ~L  ; @OPL   ; -heartbeat -ap MSG      ; timeout=6
+  300        ; 300 OPL       ,   192.100.075.32 ; ~UDP ~L  ; @OPL   ; -heartbeat -ap MSG      ; timeout=6
+  500        ; 500 OPL       ,   192.100.105.32 ; ~UDP  L  ; @OPL   ; -heartbeat -ap MSG      ; timeout=6
+  600        ; 600 OPL       ,   192.100.107.32 ; ~UDP  L  ; @OPL   ; -heartbeat -ap MSG      ; timeout=6
+
+;  pripravene adresy pre rekonfiguraciu
+;  500        ; 500 OPL       ,   192.100.113.32 ; ~UDP ~L  ; @OPL   ; -heartbeat -ap MSG       ; timeout=6
+;  600        ; 600 OPL       ,   192.100.107.32 ; ~UDP ~L  ; @OPL   ; -heartbeat -ap MSG       ; timeout=6
+
+
+; ----------------------------
+; Radarcentra
+; ----------------------------
+  100 RDC    ; 100 RDC       ,   192.100.040.32 ; @THIS
+  100 RDP    ; 100 RDP       ,   192.100.037.16 ; ~UDP     ; @RDP   ; - slave FPLC FPLM FPLO PRS
+
+  250 RDC    ; 250 RDC       ,   192.100.013.33 ; ~UDP ~L  ; @IDD   ;                MSG      ; timeout=6
+  300 RDC    ; 300 RDC       ,   192.100.073.32 ; ~UDP ~L  ; @IDD   ;                MSG      ; timeout=6
+  500 RDC    ; 500 RDC       ,   192.100.111.32 ; ~UDP ~L  ; @IDD   ;                MSG      ; timeout=6
+  600 RDC    ; 600 RDC       ,   192.100.105.32 ; ~UDP ~L  ; @IDD   ;                MSG      ; timeout=6
+
+
+; ----------------------------
+; PVO
+; ----------------------------
+  DPVL       ; VS DPVL       ,   192.100.000.33 ; ~UDP ~L  ; @IDD   ; -heartbeat MSG          ; timeout=5

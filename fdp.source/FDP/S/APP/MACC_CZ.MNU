@@ -1,0 +1,86 @@
+(*
+function SERVERmenu_init: PBarMenu;
+
+   var   ASOCmenu     : PSubMenu;
+         PREHLADmenu  : PSubMenu;
+
+         STREAMmenu   : PSubMenu;
+         FPLMmenu     : PSubMenu;
+         PRSmenu      : PSubMenu;
+         DATAmenu     : PSubMenu;
+
+         OPTIONsmenu  : PSubMenu;
+         MMImenu      : PSubMenu;
+         SYSTEMmenu   : PSubMenu;
+
+   begin
+
+   {IFNDEF DEBUG}
+
+     STREAMmenu:=  SubMenu(mnu_STREAM,  WinMenu(tit_STREAM,nil,nil),nil);
+     STREAMmenu^.PMenu_init:= @mnuSTREAM_init;
+
+    {$IFDEF PROCESS_FPLM}
+     FPLMmenu:= SubMenu(mnu_FPLM, WinMenu(tit_FPLM, hlpmnuFPLM,nil),nil);
+     FPLMmenu^.PMenu_init:= @mnuFPLM_init;
+    {$ENDIF}
+
+    {$IFDEF PROCESS_PRS}
+     PRSmenu:= SubMenu(mnu_PRS, WinMenu(tit_PRS, hlpmnuPRS,nil),nil);
+     PRSmenu^.PMenu_init:= @mnuPRS_init;
+    {$ENDIF}
+
+     DATAmenu:= SubMenu(mnu_UDAJE,  WinMenu(tit_UDAJE,nil,nil),nil);
+     DATAmenu^.PMenu_init:= @mnuPREHLAD_init;
+
+
+     OPTIONSmenu:= SubMenu(mnu_OPT,  WinMenu(tit_OPT, nil,nil),nil);
+     OPTIONSmenu^.PMenu_init:= @mnuOPTIONS_init;
+
+     MMImenu:= SubMenu (mnu_MMI,WinMenu(tit_MMI, hlpmnuSYSTEM,nil),nil);
+     MMImenu^.PMenu_init:= @mnuMMI_init;
+
+     SYSTEMmenu:= SubMenu (mnu_SYSTEM, WinMenu(tit_SYSTEM,hlpmnuSYSTEM,nil),nil);
+     SYSTEMmenu^.PMenu_init:= @mnuSYSTEM_init;
+    {ENDIF}
+
+
+     SERVERmenu:= New(PBarMenu);
+     SERVERmenu_init:= SERVERmenu;
+     SERVERmenu^.Init('',
+
+       Item2(INST, kbCtrlF1, cmAbout,
+
+      {IFNDEF DEBUG}
+        SubMenuInitialized(STREAMmenu,
+
+       {$IFDEF PROCESS_FPLM}
+        SubMenuInitialized(FPLMmenu,
+       {$ENDIF}
+
+       {$IFDEF PROCESS_PRS}
+        SubMenuInitialized(PRSmenu,
+       {$ENDIF}
+
+       SubMenuInitialized(DATAmenu,
+
+       SubMenuInitialized(OPTIONSmenu,
+       SubMenuInitialized(MMImenu,
+       SubMenuInitialized(SYSTEMmenu,
+      {ENDIF}
+
+       nil )
+          {IFNDEF DEBUG}
+           {$IFDEF PROCESS_FPLM} ) {$ENDIF}
+           {$IFDEF PROCESS_PRS}  ) {$ENDIF}
+           ) ) ) ) )
+          {ENDIF}
+      );
+
+   end;
+*)
+
+ function SERVERmenu_init: PBarMenu;
+    begin
+      SERVERmenu_init:= SERVERmenu_init_
+    end;

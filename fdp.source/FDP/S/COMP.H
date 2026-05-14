@@ -1,0 +1,80 @@
+{$DEFINE DEBUG}
+{ DEFINE TEST}
+{ DEFINE DEMO}
+
+
+{ ----------------------- }
+{ Instalacia pre...       }
+{ ----------------------- }
+
+{$DEFINE FDP}
+{$DEFINE SERVER}
+
+
+{ DEFINE LZIB_ACC}
+
+{$DEFINE LZIB_MACC}
+  { DEFINE SERVER_2}        { zalozny-spodny server }
+
+{ DEFINE LZIB_UVS}
+
+
+{ DEFINE LKPR_MACC}
+  {$DEFINE SERVER_2}        { spodny server }
+
+
+{ ----------------------- }
+{ Hardware                }
+{ ----------------------- }
+
+{$DEFINE BGI}
+{$DEFINE SVGA}
+
+
+{ ----------------------- }
+{ exe modul               }
+{ ----------------------- }
+
+{$I comp_exe.h}
+
+{$IFNDEF SVGA} {$DEFINE VGA} {$DEFINE EGAVGA} {$ENDIF}
+{$DEFINE DISPLAY_ZHASNI}
+{$DEFINE DISPLAY_PREPNI}
+
+
+{ ----------------------- }
+{ Instalacia pre...       }
+{ ----------------------- }
+
+{$IFDEF LZIB_ACC}   { Server EDD, ACC Blava, co nevidys ? }
+  {$I LZIBACC.h}
+{$ENDIF}
+
+{$IFDEF LZIB_MACC}  { Server OPL, StrRLP Blava }
+  {$I LZIBMACC.h}
+{$ENDIF}
+
+{$IFDEF LZIB_UVS}
+  {$I LZIB_UVS.h}
+{$ENDIF}
+
+
+{$IFDEF LKPR_MACC}  { Server EDD, MACC Praha, vole }
+  {$I LKPRMACC.h}
+{$ENDIF}
+
+
+
+{ ------------------------ }
+{ Spolocne nastavenia...   }
+{ ------------------------ }
+
+{$I comp_fdp.h}
+
+
+{ ------------------
+   NET
+  ------------------
+}
+{$I comp_ext.h}
+{$I comp_net.h}

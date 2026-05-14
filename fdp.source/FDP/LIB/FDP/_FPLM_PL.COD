@@ -1,0 +1,130 @@
+{$IFDEF DATA_BIN}
+  { I _FPLm0.cod}
+  {$I _FPLmL0.cod}
+  {$I _FPLm0RDP.cod}
+{$ENDIF}
+
+{$I _FPLM_L4.cod}
+
+
+{ ---------------------
+   prenos
+   ---------------------
+}
+ procedure code_FPLM(FPL: PDmFPL; var pkt: TNETpkt);
+     var   pch : pchar;
+     begin
+       pch:= code_l4_FPLM_(FPL,'');
+       new_NETpkt_data (pchars(pch),strlen(pch), pkt.pkt);
+       strdispose(pch)
+     end;
+
+ procedure decode_FPLM(const pkt: TNETpkt; FPL: PDmFPL);
+     begin
+       decode_l4_FPLM_ (pkt.pkt.data,pkt.pkt.dlz,FPL);
+       {$IFDEF NET}
+         rec_data(pkt.ods, FPL^.rec)
+       {$ENDIF}
+     end;
+
+
+ procedure code_FPLM_mess(FPL: PDmFPL; var pkt: TNETpkt);
+     var   s: string;
+     begin
+       s:=    icao_STD + decode_code_to_hd(pkt.head.typ)
+            + icao_ARR + codekey_FPLM(FPL)
+            + icao_END;
+       new_NETpkt_data (@s[1],length(s), pkt.pkt)
+     end;
+
+ procedure decode_FPLM_mess(const pkt: TNETpkt; FPL: PDmFPL);
+     var   s: string;
+           i: int;
+     begin
+       s:= get_str(pkt.pkt.data,pkt.pkt.dlz,1,[icao_STD,icao_END],sizeof(s)-1);
+       i:= pos(icao_ARR,s);
+       if i>0 then s:= copy(s,i+1,length(s)-i);
+       decodekey_FPLM(s,FPL)
+     end;
+
+
+ { ---------------------
+    DB
+   ---------------------
+ }
+
+ {$I _FPLM_DB.cod}
+
+ procedure codeDB_FPLM (FPL: PDmFPL; buff: PDB_buff; head: PDB_head);
+     begin
+       if head^.attr and DBbin <> 0 then _codeDBB_FPLM(FPL,buff,head)
+       {$IFDEF OPL} else if head^.attr and DBtxt = 0 then _codeDB0_FPLM(FPL,buff,head) {$ENDIF}
+       else _codeDBT_FPLM(FPL,buff,head)
+     end;
+
+ procedure decodeDB_FPLM (buff: PDB_buff; FPL: PDmFPL; head: PDB_head);
+     begin
+       fillchar(FPL^,sizeof(FPL^),0);
+       if head^.attr and DBbin <> 0 then _decodeDBB_FPLM(buff,FPL,head)
+       {$IFDEF OPL} else if head^.attr and DBtxt = 0 then _decodeDB0_FPLM(buff,FPL,head) {$ENDIF}
+       else _decodeDBT_FPLM(buff,FPL,head);
+       format_mFPL(FPL)
+     end;
+
+
+
+ { ---------------------
+    kluc
+   ---------------------
+   < kod_FPMkey
+ }
+ function  code_FPLM_let(let: string): string;
+    begin
+      code_FPLM_let:=
+          {$IFDEF L4444M} _cairbase(let);
+          {$ELSE}         _mairbase(let);
+          {$ENDIF}
+    end;
+
+ function  codekey_FPLM(FPL: PDmFPL): string;
+    begin
+      if FPL<>nil then codekey_FPLM:= codekey_fpl(code_FPLM_7a(FPL),code_FPLM_let(FPL^.start.kod),FPL^.date)
+      else codekey_FPLM:= ''
+    end;
+
+ procedure decodekey_FPLM(s: string; FPL: PDmFPL);
+     var   _7 : string;
+     begin
+       fillchar(FPL^,sizeof(FPL^),0); { nesmie sa zrusit ! }
+       if FPL=nil then Exit;
+       decodekey_fpl(s, _7,FPL^.start.kod,FPL^.date);
+       decode_FPLM_7(_7, FPL)
+     end;
+
+
+ { inicializacia premennej item pre najdenie kluca
+ }
+ procedure init_key_mFPL(const FPL: DmFPL; var FPLi: DmFPL);
+     begin
+       fillchar(FPLi,sizeof(DmFPL),0);
+       FPLi.idn:= FPL.idn;
+       FPLi.idn_:= FPL.idn_;
+       FPLi.start:= FPL.start;
+       FPLi.date:= FPL.date
+     end;
+
+
+ { datum podania ako kluc je jednoznacny,
+   pretoze obsahuje i sekundy
+ }
+ function  codekey_KRL(FPL: PDmFPL): string;
+    begin
+      if FPL<>nil then codekey_KRL:= codekey_FPLM(FPL) + icao_ARR + code_l4_datums(FPL^.dap)
+      else codekey_KRL:= ''
+    end;
+
+ procedure decodekey_KRL(s: string; FPL: PDmFPL);
+     begin
+       decodekey_FPLM(s,FPL);
+       if FPL<>nil then decode_l4_datum(getstr(s, 4,[icao_ARR]),FPL^.dap)
+     end;

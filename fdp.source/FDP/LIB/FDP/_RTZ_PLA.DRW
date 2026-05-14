@@ -1,0 +1,81 @@
+{
+‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹
+€                                                          €
+€ zobrazenie                                               €
+€‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹€
+}
+
+procedure _plan_RTZ(x0,y0,x1,y1: int; bk: int; sm: byte); far;
+    begin
+      BGIgraph.button(x0,y0,x1,y1, bk, btSmall, btOFF);
+      on_off(x0+3,y0+3, x1-3,y1-3,  bk+clBUTTON_DARK,bk+clBUTTON_LIGHT, btSmall, btOFF);
+      on_off(x0+5,y0+17,x1-5,y1-5, bk+clBUTTON_DARK,bk+clBUTTON_LIGHT, btSmall, btON);
+    end;
+
+
+procedure plan_RTZ(RTZ: PRTZ; x,y: int; b: bool); far;
+    var   zacp,konp: pchar;
+          dx,bk: byte;
+    begin
+      bk:= bkPLAN_[b];
+      _plan_RTZ(x,y,x+dx_RTZ,y+dy_RTZ, bk, 1);
+      settextstyle(0,HorizDir,1); setcolor (cl_DATA-2);
+
+      setcolor(cl_data+1);
+      outtextxy(x+10,y+7, RTZ^.id);
+      dx:= textwidth(RTZ^.id);
+
+      {$IFDEF SPEA} SetBkColor(bk); SetTextStyle(BIT8x8, HorizDir,0);
+      {$ELSE} SetTextStyle(SmallFont, HorizDir,4);
+      {$ENDIF}
+      {$IFDEF SPEA} inc(y,dy_ch); {$ENDIF}
+
+      outtextxy(x+10+dx+5,y+4,', '+DateToStrS(RTZ^.date.d,RTZ^.date.m,RTZ^.date.r));
+
+      setcolor(cl_data-1);
+      outtextxy(x+10,y+20,  _line_rtz_data(RTZ^.data, rtz_DIR,rtz_CR,rtz_VPD ,zacp,konp, true));
+      outtextxy(x+10,y+30,  _line_rtz_data(zacp, rtz_CR,rtz_VPD,rtz_ALS ,zacp,konp, true));
+      outtextxy(x+10,y+40,  _line_rtz_data(zacp, rtz_VPD,rtz_ALS,rtz_DMK,zacp,konp, true));
+      outtextxy(x+10,y+50,  _line_rtz_data(zacp, rtz_ALS,rtz_DMK,rtz_BMK,zacp,konp, true));
+      outtextxy(x+10,y+60,  _line_rtz_data(zacp, rtz_DMK,rtz_BMK,rtz_W_,zacp,konp, true));
+      outtextxy(x+10,y+70,  _line_rtz_data(zacp, rtz_BMK,rtz_W_,rtz_QB,zacp,konp, true));
+      outtextxy(x+10,y+80,  _line_rtz_data(zacp, rtz_W_,rtz_QB,rtz_T,zacp,konp, true));
+      outtextxy(x+10,y+90,  _line_rtz_data(zacp, rtz_QB,rtz_T,rtz_QNH,zacp,konp, true));
+      outtextxy(x+10,y+100, _line_rtz_data(zacp, rtz_T,rtz_QNH,rtz_QFE,zacp,konp, true));
+      outtextxy(x+10,y+110, _line_rtz_data(zacp, rtz_QNH,rtz_QFE,rtz_TREND,zacp,konp, true));
+      outtextxy(x+10,y+120, _line_rtz_data(zacp, rtz_QFE,rtz_TREND,'',zacp,konp, true));
+      outtextxy(x+10,y+130, _line_rtz_data(zacp, rtz_TREND,'','',zacp,konp, true));
+
+      SetTextStyle(DefaultFont, HorizDir,0);
+    end;
+
+
+ procedure _info_RTZ(x0,y0,x1,y1: int; RTZ: PRTZ); far;
+     begin
+       plan_RTZ(RTZ, x0+(x1-x0-dx_RTZ) shr 1, y0{+winHEIGHT},true)
+     end;
+
+ function info_RTZ(RTZ: PRTZ; title: string): bool;
+     begin
+       info_RTZ:= Info(title, @_info_RTZ, RTZ,dx_RTZ+20,dy_RTZ+10, nil,0)
+     end;
+
+
+{ --------------------
+  Spracovanie hlasenia
+  --------------------
+}
+ function report_RTZ (RTZ: PRTZ; title: string): bool;
+     var   res : bool;
+           p   : pointer;
+     begin
+       if varovanie_RTZ then
+          begin
+            Beep2;
+            p:= @Beep99
+          end
+       else p:= nil;
+       res:= Info(title, @_info_RTZ, RTZ,dx_RTZ+20,dy_RTZ+10,p,0);
+       if varovanie_RTZ then isRTZ:= isRTZ or (not res)
+     end;
+

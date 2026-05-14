@@ -1,0 +1,166 @@
+{ --------
+   14
+  --------
+
+  L4444 :
+
+   VOZ/0120F140F010A
+   VLM/0142F150F350B
+
+}
+
+ function code_l4_14 (kod1 : string; h1,m1 : byte; vys1: word; vys1_: char;
+                      vysI : word; vysI_,vysI_ab : char
+                     ): string;
+    var   s : string;
+    begin
+      s:= kod1+icao_NXT+code_l4_utc(h1,m1);
+      if (vys1<>0) or (vysI<>0) then
+         begin
+           s:= s + code_l4_vys (vys1,vys1_) {};
+           if (vysI<>0) then s:= s {} + code_l4_vys (vysI,vysI_) + vysI_ab
+         end;
+      code_l4_14:= s
+    end;
+
+
+ function decode_l4_14_ (_14 : string;
+
+                         var kod1    : string;      { vstupny bod FIR/oblasti}
+                         var h1,m1   : byte;        { vypocitany cas na bode  }
+                         var vys1    : word;        { vyska na bode           }
+                         var vys1_   : char;
+
+                         is_vysI     : bool;        { dekodovat vysku I ? }
+                         var vysI    : word;        { vyska na hranici do FIR (oblasti) }
+                         var vysI_,
+                             vysI_ab : char;
+
+                         var b14a,b14b,b14c,b14de : bool;
+                         var _14b,_14c,_14d,_14e : string
+                        ): bool;
+
+    var   s   : string;
+          dlz : int;
+          v_a : char;
+
+    begin
+      decode_l4_14_:= false;
+
+      kod1:= ''; h1:= 0; m1:= 0; vys1:= 0; vys1_:= vysOB;
+      vysI:= 0; vysI_:= vysOB; vysI_ab:= ' ';
+      b14c:= true; b14de:= true;
+      _14c:= ''; _14d:= ''; _14e:= '';
+
+     { 14a - bod
+     }
+       kod1:= cut_(getstr(_14,1,[icao_NXT]));
+       b14a:= kod1<>'';
+
+
+     { 14b - cas na bode
+     }
+       s:= cut_(getstr(_14,2,[icao_NXT]));
+       _14b:= copy(s,1,kod_TIME);
+       b14b:= decode_l4_utc (_14b, h1,m1);
+
+       if is_vysI then
+          begin
+          { 14c - ocakavana a povolena vyska na vstupnom bode
+          }
+            s:= copy(s,kod_TIME+1,length(s)-kod_TIME);
+            b14c:= decode_l4_vys_ (s, vys1,vys1_,nil,dlz,true);
+            _14c:= copy(s,1,dlz);
+
+          { 14de - vyska na vstupe cez hranicu riadenej oblasti
+          }
+            s:= cut_(copy(s,dlz+1,length(s)-dlz));
+            if (s<>'') then
+               begin
+                 b14de:= decode_l4_vys_ (s, vysI,vysI_,@vysI_ab, dlz,true);
+                 if vysI_ab<>' 'then dec(dlz);
+                 _14d:= copy(s,1,dlz);
+                 _14e:= vysI_ab
+               end
+          end;
+
+      decode_l4_14_:= b14a and b14b and b14c and b14de
+    end;
+
+
+ function decode_l4_14  (_14 : string;
+
+                         var kod1    : string;      { vstupny bod FIR/oblasti}
+                         var h1,m1   : byte;        { vypocitany cas na bode  }
+                         var vys1    : word;        { vyska na bode           }
+                         var vys1_   : char;
+
+                         is_vysI     : bool;        { dekodovat vysku I ? }
+                         var vysI    : word;        { vyska na hranici do FIR (oblasti) }
+                         var vysI_,
+                             vysI_ab : char
+                       ): bool;
+
+    var   b14a,b14b,b14c,b14de : bool;
+          _14b,_14c,_14d,_14e  : string;
+    begin
+      decode_l4_14:= decode_l4_14_
+                       (_14,kod1, h1,m1,vys1,vys1_,
+                        is_vysI,vysI,vysI_,vysI_ab,
+                        b14a,b14b,b14c,b14de,
+                        _14b,_14c,_14d,_14e
+                       )
+    end;
+
+
+{ --------
+   EXI
+  --------
+
+  bez predpisu :
+
+  ...-EXI-OKG/2231F120-F120
+  ...-EXI-ASTUT/2247F150F200B-F130
+
+}
+
+ function code_l4_EXI (kodL : string; hL,mL : byte; vysL: word; vysL_: char;
+                       vysO : word; vysO_,vysO_ab : char;
+                       vysH : word; vysH_ : char
+                      ): string;
+
+    var   s : string;
+    begin
+      s:= code_l4_14 (kodL, hL,mL, vysL,vysL_, vysO,vysO_,vysO_ab);
+      if vysH<>0 then s:= cut_(s) + icao_NXIT + cut_(code_l4_vys (vysH,vysH_));
+      code_l4_EXI:= s
+    end;
+
+
+ function decode_l4_EXI (_EXI        : string;
+
+                         var kodL    : string;      { vystupny bod FIR/oblasti }
+                         var hL,mL   : byte;        { vypocitany cas na bode   }
+                         var vysL    : word;        { vyska na bode }
+                         var vysL_   : char;
+
+                         var vysO    : word;        { vyska na hranici z FIR (oblasti) }
+                         var vysO_,
+                             vysO_ab : char;
+
+                         var vysH    : word;        { nasledujuca vyska }
+                         var vysH_   : char
+                        ): bool;
+
+    var   s : string;
+
+    begin
+      decode_l4_EXI:= decode_l4_14
+                          (cut_(getstr(_EXI,1,[icao_ARR,icao_NXIT])),
+                           kodL, hL,mL, vysL,vysL_,
+                           true,vysO, vysO_,vysO_ab
+                          );
+
+      s:= cut_(getstr(_EXI,2,[icao_ARR,icao_NXIT]));
+      if s<>'' then decode_l4_vys (s, vysH,vysH_);
+    end;

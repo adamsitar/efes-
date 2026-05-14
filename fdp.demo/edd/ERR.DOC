@@ -1,0 +1,609 @@
+Ku menu :
+
+DCT EXPECTED                 Doc.4444 vyzaduje, aby body uvedene v plane letu lezali
+                             na jednej trati, v opacnom pripade musi byt medyi nimi
+                             priznak "DCT". System umoznuje eliminaciu tejto kontroly.
+
+ROUTE INTERSECTION ENABLED - Doc.4444 vyzaduje, aby pri prechode medzi tratami LPS
+                             bol v plane uvedeny bod prechodu. System umoznuje jeho
+                             automaticke urcenie, ak chyba a trate sa nekrizuju
+                             viacejkrat.
+
+POINT OUT OF ROUTE ENABLED - Doc.4444 vyzaduje, aby v popise trate nasledoval
+                             pred alebo za tratou LPS len bod patriaci na nu.
+                             pri prechode medzi tratami LPS.
+                             System umoznuje potlacenie tohto obmedzenia, ak je
+                             nastavena maximalna pripustna vzdialenost bodu od
+                             trate.
+
+DISTANCE POINT-ROUTE [km] - maximalna mozna vzdialenost pri hladani
+                            najblizsieho bodu ku trati
+
+DISTANCE VOR-ROUTE [km]   - maximalna vzdialenost pri hladani
+                            najblizsieho bodu ku trati pre
+                            bod typu VOR
+
+
+--------------------------------------------------------------------------
+
+
+CHYBOVE SPRAVY PRI DEKODOVANI/SPRACOVANI FPL PODLA Doc. 4444
+
+
+5a - Uncorrect describtion of emergency phase
+
+     Obsah pola 5a (...) nezodpoveda Doc.4444.
+     Zapis : vid cast o Doc. 4444
+
+
+7a - Missing aircraft identification
+
+     Pole 7a je prazdne - plan letu nema uvedenu identifikaciu.
+
+
+Missing array "8"
+
+    Chybajuci popis v poli 8 (...)
+
+
+8 - Uncorrect array length
+
+    Dlzka pola 8 nezodpoveda Doc.4444.
+
+
+8a - Unknown flight rules
+
+     Pravidla letu nie su uvedene v sulade s Doc.4444.
+     Zapis : vid cast o Doc. 4444
+
+
+8b - Unknown type of flight
+
+     Typ letu nie su uvedene v sulade s Doc.4444.
+     Zapis : vid cast o Doc. 4444
+
+
+9  - Error in array format
+
+     Chybajuci popis alebo nespravny zapis v poli 9
+
+
+9b - Missing aircfraft code
+
+     Pole 9b neobsahuje popis typu letuna.
+
+
+9b - Unknown aircfraft code
+
+     Pole 9a neobsahuje typ letuna podla ICAO, pripadne podla
+     narodneho ciselnika.
+
+     Zapis : Ciselniky su v suboroch _9a.lst a _9a-rus.lst.
+             Pri zmene...
+
+
+9c - Unkwnown value of wake turbulence cat
+
+     Obsah pola 9c (...) nezodpoveda Doc.4444.
+     Zapis : vid cast o Doc. 4444
+
+
+9c - Other value of wake turbulence cat
+
+     Hodnota uvedena v poli 9c je ina ako prinalezi
+     danemu typu podla hodnot uvedenych v ciselniku.
+
+
+10a - Unknown equipment COM,NAV
+
+      Chybajuci popis alebo nespravny zapis v poli 9
+      (radiove, navigacne alebo priblizovacie zariadenie)
+
+
+10a - Equipment "N" means no equipment on board
+
+      Uvedena hodnota "N" predpoklada, ze lietadlo nie je vybavene
+      ziadnym radiovym, navigacnym alebo priblizovacim zariadenim...
+
+
+10a - Unalowed equipment code
+      Obsah pola 10a (...) nezodpoveda Doc.4444.
+      Zapis : vid cast o Doc. 4444
+
+
+10b - Missing describtion of equipment SSR
+
+      Chyba popis pola 10b (...)
+
+10b - Uncorrect length of equipment SSR array
+
+      Obsah pola 10b (...) nezodpoveda Doc.4444.
+      Zapis : vid cast o Doc. 4444
+
+
+10b - Uncorrect equipment SSR
+
+      Obsah pola 10b (...) nezodpoveda Doc.4444.
+      Ak je dlzka pola vacsia ko jeden, moze nasledovat
+      uz len "D" - popis schopnosti vysielat informacie ADS
+      Zapis : vid cast o Doc. 4444
+
+
+13  - Array is not written according to ICAO rules
+
+      Obsah pola 13 (...) nezodpoveda Doc.4444.
+      Zapis : vid cast o Doc. 4444
+
+
+13a - Departure aerodrome is not written according to ICAO rules
+
+      Obsah pola 13a (...) nezodpoveda Doc.4444.
+      Zapis : vid cast o Doc. 4444
+
+
+13a - Invalid value or format of estimated departure time
+
+      Chybny alebo chybajuci zapis casu startu.
+      Zapis : vid cast o Doc. 4444
+
+
+13b - Invalid value or format of real departure time
+
+      Chybny alebo chybajuci zapis skutocneho casu startu.
+      Zapis : vid cast o Doc. 4444
+
+
+14a - Unknown input/crossing point
+
+      Neznamy alebo chybajuci hranicny/vstupny bod.
+      Zapis : vid cast o Doc. 4444
+
+
+14b - Invalid value of estimated time
+
+      Chybny alebo chybajuci zapis casu preletu.
+      Zapis : vid cast o Doc. 4444
+
+14c - Invalid value of flight level
+
+      Chybny alebo chybajuci zapis povolenej letovej hladiny.
+      Zapis : vid cast o Doc. 4444
+
+
+14d - Invalid value of first flight level
+
+      Chybny zapis letovej hladiny, nad alebo pod ktorou
+      let preleti hranicny/vstupny bod.
+      Zapis : vid cast o Doc. 4444
+
+14e - "A"scending or "B"ellow enabled
+
+      Nespravne uvedene podmienky preletu, t.j. ci let preleti
+      preleti hranicny/vstupny bod pod alebo nad hladinou v poli
+      14d.
+      Zapis : vid cast o Doc. 4444
+
+
+15a - Invalid value or format of cruising speed (i.e. K0900,N400,M0910)
+
+      Popis rychlosti letu nezodpoveda pravidlam uvedenym v Doc.4444.
+      Zapis : vid cast o Doc. 4444
+
+15a - Speed is to low
+
+      Planovana rychlost letu pre uvedeny let je prilis mala.
+
+15a - Speed is to high
+
+      Planovana rychlost letu pre uvedeny let je privysoka.
+
+
+15b - Invalid value or format of flight level (i.e. F340,S1120,A045,M0900)
+
+      Popis vysky letu nezodpoveda pravidlam uvedenym v Doc.4444.
+      Zapis : vid cast o Doc. 4444
+
+
+15b - Altitude is to low
+
+      Planovana vyska letu pre uvedeny let je prilis nizka.
+
+
+15b - Altitude is to high
+
+      Planovana vyska letu pre uvedeny let je prilis vysoka.
+
+
+15c - Point expected (i.e. C/POINT/K0650F340F360)
+
+      V popise trate je uvedena zmena letovej vysky na bode.
+      Chyba alebo nespravny popis popis bodu.
+      Zapis : vid cast o Doc. 4444
+
+
+
+15c - Speed expected (i.e. C/POINT/K0650F340F360)
+
+      V popise trate je uvedena zmena letovej vysky na bode.
+      Chyba alebo nespravny popis popis rychlosti, ktora ma byt
+      dosiahnuta pocas zmeny vsyky.
+      Zapis : vid cast o Doc. 4444
+
+
+15c - Flight level value expected (i.e. C/POINT/K0650F340F360)
+
+      V popise trate je uvedena zmena letovej vysky na bode.
+      Chyba alebo nespravny popis vychodzej letovej
+      hladiny.
+      Zapis : vid cast o Doc. 4444
+
+
+15c - Expected cruise climb (K0760S0965)
+
+      Chyba v zapise zmeny rychlosti a/alebo letovej vysky.
+      Zapis : vid cast o Doc. 4444
+
+
+15c - Invalid value or format of speed (i.e. K0900,N400,M0910)
+
+      Popis rychlosti letu nezodpoveda pravidlam uvedenym v Doc.4444.
+      Zapis : vid cast o Doc. 4444
+
+
+15c - Invalid value or format of flight level (i.e. F340,S1120,A045,M0900)
+
+      Popis vysky letu nezodpoveda pravidlam uvedenym v Doc.4444.
+      Zapis : vid cast o Doc. 4444
+
+
+15c - Unknown code of point or route
+
+      Pri dekodovanie trate sa medzi znamymi kodmi bodov a trati
+      nachadza neznamy kod.
+
+
+15c - Unable to decode known points or routes
+
+      V poli 15c nie je mozne urcit ziaden znamy bod ani trat
+      patriacu do danej riadenej oblasti.
+      Je potrebne preverit, ci nie su pouzite starsie kody bodov
+      a trati, ci nie je v nich preklep, ci nie je uvedeny novy kod,
+      este nezahrnuty v ciselniku programu, priadne, ci usek trate
+      skrz danu riadenu oblast vobec prechadza.
+
+
+15c - There are no points on the route
+
+      Pre usek trate v alebo z alebo do danej riadenej oblasti
+      nie je urceny ziaden znamy bod alebo trat.
+
+
+15c - Stopover is not enabled
+
+      Spracovnie spravy o medzipristati nie je podla Doc. 4444
+      povolene. Program ho umoznuje, ale tato volba je momentalne
+      vypnuta.
+
+
+15c - There is not specified intersection points of routes
+
+      Predpis Doc.4444 urcuje, ze pri prechode z jednej na inu
+      trat LPS je potrebne uviest bod prechodu. Tuto kontrolu
+      nastavenu implicitne je mozne potlacit nastavenim programu.
+      Vtedy program moze pomoct s urcemim bodu prechodu medzi
+      tratami, ak ich nie je viac.
+
+
+15c - There more possible intersection points of routes
+
+      Medzi povodnou a nasledujucou tratou nie je uvedeny bod
+      prechodu, pricom takychto bodov existuje viac. Je ho
+      potrebne uviest, aby bol urceny jednoznacny prechodu
+      medzi tratami.
+
+
+15c - There is not intersection points of routes
+
+      Medzi povodnou a nasledujucou tratou nsa nekrizuju, t.j.
+      useky uvedenych trati pre danu riadiacu oblast nemaju
+      uvedene spolocne body.
+      Prechod medzi nimi je potrebne uviest ako
+
+              TRAT1 BOD1_TRAT1 DCT BOD2_TRAT2 TRAT2
+
+
+15c - The point not belong to the route, their distance is to large
+      alebo
+15c - The point not belong  of the route
+
+      Dekodovany bod "Bi" nasleduje po trati "T", pricom na nej nelezi.
+      V pripade, ak je taketo dekodovanie povolene, a ich vzdialenost
+      nie je vacsia, ako pripusta nastavenie systemu.
+
+      Je potrebne urcit posledny bod trate "Bt",
+      z ktoreho let trat opusti a smeruje na dany bod "Bi".
+
+                   "Ti" "Bt"  DCT  "Bi"
+
+      Vid : nastavenie systemu
+
+
+15c - Point does'nt belong on the route
+
+      Dekodovany bod by mal lezat na uvedenej trati.
+      Vid : nastavenie systemu
+
+
+15c - Points does'nt belong to the same route, "DCT" is expected
+      alebo
+      Points are to be separated by "DCT"
+
+      Dekodovane body uvedene v plane letu a nasledujuce po sebe
+      nepatria na rovnaku trat, co Doc.4444 nepripusta. V tom pripade
+      je potrebne vlozit medzi ne priznak "DCT" alebo nastavit program
+      tak, ze uvedene pravidlo ignoruje.
+
+      Vid : nastavenie systemu
+
+
+15c - Departure aerodrome is to far from first point of the route
+
+      Medzi letiskom startu (kontroluje sa len pre letisko v riadenej
+      oblasti) a prvym bodom na trati je vacsia vzdialenost ako
+      dovoluje nastavenie systemu. V tom pripade je potrebne vlozit
+      vstupny bod na trat alebo zmenit nastavenie systemu.
+
+      Vid : nastavenie systemu
+
+
+15c - Destination aerodrome is to far from route
+      Medzi letiskom pristatia (kontroluje sa len pre letisko v riadenej
+      oblasti) a poslednym bodom na trati je vacsia vzdialenost ako
+      dovoluje nastavenie systemu. V tom pripade je potrebne vlozit
+      vstupny bod na trat alebo zmenit nastavenie systemu.
+
+      Vid : nastavenie systemu
+
+
+15c - Cannot determine input point on route
+
+      Let nezacina v riadenej oblasti. Z jeho vstupnej trate nie je mozne
+      urcit vstupny bod alebo vstup trate do riadenej oblasti nelezi na smere,
+      odkial prilieta. Je potrebne predradit vstupny bod do oblasti
+      pred vstupnu trat.
+
+
+15c - Cannot determine output point on route
+
+      Let nekonci v riadenej oblasti. Z jeho vystupnej trate nie je mozne
+      urcit vystupny bod alebo vystup trate z riadenej oblasti nelezi
+      na smere, odkial odlieta. Je potrebne zaradit vystupny bod z oblasti
+      za vystupnu trat.
+
+
+15c - Decoded route does'nt begin on aerodrome in or input into controlled area
+
+      Prvy bod trate zacina v riadenej oblasti, nie je hranicnym/vstupnym bodom
+      do nej a pritom letisko startu do nej neparti.
+
+
+15c - Decoded route does'nt end on aerodrome in or output from controlled area
+
+      Posledny bod trate konci v riadenej oblasti, nie je hranicnym/vystupnym bodom
+      do nej a pritom letisko pristatia do nej neparti.
+
+
+15c - Internal flight with unknown points on the route
+
+      Let so startom a pristatim v riadenej oblasti a s neznamymi bodmi na trati.
+
+
+16 -  Array is not written according to ICAO rules
+
+      Obsah pola 16a (...) nezodpoveda Doc.4444.
+      Zapis : vid cast o Doc. 4444
+
+
+16a - Destination aerodrome is not written according to ICAO rules
+
+      Obsah pola 16a (...) nezodpoveda Doc.4444.
+      Zapis : vid cast o Doc. 4444
+
+
+16a - Invalid value or format  of flight time
+
+      Chybny alebo chybajuci zapis casu pristatia.
+      Zapis : vid cast o Doc. 4444
+
+
+16b - Backup aerodromes are not written according to ICAO rules
+
+      Chybny alebo chybajuci popis zalozneho (zaloznych) letisk.
+      Zapis : vid cast o Doc. 4444
+
+
+18    ; 18 - Other information
+
+
+18 - Another keyword
+
+     Opakuje sa uvedene klucove slovo.
+
+
+18 - Expected
+
+     Ocakava sa uvedene klucove slovo
+
+
+18 - "ZZZZ" used in FPL, array 18 is expecting
+
+     Vo FPL je uvedena polozka "ZZZZ". V poli 18 sa ocakava
+     jej odkryty nazov.
+
+
+18 - Departure aerodrome is not in FIR, there is expected EET/
+
+     Pre vypocet vstupneho casu je potrebne poznat cas startu,
+     alebo pristatia, ak dane letisko sa nachadza v riadenej
+     oblasti. Ak nie, potom Doc. 4444 urcuje, ze v poli 18
+     sa za klucovym slovom "EET/" uvadzaju nazvy prelietavanych
+     riadenych oblasti alebo vstupnych bodov do nich a cas,
+     za ktory budu dosiahnute.
+     Zapis : vid cast o Doc. 4444
+
+
+18 - Invalid format or time value of EET
+
+     Chybne uvedeny udaj o dobe vletu po riadenu oblast.
+     Zapis : vid cast o Doc. 4444
+
+
+18 - Invalid date of flight
+
+     Nespravne uvedeny datum letu.
+     Zapis : vid cast o Doc. 4444
+
+
+18 - Not actual date of flight
+
+     Neplatny datum letu.
+     Zapis : vid cast o Doc. 4444
+
+
+
+CHYBOVE SPRAVY PRI DEKODOVANI/SPRACOVANI RPL PODLA Doc. 4444
+
+
+Date of flight requested in format rrmmdd, i.e. 970531
+
+     Datum vo formulari pre RPL ma format
+     uvedeny v Doc. 4444 : ...
+     Zapis : vid cast o Doc. 4444
+
+
+Last date of flight is before first one
+
+     Posledny datum platnosti RPL planu je uvedeny
+     pre datumom zaciatku platnosti.
+     Zapis : vid cast o Doc. 4444
+
+
+There is no flight planned during the week
+
+     RPL plan nema uvedene dni platnosti v tyzdni.
+     Zapis : vid cast o Doc. 4444
+
+
+Empty array 19 ("SUPLEMENTARY INFORMATION")
+
+     Chybajuce pole popisu doplnkovych informacii
+     Zapis : vid cast o Doc. 4444
+
+
+Empty array 20 ("ALERTING SEARCH AND RESCUE INFORMATION")
+
+     Chybajuce pole popisu ....
+     Zapis : vid cast o Doc. 4444
+
+
+
+Empty array 21 ("RADIO FAILURE INFORMATION")
+
+     Chybajuce pole popisu ...
+     Zapis : vid cast o Doc. 4444
+
+
+
+CHYBOVE SPRAVY PRI DEKODOVANI/SPRACOVANI SPRAV PRE/OD AFTN
+
+
+Message processing is not enabled
+
+    Spracovanie tohto typu spravy nie je povolene.
+
+
+Array is not written according to ICAO or national rules
+
+    Uvedene pole spravy nie je zapisane v sulade
+    s pravidlami uvedenymi v Doc.4444 alebo narodnymi
+    predpismi.
+
+    Zapis : vid cast o Doc. 4444
+
+
+Invalid number of digits or format in ssr code/board number
+
+    Nespravny pocet znakov v kode odpovedaca
+    alebo nepripustny znak v poli znakov
+
+
+SSR code allows the octal digits (0-7)
+
+    Kody ssr podla ICAO pravidiel su oktalove cisla.
+
+
+Board number have to contain only digits
+
+    Nespravny format odpovedaca
+    alebo nepripustny znak v poli znakov
+
+
+This ssr code/board number is already used
+
+    Uvedeny SSR kod je prideleny inemu lietadlu,
+    ktore sa podla udajov v jeho plane by mal byt
+    este aktivny alebo este neuplynula nastavena
+    doba od jeho posledneho pouzitia.
+
+
+There is no message priority
+
+    V hlavicke telegramu nie je uvedena kategoria
+    naliehavosti spravy.
+    Zapis : vid cast o MTK2
+                       --------
+
+
+This priority is not allowed for this message
+
+    Tato sprava predpoklada inu kategoriu naliehavosti.
+    Zapis : vid cast o MTK2
+
+
+There is no destination address of message
+
+    V hlavicke telegramu nie je uvedena adresa odosielatela.
+    Zapis : vid cast o MTK2
+
+
+Invalid length of message address [6..8].
+
+    Uvedena adresa ma nespravny format, jej dlzka
+    nezodpoveda pravidlam pouzivanym pri adresacii
+    v sieti AFTN.
+    Zapis : vid cast o MTK2
+
+
+To much address (9adr by 6char / 7adr by 8char)
+
+    Rozsah adresnej casti je prekroceny. Obsahuje mnoho adries.
+    Ich pocet by mal byt 9 adries s dlzkou do 6 znakov
+    alebo 7 adries s dlzkou do 8 znakov.
+    Zapis : vid cast o MTK2
+
+
+Empty array
+
+    Prazdne pole. Ocakava sa hodnota.
+
+
+There is missing or invalid value of date ("DATE/...")
+
+    V sprave chyba udaj o datume platnosti.
+    Zapis : vid cast o Doc. 4444
+
+
+There is missing or invalid value of time ("UTC/...")
+
+    V sprave chyba udaj o case platnosti.
+    Zapis : vid cast o Doc. 4444

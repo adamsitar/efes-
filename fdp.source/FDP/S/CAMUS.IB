@@ -1,0 +1,85 @@
+; -----------------------------------------------
+; Komunikacny uzol medzi E200(0) a LETVIS
+; SRLP Bratislava
+;
+; -----------------------------------------------
+
+
+;---------------
+; ADRESY                            ; IMPLICITNE
+;תתתתתתתתתתתתתתת
+
+  FIR           = LZIB
+  THIS NODE     = *
+  REMOTE NODE   = *
+
+  THIS X25      = 721 12 12 19      ; LETVIS
+  MASTER X25    =
+;  BACKUP X25    =
+
+  THIS NSAP     = 73 51 00          ; 
+  REMOTE NSAP   = 73 31 00          ; 
+
+
+;---------------
+; OLDI
+;תתתתתתתתתתתתתתת
+
+;  rec_buf_size = 15;               ; velkost prijimacieho buffera (az neskor a automaticky pri zmene)
+;  pkt_size     = 4124              ; nastavit zatial manualne do X25.camus.cfg
+
+  Ts_TimeOut   = 40
+  Tr_TimeOut   = 80
+
+  send_StartUp = yes               ; povolenie vysielania StartUp
+
+
+;---------------
+; EXT
+;תתתתתתתתתתתתתתת
+
+  process-all  = no                ; imlicitne
+  HeartBeat    = (CH)Ù
+
+
+;---------------
+; CAMUS/ASTA
+;תתתתתתתתתתתתתתת
+
+  LAM_TimeOut       = 40
+
+  asta-interface    = yes          ; pripojeno na ASTA nie na THOMSON
+  debug_ACT         = no           ; povolenie odosielania cvicnych sprav ACT
+
+
+;---------------
+; FDP
+;תתתתתתתתתתתתתתת
+
+  point distance    = 5000         ; maximalny pripustny rozdiel medzi bodmi OPL a CAMUS
+  FL from altitude  = FL60         ; od uvedenej vysky sa letove hladiny pre CAMUS uvadzaju vo feetoch
+
+  send VFR FPL      = no           ;
+  send ERROR to FDO = yes          ; imlicitne zapnute
+  send NOLAM to FDO = yes          ; imlicitne potlacene
+
+  15a               = true         ; povodne nastavenie pre nehlasenu zmenu protokolu - ci je pole 15a uvedene v sprave, teraz sa testuje automaticky
+
+
+  exclude-points    = XZ           ; vstupne body do sektorov pre trate LPS zacinajuce na tuto kombinaciu su ignorovane
+  exclude-points    = XX           ; maximalne dalsich 19 vynimiek
+  exclude-points    = ?????
+  exclude-points    = TP
+; exclude-points    =
+; exclude-points    =
+; exclude-points    =
+; exclude-points    =
+
+  exclude-unknown-points = true;
+
+;---------------
+; Xת25
+;תתתתתתתתתתתתתתת
+
+  exception_call_desc = yes;
+

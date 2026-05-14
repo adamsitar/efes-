@@ -1,0 +1,37 @@
+{$IFDEF PRS_L}   {$I _PRSL.drw}
+{$ELSE}          {$I _PRSS.drw}
+{$ENDIF}
+
+
+function dx_sc_PRS: int; far;
+   begin
+     if pis_STRIP_PRS then dx_sc_PRS:= dx_sc_strip(miniSTRIP_PRS)
+     else dx_sc_PRS:= dxi_PRS
+   end;
+
+function dy_sc_PRS: int; far;
+   begin
+     if pis_STRIP_PRS then dy_sc_PRS:= dy_sc_strip
+     else dy_sc_PRS:= dyi_PRS
+   end;
+
+procedure sc_PRS(PRS: PPRS; x,y: int; b: bool); far;
+    var   _miniSTRIP: T_strip;
+    begin
+      if pis_STRIP_PRS then
+         begin
+           _miniSTRIP:= miniSTRIP;
+           miniSTRIP := _is_mini_strip(miniSTRIP_PRS);
+           strip_PRS(PRS, x,y, b);
+           miniSTRIP:= _miniSTRIP
+         end
+      else plan_PRS(PRS, x,y, b)
+    end;
+
+
+{$IFDEF MAPY} {$IFNDEF MAPY_1.0}
+  function  new_GP_PRS(PRS: PPRS): PTMapOb; far;
+      begin
+        new_GP_PRS:= new_GP_KruhPriestor(idn_PRS(PRS),polomer_PRS)
+      end;
+{$ENDIF} {$ENDIF}

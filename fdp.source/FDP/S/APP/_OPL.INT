@@ -1,0 +1,42 @@
+procedure ReadOPL; interrupt;
+    var   IBUFF  : PO_EXT_ibuff;
+          OPLpkt : POPLpkt;
+          b : char;
+
+    label endp;
+
+    begin
+      IBUFF:= IBUFF_OPL_ASYNC^;
+      if (IBUFF_OPL_ASYNC=nil) or (IBUFF=nil) or (Port[IIR[IBUFF^.asyncCOM]]<>$04) then goto endp;
+
+      b:= chr(Port[COM[IBUFF^.asyncCOM]]);
+      if (b=NULL) or (IBUFF^.ipkt=nil) or (IBUFF^.ibuff=nil) then goto endp;
+
+      OPLpkt:= IBUFF^.ipkt;
+
+      {save_stream_char(b);}
+      {_process_char(b);}
+
+      { Paket s nespravnym ramcom sa nevyhodi,
+        nahraje sa do buffera
+        a aplikacny objekt vyhodnoti jeho spravnost
+        [#]
+      }
+      if ((b=_OPL_def.SOH) and (OPLpkt^.poc>1)) or (OPLpkt^.poc>=sizeof(OPLpkt^.buf)) then
+         begin
+           if power_OPL_async then IBUFF^.ibuff^.save(OPLpkt);    {[#]}
+           OPLpkt^.poc:= 0;
+         end;
+
+      OPLpkt^.buf[OPLpkt^.poc]:= b;
+      inc(OPLpkt^.poc);
+
+      if (b=_OPL_def.EOT) then
+         begin
+           {if (OPLpkt^.b[0]=SOH) then} {[#]}
+           if power_OPL_async then IBUFF^.ibuff^.save(OPLpkt);
+           OPLpkt^.poc:= 0
+         end;
+
+      endp: Port[$20]:= $20
+    end;

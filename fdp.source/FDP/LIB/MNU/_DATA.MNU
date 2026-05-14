@@ -1,0 +1,23 @@
+{$I ..\lib\mnu\_ssr.mnu}
+
+
+{$I ..\lib\mnu\_spr.mnu}
+{$I ..\lib\mnu\_tlg.mnu}
+
+{$I ..\lib\mnu\_rpl.mnu}
+{$I ..\lib\mnu\_pln.mnu}
+{$I ..\lib\mnu\_fplc.mnu}
+{$I ..\lib\mnu\_fpl4.mnu}
+
+{$I ..\lib\mnu\_fplm.mnu}
+{$I ..\lib\mnu\_krl.mnu}
+
+{$I ..\lib\mnu\_zam.mnu}
+{$I ..\lib\mnu\_qgo.mnu}
+{$I ..\lib\mnu\_rtz.mnu}
+{$I ..\lib\mnu\_dvz.mnu}
+
+{$I ..\lib\mnu\_prz.mnu}
+{$I ..\lib\mnu\_prs.mnu}
+
+{$I ..\lib\mnu\_met.mnu}

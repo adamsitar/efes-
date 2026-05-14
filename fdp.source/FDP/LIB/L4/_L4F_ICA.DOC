@@ -1,0 +1,32 @@
+{
+     zakodovanie planu FPLm do tvaru podla L4444;
+      - neuvadza sa poznamka
+      - -//- -ju sa prevadzkovatel, ulohy, MZP
+      - vyska sa uvadza v "S"
+
+      - v poli _14 je kvoli Thomsonu vynimka !
+
+    CAMUS :
+     (FPLMI/PR665
+      -2587
+      -IF
+      -MG21/L
+      -S/N
+      -LKCV1650
+      -K0800F180 ML281 MC631 MC834 MF411 MF711 MB364 ME512 ML264
+      -LKCV0100
+      -0)
+
+    OPL :
+     (FPLPL/MI435
+      -5517
+      -VF
+      -MI17/L
+      -FV/C
+      -LKLN1530
+      -K0200VFR OAT B594/C99 GAT
+      -LKLN0200
+      -OPR/09 RMK/UKOL02 12  RMK/MNM4040 REG/0850 RMK/JOGL VSTUP1545 VYSTUP1830 CJ0604 B594MZPC170
+      )
+
+}

@@ -1,0 +1,87 @@
+{ ---------------------
+  DB
+  ---------------------
+}
+
+ procedure _codeDB0_SPR(SPR: PSPR; buff: PDB_buff; desc: PDB_head);
+     var   s: string;
+     begin
+       s:= code0_SPR_1(SPR);
+       Move(s[0],buff^[0],length(s)+1);
+
+       s:= code0_SPR_2(SPR);
+       Move(s[0],buff^[1],length(s)+1);
+
+       s:=     ZAC_SPR + strpas(SPR^.adr)
+             + ODD_SPR + SPR^.ods
+             + KON_SPR;
+       {$IFDEF NET}
+         {s:= s + rectostr(SPR^.rec) + KON_SPR;}
+       {$ENDIF}
+       Move(s[0],buff^[2],length(s)+1);
+     end;
+
+ procedure _decodeDB0_SPR(buff: PDB_buff; SPR: PSPR; desc: PDB_head);
+     var   s: string;
+     begin
+       Move(buff^[0],s[0],ord(buff^[0][0])+1);
+       decode0_SPR_1(s, SPR);
+       Move(buff^[1],s[0],ord(buff^[1][0])+1);
+       decode0_SPR_2(s, SPR);
+
+       Move(buff^[2],s[0],ord(buff^[2][0])+1);
+       SPR^.adr := strpasnew(getstr(s,1,setLET_1_1));
+       SPR^.ods := getstr(s,2,setLET_1_1);
+       {$IFDEF NET};
+         {strtorec(getstr(s,2,[KON_SPR]), SPR^.rec)}
+       {$ENDIF}
+     end;
+
+
+ procedure _codeDBT_SPR(SPR: PSPR; buff: PDB_buff; desc: PDB_head);
+     var   s,t : string;
+           i   : int;
+     begin
+       s:= code_SPR_data(SPR);
+       s:= s + icao_ARR + code_l4_datums(SPR^.daz) ;
+       str_toDBstr(s,buff^[db_SPR_data]);
+
+       for i:= db_SPR_text to db_SPR_ine-1 do
+           str_toDBstr(code_line_i (SPR^.text,
+                                    (i-db_SPR_text)*db_SPR_LTL+1,
+                                    (i-db_SPR_text)*db_SPR_LTL+db_SPR_LTL),
+                                    buff^[i]
+                                   );
+
+       s:= '';
+       {$IFDEF NET}
+        s:= rectostr(SPR^.rec);
+        t[0]:= chr(minimum(sizeof(SPR^.acc),sizeof(t)-1)); move(SPR^.acc,t[1],sizeof(SPR^.acc));
+        s:= s + icao_ARR + t + icao_NXT + chr(ord(SPR^.acs));
+       {$ENDIF};
+       str_toDBstr(s,buff^[db_SPR_ine])
+     end;
+
+ procedure _decodeDBT_SPR(buff: PDB_buff; SPR: PSPR; desc: PDB_head);
+     var   res, s,t,u : string;
+           i : int;
+     begin
+       fillchar(SPR^,sizeof(SPR^),0);
+
+       s:= DBstr_to_str (buff^[db_SPR_data]);
+       decode_SPR_data (s, SPR, res,false);
+       s:= getstr(s,getstritems(s,[icao_ARR]),[icao_ARR]);
+       decode_l4_datums(getstr(s,1,[icao_NXT]),SPR^.daz);
+
+       for i:= db_SPR_text to db_SPR_ine-1 do SPR^.text:= decode_line_i (DBstr_to_str(buff^[i]),SPR^.text,[]);
+
+       s:= DBstr_to_str (buff^[db_SPR_ine]);
+       {$IFDEF NET}
+        strtorec(getstr(s,1,[icao_ARR]), SPR^.rec);
+        t:= getstr(s,2,[icao_ARR]);
+        u:= getstr(t,1,[icao_NXT]);
+        move(u[1],SPR^.acc,sizeof(SPR^.acc));
+        u:= getstr(t,2,[icao_NXT]);
+        if u<>'' then SPR^.acs:= Tspr_acc(u[1]);
+       {$ENDIF}
+     end;

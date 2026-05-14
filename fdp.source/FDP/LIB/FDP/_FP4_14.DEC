@@ -1,0 +1,151 @@
+{ --------------------------------
+   parametre na vstupnom bode
+  תתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתת
+   BOD/CAS+VYSKA+VYSKA+VYSKA_
+}
+ function _cas_na_vstupnom_bode(const FPL : DFPL4;
+                                var   FDR : DFDR;
+
+                                var  dd   : TFDR_decoded_data;
+                                var  res  : string;
+                                var  ires : int
+                               ): int;
+
+    var   B    : TsBod;
+          bod  : string;
+          v,v2 : word;
+          v_,v2_,v2_ab : char;
+
+    begin
+     { Pociatocna hladina moze byt pretazena popisom v poli
+       14c, kde je uvedena povolena (planovana) letova hladina pre nasledujuci usek trate
+       a 14d, kde moze byt uvedena skutocne hladina pri prechode na povolenu hladinu
+     }
+      _cas_na_vstupnom_bode:= i_14c;
+      if cut_(FPL._14)='' then Exit;
+
+      ires:= _check_14_by4444 (FPL._14, FDR.typ,
+                               bod, dd.eet.h,dd.eet.m,
+                               v,v_, true{is_vys}, v2,v2_,v2_ab,
+                               res
+                              );
+      if (ires=0) and (res='') then
+        begin
+          if is_OB(bod, B,true) then
+             begin
+               dd.isEET:= true;
+               dd.isEET_14:= true;
+
+               if v<>0  then
+                  begin
+                    dd.eet.vys := v;
+                    dd.eet.vys_:= v_;
+                  end;
+               dd.eet.vys_:= ' ';
+
+               if FDR.fpl<>nil then
+                  begin
+                    FDR.fpl^.vys:= _vys_OB (v,v_);
+                    if (v2<>0) then
+                       begin
+                         FDR.fpl^.vys1:= _vys_OB (v2,v2_);
+                         FDR.fpl^.vys1_a:= v2_ab
+                       end;
+                  end;
+
+               with dd.eet do
+                 begin
+                   kod:= bod; x:= B.x; y:= B.y;
+                   vys:= v; vys_:= v_;
+                   if FDR.fpl<>nil then
+                      begin
+                        rych_:= FDR.fpl^.rych_; rych:= FDR.fpl^.rych;
+                        if (v2<>0) and (FDR.fpl^.vys1<>FDR.fpl^.vys) then
+                           if FDR.fpl^.vys1>FDR.fpl^.vys then vysab:= altBellow
+                           else vysab:= altAbove
+                      end
+                 end;
+
+               FDR.vys := dd.eet.vys;
+               FDR.vys_:= dd.eet.vys_;
+             end
+          else ires:= l4_err(a_14a,FPL._14,i_14a,err_14a_neznamy, res);
+        end;
+      if (res<>'') and (ires<=0) then ires:= i_14c;
+      _cas_na_vstupnom_bode:= ires
+    end;
+
+
+{ ----------------------------------
+   dekodovanie rychlosti a vysky
+  תתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתת
+}
+ function _urcenie_vysky_rychlosti (var   FDR  : DFDR;
+
+                                    const f15_ : pchar;
+
+                                    var  dd   : TFDR_decoded_data;
+                                    var  res  : string;
+                                    var  ires : int
+                                   ) : int;
+
+    var   kodB,kods,s,tarr,tdep : string;
+          ry,minr,maxr, ryB : single;
+          ry_,v_,v_ab,v2_, ryB_,vB_,vB_ab,v2B_: char;
+          v,minv,maxv, v2,vB,v2B : word;
+          mzp : bool;
+          i,r : int;
+          B   : TsBod;
+
+    begin
+      kods:= GetPStr(f15_,1,[icao_NXIT]);
+
+     { rychlost a vyska pre prvu alebo celu cast trate su urcene
+
+       a) pole 15ab :
+          podla predpisu
+     }
+      ires:= _check_rychvys_by4444 (kods,FDR.typ, ry,ry_,v,v_,res);
+      if (ires<>0) and (not dd.check_en) then _9b_rychvys (FDR.typ,false, ry,ry_,minr,maxr, v,v_, minv,maxv);
+      FDR.vys:= v; FDR.vys_:= v_;
+
+      with dd.eet do
+        begin
+          rych:= ry; rych_:= ry_;
+          if (dd.eet.kod<>dd.dep.kod) and (dd.eet.kod<>dd.arr.kod) then
+             begin
+               vys:= v;
+               vys_:= v_;
+             end
+        end;
+
+      if FDR.fpl<>nil then with FDR.fpl^ do
+        begin
+          rych:= ry; rych_:= ry_;
+          vys:= _vys_OB(v,v_);
+        end;
+
+     { b) v poli 15c ako zmena doteraz platnych hodnot
+          nastavenych v poli 15ab az po prvy bod na trati
+     }
+      if ((not dd.check_en) or (ires=0)) and (dd.prvy>-1) then
+         for i:= 2 to dd.prvy-1 do
+           begin
+             if     decode_OB(getPstr(f15_,i,[icao_NXIT]), FDR.typ,
+                              B, ryB,ryB_, vB,vB_,vB_ab, v2B,v2B_, mzp,tarr,tdep,
+                              dd.check_en, res,ires
+                             )
+                and ((ires=0) or (not dd.check_en))
+                then if FDR.fpl<>nil then with FDR.fpl^ do
+                 begin
+                   if ryB<>0 then begin rych:= ryB; rych_:= ryB_ end;
+                   if vB<>0  then vys:= _vys_OB(vB,vB_);
+                   if v2B<>0 then vys1:= _vys_OB(v2B,v2B_);
+                 end;
+         end;
+
+     { c) v poli 14c zadana operatorom,
+          dekoduje sa neskor
+     }
+      _urcenie_vysky_rychlosti:= ires
+    end;

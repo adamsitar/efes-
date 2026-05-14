@@ -1,0 +1,63 @@
+(*
+             cfg_ZAM       = 'ZAM';     { Zamestania letiska              }
+             cfg_ZAM_O     = 'ZAM-O';   { Zamestania podriaden˜ch let¡sk  }
+
+             cfg_QGO       = 'QGO';     { Hl senie o zmena schopnost¡        }
+
+             poloziek_DVZ  = 2;
+             cfg_DVZ_S     = 'DVZ-S';   { Diverzie vlastn‚                   }
+             cfg_DVZ_R     = 'DVZ-R';   { Diverzie pre in‚ letisk            }
+
+             poloziek_PRZ  = 1;
+             cfg_PRZ       = 'PRZ';     { ’iadosti o pridelenie priestoru    }
+
+             poloziek_MSG  = 2;
+             cfg_MSG_S     = 'MSG-S';   { Spr vy - odoslan‚                  }
+             cfg_MSG_R     = 'MSG-R';   { Spr vy - prijat‚                   }
+
+             poloziek_NET  = 1;
+             cfg_SERVER    = 'SERVER';  { Po‡et preru¨en˜ch spojen¡ so SRLP  }
+
+
+ {$IFDEF QGO}
+  {$I sta_QGO.inc}
+ {$ENDIF}
+ {$IFDEF DVZ}
+  {$I sta_DVZ.inc}
+ {$ENDIF}
+
+ {$IFDEF PRZ}
+  {$I sta_PRZ.inc}
+ {$ENDIF}
+
+ {$IFDEF SPR}
+  {$I sta_SPR.inc}
+ {$ENDIF}
+
+      const { nazvy sledovanych velicin
+            }
+             cfg_O         = 'O';
+             cfg_P         = 'P';
+             cfg_S         = 'S';
+             cfg_Z         = 'Z';
+             cfg_R         = 'R';
+
+             cfg_O_        = 'O_';
+             cfg_P_        = 'P_';
+             cfg_S_        = 'S_';
+             cfg_Z_        = 'Z_';
+             cfg_R_        = 'R_';
+
+             titO : char   = 'o';
+             titP : char   = 'p';
+             titS : char   = 's';
+             titZ : char   = 'z';
+             titR : char   = 'r';
+
+             titO_: string[15] = 'odoslan˜ch';
+             titP_: string[15] = 'prijat˜ch';
+             titS_: string[15] = 'schv len˜ch';
+             titZ_: string[15] = 'zamietnut˜ch';
+             titR_: string[15] = 'realizovan˜ch';
+
+*)

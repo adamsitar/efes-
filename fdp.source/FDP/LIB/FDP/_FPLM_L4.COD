@@ -1,0 +1,310 @@
+ { -------------------------------------------------
+   kodovanie pre prenos a pre ulozenie v db sa lisi,
+   pretoze prenos sa blizi L4444
+
+  Priklad : (FPL                                     ; pole 3
+             -5003 A/C2221                           ; pole 7
+             -PM                                     ; pole 8
+             -0139 0229                              ; pole 9
+             -" "                                    ; pole 10
+             -5001500                                ; pole 13
+             -K0900S1370/S0825 Z313 400/MZP/H2150    ; pole 15
+             -5000012                                ; pole 16
+             -TYP/LECI -MACEJKOÙ-DOÙ-SMECA         ; pole 18
+             -OPR/07                                 ; pole 19 - pracovisko podania planu
+              UKL/01 02 03 04 05 06                  ;           ulohy
+              DATE/980614 980614162508               ;           datum platnosti a datum podania planu
+              SRC/500                                ; prevadzkovatel
+              FDP/*                                  ;           stav spracovania planu
+            )
+ }
+
+ { -------------------------------
+    odovodene kodovanie podla
+    vzoru Doc4444,
+    a pomocne procedury
+   -------------------------------
+ }
+ { Priklad 5003 A/A2312
+           5004/4332
+ }
+ function code_FPLM_7a (FPL: PDmFPL): string;
+    var   s : string;
+    begin
+      s:= FPL^.idn;
+      {$IFNDEF L4444M}
+        if FPL^.idn_<>' ' then s:= s + icao_NXIT + FPL^.idn_;
+      {$ENDIF}
+      code_FPLM_7a:= format_s(s)
+   end;
+
+ function code_FPLM_7 (FPL: PDmFPL): string;
+    begin
+      code_FPLM_7:= code_l4_7(code_FPLM_7a(FPL), FPL^.ssr_,FPL^.ssr)
+    end;
+
+
+ procedure decode_FPLM_7a (_7: string; var _7a: string {$IFNDEF L4444M}; var _7x: char {$ENDIF});
+     var   t : string;
+           p : int;
+     begin
+       {$IFNDEF L4444M}
+        t:= decode_l4_7a(_7);
+        p:= pos(icao_NXIT,t);
+        if p>1 then
+           begin
+             _7x:= getchar(copy(t,p+1,1)); { malo by to zvladnut i kridlo, t.j. '  A' }
+             _7a:= copy(t,1,p-1)
+           end
+        else begin
+               _7x:= ' ';
+               _7a:= t
+             end;
+       {$ELSE}
+         _7a:= decode_l4_7a(_7);
+       {$ENDIF}
+       _7a:= cut_(_7a);
+     end;
+
+ procedure decode_FPLM_7 (_7: string; FPL: PDmFPL);
+     var   t : string;
+     begin
+       decode_l4_7 (_7,t,FPL^.ssr_,FPL^.ssr);
+       decode_FPLM_7a (t,FPL^.idn{$IFNDEF L4444M},FPL^.idn_{$ENDIF});
+     end;
+
+
+ function code_FPLM_8(FPL: PDmFPL): string;
+    begin
+      code_FPLM_8:= code_l4_8(FPL^._8a,FPL^._8b, true)
+    end;
+
+ procedure decode_FPLM_8(s: string; FPL: PDmFPL);
+     begin
+       decode_l4_8(s,FPL^._8a,FPL^._8b)
+     end;
+
+
+ function code_FPLM_9(FPL: PDmFPL): string;
+    var   s: string;
+    begin
+      s:= FPL^.typ;
+      if cut_(FPL^.typ2)<>'' then s:= s + icao_NXIT + FPL^.typ2;
+      code_FPLM_9:= format_s(s)
+    end;
+
+ procedure decode_FPLM_9(_9: string; FPL: PDmFPL);
+     var   s: string;
+     begin
+       s:= getstr(_9,1,[icao_NXIT]);
+       if (_9<>'') and (_9[1]<>icao_NXIT) and (s<>'') then
+          begin
+            FPL^.typ:= s;
+            s:= getstr(_9,2,[icao_NXIT]);
+          end;
+       FPL^.typ2 := s
+     end;
+
+
+ function code_FPLM_10(FPL: PDmFPL): string;
+    begin
+      code_FPLM_10:= code_l4_10(FPL^.com_,FPL^.ssr_)
+    end;
+
+ procedure decode_FPLM_10(s: string; FPL: PDmFPL);
+     begin
+       decode_l4_10(s,FPL^.com_,FPL^.ssr_)
+     end;
+
+
+{ zakodovanie kodu letiska do tvaru L4444,
+  pretoze je mozny i iny kratsi a ciselny
+  tvar
+
+ function code_FPLM_AP(kod: string): string;
+    begin
+      code_FPLM_AP:= inschar(kod,kod_AP,' ',1)
+    end;
+}
+
+ function code_FPLM_13(FPL: PDmFPL): string;
+    begin
+      with FPL^.start do code_FPLM_13:= code_l4_13 (kod, h,m, h,m, true);
+    end;
+
+ procedure decode_FPLM_13(s: string; FPL: PDmFPL);
+     var   hl,ml : byte;
+     begin
+       with FPL^.start do decode_l4_13 (s,kod, h,m, hl,ml)
+     end;
+
+
+ function code_FPLM_16(FPL: PDmFPL): string;
+    begin
+      with FPL^,FPL^.prist do code_FPLM_16:= code_l4_16 (kod, h,m, prist_, start.h,start.m, true);
+    end;
+
+ procedure decode_FPLM_16(s: string; FPL: PDmFPL);
+     var   hl,ml : byte;
+     begin
+       with FPL^,FPL^.prist do decode_l4_16 (s, start.h,start.m, kod, h,m, hl,ml, prist_)
+     end;
+
+
+ function code_FPLM_15_FL(FPL: PDmFPL): string;
+    var   s: string;
+    begin
+      with FPL^ do
+        begin
+          s:= code_l4_rych_vys (rych,rych_, vys,vys_, 0,false);
+          if vys2<>0 then s:= s + icao_NXT + code_l4_vys_(vys2,vys2_, 0,false)
+        end;
+      code_FPLM_15_FL:= s
+    end;
+
+ function decode_FPLM_15_FL(s: string; FPL: PDmFPL): bool;
+    begin
+      with FPL^ do
+        begin
+          decode_FPLM_15_FL:= decode_l4_rych_vys (getstr(s,1,[icao_NXT]), rych,rych_, vys,vys_);
+          s:= getstr(s,2,[icao_NXT]);
+          if s<>'' then decode_l4_vys (s, vys2,vys2_)
+        end;
+    end;
+
+
+ function code_FPLM_19(FPL: PDmFPL; _dap: bool): string;
+    var   s,t : string;
+          i : int;
+    begin
+      with FPL^ do
+        begin
+          s:= rmk_OPR + icao_NXT + l4_format_s(vu);
+
+          t:= ''; for i:= 0 to max_ulohy_FPLm-1 do t:= t + ulohy[i] + icao_NXIT;
+          s:= s + icao_NXIT + rmk_UKL + icao_NXT + t;
+
+          s:=  s + rmk_DATE + icao_NXT + code_l4_date(date);
+          if _dap then
+              begin
+                s:= s + icao_NXIT + code_l4_datums(dap);
+                s:= s + icao_NXIT + rmk_SRC + icao_NXT + l4_format_s(let);
+                s:= s + icao_NXIT + rmk_FDP + icao_NXT + format_s(stat)
+              end;
+        end;
+      code_FPLM_19:= s
+    end;
+
+ procedure decode_FPLM_19(_19: string; FPL: PDmFPL);
+     var   t : string;
+           i : int;
+     begin
+       _19:= _19+NULL;
+
+       {t:= _item_18_(@_19[1],rmk_OPR,1);
+       FPL^.VU := decode_l4_s(getstr(t,1,[icao_NXIT]),true);
+       FPL^.let:= decode_l4_s(getstr(t,2,[icao_NXIT]),true);}
+       FPL^.vu := _item_18_(@_19[1],rmk_OPR,1);
+
+       t:= _item_18_(@_19[1],rmk_UKL,1);
+       i:= 0; while (i<max_ulohy_FPLm) do
+         begin
+           FPL^.ulohy[i]:= getstr(t,i+1,[icao_NXIT]);
+           inc(i)
+         end;
+
+       t:= _item_18_(@_19[1],rmk_DATE,1);
+       decode_l4_date(getstr(t,1,[icao_NXIT]),FPL^.date);
+       decode_l4_datum(getstr(t,2,[icao_NXIT]),FPL^.dap);
+
+       FPL^.let:= _item_18_(@_19[1],rmk_SRC,1);
+
+       { stav by sa mohol kodovat A -> ACT,... }
+       FPL^.stat:= _item_18_(@_19[1],rmk_FDP,1)
+     end;
+
+
+ { -----------------------------
+    kodovanie podla vzoru 4444,
+    hlavne funkcie
+   -----------------------------
+ }
+ function code_l4_FPLM__(FPL: PDmFPL; _19: bool; cislo: string): pchar;
+    var   pch,p : pchar;
+          i,r : int;
+          hd  : Thead_ICAO;
+    begin
+      if is_KRL(FPL) then hd:= hd_KRL else hd:= hd_FPL;
+
+      pch:= StrPasNew(   icao_STD + hd + cislo
+                       + icao_ARR + code_FPLM_7(FPL)
+                       + icao_ARR + code_FPLM_8(FPL)
+                       + icao_ARR + code_FPLM_9(FPL)
+                       + icao_ARR + code_FPLM_10(FPL)
+                       + icao_ARR + code_FPLM_13(FPL)
+                     );
+
+      pch:= StrNPCopy(pch,icao_ARR + code_FPLM_15_FL(FPL),true,true);
+      r:= get_data_lines_i_(FPL^.trat);
+      if r>0 then
+         begin
+           pch:= StrNPCopy(pch,icao_NXIT,true,true);
+           {for i:= 1 to r do pch:= StrNPCopy(pch,code_line_i_nl(FPL^.trat,i,kbNL),true,true)}
+           pch:= StrNCopy(pch,FPL^.trat,true,false)
+         end;
+
+      pch:= StrNPCopy(pch,icao_ARR + code_FPLM_16(FPL),true,true);
+
+      pch:= StrNPCopy(pch,icao_ARR,true,true);
+      p:= l4_format_p(FPL^.pozn);
+      pch:= StrNCopy (pch,p,true,false);
+      {r:= get_data_lines_i_(FPL^.pozn);
+      if r>0 then for i:= 1 to r do pch:= StrNPCopy(pch,code_line_i_nl(FPL^.pozn,i,kbNL),true,true)
+      else pch:= StrNPCopy(pch,icao_NXIT, true,true);}
+
+      if _19 then pch:= StrNPCopy(pch,icao_ARR + code_FPLM_19(FPL,true), true,true);
+      pch:= StrNPCopy(pch,icao_END, true,true);
+
+      code_l4_FPLM__:= pch
+    end;
+
+ function code_l4_FPLM_(FPL: PDmFPL; cislo: string): pchar;
+    begin
+      code_l4_FPLM_:= code_l4_FPLM__(FPL,true,cislo)
+    end;
+
+
+ function  decode_l4_FPLM_ (data: pchars; size: TNETdlz; FPL: PDmFPL): string;
+    var    p,m   : pchar;
+           i,k   : word;
+           res   : string;
+    begin
+      decode_l4_FPLM_:= '';
+      fillchar(FPL^,sizeof(FPL^),0);
+      frame_l4_pkt(data,size, res);
+
+      decode_FPLM_7  (get_str(data,size,2,[icao_ARR],sizeof(string)-1), FPL);
+      decode_FPLM_8  (get_str(data,size,3,[icao_ARR],sizeof(string)-1), FPL);
+      decode_FPLM_9  (get_str(data,size,4,[icao_ARR],sizeof(string)-1), FPL);
+      decode_FPLM_10 (get_str(data,size,5,[icao_ARR],sizeof(string)-1), FPL);
+      decode_FPLM_13 (get_str(data,size,6,[icao_ARR],sizeof(string)-1), FPL);
+
+      p:= get_str0(data,size, 7, [icao_ARR]); m:= p;
+      if decode_FPLM_15_FL (getPstr(p,1,[icao_NXIT]), FPL) then m:= PosStr(p,2,[icao_NXIT]);
+      if m<>nil then FPL^.trat:= decode_line_ip (m,FPL^.trat,[]);
+      strdispose(p);
+
+      decode_FPLM_16 (get_str(data,size,8,[icao_ARR],sizeof(string)-1), FPL);
+
+      { V poli 18 sa moze nachadzat viacej znakov "-",
+        ktore su zaroven oddelovacom pola
+      }
+      k:= get_str_items(data,size,[icao_ARR]);
+      p:= get_strs0(data,size, 9,Maximum(9,N(k-1)),[icao_ARR]);
+      FPL^.pozn:= strnew(decode_l4_p({decode_line_ip (p),nil,[])} p,true));
+      strdispose(p);
+
+      decode_FPLM_19 (get_str(data,size,k,[icao_ARR],sizeof(string)-1),FPL);
+
+      format_mFPL(FPL);
+    end;

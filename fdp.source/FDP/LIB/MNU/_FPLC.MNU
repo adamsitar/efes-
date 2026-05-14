@@ -1,0 +1,127 @@
+{ -----------------
+   FPL
+ תתתתתתתתתתתתתתתתתת
+}
+{$I ..\lib\mnu\_FPLC.h}
+
+{$IFDEF FPL0}
+
+ procedure mnuFPLCvolby_init(MMenu: PSubmenu); far;
+     var   smnu : TPItems;
+           i,items,nl,ihk: int;
+           pb: bool;
+     begin
+       items:= 0; nl:= 0; ihk:= 0;
+       pb:= {$IFDEF BACKUP} false {$ELSE} true {$ENDIF};
+
+       smnu[items]:= NewTLine(mnuSPRACOVANIE,nil);
+       inc(items);
+
+       smnu[items]:= SwitchI_ (' '+hk(ihk)+ FPLCDEL, @dT_deactive_FPLC,tit_min,dT_deactive_FPLC_lo,dT_deactive_FPLC_hi,
+                               @SERVERstatus,pb, nil
+                              );
+       inc(items);
+       smnu[items]:= SwitchI_ (' '+hk(ihk)+ FPLCDELN, @dT_deactive_NOPL,tit_min,dT_deactive_NOPL_lo,dT_deactive_NOPL_hi,
+                               @SERVERstatus,pb, nil
+                              );
+       inc(items);
+
+       {$IFDEF EDD}
+        smnu[items]:= SwitchI(' '+hk(ihk)+ FPLCARCH, @prehlad_arch_fn_cFPL,
+                              tit_hod, prehlad_arch_fn_cFPL_lo, prehlad_arch_fn_cFPL_hi,
+                              nil);
+        inc(items);
+       {$ENDIF}
+
+       {$IFDEF FPLC_CPL}
+        smnu[items]:= Switch2 (' '+hk(ihk)+ FPLCCPL, @FPLC_CPL,nil);
+        inc(items);
+        smnu[items]:= Switch2 (' '+hk(ihk)+ FPLCCPLSSR, @FPLC_CPL_SSR,nil);
+        inc(items);
+       {$ENDIF}
+
+       if ENABLE_FPLC then
+          begin
+            smnu[items]:= Switch2 (' '+hk(ihk)+ PLANGET, @find_and_process_FPLC,nil);
+            inc(items);
+
+            {smnu[items]:= Switch2_(' '+hk(ihk)+ FPLCARR, @FPLC_ARR, @SERVERstatus,pb, nil);
+            inc(items); - len pre niektore zrdoje: ASTA,...
+            }
+            {$IFDEF FPL4_ACT}
+             smnu[items]:= Switch2 (' '+hk(ihk)+ ACTASEST, @_ACT_AS_EST, nil);
+             inc(items);
+            {$ENDIF}
+
+            smnu[items]:= Switch2_(' '+hk(ihk)+ FPLC15C, @FPLC_CHECK_15, @SERVERstatus,pb, nil);
+            inc(items);
+
+            {$IFDEF SSR_MANAGEMENT}
+             add_newline_(0,nl,items,smnu);
+
+             smnu[items]:= Switch2 (' '+hk(ihk)+ SSRCHECK,   @FPLC_SSR, nil);
+             inc(items);
+             smnu[items]:= Switch2 (' '+hk(ihk)+ SSRNEXTUSE, @SSR_NEXT_USE_KEEP, nil);
+             inc(items);
+             smnu[items]:= SwitchI (' '+hk(ihk)+ SSRNEXTUSELIMIT, @SSR_NEXT_USE,tit_min,SSR_NEXT_USE_lo,SSR_NEXT_USE_hi,nil);
+             inc(items);
+             (*smnu[items]:= Switch2 (' '+hk(ihk)+ SSRLIST, @SSR_LIST, nil);
+             inc(items);
+             {smnu[items]:= Switch2_(' '+hk(ihk)+ SSRASSIGN, @SSR_ASSIGN, @SERVERstatus,pb, nil);
+             inc(items);}
+             smnu[items]:= Switch2 (' '+hk(ihk)+ SSRNOTCFG, @SSR_NOT_CFG, nil);
+             inc(items);*)
+             add_newline_(0,nl,items,smnu);
+            {$ENDIF}
+          end;
+
+       {$IFDEF EDD}
+        smnu[items]:= SwitchI(' '+hk(ihk)+ FPLCARCH, @prehlad_arch_fn_cFPL,
+                              tit_hod, prehlad_arch_fn_cFPL_lo, prehlad_arch_fn_cFPL_hi,
+                              nil);
+        inc(items);
+       {$ENDIF}
+
+
+       add_newline_(2,nl,items,smnu);
+       smnu[items]:= NewTLine(mnuZOBRAZENIE,nil);
+       inc(items);
+
+       smnu[items]:= SubMenu (hk(ihk)+cut_(mnu_miniSTRIP)+'... ', OptMenu (mnu_miniSTRIP,nil,cmDefault,
+                        Radio(mnu_miniSTRIP, @miniSTRIP_cFPL,0,
+                          RadioItem(mnu_MINI,
+                          RadioItem(mnu_SHORT,
+                          RadioItem(mnu_LARGE,
+                          nil ) ) ),
+                         nil)
+                        ),nil);
+       inc(items);
+
+       smnu[items]:= Switch2(' '+hk(ihk) + FPL_FL,   @in_FL, nil);
+       inc(items);
+       smnu[items]:= Switch2(' '+hk(ihk) + FPL_VFR,  @alt_VFR_sym, nil);
+       inc(items);
+       smnu[items]:= Switch2(' '+hk(ihk) + FPLC_10b, @pis_STRIP_10b, nil);
+       inc(items);
+
+      { IFDEF EDD}
+        smnu[items]:= Switch2(' '+hk(ihk) + mnu_pis_STRIP_COR,  @pis_STRIP_COR, nil);
+        inc(items);
+        {$IFDEF PVO}
+         smnu[items]:= Switch2(' '+hk(ihk) + mnu_pis_STRIP_ACK, @pis_STRIP_ACK, nil);
+         inc(items);
+        {$ENDIF};
+      { ENDIF};
+
+       {$IFDEF STATISTIKA}
+         {$IFDEF STATISTIKA_PRELETY}
+           add_newline_(0,nl,items,smnu);
+           smnu[items]:= Switch2(' '+hk(ihk) + prnFPSFLO,  @prn_FPS_FLO, nil);
+           inc(items);
+         {$ENDIF}
+       {$ENDIF}
+
+       for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i]);
+     end;
+
+{$ENDIF}

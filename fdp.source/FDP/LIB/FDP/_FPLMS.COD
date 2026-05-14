@@ -1,0 +1,210 @@
+const  db_mFPL0_RIADKOV = 2;
+
+{ ---------------------
+  kodovanie
+  ---------------------
+}
+
+function code_mFPL0_1(FPL: PDmFPL): string;
+   var   s,t : string;
+         i   : int;
+   begin
+     with FPL^ do
+       begin
+         s:= ZAC_SPR     + format_s(idn)+'-'
+             + {$IFNDEF L4444M} format_(idn_) {$ELSE} ' ' {$ENDIF}
+             ; {   + 5+1 }
+         s:= s + ODD_SPR + format_(ssr_)+'-'+format_s(ssr);    {   + 1+4 }
+         s:= s + ODD_SPR + format_s(typ)+'-'+format_s(typ2)+'-' + format_(rych_);   {   + 4+4+1 }
+         str(rych:RYCH_C:RYCH_D,t);
+         s:= s + t +'-'+format_(prav);                         {   + 5+1 }
+         s:= s + ODD_SPR + alt_to_str(vys,vys_,'',false,false);      { vys_+inttostr(vys,4,0); + 1+4 }
+         s:= s + ODD_SPR + alt_to_str(vys2,vys2_,'',false,false);    { vys2_+inttostr(vys2,4,0); }
+         s:= s + ODD_SPR + format_s(start.kod)+'-'+TimeToStr(start.h,start.m,''); {  + 4+4 }
+         s:= s + ODD_SPR + format_s(prist.kod)+'-'+TimeToStr(prist.h,prist.m,''); {  + 4+4 }
+         s:= s + ODD_SPR + format_s(VU);              {   +   2 }
+         s:= s + ODD_SPR + format_s(let);             {   +   4 }
+         s:= s + ODD_SPR; for i:= 0 to max_ulohy_FPLm-1 do s:= s + ulohy[i] + ' '; { + 6*2 }
+         s:= s + ODD_SPR + DateToStr(date.d,date.m,date.r,0,'');
+         s:= s + ODD_SPR + format_s(stat)
+       end;
+     code_mFPL0_1:= s
+   end;
+
+function code_mFPL0_2(FPL: PDmFPL): string;
+   var   s,t : string;
+   begin
+     with FPL^ do
+       begin
+         s:=     ODD_SPR + format_s(strpas(trat));
+         s:= s + ODD_SPR + format_s(strpas(pozn));
+         s:= s + ODD_SPR + typ_pl            { neskoro pridane }
+               + ODD_SPR + com_              { neskoro pridane }
+               + ODD_SPR + format_s(prist_)  { neskoro pridane }
+               + KON_SPR
+       end;
+     code_mFPL0_2:= s
+   end;
+
+
+procedure decode_mFPL0_1(s: string; FPL: PDmFPL);
+    var   i,ii,c,p  : int;
+          t,t1,t2   : string;
+          pom       : byte;
+    begin
+      fillchar(FPL^,sizeof(DmFPL),0);
+    { 1. cast --------------------------------------------- }
+      with FPL^ do
+        begin
+          t    := getstr(s,1,setLET_1_1);
+          idn  := cut_(getstr(t,1,['-']));
+         {$IFNDEF L4444M}
+          idn_ := getcharu(getstr(t,2,['-']));
+         {$ENDIF}
+
+          t    := getstr(s,2,setLET_1_1);
+          ssr_ := getcharu(getstr(t,1,['-']));
+          ssr  := getstr(t,2,['-']);
+
+          t    := getstr(s,3,setLET_1_1);
+          typ  := getstr(t,1,['-']);
+          typ2 := getstr(t,2,['-']);
+          t1   := getstr(t,3,['-']);
+          rych_:= t1[1];
+          t2   := copy(t1,2,length(t1)-1);
+          val(t2,rych,c);
+          prav := getcharu(getstr(t,4,['-']));
+
+          {
+          t    := getstr(s,4,setLET_1_1);
+          vys_ := getcharu(t[1]);
+          vys  := scis(t,2,length(t)-1);
+          }
+          decode_l4_vys_(getstr(s,4,setLET_1_1),vys,vys_,nil,p);
+
+          {
+          t    := getstr(s,5,setLET_1_1);
+          vys2_:= getcharu(t[1]);
+          vys2 := scis(t,2,length(t)-1);
+          }
+          decode_l4_vys_(getstr(s,5,setLET_1_1),vys2,vys2_,nil,p);
+
+          t:= getstr(s,6,setLET_1_1);
+          start.kod:= getstr(t,1,['-']);
+          GetTimeStr(start.h,start.m,pom, getstr(t,2,['-']));
+
+          t:= getstr(s,7,setLET_1_1);
+          prist.kod:= getstr(t,1,['-']);
+          GetTimeStr(prist.h,prist.m,pom, getstr(t,2,['-']));
+
+          VU:= getstr(s,8,setLET_1_1);
+
+          let:= cut_(getstr(s,9,setLET_1_1));
+
+          t := getstr(s,10,setLET_1_1);
+          for i:= 0 to max_ulohy_FPLm-1 do ulohy[i]:= getstr(t,i+1,set_);
+
+          GetDateStr(date.r,date.m,date.d, getstr(s,11,setLET_1_1),false);
+          stat := getstr(s,12,setLET_1_1)
+        end
+    end;
+
+procedure decode_mFPL0_2(s: string; FPL: PDmFPL);
+    var   i,ii,c    : int;
+          t,t1,t2   : string;
+          pom       : byte;
+    begin
+    { 2. cast --------------------------------------------- }
+      with FPL^ do
+        begin
+          trat   := strpasnew(getstr(s,1,setLET_1_1));
+          pozn   := strpasnew(getstr(s,2,setLET_1_1));
+          typ_pl := getchar(getstr(s,3,setLET_1_1));
+          com_  := getstr(s,4,setLET_1_1);
+          prist_:= cut_(getstr(s,5,setLET_1_1))
+        end
+    end;
+
+
+{ ---------------------
+  DB
+  ---------------------
+}
+
+procedure codeDB_mFPL0(FPL: PDmFPL; buff: PDB_buff; desc: PDB_desc);
+    var   s : string;
+    begin
+      s:= code_mFPL0_1(FPL);
+      { do posledneho riadku by uz nevoslo }
+      {$IFDEF NET} s:= s + ODD_SPR + rectostr(FPL^.rec) + ODD_SPR; {$ENDIF}
+      Move(s[0],buff^[0],length(s)+1);
+
+      s:= code_mFPL0_2(FPL);
+      s:= s + ODD_SPR + inttostr(FPL^.cor_,1,1) + ODD_SPR;
+      Move(s[0],buff^[1],length(s)+1)
+    end;
+
+procedure decodeDB_mFPL0(buff: PDB_buff; FPL: PDmFPL; desc: PDB_desc);
+    var   s : string;
+    begin
+      Move(buff^[0],s[0],ord(buff^[0][0])+1);
+      decode_mFPL0_1(s, FPL);
+      {$IFDEF NET} strtorec(getstr(s,13,setLET_1_1), FPL^.rec); {$ENDIF}
+
+      Move(buff^[1],s[0],ord(buff^[1][0])+1);
+      decode_mFPL0_2(s, FPL);
+      FPL^.cor_:= byte(getint(s,getstritems(s,setLET_1_1),setLET_1_1));
+
+      format_mFPL(FPL)
+    end;
+
+
+{ ---------------------
+  kluc
+  ---------------------
+}
+
+function  codekey_mFPL0(FPL: PDmFPL): string;
+    begin
+      with FPL^ do
+        begin
+          codekey_mFPL0:=             format_s(idn)
+                         + ODD_SPR + {$IFNDEF L4444M} format_s(idn_) {$ELSE} ' ' {$ENDIF}
+                          {$IFDEF FDP_OPL}
+                           {+ ODD_SPR + format_s(let) }
+                          {$ENDIF}
+                         + ODD_SPR + DateToStr(date.d,date.m,date.r,0,'')
+        end
+    end;
+
+procedure decodekey_mFPL0(s: string; FPL: PDmFPL);
+    begin
+      fillchar(FPL^,sizeof(FPL^),0); { nesmie sa zrusit ! }
+      with FPL^ do
+        begin
+          idn := getstr(s,1,setLET_1_1);
+         {$IFNDEF L4444M}
+          idn_:= getcharu(getstr(s,2,setLET_1_1));
+         {$ENDIF}
+
+         { let := getstr(s,3,setLET_1_1); }
+          GetDateStr(date.r,date.m,date.d, getstr(s,3,setLET_1_1),false)
+        end
+    end;
+
+{
+  inicializacia premennej item pre najdenie kluca
+}
+procedure init_key_mFPL0(const FPL: DmFPL; var item: DmFPL);
+    begin
+      fillchar(item,sizeof(DmFPL),0);
+      with FPL do
+        begin
+          item.idn:= idn;
+         {$IFNDEF L4444M}
+          item.idn_:= idn_;
+         {$ENDIF}
+          item.let:= let;
+          item.date:= date
+        end
+    end;

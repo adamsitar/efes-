@@ -1,0 +1,141 @@
+{$I ..\lib\mnu\_system.h}
+
+procedure mnuUTC_init(MMenu: PSubmenu); far;
+    var   smnu  : TPItems;
+          sbmnu : PSubMenu;
+          i,items,nl, j,p : int;
+    begin
+      items:= 0; nl:= 0;
+
+      smnu[items]:= Switch2 (I_UTC,@UTC_SYNCHRONIZE,nil);
+      inc(items);
+      smnu[items]:= Switch2 (M_UTC,@CASOVE_ZNAMENIE,nil);
+      inc(items);
+      smnu[items]:= NewLine2(0,nil);
+      inc(items);
+      smnu[items]:= Item    (C_UTC, cmTIMEset,nil);
+      inc(items);
+
+      for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i])
+    end;
+
+
+procedure mnuTLAC_init(MMenu: PSubmenu); far;
+    var   smnu  : TPItems;
+          sbmnu : PSubMenu;
+          i,items,nl, j,p : int;
+    begin
+      items:= 0; nl:= 0;
+
+      smnu[items]:= Switch2_(TL_NET, @PRN_NET, @is_PRN_NET, true,nil);
+      inc(items);
+      smnu[items]:= SwitchI (TL_OFF, @PRN_TAB,'',PRN_TAB_lo,PRN_TAB_hi,nil);
+      inc(items);
+      smnu[items]:= NewLine2(0,nil);
+      inc(items);
+      smnu[items]:= Item (TL_TEST, cmPRN_TEST,nil);
+      inc(items);
+
+      for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i])
+    end;
+
+
+(*
+procedure mnuSYSTEM_init(MMenu: PSubmenu); far;
+    var   smnu  : TPItems;
+          sbmnu : PSubMenu;
+          i,items,nl, j,p : int;
+    begin
+      items:= 0; nl:= 0;
+
+      {$IFNDEF TRENAZER}
+       smnu[items]:= SubMenu(UTC,OptMenu(UTC_,nil, cmDefault,
+                       Switch2 (I_UTC,@UTC_SYNCHRONIZE,
+                       Switch2 (M_UTC,@CASOVE_ZNAMENIE,
+                       NewLine2(0,
+                       Item    (C_UTC, cmTIMEset,
+                       nil) ) ) )
+                      ),nil);
+       inc(items);
+      {$ENDIF}
+
+      {$IFDEF PRN}
+       smnu[items]:= SubMenu(TLAC,OptMenu(TLAC_,nil, cmDefault,
+                        Switch2_(TL_NET, @PRN_NET, @is_PRN_NET, true,
+                        SwitchI (TL_OFF, @PRN_TAB,PRN_TAB_lo,PRN_TAB_hi,
+                        NewLine2(0,
+                        Item   (TL_TEST, cmPRN_TEST,
+                        nil) ) ) )
+                       ),nil);
+       inc(items);
+      {$ENDIF}
+
+      {$IFDEF TRENAZER_UDP}
+       smnu[items]:= NewLine2(0,nil);
+       inc(items);
+       smnu[items]:= Switch2 (I_SIM,@SIM_UNIX,nil);
+       inc(items);
+      {$ENDIF}
+
+      for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i])
+    end;
+*)
+
+procedure mnuSYSTEM_init(MMenu: PSubmenu); far;
+    var   smnu  : TPItems;
+          sbmnu : PSubMenu;
+          i,items,nl : int;
+
+    begin
+      items:= 0; nl:= 0;
+
+      smnu[items]:= Item (VERSION,  cmAbout, nil);
+      inc(items);
+      smnu[items]:= Item (UPGRADE,  cmAboutUpgrade, nil);
+      inc(items);
+      smnu[items]:= Item (HELPINDEX, cmHelpIndex, nil);
+      inc(items);
+
+      {$IFNDEF SERVER}
+       add_newline_(0,nl,items,smnu);
+       smnu[items]:= CFG_READ_menu_init (CFG_READ);
+       inc(items);
+       smnu[items]:= CFG_SAVE_menu_init (CFG_SAVE);
+       inc(items);
+      {$ENDIF}
+
+      add_newline_(0,nl,items,smnu);
+      {sbmnu:= SubMenu (cut_r(SYSTEM_OPTIONS)+'... ', OptMenu_S(SYSTEM_OPTIONS, hlpmnuSYSTEM,cmDefault,15,nil),nil);
+      sbmnu^.PMenu_init:= @mnuSYSTEM_init;
+      smnu[items]:= SubMenuInitialized(sbmnu,nil);
+      inc(items);}
+
+      {$IFNDEF TRENAZER}
+       sbmnu:= SubMenu(UTC,OptMenu(UTC_,hlpmnuSYSTEM_UTC, cmDefault,nil),nil);
+       sbmnu^.PMenu_init:= @mnuUTC_init;
+       smnu[items]:= SubMenuInitialized(sbmnu,nil);
+       inc(items);
+      {$ENDIF}
+
+      sbmnu:= SubMenu(TLAC,OptMenu(TLAC_,hlpmnuSYSTEM_PRN, cmDefault,nil),nil);
+      sbmnu^.PMenu_init:= @mnuTLAC_init;
+      smnu[items]:= SubMenuInitialized(sbmnu,nil);
+      inc(items);
+
+      if is_letvis_menu then
+         begin
+           {sbmnu:= SubMenu (cut_r(NETWORKM)+'... ', WinMenu(NETWORKM,hlpmnuSYSTEM_NETWORK,nil),nil);
+           sbmnu^.PMenu_init:= @mnuSTREAM_init;
+           }
+           sbmnu:= SubMenu(cut_r(S_LETVIS)+'...', WinMenu(S_LETVIS, hlpmnuSYSTEM_NET,nil),nil);
+           sbmnu^.PMenu_init:= @mnuNET_init;
+           smnu[items]:= SubMenuInitialized(sbmnu,nil);
+           inc(items);
+         end;
+
+      add_newline_(0,nl,items,smnu);
+      smnu[items]:= Item (EXT, cmQUIT, nil);
+      inc(items);
+
+      for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i])
+    end;

@@ -1,0 +1,87 @@
+{$IFDEF FPL4}
+
+{ תתתתתתתתתתתתתתתתתת
+   CPL
+  תתתתתתתתתתתתתתתתתת
+
+}
+ procedure O_OPL._decode_CPL(data: pchars; size: word; var FPL: DFPL4; var res: string);
+    begin
+      res:= '';
+      FPL._3 := get_str (data,size, 1,odd_ICAO, sizeof(FPL._3));
+      FPL._7 := get_str (data,size, 2,odd_ICAO, sizeof(FPL._7));
+      FPL._13:= get_str (data,size, 3,odd_ICAO, sizeof(FPL._13));
+      FPL._15:= get_str0(data,size, 4,odd_ICAO);
+      FPL._16:= get_str (data,size, 5,odd_ICAO, sizeof(FPL._16));
+    end;
+
+
+{ תתתתתתתתתתתתתתתתתת
+   EST
+  תתתתתתתתתתתתתתתתתת
+}
+ procedure O_OPL._decode_EST(data: pchars; size: word; var FPL: DFPL4; var res: string);
+    begin
+      res:= '';
+      FPL._3 := get_str (data,size, 1,odd_ICAO, sizeof(FPL._3));
+      FPL._7 := get_str (data,size, 2,odd_ICAO, sizeof(FPL._7));
+      FPL._8 := get_str (data,size, 3,odd_ICAO, sizeof(FPL._8));
+      FPL._9 := get_str (data,size, 4,odd_ICAO, sizeof(FPL._9));
+      FPL._13:= get_str (data,size, 5,odd_ICAO, sizeof(FPL._13));
+      FPL._14:= get_str (data,size, 6,odd_ICAO, sizeof(FPL._14));
+      FPL._22:= get_str0(data,size, 7,odd_ICAO);
+      FPL._16:= get_str (data,size, 8,odd_ICAO, sizeof(FPL._16));
+      FPL._15:= get_str0(data,size, 9,odd_ICAO);
+    end;
+
+
+{ OPL posiela v poli 22 vysku
+}
+ function O_OPL._decode_ESTc (var FPL: DFPL4; var FPLc: DcFPL; var res: string): bool;
+    var   _OBs : POBxys;
+          i,_bodov : int;
+          v_ : char;
+    begin
+     { dekodovanie planu
+     }
+      _decode_ESTc:= inherited _decode_ESTc(FPL, FPLc, res);
+
+     { navyse uvedena vyska
+     }
+      if FPL._22<>nil then with FPLc do
+         begin
+           decode_l4_rych_vys (strpas(FPL._22), rych,rych_, vys,v_);
+           vys:= _vys_OB (vys,v_)
+         end;
+
+     { trat letu pre VFR plany chodi kodovana po vojensky
+     }
+      New(_OBs); fillchar(_OBs^,sizeof(_OBs^),0); _bodov:= 0;
+      with FPLc do
+        res:= _decode_FPL0_15 (FPL._15, start,prist,
+                               _OBs^,_bodov,
+                               rych,rych_, vys,v_, date,
+                               false,false,false,false,false
+                              );
+      _napln_trat_FPLC_ (_OBs,_bodov, FPLc, false);
+      Dispose(_OBs);
+
+      format_cFPL(@FPLc);
+    end;
+
+
+{ spracovanie FPLc od OPL, zatial len ak ad hlavneho uzla neprislo...
+}
+ function O_OPL._process_ESTc (var FPL: DFPL4; var res: string): bool;
+    var   FPLc: DcFPL;
+          bres: bool;
+    begin
+      bres:= _decode_ESTc(FPL,FPLc, res);
+      if bres then
+         begin
+           if FPLc._8a<>IFR_let {(cFPL^.find_id(FPLc.idn)=-1)} then zarad_FPLc(@FPLc,FPLc.stt,true,opl_ext)
+         end;
+      _process_ESTc:= bres
+    end;
+
+{$ENDIF}

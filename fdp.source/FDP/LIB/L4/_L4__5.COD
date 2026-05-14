@@ -1,0 +1,19 @@
+{ --------
+   5
+  --------
+}
+
+ function code_l4_5(_5a,_5b,_5c: string): string;
+    begin
+      if cut_(_5a+_5b+_5c)='' then code_l4_5:= ''
+      else code_l4_5:= l4_format_s(_5a)+icao_NXT+l4_format_s(_5b)+icao_NXT+l4_format_s(_5c)
+    end;
+
+ procedure decode_l4_5(_5: string; var _5a,_5b,_5c: string);
+     begin
+       _5a:= decode_l4_s(getstr(_5,1,[icao_NXT]),true);
+       _5b:= decode_l4_s(getstr(_5,2,[icao_NXT]),true);
+       _5c:= decode_l4_s(getstr(_5,3,[icao_NXT]),true);
+     end;
+
+

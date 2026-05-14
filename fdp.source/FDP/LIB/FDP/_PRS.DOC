@@ -1,0 +1,52 @@
+(*
+===========================
+ ALGORITMUS VYKRESLOVANIA
+---------------------------
+
+ stav :        komu :              ; - vysvetlenia
+                                   ; - plati pre priestory (pri FUA sa schvaluju) a zamestania (neschvaluju sa)
+
+ _plan         - FDP               ; . *
+ _ziadost      - FDP(,RDP)  (?) *  ; na RDP sa posiela len vtedy, ak sa neschvaluje; zavisi od algoritmu na FDP
+ _zamietnuty   - FDP               ; - N
+ _schvaleny    - FDP,RDP     +     ; za niektorych
+
+ _aktivovany   - FDP,RDP     A
+ _preruseny    - FDP,RDP     B
+ _ukonceny     - FDP,RDP     @
+
+ _zruseny      - FDP,RDP     @     ; @ samostatne alebo s lubovolnym znakom podla posledneho stavu
+
+ _neplatny     - FDP               ; lubovolny stav, najcastnejsie . * ?
+
+
+ Vykreslenie - vid "_platny_plan" a "Tpoz",
+ operacioe platne pre zpznam stripov a map:
+ pri zaciatku T1 a preaktivacnej dobe dT1
+ pri ukonceni T2 a poaktivacnej dobe dT2
+
+
+     * ? +   preaktivovany stav ->  vykresli sa obrys v T1-dT1
+             (poz_COORDINATED)      odmaze sa v T2+dT2
+
+     A       aktivovany         ->  vyfarbi sa i plocha v T1,
+             (poz_LETI,poz_PRIST)   az do prichodu inej spravy alebo
+                                    do doby T2+dT2
+
+     B       preruseny          ->  ak bol aktivny prekresli sa len na obrys
+             (poz_STOJI)            az do prichodu inej spravy alebo
+                                    do doby T2+dT2
+
+     @      ukonceny           ->  podla posledneho stavu obrys alebo plocha
+             (poz_HANGAR)           sa odmazu v T2
+
+     @ (prip. spolu s inym znakom)
+             zruseny            ->  okamzite sa odmaze
+             (poz_CANCELLED)
+
+
+ Pozn: nevykreslenie mapy (nedostatok pamate alebo nenajdenie mapy)
+       je potrebne indikovat varovnou hlaskou alebo indikaciou
+       v stripe.
+
+*)

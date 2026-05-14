@@ -1,0 +1,13 @@
+       const  mnuEST  = ' ES~T~ ';
+              mnuETO  = ' ET~O~ ';
+              mnuDEL  = ' ~D~ELETE ';
+              mnuCNL  = ' C~N~L ';
+              mnuACC  = ' ~A~CCEPT ';
+              mnuUNC  = ' ~U~NACCEPT ';
+              mnuHIDE = ' ~H~IDE ';
+              mnuSHOW = ' ~S~HOW ';
+              mnuCAC  = ' ~C~HG ACK  ';
+              mnuABI  = ' A~B~I ';
+              mnuFPL  = ' ~F~PL ';
+              mnuSTR  = ' STR~I~P ';
+              mnuLAM  = ' ~L~AM ';

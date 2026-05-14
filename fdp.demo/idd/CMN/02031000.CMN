@@ -1,0 +1,421 @@
+10:59ú59 þ ; -----------------------------------------
+10:59ú59 þ ; -----------------------------------------
+10:59ú59 þ ; FDP/EDD  - SRLP Bratislava
+10:59ú59 þ ; -----------------------------------------
+10:59ú59 þ ; --------------------------------------------------------------------------------------------------------------------------------
+10:59ú59 þ ; Pracovisko ; Adresa logicka,   RTR, IP        ; Protokol ; Stanica  ; informacie                               ; ine nastavenia
+10:59ú59 þ ; --------------------------------------------------------------------------------------------------------------------------------
+10:59ú59 þ ; ----------------------------
+10:59ú59 þ ; SRLP
+10:59ú59 þ ; ----------------------------
+10:59ú59 þ   BRIDGE     ; StrRLP BRIDGE ,    192.100.141.31 ; ~UDP  L  ; @BRIDGE  ; -heartbeat  MSG
+10:59ú59 þ   S-RTZ      ; StrRLP S1     ,    192.100.141.32 ; ~UDP  L  ; @SERVER  ; -master     MSG  ALL  ; timeout=3
+10:59ú59 þ   S-ACC      ; StrRLP S2     ,    192.100.141.33 ; ~UDP  L  ; @BSERVER ; -backup     MSG  ALL  ; timeout=3
+10:59ú59 þ   EDD        ; StrRLP EDD    ,$08,192.100.141.40 ; @THIS
+10:59ú59 þ   TEREN      ; StrRLP TEREN  ,$03,192.100.141.16 ; ~UDP     ; @RDP     ; -slave ALL  @SECTOR
+10:59ú59 þ   SOD        ; StrRLP SOD    ,$05,192.100.141.17 ; ~UDP     ; @RDP     ; -slave ALL
+10:59ú59 þ   ADP        ; StrRLP TS     ,$06,192.100.141.18 ; ~UDP     ; @RDP     ; -slave ALL
+10:59ú59 þ   SAR        ; StrRLP SAR    ,$04,192.100.143.16 ; ~UDP     ; @RDP     ; -slave ALL
+10:59ú59 þ ; ----------------------------
+10:59ú59 þ ; PVO
+10:59ú59 þ ; ----------------------------
+10:59ú59 þ   DPVL       ; VS DPVL       ,    192.100.000.33 ; ~UDP ~L  ; @IDD     ; -heartbeat MSG        ; timeout=5
+10:59ú59 þ ; -----------------------------------------
+10:59ú59 þ ; -----------------------------------------
+10:59ú59 þ ; FDP/EDD  - SRLP Bratislava
+10:59ú59 þ ; -----------------------------------------
+10:59ú59 þ ; --------------------------------------------------------------------------------------------------------------------------------
+10:59ú59 þ ; Pracovisko ; Adresa logicka,   RTR, IP        ; Protokol ; Stanica  ; informacie                               ; ine nastavenia
+10:59ú59 þ ; --------------------------------------------------------------------------------------------------------------------------------
+10:59ú59 þ ; ----------------------------
+10:59ú59 þ ; SRLP
+10:59ú59 þ ; ----------------------------
+10:59ú59 þ   BRIDGE     ; StrRLP BRIDGE ,    192.100.141.31 ; ~UDP  L  ; @BRIDGE  ; -heartbeat  MSG
+10:59ú59 þ   S-RTZ      ; StrRLP S1     ,    192.100.141.32 ; ~UDP  L  ; @SERVER  ; -master     MSG  ALL  ; timeout=3
+10:59ú59 þ   S-ACC      ; StrRLP S2     ,    192.100.141.33 ; ~UDP  L  ; @BSERVER ; -backup     MSG  ALL  ; timeout=3
+10:59ú59 þ   EDD        ; StrRLP EDD    ,$08,192.100.141.40 ; @THIS
+10:59ú59 þ   TEREN      ; StrRLP TEREN  ,$03,192.100.141.16 ; ~UDP     ; @RDP     ; -slave ALL  @SECTOR
+10:59ú59 þ   SOD        ; StrRLP SOD    ,$05,192.100.141.17 ; ~UDP     ; @RDP     ; -slave ALL
+10:59ú59 þ   ADP        ; StrRLP TS     ,$06,192.100.141.18 ; ~UDP     ; @RDP     ; -slave ALL
+10:59ú59 þ   SAR        ; StrRLP SAR    ,$04,192.100.143.16 ; ~UDP     ; @RDP     ; -slave ALL
+10:59ú59 þ ; ----------------------------
+10:59ú59 þ ; PVO
+10:59ú59 þ ; ----------------------------
+10:59ú59 þ   DPVL       ; VS DPVL       ,    192.100.000.33 ; ~UDP ~L  ; @IDD     ; -heartbeat MSG        ; timeout=5
+10:59ú59 þ FPLC-FL = S0745
+10:59ú59 þ title-FPLC       = <%FPLC-FL%
+10:59ú59 þ FPLM-FL = S0745
+10:59ú59 þ FPLO-FL = M0300
+10:59ú59 þ line-area = R13
+10:59ú59 þ line-area = R22
+10:59ú59 þ line-area = R24
+10:59ú59 þ line-area = R80
+10:59ú59 þ line-area = R84
+10:59ú59 þ line-area = R86
+10:59ú59 þ line-area = TSA01
+10:59ú59 þ line-area = TSA02A
+10:59ú59 þ line-area = TSA02B
+10:59ú59 þ line-area = TSA02C
+10:59ú59 þ line-area = TSA03
+10:59ú59 þ line-area = TSA04
+10:59ú59 þ line-area = TSA05A
+10:59ú59 þ line-area = TSA05B
+10:59ú59 þ line-area = TSA06A
+10:59ú59 þ line-area = TSA06B
+10:59ú59 þ line-area = TSA06C
+10:59ú59 þ line-area = TSA07A
+10:59ú59 þ line-area = TSA07B
+10:59ú59 þ line-area = TSA08A
+10:59ú59 þ line-area = TSA08B
+10:59ú59 þ line-area = TSA09A
+10:59ú59 þ line-area = TSA09B
+10:59ú59 þ line-area = TSA09C
+10:59ú59 þ line-area = TSA09D
+10:59ú59 þ line-area = TSA10A
+10:59ú59 þ line-area = TSA10B
+10:59ú59 þ line-area = TSA11A
+10:59ú59 þ line-area = TSA11B
+10:59ú59 þ line-area = R13
+10:59ú59 þ line-area = R22
+10:59ú59 þ line-area = R24
+10:59ú59 þ line-area = R80
+10:59ú59 þ line-area = R84
+10:59ú59 þ line-area = R86
+10:59ú59 þ line-area = TSA01
+10:59ú59 þ line-area = TSA02A
+10:59ú59 þ line-area = TSA02B
+10:59ú59 þ line-area = TSA02C
+10:59ú59 þ line-area = TSA03
+10:59ú59 þ line-area = TSA04
+10:59ú59 þ line-area = TSA05A
+10:59ú59 þ line-area = TSA05B
+10:59ú59 þ line-area = TSA06A
+10:59ú59 þ line-area = TSA06B
+10:59ú59 þ line-area = TSA06C
+10:59ú59 þ line-area = TSA07A
+10:59ú59 þ line-area = TSA07B
+10:59ú59 þ line-area = TSA08A
+10:59ú59 þ line-area = TSA08B
+10:59ú59 þ line-area = TSA09A
+10:59ú59 þ line-area = TSA09B
+10:59ú59 þ line-area = TSA09C
+10:59ú59 þ line-area = TSA09D
+10:59ú59 þ line-area = TSA10A
+10:59ú59 þ line-area = TSA10B
+10:59ú59 þ line-area = TSA11A
+10:59ú59 þ line-area = TSA11B
+10:59ú59 þ title-FPLC       = <%FPLC-FL%
+10:59ú59 þ ; -----------------------------------------
+10:59ú59 þ ;  FDP/OPL - SRLP-100
+10:59ú59 þ ; =========================================
+10:59ú59 þ ; --------------------------------------------------------------------------------------------------------------------------------
+10:59ú59 þ ; Pracovisko ; Adresa logicka,   RTR, IP        ; Protokol ; Stanica  ; informacie                               ; ine nastavenia
+10:59ú59 þ ; --------------------------------------------------------------------------------------------------------------------------------
+10:59ú59 þ ; ----------------------------
+10:59ú59 þ ; SRLP
+10:59ú59 þ ; ----------------------------
+10:59ú59 þ ;  BRIDGE     ; StrRLP BRIDGE ,   192.100.141.35 ; ~X25  L  ; @BRIDGE  ; -heartbeat  MSG
+10:59ú59 þ ;  BRIDGE     ; StrRLP BRIDGE ,   192.100.141.35 ; ~X25 ~L  ; @BRIDGE  ; -heartbeat  MSG
+10:59ú59 þ   SERVER     ; StrRLP S1     ,   192.100.141.32 ; ~UDP ~L  ; @SERVER  ; -master     MSG  ALL \KRL \SYN \FUA ; timeout=3
+10:59ú59 þ   RTZ        ; StrRLP S2     ,   192.100.141.33 ; ~UDP ~L  ; @BSERVER ; -backup     MSG  ALL \KRL \SYN \FUA ; timeout=3
+10:59ú59 þ   SOD        ; StrRLP SOD    ,   192.100.141.42 ; ~UDP ~L  ; @OPL     ; -heartbeat  MSG  ; timeout=3
+10:59ú59 þ   SMD        ; StrRLP SMD    ,   192.100.141.41 ; @THIS
+10:59ú59 þ ; ----------------------------
+10:59ú59 þ ; SAR
+10:59ú59 þ ; ----------------------------
+10:59ú59 þ   SAR        ; SAR OPL       ,   192.100.143.32 ; ~UDP  L  ; @OPL     ; -heartbeat  MSG  ; timeout=3
+10:59ú59 þ ; ----------------------------
+10:59ú59 þ ; VLIS
+10:59ú59 þ ; ----------------------------
+10:59ú59 þ ; VLIS       ; VLIS          ,   192.100.142.06 ; ~UDP ~L  ; @LIS     ; MSG ; timeout=6
+10:59ú59 þ ; ----------------------------
+10:59ú59 þ ; Letiska
+10:59ú59 þ ; ----------------------------
+10:59ú59 þ   100        ; 100 OPL       ,   192.100.037.32 ; ~UDP ~L  ; @OPL   ; -heartbeat -ap MSG      ; timeout=6
+10:59ú59 þ   100 RDC    ; 100 RDC       ,   192.100.040.32 ; ~UDP ~L  ; @IDD   ;                MSG      ; timeout=6
+10:59ú59 þ   200        ; 200 OPL       ,   192.100.035.32 ; ~UDP ~L  ; @OPL   ; -heartbeat -ap MSG      ; timeout=6
+10:59ú59 þ   250        ; 250 OPL       ,   192.100.013.32 ; ~UDP     ; @OPL   ; -heartbeat -ap MSG      ; timeout=6
+10:59ú59 þ ; 250        ; 250 OPL       ,   192.100.013.32 ; ~UDP ~L  ; @OPL   ; -heartbeat -ap MSG      ; timeout=6
+10:59ú59 þ   250 RDC    ; 250 RDC       ,   192.100.013.33 ; ~UDP ~L  ; @IDD   ;                MSG      ; timeout=6
+10:59ú59 þ   300        ; 300 OPL       ,   192.100.075.32 ; ~UDP     ; @OPL   ; -heartbeat -ap MSG      ; timeout=6
+10:59ú59 þ ; 300        ; 300 OPL       ,   192.100.075.32 ; ~UDP ~L  ; @OPL   ; -heartbeat -ap MSG      ; timeout=6
+10:59ú59 þ   300 RDC    ; 300 RDC       ,   192.100.073.32 ; ~UDP ~L  ; @IDD   ;                MSG      ; timeout=6
+10:59ú59 þ   500        ; 500 OPL       ,   192.100.105.32 ; ~UDP  L  ; @OPL   ; -heartbeat -ap MSG      ; timeout=6
+10:59ú59 þ   600        ; 600 OPL       ,   192.100.107.32 ; ~UDP  L  ; @OPL   ; -heartbeat -ap MSG      ; timeout=6
+10:59ú59 þ ; pripravene adresy pre rekonfiguraciu
+10:59ú59 þ ;
+10:59ú59 þ ;  500        ; 500 OPL       ,   192.100.113.32 ; ~UDP ~L  ; @OPL   ; -heartbeat -ap MSG       ; timeout=6
+10:59ú59 þ ;  500 RDC    ; 500 RDC       ,   192.100.111.32 ; ~UDP ~L  ; @IDD   ;                MSG       ; timeout=6
+10:59ú59 þ ;  600        ; 600 OPL       ,   192.100.107.32 ; ~UDP ~L  ; @OPL   ; -heartbeat -ap MSG       ; timeout=6
+10:59ú59 þ ;  600 RDC    ; 600 RDC       ,   192.100.105.32 ; ~UDP ~L  ; @IDD   ;                MSG       ; timeout=6
+10:59ú59 þ ; ----------------------------
+10:59ú59 þ ; PVO
+10:59ú59 þ ; ----------------------------
+10:59ú59 þ   DPVL       ; VS DPVL       ,   192.100.000.33 ; ~UDP ~L  ; @IDD   ; -heartbeat MSG          ; timeout=5
+10:59ú59 þ There is not defined RDP sector.
+10:59ú59 þ FPLC-FL = S0745
+10:59ú59 þ title-FPLC       = <%FPLC-FL%
+10:59ú59 þ FPLM-FL = S0745
+10:59ú59 þ FPLO-FL = M0300
+10:59ú59 þ line-area = R13
+10:59ú59 þ line-area = R22
+10:59ú59 þ line-area = R24
+10:59ú59 þ line-area = R80
+10:59ú59 þ line-area = R84
+10:59ú59 þ line-area = R86
+10:59ú59 þ line-area = TSA01
+10:59ú59 þ line-area = TSA02A
+10:59ú59 þ line-area = TSA02B
+10:59ú59 þ line-area = TSA02C
+10:59ú59 þ line-area = TSA03
+10:59ú59 þ line-area = TSA04
+10:59ú59 þ line-area = TSA05A
+10:59ú59 þ line-area = TSA05B
+10:59ú59 þ line-area = TSA06A
+10:59ú59 þ line-area = TSA06B
+10:59ú59 þ line-area = TSA06C
+10:59ú59 þ line-area = TSA07A
+10:59ú59 þ line-area = TSA07B
+10:59ú59 þ line-area = TSA08A
+10:59ú59 þ line-area = TSA08B
+10:59ú59 þ line-area = TSA09A
+10:59ú59 þ line-area = TSA09B
+10:59ú59 þ line-area = TSA09C
+10:59ú59 þ line-area = TSA09D
+10:59ú59 þ line-area = TSA10A
+10:59ú59 þ line-area = TSA10B
+10:59ú59 þ line-area = TSA11A
+10:59ú59 þ line-area = TSA11B
+10:59ú59 þ line-area = R13
+10:59ú59 þ line-area = R22
+10:59ú59 þ line-area = R24
+10:59ú59 þ line-area = R80
+10:59ú59 þ line-area = R84
+10:59ú59 þ line-area = R86
+10:59ú59 þ line-area = TSA01
+10:59ú59 þ line-area = TSA02A
+10:59ú59 þ line-area = TSA02B
+10:59ú59 þ line-area = TSA02C
+10:59ú59 þ line-area = TSA03
+10:59ú59 þ line-area = TSA04
+10:59ú59 þ line-area = TSA05A
+10:59ú59 þ line-area = TSA05B
+10:59ú59 þ line-area = TSA06A
+10:59ú59 þ line-area = TSA06B
+10:59ú59 þ line-area = TSA06C
+10:59ú59 þ line-area = TSA07A
+10:59ú59 þ line-area = TSA07B
+10:59ú59 þ line-area = TSA08A
+10:59ú59 þ line-area = TSA08B
+10:59ú59 þ line-area = TSA09A
+10:59ú59 þ line-area = TSA09B
+10:59ú59 þ line-area = TSA09C
+10:59ú59 þ line-area = TSA09D
+10:59ú59 þ line-area = TSA10A
+10:59ú59 þ line-area = TSA10B
+10:59ú59 þ line-area = TSA11A
+10:59ú59 þ line-area = TSA11B
+10:59ú59 þ title-FPLC       = <%FPLC-FL%
+10:59ú59 þ ; -----------------------------------------
+10:59ú59 þ ;  FDP/OPL - SRLP-100
+10:59ú59 þ ; =========================================
+10:59ú59 þ ; --------------------------------------------------------------------------------------------------------------------------------
+10:59ú59 þ ; Pracovisko ; Adresa logicka,   RTR, IP        ; Protokol ; Stanica  ; informacie                               ; ine nastavenia
+10:59ú59 þ ; --------------------------------------------------------------------------------------------------------------------------------
+10:59ú59 þ ; ----------------------------
+10:59ú59 þ ; SRLP
+10:59ú59 þ ; ----------------------------
+10:59ú59 þ ;  BRIDGE     ; StrRLP BRIDGE ,   192.100.141.35 ; ~X25  L  ; @BRIDGE  ; -heartbeat  MSG
+10:59ú59 þ ;  BRIDGE     ; StrRLP BRIDGE ,   192.100.141.35 ; ~X25 ~L  ; @BRIDGE  ; -heartbeat  MSG
+10:59ú59 þ   SERVER     ; StrRLP S1     ,   192.100.141.32 ; ~UDP ~L  ; @SERVER  ; -master     MSG  ALL \KRL \SYN \FUA ; timeout=3
+10:59ú59 þ   RTZ        ; StrRLP S2     ,   192.100.141.33 ; ~UDP ~L  ; @BSERVER ; -backup     MSG  ALL \KRL \SYN \FUA ; timeout=3
+10:59ú59 þ   SOD        ; StrRLP SOD    ,   192.100.141.42 ; ~UDP ~L  ; @OPL     ; -heartbeat  MSG  ; timeout=3
+10:59ú59 þ   SMD        ; StrRLP SMD    ,   192.100.141.41 ; @THIS
+10:59ú59 þ ; ----------------------------
+10:59ú59 þ ; SAR
+10:59ú59 þ ; ----------------------------
+10:59ú59 þ   SAR        ; SAR OPL       ,   192.100.143.32 ; ~UDP  L  ; @OPL     ; -heartbeat  MSG  ; timeout=3
+10:59ú59 þ ; ----------------------------
+10:59ú59 þ ; VLIS
+10:59ú59 þ ; ----------------------------
+10:59ú59 þ ; VLIS       ; VLIS          ,   192.100.142.06 ; ~UDP ~L  ; @LIS     ; MSG ; timeout=6
+10:59ú59 þ ; ----------------------------
+10:59ú59 þ ; Letiska
+10:59ú59 þ ; ----------------------------
+10:59ú59 þ   100        ; 100 OPL       ,   192.100.037.32 ; ~UDP ~L  ; @OPL   ; -heartbeat -ap MSG      ; timeout=6
+10:59ú59 þ   100 RDC    ; 100 RDC       ,   192.100.040.32 ; ~UDP ~L  ; @IDD   ;                MSG      ; timeout=6
+10:59ú59 þ   200        ; 200 OPL       ,   192.100.035.32 ; ~UDP ~L  ; @OPL   ; -heartbeat -ap MSG      ; timeout=6
+10:59ú59 þ   250        ; 250 OPL       ,   192.100.013.32 ; ~UDP     ; @OPL   ; -heartbeat -ap MSG      ; timeout=6
+10:59ú59 þ ; 250        ; 250 OPL       ,   192.100.013.32 ; ~UDP ~L  ; @OPL   ; -heartbeat -ap MSG      ; timeout=6
+10:59ú59 þ   250 RDC    ; 250 RDC       ,   192.100.013.33 ; ~UDP ~L  ; @IDD   ;                MSG      ; timeout=6
+10:59ú59 þ   300        ; 300 OPL       ,   192.100.075.32 ; ~UDP     ; @OPL   ; -heartbeat -ap MSG      ; timeout=6
+10:59ú59 þ ; 300        ; 300 OPL       ,   192.100.075.32 ; ~UDP ~L  ; @OPL   ; -heartbeat -ap MSG      ; timeout=6
+10:59ú59 þ   300 RDC    ; 300 RDC       ,   192.100.073.32 ; ~UDP ~L  ; @IDD   ;                MSG      ; timeout=6
+10:59ú59 þ   500        ; 500 OPL       ,   192.100.105.32 ; ~UDP  L  ; @OPL   ; -heartbeat -ap MSG      ; timeout=6
+10:59ú59 þ   600        ; 600 OPL       ,   192.100.107.32 ; ~UDP  L  ; @OPL   ; -heartbeat -ap MSG      ; timeout=6
+10:59ú59 þ ; pripravene adresy pre rekonfiguraciu
+10:59ú59 þ ;
+10:59ú59 þ ;  500        ; 500 OPL       ,   192.100.113.32 ; ~UDP ~L  ; @OPL   ; -heartbeat -ap MSG       ; timeout=6
+10:59ú59 þ ;  500 RDC    ; 500 RDC       ,   192.100.111.32 ; ~UDP ~L  ; @IDD   ;                MSG       ; timeout=6
+10:59ú59 þ ;  600        ; 600 OPL       ,   192.100.107.32 ; ~UDP ~L  ; @OPL   ; -heartbeat -ap MSG       ; timeout=6
+10:59ú59 þ ;  600 RDC    ; 600 RDC       ,   192.100.105.32 ; ~UDP ~L  ; @IDD   ;                MSG       ; timeout=6
+10:59ú59 þ ; ----------------------------
+10:59ú59 þ ; PVO
+10:59ú59 þ ; ----------------------------
+10:59ú59 þ   DPVL       ; VS DPVL       ,   192.100.000.33 ; ~UDP ~L  ; @IDD   ; -heartbeat MSG          ; timeout=5
+10:59ú59 þ There is not defined RDP sector.
+10:59ú59 þ FPLC-FL = S0745
+10:59ú59 þ title-FPLC       = <%FPLC-FL%
+10:59ú59 þ FPLM-FL = S0745
+10:59ú59 þ FPLO-FL = M0300
+10:59ú59 þ line-area = R13
+10:59ú59 þ line-area = R22
+10:59ú59 þ line-area = R24
+10:59ú59 þ line-area = R80
+10:59ú59 þ line-area = R84
+10:59ú59 þ line-area = R86
+10:59ú59 þ line-area = TSA01
+10:59ú59 þ line-area = TSA02A
+10:59ú59 þ line-area = TSA02B
+10:59ú59 þ line-area = TSA02C
+10:59ú59 þ line-area = TSA03
+10:59ú59 þ line-area = TSA04
+10:59ú59 þ line-area = TSA05A
+10:59ú59 þ line-area = TSA05B
+10:59ú59 þ line-area = TSA06A
+10:59ú59 þ line-area = TSA06B
+10:59ú59 þ line-area = TSA06C
+10:59ú59 þ line-area = TSA07A
+10:59ú59 þ line-area = TSA07B
+10:59ú59 þ line-area = TSA08A
+10:59ú59 þ line-area = TSA08B
+10:59ú59 þ line-area = TSA09A
+10:59ú59 þ line-area = TSA09B
+10:59ú59 þ line-area = TSA09C
+10:59ú59 þ line-area = TSA09D
+10:59ú59 þ line-area = TSA10A
+10:59ú59 þ line-area = TSA10B
+10:59ú59 þ line-area = TSA11A
+10:59ú59 þ line-area = TSA11B
+10:59ú59 þ line-area = R13
+10:59ú59 þ line-area = R22
+10:59ú59 þ line-area = R24
+10:59ú59 þ line-area = R80
+10:59ú59 þ line-area = R84
+10:59ú59 þ line-area = R86
+10:59ú59 þ line-area = TSA01
+10:59ú59 þ line-area = TSA02A
+10:59ú59 þ line-area = TSA02B
+10:59ú59 þ line-area = TSA02C
+10:59ú59 þ line-area = TSA03
+10:59ú59 þ line-area = TSA04
+10:59ú59 þ line-area = TSA05A
+10:59ú59 þ line-area = TSA05B
+10:59ú59 þ line-area = TSA06A
+10:59ú59 þ line-area = TSA06B
+10:59ú59 þ line-area = TSA06C
+10:59ú59 þ line-area = TSA07A
+10:59ú59 þ line-area = TSA07B
+10:59ú59 þ line-area = TSA08A
+10:59ú59 þ line-area = TSA08B
+10:59ú59 þ line-area = TSA09A
+10:59ú59 þ line-area = TSA09B
+10:59ú59 þ line-area = TSA09C
+10:59ú59 þ line-area = TSA09D
+10:59ú59 þ line-area = TSA10A
+10:59ú59 þ line-area = TSA10B
+10:59ú59 þ line-area = TSA11A
+10:59ú59 þ line-area = TSA11B
+10:59ú59 þ title-FPLC       = <%FPLC-FL%
+10:59ú59 þ ; -----------------------------------------
+10:59ú59 þ ;  FDP/OPL - SRLP-100
+10:59ú59 þ ; =========================================
+10:59ú59 þ ; --------------------------------------------------------------------------------------------------------------------------------
+10:59ú59 þ ; Pracovisko ; Adresa logicka,   RTR, IP        ; Protokol ; Stanica  ; informacie                               ; ine nastavenia
+10:59ú59 þ ; --------------------------------------------------------------------------------------------------------------------------------
+10:59ú59 þ ; ----------------------------
+10:59ú59 þ ; SRLP
+10:59ú59 þ ; ----------------------------
+10:59ú59 þ ;  BRIDGE     ; StrRLP BRIDGE ,   192.100.141.35 ; ~X25  L  ; @BRIDGE  ; -heartbeat  MSG
+10:59ú59 þ ;  BRIDGE     ; StrRLP BRIDGE ,   192.100.141.35 ; ~X25 ~L  ; @BRIDGE  ; -heartbeat  MSG
+10:59ú59 þ   SERVER     ; StrRLP S1     ,   192.100.141.32 ; ~UDP ~L  ; @SERVER  ; -master     MSG  ALL \KRL \SYN \FUA ; timeout=3
+10:59ú59 þ   RTZ        ; StrRLP S2     ,   192.100.141.33 ; ~UDP ~L  ; @BSERVER ; -backup     MSG  ALL \KRL \SYN \FUA ; timeout=3
+10:59ú59 þ   SOD        ; StrRLP SOD    ,   192.100.141.42 ; ~UDP ~L  ; @OPL     ; -heartbeat  MSG  ; timeout=3
+10:59ú59 þ   SMD        ; StrRLP SMD    ,   192.100.141.41 ; @THIS
+10:59ú59 þ ; ----------------------------
+10:59ú59 þ ; SAR
+10:59ú59 þ ; ----------------------------
+10:59ú59 þ   SAR        ; SAR OPL       ,   192.100.143.32 ; ~UDP  L  ; @OPL     ; -heartbeat  MSG  ; timeout=3
+10:59ú59 þ ; ----------------------------
+10:59ú59 þ ; VLIS
+10:59ú59 þ ; ----------------------------
+10:59ú59 þ ; VLIS       ; VLIS          ,   192.100.142.06 ; ~UDP ~L  ; @LIS     ; MSG ; timeout=6
+10:59ú59 þ ; ----------------------------
+10:59ú59 þ ; Letiska
+10:59ú59 þ ; ----------------------------
+10:59ú59 þ   100        ; 100 OPL       ,   192.100.037.32 ; ~UDP ~L  ; @OPL   ; -heartbeat -ap MSG      ; timeout=6
+10:59ú59 þ   100 RDC    ; 100 RDC       ,   192.100.040.32 ; ~UDP ~L  ; @IDD   ;                MSG      ; timeout=6
+10:59ú59 þ   200        ; 200 OPL       ,   192.100.035.32 ; ~UDP ~L  ; @OPL   ; -heartbeat -ap MSG      ; timeout=6
+10:59ú59 þ   250        ; 250 OPL       ,   192.100.013.32 ; ~UDP     ; @OPL   ; -heartbeat -ap MSG      ; timeout=6
+10:59ú59 þ ; 250        ; 250 OPL       ,   192.100.013.32 ; ~UDP ~L  ; @OPL   ; -heartbeat -ap MSG      ; timeout=6
+10:59ú59 þ   250 RDC    ; 250 RDC       ,   192.100.013.33 ; ~UDP ~L  ; @IDD   ;                MSG      ; timeout=6
+10:59ú59 þ   300        ; 300 OPL       ,   192.100.075.32 ; ~UDP     ; @OPL   ; -heartbeat -ap MSG      ; timeout=6
+10:59ú59 þ ; 300        ; 300 OPL       ,   192.100.075.32 ; ~UDP ~L  ; @OPL   ; -heartbeat -ap MSG      ; timeout=6
+10:59ú59 þ   300 RDC    ; 300 RDC       ,   192.100.073.32 ; ~UDP ~L  ; @IDD   ;                MSG      ; timeout=6
+10:59ú59 þ   500        ; 500 OPL       ,   192.100.105.32 ; ~UDP  L  ; @OPL   ; -heartbeat -ap MSG      ; timeout=6
+10:59ú59 þ   600        ; 600 OPL       ,   192.100.107.32 ; ~UDP  L  ; @OPL   ; -heartbeat -ap MSG      ; timeout=6
+10:59ú59 þ ; pripravene adresy pre rekonfiguraciu
+10:59ú59 þ ;
+10:59ú59 þ ;  500        ; 500 OPL       ,   192.100.113.32 ; ~UDP ~L  ; @OPL   ; -heartbeat -ap MSG       ; timeout=6
+10:59ú59 þ ;  500 RDC    ; 500 RDC       ,   192.100.111.32 ; ~UDP ~L  ; @IDD   ;                MSG       ; timeout=6
+10:59ú59 þ ;  600        ; 600 OPL       ,   192.100.107.32 ; ~UDP ~L  ; @OPL   ; -heartbeat -ap MSG       ; timeout=6
+10:59ú59 þ ;  600 RDC    ; 600 RDC       ,   192.100.105.32 ; ~UDP ~L  ; @IDD   ;                MSG       ; timeout=6
+10:59ú59 þ ; ----------------------------
+10:59ú59 þ ; PVO
+10:59ú59 þ ; ----------------------------
+10:59ú59 þ   DPVL       ; VS DPVL       ,   192.100.000.33 ; ~UDP ~L  ; @IDD   ; -heartbeat MSG          ; timeout=5
+10:59ú59 þ There is not defined RDP sector.
+10:59ú59 þ ; -----------------------------------------
+10:59ú59 þ ; -----------------------------------------
+10:59ú59 þ ; FDP/EDD  - SRLP Bratislava
+10:59ú59 þ ; -----------------------------------------
+10:59ú59 þ ; --------------------------------------------------------------------------------------------------------------------------------
+10:59ú59 þ ; Pracovisko ; Adresa logicka,   RTR, IP        ; Protokol ; Stanica  ; informacie                               ; ine nastavenia
+10:59ú59 þ ; --------------------------------------------------------------------------------------------------------------------------------
+10:59ú59 þ ; ----------------------------
+10:59ú59 þ ; SRLP
+10:59ú59 þ ; ----------------------------
+10:59ú59 þ   BRIDGE     ; StrRLP BRIDGE ,    192.100.141.31 ; ~UDP  L  ; @BRIDGE  ; -heartbeat  MSG
+10:59ú59 þ   S-RTZ      ; StrRLP S1     ,    192.100.141.32 ; ~UDP  L  ; @SERVER  ; -master     MSG  ALL  ; timeout=3
+10:59ú59 þ   S-ACC      ; StrRLP S2     ,    192.100.141.33 ; ~UDP  L  ; @BSERVER ; -backup     MSG  ALL  ; timeout=3
+10:59ú59 þ   EDD        ; StrRLP EDD    ,$08,192.100.141.40 ; @THIS
+10:59ú59 þ   TEREN      ; StrRLP TEREN  ,$03,192.100.141.16 ; ~UDP     ; @RDP     ; -slave ALL  @SECTOR
+10:59ú59 þ   SOD        ; StrRLP SOD    ,$05,192.100.141.17 ; ~UDP     ; @RDP     ; -slave ALL
+10:59ú59 þ   ADP        ; StrRLP TS     ,$06,192.100.141.18 ; ~UDP     ; @RDP     ; -slave ALL
+10:59ú59 þ   SAR        ; StrRLP SAR    ,$04,192.100.143.16 ; ~UDP     ; @RDP     ; -slave ALL
+10:59ú59 þ ; ----------------------------
+10:59ú59 þ ; PVO
+10:59ú59 þ ; ----------------------------
+10:59ú59 þ   DPVL       ; VS DPVL       ,    192.100.000.33 ; ~UDP ~L  ; @IDD     ; -heartbeat MSG        ; timeout=5
+10:59ú59 þ ; -----------------------------------------
+10:59ú59 þ ; -----------------------------------------
+10:59ú59 þ ; FDP/EDD  - SRLP Bratislava
+10:59ú59 þ ; -----------------------------------------
+10:59ú59 þ ; --------------------------------------------------------------------------------------------------------------------------------
+10:59ú59 þ ; Pracovisko ; Adresa logicka,   RTR, IP        ; Protokol ; Stanica  ; informacie                               ; ine nastavenia
+10:59ú59 þ ; --------------------------------------------------------------------------------------------------------------------------------
+10:59ú59 þ ; ----------------------------
+10:59ú59 þ ; SRLP
+10:59ú59 þ ; ----------------------------
+10:59ú59 þ   BRIDGE     ; StrRLP BRIDGE ,    192.100.141.31 ; ~UDP  L  ; @BRIDGE  ; -heartbeat  MSG
+10:59ú59 þ   S-RTZ      ; StrRLP S1     ,    192.100.141.32 ; ~UDP  L  ; @SERVER  ; -master     MSG  ALL  ; timeout=3
+10:59ú59 þ   S-ACC      ; StrRLP S2     ,    192.100.141.33 ; ~UDP  L  ; @BSERVER ; -backup     MSG  ALL  ; timeout=3
+10:59ú59 þ   EDD        ; StrRLP EDD    ,$08,192.100.141.40 ; @THIS
+10:59ú59 þ   TEREN      ; StrRLP TEREN  ,$03,192.100.141.16 ; ~UDP     ; @RDP     ; -slave ALL  @SECTOR
+10:59ú59 þ   SOD        ; StrRLP SOD    ,$05,192.100.141.17 ; ~UDP     ; @RDP     ; -slave ALL
+10:59ú59 þ   ADP        ; StrRLP TS     ,$06,192.100.141.18 ; ~UDP     ; @RDP     ; -slave ALL
+10:59ú59 þ   SAR        ; StrRLP SAR    ,$04,192.100.143.16 ; ~UDP     ; @RDP     ; -slave ALL
+10:59ú59 þ ; ----------------------------
+10:59ú59 þ ; PVO
+10:59ú59 þ ; ----------------------------
+10:59ú59 þ   DPVL       ; VS DPVL       ,    192.100.000.33 ; ~UDP ~L  ; @IDD     ; -heartbeat MSG        ; timeout=5

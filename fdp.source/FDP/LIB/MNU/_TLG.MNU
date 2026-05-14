@@ -1,0 +1,153 @@
+{ -----------------
+   TLG
+ ˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙
+}
+{$I ..\lib\mnu\_TLG.h}
+
+{$IFDEF TLG}
+
+ procedure mnuTLGvolby_init(MMenu: PSubmenu); far;
+     var   smnu : TPItems;
+           sbmnu : PSubMenu;
+           i,items,nl,ihk: int;
+           pb : bool;
+     begin
+       items:= 0; nl:= 0; ihk:= 0;
+       pb:= {$IFDEF BACKUP} false {$ELSE} true {$ENDIF};
+
+       smnu[items]:=  Switch2(' '+hk(ihk)+TLGSS, @tlg_SS,nil);
+       inc(items);
+       smnu[items]:=  Switch2(' '+hk(ihk)+TLGFF, @tlg_FF,nil);
+       inc(items);
+       smnu[items]:=  Switch2(' '+hk(ihk)+TLGKK, @tlg_KK,nil);
+       inc(items);
+       add_newline_(0,nl,items,smnu);
+
+       smnu[items]:=  Switch2(' '+hk(ihk)+PRNRECTLG, @tlg_Print,nil);
+       inc(items);
+       {Switch2(' '+hk(ihk)+'~N~O DELAY PRINT ', @tlg_PrintAll,}
+       smnu[items]:=  Switch2(' '+hk(ihk)+PRNSS, @tlg_SSprint,nil);
+       inc(items);
+       smnu[items]:=  Switch2(' '+hk(ihk)+PRNFF, @tlg_FFprint,nil);
+       inc(items);
+       smnu[items]:=  Switch2(' '+hk(ihk)+PRNKK, @tlg_KKprint,nil);
+       inc(items);
+
+       add_newline_(0,nl,items,smnu);
+       smnu[items] := Switch2 (' '+hk(ihk)+TLGHEADERR,    @icao_HEAD_ERR,nil);
+       inc(items);
+       smnu[items] := Switch2 (' '+hk(ihk)+TLGHEADERRTLG, @icao_HEAD_ERR_TLG,nil);
+       inc(items);
+       smnu[items]:=  Switch2_(' '+hk(ihk)+TLGUPDATE,     @icao_REC_UPDATED, @SERVERstatus,pb,nil);
+       inc(items);
+
+       {$IFDEF FLI_COORDINATION}
+        add_newline_(0,nl,items,smnu);
+        smnu[items]:=  Switch2(' '+hk(ihk)+FLISEND, @send_FLI,nil);
+        inc(items);
+        smnu[items]:=  SwitchI(' '+hk(ihk)+FLIACT, @limit_FLI,'min',limit_FLI_lo,limit_FLI_hi,nil);
+        inc(items);
+        smnu[items]:=  Switch2(' '+hk(ihk)+DISPERRFLI, @display_FLI_ERR,nil);
+        inc(items);
+
+        smnu[items]:=  Switch2(' '+hk(ihk)+UPDATEFPLCFLI, @update_FPLC_by_FLI,nil);
+        inc(items);
+        smnu[items]:=  Switch2(' '+hk(ihk)+DELETEFPLCFLI, @delete_FPLC_by_FLI,nil);
+        inc(items);
+       {$ENDIF}
+
+       { IFDEF PROCESS_TLG}
+       for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i]);
+     end;
+
+
+ procedure mnuTLGprehlad_init(MMenu: PSubmenu); far;
+     var   smnu    : TPItems;
+           sbmnu : PSubMenu;
+           i,items,nl : int;
+     begin
+       items:= 0; nl:= 0;
+
+       {$IFDEF AFTN}
+        smnu[items]:= Item (PREHLADAFTN, cmPREHLAD_AFTN,   nil);
+        inc(items);
+       {$ENDIF}
+       {smnu[items]:= Item (tit_ARCH, cmPREHLAD_TLG_ARCH, nil);
+       inc(items);}
+
+       for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i]);
+     end;
+
+
+ procedure mnuTLG_init(MMenu: PSubmenu); far;
+     var   smnu  : TPItems;
+           sbmnu : PSubMenu;
+           i,items,nl : int;
+     begin
+       items:= 0; nl:= 0;
+
+       { IFDEF PROCESS_TLG}
+        smnu[items]:=  Item   (' ~A~LR - '+tit_fpl_alr+' ', cm_ALR,nil);
+        inc(items);
+        smnu[items]:=  Item   (' ~R~CF - '+tit_fpl_rcf+' ', cm_RCF,nil);
+        inc(items);
+        add_newline_(0,nl,items,smnu);
+        smnu[items]:=  Item   (' Ä~ç~è - '+tit_fpl_anp+' ', cm_ANP,nil);
+        inc(items);
+        {$IFDEF FLI_COORDINATION}
+         smnu[items]:=  Item   (' îã~à~ - '+tit_fpl_fli+' ', cm_FLI,nil);
+         inc(items);
+        {$ENDIF}
+        smnu[items]:=  Item   (' ~î~ãÄ - '+tit_fpl_fla+' ', cm_FLA,nil);
+        inc(items);
+        add_newline_(0,nl,items,smnu);
+        smnu[items]:=  Item   (' êí~ë~ - '+tit_RTS+' ', cm_RTS,nil);
+        inc(items);
+        smnu[items]:=  Item   (' êí~é~ - '+tit_RTO+' ', cm_RTO,nil);
+        inc(items);
+        smnu[items]:=  Item   (' êÜ~å~ - '+tit_RVM+' ', cm_RVM,nil);
+        inc(items);
+        smnu[items]:=  Item   (' êÜ~à~ - '+tit_RVI+' ', cm_RVI,nil);
+        inc(items);
+        add_newline_(0,nl,items,smnu);
+        smnu[items]:=  Item (TLGF11+inschar(' F11 ',length(tit_fpl_fli)-length(TLGF11)+10,' ',0),cm_TLG, nil);
+        inc(items);
+        {$IFDEF SPR}
+         smnu[items]:= Item (SPRF10+inschar(' F10 ',length(tit_fpl_fli)-length(SPRF10)+10,' ',0),cmSPR, nil);
+         inc(items);
+        {$ENDIF}
+        add_newline_(2,nl,items,smnu);
+       { ENDIF}
+
+       {sbmnu:= SubMenu(cut_r(mnuPREHLAD)+'... ', WinMenu(tit_TLG_PREHLAD,hlp_PREHLAD_TLG,nil),nil);
+       sbmnu^.PMenu_init:= @mnuTLGprehlad_init;
+       smnu[items]:= SubMenuInitialized(sbmnu,nil);
+       inc(items);
+       }
+       {$IFDEF AFTN}
+        smnu[items]:= Item (PREHLADAFTN, cmPREHLAD_AFTN, nil);
+        inc(items);
+       {$ENDIF}
+
+       if not mnu_data_opt_common then
+          begin
+            add_newline_(2,nl,items,smnu);
+            sbmnu:= SubMenu(cut_r(mnu_OPTi)+'... ',
+                            OptMenu_S(tit_OPTi,hlp_mnu_TLG_NASTAV,cmDEFAULT{NASTAV_SPRACOVANIE},15,nil),nil
+                           );
+            sbmnu^.PMenu_init:= @mnuTLGvolby_init;
+            smnu[items]:= SubMenuInitialized(sbmnu,nil);
+            inc(items);
+          end;
+
+       for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i])
+     end;
+
+{$ENDIF}
+
+{
+      smnu[items]:= SubMenu(' ~T~ELEGRAM PROCESSING... ',
+                    OptMenu(' TELEGRAM PROCESSING ', hlpmnuTLGpresentation, cmConfigChanged,
+
+
+}

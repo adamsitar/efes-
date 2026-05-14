@@ -1,0 +1,287 @@
+{$IFDEF FPL4}
+
+{ תתתתתתתתתתתתתתתתתת
+   FPLc
+  תתתתתתתתתתתתתתתתתת
+}
+
+{$IFDEF DEBUG}
+ {$I _FPL0.vyp -> v module _FPL_def }
+{$ENDIF}
+
+ function O_OPL._decode_FPLc (var FPL: DFPL4; var FPLc: DcFPL; var res: string): bool;
+    var   _OBs: POBxys;
+          i,_bodov : int;
+          v_: char;
+          p: pchar;
+          s: string;
+
+    begin
+      {res:= ''; fillchar(FDR,sizeof(FDR),0);
+
+      _decode_FPL4_DATA (FPL,FDR,true,res);
+      if res='' then _decode_FPL4_18(FPL,FDR,true,res);
+
+      _decode_FDR:= _decode_FPL4_15   (FPL,FDR,check_en,res);
+      if check_en and (res<>'') then Exit;
+
+      stav_FDR (@FDR, absTime, zmena);
+      FDR_to_EST(FDR,FPLc);
+
+      X: disp_FDR(@FDR);
+         _decode_FPLc:= res=''
+      }
+
+      s:= GetPStr(FPL._15,1,[icao_NXIT])+NULL;
+      p:= FPL._15; FPL._15:= @s[1];
+      _decode_FPLc:= inherited _decode_ESTc (FPL,FPLc,res);
+      FPL._15:= p;
+
+     { trat letu pre VFR plany chodi kodovana po vojensky
+     }
+      New(_OBs); fillchar(_OBs^,sizeof(_OBs^),0); _bodov:= 0;
+      with FPLc do
+        res:= _decode_FPL0_15 (FPL._15, start,prist, _OBs^,_bodov,
+                               rych,rych_, vys,v_, date,
+                               false,false,false,false,false
+                              );
+      FPLc.vys := _vys_OB(FPLc.vys,v_);
+      _napln_trat_FPLC_ (_OBs,_bodov, FPLc, false);
+      Dispose(_OBs);
+
+      format_cFPL(@FPLc);
+      {prepocet_trate_FPLc(@FPLc,cmEST_EST,0);}
+      FPLc.stt:= hd_EST
+    end;
+
+
+{ תתתתתתתתתתתתתתתתתת
+   FPLm
+  תתתתתתתתתתתתתתתתתת
+}
+{$IFDEF DEBUG}
+ {$I _L4__18.cod}
+{$ENDIF}
+
+ function O_OPL._decode_FPLm (var FPL: DFPL4; var FPLm: DmFPL; var res: string): bool;
+
+    var   r,p,rdk : pchar;
+          s,t  : string;
+          i,u  : int;
+          date : TDate;
+          bres : bool;
+
+    begin
+      res:= '';
+      bres:= inherited _decode_FPLm(FPL,FPLm, res) and (res='');
+
+      if bres and (FPL._18<>nil) then
+         begin
+
+         { datum ?
+         } s:= _item_18_(FPL._18,rmk_DATE,-1);
+           if s<>'' then
+              begin
+                date:= FPLm.date;
+                if decode_l4_date(s, date) then
+                  if DateToSec(date.r,date.m,date.d) < DateToSec(Year,Month,Day) then
+                     begin
+                       FPLm.date:= date;
+                     end
+                  else l4_err(a_L4,s,0,err_l4444_date_not_actual, res)
+                else l4_err(a_L4,s,0,err_l4444_date, res)
+              end;
+           format_mFPL(@FPLm);
+
+
+         { spojenie viacerych RMK do jednej,
+           detekcia prevadzkovatela,
+           uloh...
+         } p:= nil; r:= nil; u:= 0;
+
+           s:= rmk_RMK+icao_NXT;
+           i:= 1;
+           repeat
+             t:= _item_18_(FPL._18,rmk_RMK,i);
+             if t<>'' then
+                begin
+                  if i>1 then s:= s + icao_NXIT;
+                  s:= s + t
+                end;
+             inc(i)
+           until t='';
+           if s<>'' then
+              begin
+                _dec_18(FPLm.pozn,rmk_RMK);
+                if FPLm.pozn<>nil then s:= icao_NXIT + s;
+                FPLm.pozn:= StrNPCopy(FPLm.pozn,s,true,true);
+              end;
+
+
+           { b) detekcia prevadzkovatela
+           }
+            FPLm.VU:= copy(_item_18_(FPL._18,rmk_OPR,1),1,sizeof(FPLm.VU)-1);
+
+
+           { c) detekcia uloh
+           }
+            if u<max_ulohy_FPLm then
+               begin
+                 s:= _item_18_(FPL._18,rmk_UKL,1);
+                 for u:= 1 to minimum(getstritems(s,[icao_NXIT]),max_ulohy_FPLm) do
+                     FPLm.ulohy[u-1]:= copy(getstr(s,u,[icao_NXIT]),1,sizeof(FPLm.ulohy[u-1])-1);
+               end;
+
+
+          { vlozenie oddelovacov riadkov
+          } rdk:= FPLm.pozn;
+           for i:= 1 to GetPStrItems(FPLm.pozn,[icao_NXIT]) do
+               begin
+                 p:= strpos(FPLm.pozn,icao_NXIT);
+                 if p<>nil then
+                    begin
+                      if p-rdk>dlz_rdk_FPLm then
+                         begin
+                           char(p^):= kbCRLF;
+                           rdk:= p
+                         end
+                    end
+               end
+         end;
+
+      _decode_FPLm:= bres;
+    end;
+
+
+ { תתתתתתתתתתתתתתתתתת
+    FPL
+   תתתתתתתתתתתתתתתתתת
+
+   Podla dohody sa od OPL spracovavuju len vojenske FPL
+ }
+
+ function O_OPL._process_FPL (data: pchars; size: word; var FPL: DFPL4; var res: string): bool;
+    var   FPLm,FPLmi : DmFPL;
+          bres, b1 : bool;
+    begin
+      _process_FPL:= false;
+      if is_FPL4M(@FPL) {is_FPL4MIL(FPL)} then
+         begin
+           if _decode_FPLm(FPL,FPLm, res) then
+              begin
+                if najdi_FPLm(FPLm,FPLmi) then
+                   begin
+                   { Roman mi posiela raz FPL, raz ABI, zase FPL... ;
+                     preto sa uchova stav spracovania planu
+                   } FPLm.stat:= FPLmi.stat;
+                     disp_mFPL(@FPLmi);
+                   end
+                else FPLm.stat:= cnst_sended;
+                _process_message_FPLM (dst_set,hd_FPL,FPLm.stat,@FPLmi,@FPLm); { povodny, novy }
+                _process_FPL:= true;
+              end;
+           disp_mFPL(@FPLm)
+         end
+      else begin
+             {if _decode_FPLc(FPL,FPLc, res) then}
+             b1:= _9c_CHECK_ICAO; _9c_CHECK_ICAO:= false;
+             _process_FPL:= _process_FPLc (FPL,res);
+             _9c_CHECK_ICAO:= b1;
+             {l4_err(a_FDP,decode_l4_7a(FPL._7),0,101, res);
+             Exit}
+           end;
+    end;
+
+
+
+ { תתתתתתתתתתתתתתתתתת
+    CHG
+   תתתתתתתתתתתתתתתתתת
+ }
+ function O_OPL._process_CHG (data: pchars; size: word; var FPL: DFPL4; var res: string): bool;
+    var   FPL2  : DFPL4;
+          FPLm,FPLmi : DmFPL;
+          p,pi  : pchar;
+          stat  : string;
+    begin
+      _process_CHG:= false;
+      _decode_FPLm(FPL,FPLm, res);
+      if najdi_FPLm(FPLm,FPLmi) then
+         begin
+           copy_mFPL(@FPLmi,@FPLm);       { vytvorenie kopie "FPLm" pre porovnanie planov }
+           _code_FPLm(FPLmi,FPL2);        { zakodovanie (vyhladananych) vsetkych udajov FPL "FPLmi" }
+           strdispose(FPL2._22);
+           FPL2._22:= ReplChar0 (FPL._22,[#127],icao_NXIT,true);
+           if _decode__22(FPL2, res) then
+              begin
+               { dekodovanie zmien podla pola 22
+               } disp_FPL4(@FPL); FPL:= FPL2;
+                 disp_mFPL(@FPLmi);
+                 _decode_FPLm(FPL,FPLmi, res);
+                 if (FPLm.start.kod)<>(FPLmi.start.kod) then
+                    begin
+                    { Roman mi posle zmenene letisko startu bez toho,
+                      aby povodny plan zrusil
+                    } _process_message_FPLM (dst_set,hd_CNL,cnst_cnl,nil,@FPLm);
+                    end;
+                _process_message_FPLM (dst_set,hd_CHG,add_stat(FPLm.stat,cnst_chg),@FPLm,@FPLmi);
+                _process_CHG:= true
+              end
+           else l4_err(a_21,code_FPLM_7a(@FPLm),0,1, res);
+           disp_mFPL(@FPLmi);
+         end
+      else if not OPL__LAM_NOT_FOUND then l4_err(a_FDP,code_FPLM_7a(@FPLm),0,100, res);
+      disp_mFPL(@FPLm)
+    end;
+
+
+ { תתתתתתתתתתתתתתתתתת
+    CNL
+   תתתתתתתתתתתתתתתתתת
+ }
+ function O_OPL._process_CNL (data: pchars; size: word; var FPL: DFPL4; var res: string): bool;
+    var   FPLm,FPLmi : DmFPL;
+    begin
+      _process_CNL:= false;
+      _decode_FPLm(FPL,FPLm, res);
+      if najdi_FPLM(FPLm,FPLmi) then
+         begin
+           _process_message_FPLM (dst_set,hd_CNL,cnst_cnl,nil,@FPLmi);
+           _process_CNL:= true;
+           disp_mFPL(@FPLmi);
+         end
+      else if not OPL__LAM_NOT_FOUND then l4_err(a_FDP,code_FPLM_7a(@FPLm),0,100, res);
+      disp_mFPL(@FPLm)
+    end;
+
+
+ { תתתתתתתתתתתתתתתתתת
+    DLA
+   תתתתתתתתתתתתתתתתתת
+ }
+ function O_OPL._process_DLA (data: pchars; size: word; var FPL: DFPL4; var res: string): bool;
+    var   FPLm,FPLp : DmFPL;
+          h_,m_ : byte;
+          r : real;
+    begin
+      _process_DLA:= false;
+      _decode_FPLm(FPL,FPLm, res);
+      if najdi_FPLM(FPLm,FPLp) then
+         begin
+           FPLm.start:= FPLp.start;
+           decode_l4_13(FPL._13, FPLp.start.kod,FPLp.start.h,FPLp.start.m, h_,m_);
+           { oprava casu pristatia, pretoze ho drzim v absolutnej a nie relativnej podobe }
+           r:=   TimeToSec(FPLp.prist.h,FPLp.prist.m,0)
+               + TimeToSec(FPLp.start.h,FPLp.start.m,0)
+               - TimeToSec(FPLm.start.h,FPLm.start.m,0);
+           if r<0 then r:= r+secDAY;
+           TimeFromSec(r, FPLp.prist.h,FPLp.prist.m, h_);
+           _process_message_FPLM (dst_set,hd_DLA,add_stat(del_stat(FPLp.stat,cnst_chg),cnst_dla),@FPLm,@FPLp);
+           _process_DLA:= true;
+           disp_mFPL(@FPLp);
+         end
+      else if not OPL__LAM_NOT_FOUND then l4_err(a_FDP,code_FPLM_7a(@FPLm),0,100, res);
+      disp_mFPL(@FPLm)
+    end;
+
+{$ENDIF}

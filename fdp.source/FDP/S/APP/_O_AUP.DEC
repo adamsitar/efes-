@@ -1,0 +1,424 @@
+{ תתתתתתתתתתתתתתתתתת
+   AUP
+  תתתתתתתתתתתתתתתתתת
+
+ Spracovanie spravy o priestoroch
+
+ #AUP(32-
+ D1001   -O-06.10.1998-05:00-06.10.1998-06:00-    0- 4250-  -
+ D1001   -O-06.10.1998-06:00-06.10.1998-16:00-    0- 2900-  -
+ D1001   -O-07.10.1998-05:00-07.10.1998-06:00-    0- 2900-  -
+ LKP1    -O-01.01.1995-00:00-01.01.2000-00:00-    0- 3350-32-
+ LKR11   -O-06.10.1998-10:00-06.10.1998-19:00-  300- 5500-32-
+ LKR12   -O-06.10.1998-11:00-06.10.1998-19:00- 1500- 5500-32-
+ LKR13   -O-06.10.1998-12:00-06.10.1998-19:00-  300- 7300-34-
+ ...
+ LKR2    -O-06.10.1998-06:00-06.10.1998-16:00-    0-10050-  -
+ LKR29   -O-05.10.1998-06:00-06.10.1998-06:00-    0-  600-  -
+ LKR29   -O-06.10.1998-06:00-07.10.1998-06:00-    0-  600-  -
+ LKR3    -O-06.10.1998-06:00-06.10.1998-13:00-    0- 6100-  -
+ MCTA10  -O-06.10.1998-06:00-06.10.1998-14:00-  300- 7300-33-
+ MCTA9   -O-06.10.1998-10:00-06.10.1998-19:00-  300- 5500-32-
+ TSA53   -O-06.10.1998-08:00-06.10.1998-20:00- 3050- 7300-44-
+ TSA57   -O-06.10.1998-08:00-06.10.1998-20:00- 3050- 7300-44
+ )1656
+
+}
+const PRS_ITEMS = 9;
+      PRS_LET   = ' ';
+
+
+function O_OPL._decode_AUPi (data: pchars; size: word;
+                            var PRS: TPRS;
+                            var res: string
+                           ): bool;
+
+   var   prsi,s : string;
+         ires : int;
+
+   function decode_datum(ind: int; var d: TDatum): bool;
+      var   s: string;
+      begin
+        s:= getstr(prsi,ind,odd_l4);
+        if not GetDateStr (d.rok,d.mes,d.den, s,false) then l4_err(a_L4,s,0,102, res)
+        else begin
+               s:= getstr(prsi,ind+1,odd_l4);
+               if not GetTimeStr (d.h,d.m,d.s, s) then l4_err(a_L4,s,0,101, res)
+             end;
+        decode_datum:= res= ''
+      end;
+
+   function decode_vys(s: string; ind: int): string;
+      var   v: long;
+      begin
+        s:= getstr(s,ind,odd_l4);
+        v:= scis(s,1,length(s)) div m_S;
+        decode_vys:= code_vysOPL(code_l4_vyss(v,altS))
+      end;
+
+
+   begin
+     res:= '';
+     prsi[0]:= chr(minimum(size,sizeof(prsi)-1));
+     move(data^,prsi[1],ord(prsi[0]));
+
+    { LKP1    -P-23.11.2000-00:00-23.11.2000-23:59-    0- 1850-  -ÿ}
+     fillchar (PRS,sizeof(PRS),0);
+
+     PRS.kod:= cut_(getstr(prsi,1,odd_l4));
+     PRS.typ:= getchar(getstr(prsi,2,odd_l4));
+     PRS.unt:= cut_(getstr(prsi,9,odd_l4));
+     PRS.let:= PRS.unt; { PRS_LET; }
+
+     decode_datum(3,PRS.zac);
+     decode_datum(5,PRS.kon);
+     PRS.vys1:= decode_vys(prsi,7);
+     PRS.vys2:= decode_vys(prsi,8);
+
+     {s:= decode_l4_s(getstr(prsi,9,odd_l4),false);
+     if s<>'' then PRS.pozn:= strpasnew(s);}
+
+    { nastavenie hodnot schvalenych v plane aup }
+     PRS.vys1p:= PRS.vys1;
+     PRS.vys2p:= PRS.vys2;
+     PRS.zacp := PRS.zac;
+     PRS.konp := PRS.kon;
+
+     PRS.vys1_aup:= PRS.vys1;
+     PRS.vys2_aup:= PRS.vys2;
+     PRS.zac_aup := PRS.zac;
+     PRS.kon_aup := PRS.kon;
+
+     if is_P(PRS.kod) then PRS.stat:= cnst_active
+     else PRS.stat:= cnst_acc;
+     format_PRS(@PRS);
+     {if res='' then syntax_PRS(@PRS,nil, res,ires, false,nil)};
+
+     _decode_AUPi:= res=''
+   end;
+
+
+function najdi_AUPi(PRS1,PRS2: PPRS): bool; far;
+   begin
+    { vyhladanie planu priestoru, ktory ma rovnake:
+       - nazov
+       - uzivatela/letisko
+       - casy a vysky aup
+    }
+     najdi_AUPi:=     (PRS1^.kod = PRS2^.kod)
+                  and eq_str(PRS1^.let,PRS2^.let)
+                  and (PRS1^.vys1_aup = PRS2^.vys1_aup)
+                  and (PRS1^.vys2_aup = PRS2^.vys2_aup)
+                  and eq_datum(PRS1^.zac_aup,PRS2^.zac_aup)
+                  and eq_datum(PRS1^.kon_aup,PRS2^.kon_aup)
+   end;
+
+
+function O_OPL.decode_AUP (data: pchars; size: word;
+                           header,head: string;
+                           var res: string
+                          ): bool;
+
+   var   PRS,PRSp : TPRS;
+         pi : PPRS;
+         ind,cit,poc,pocet,poloziek,ires : int;
+         bres,is : bool;
+         s,prsi : string;
+         r,ri : real;
+   begin
+     res:= '';
+     decode_AUP:= true;
+     if cut_(getstr(init_str(data,size),1,[icao_STD,icao_END]))='NIL' then Exit;
+
+     bres:= true;
+
+     { --------------------------------------------------
+       vyhodnotenie, ci bola dorucena odpoved na ziadost
+       od dorucenie spravy "AUP"
+       --------------------------------------------------
+     }
+     {$IFDEF REQUEST_AUP}
+      if not Ts_REQUEST_AUP.next then
+         begin
+           s:= getstr(header,2,[icao_NXT]);
+           if s<>'' then decode_l4_date(s,Ts_REQUEST_AUP.date)
+           else init_date(Ts_REQUEST_AUP.date,year,month,day);
+         end;
+
+      r:= DateToSec(Ts_REQUEST_AUP.date.r,Ts_REQUEST_AUP.date.m,Ts_REQUEST_AUP.date.d);
+      if not Ts_REQUEST_AUP.next then nextdate(Ts_REQUEST_AUP.date.r,Ts_REQUEST_AUP.date.m,Ts_REQUEST_AUP.date.d);
+
+      is:= Ts_REQUEST_AUP.is;
+      Ts_REQUEST_AUP.next:= {is and} (head=hd_AUM);
+      Ts_REQUEST_AUP.is:= {false} is and (head<>hd_AUP);
+      Ts_REQUEST_AUP.last:= absTime;
+
+      if is and (not Ts_REQUEST_AUP.is) then
+         begin
+           Ts_REQUEST_AUP.next:= false;
+           save_lastREQ(Ts_REQUEST_AUP,fn_AUPupdated);
+         end;
+     {$ENDIF}
+
+
+     { --------------------------------------------------
+       sprava sa spracuje, len ako bola odoslana
+       ziadost o priestory - 1x za den
+       --------------------------------------------------
+     }
+     {$IFNDEF DEBUG}
+       if (not OPL__PROCESS_AUP)
+          {$IFDEF REQUEST_AUP} or (not is) {$ENDIF}
+          then Exit;
+     {$ENDIF}
+
+
+     { --------------------------------------------------
+       dekodovanie poloziek planov "ASM"
+       v sprave "AUP"
+       --------------------------------------------------
+     }
+     smphr_AUP:= true;
+     s:= get_str (data,size, 1, odd_l4, sizeof(s)-1);
+     val(s,pocet,ind);
+     poloziek:= (get_str_items (data,size,odd_l4)-1) div PRS_ITEMS;
+     poc:= maximum(pocet,poloziek);
+     cit:= 2;
+     for ind:= 1 to poc do
+       begin
+         prsi:= get_strs0p (data,size, cit,cit+PRS_ITEMS-1, odd_l4);
+         if prsi='' then break;
+         InfoCakaj('Zpracov n¡ zpr vy AUP ',prsi);
+         _decode_AUPi(@prsi[1],length(prsi),PRS,res);
+         if (PRS.kod<>'') and ((process_PRS_P or (not is_P(PRS.kod)))) then
+            begin
+              { -----------------
+                 Urcenie kluca:
+                -----------------
+                vyhladanie planu priestoru, ktory ma rovnake:
+                - nazov
+                - uzivatela/letisko
+                - casy a vysky aup
+                a nastavenie dap na datum prijatia planu
+                namiesto povodneho "PRS^.dap:= PRS^.zacp;"
+                pretoze bolo zistene, ze kod, user a zacp nie
+                su dostatocne jednoznacne hodnoty, mozu byt
+                este vys1,2 a kon.
+              }
+
+              fillchar(PRSp,sizeof(PRSp),0);
+              pi:= nil;
+
+              datum_schvalenia_PRS(@PRS);
+              ires:= DB_prehladaj(@najdi_AUPi, @PRS,@PRSp, @disp_PRS,
+                                  get_dbPRSifn(@PRS),db_PRS_RIADKOV,@decodeDB_PRS,@codekey_PRS,
+                                  false,''
+                                 );
+              if (ires>-1) then begin pi:= @PRSp; PRS.dap:= PRSp.dap; end
+              else datum_init(PRS.dap, day,month,year, hour,min,sec);
+
+              _process_message_PRS (dst_set,hd_PRS,PRS.stat,true,pi,@PRS);
+              if pi<>nil then disp_PRS(@PRSp);
+            end;
+         InfoCakaj_zatvor;
+         if res<>'' then
+            begin
+              writeln_pkt(@PRS.kod[1],length(PRS.kod),arch_SYS,res,cl_SYS,false,true);
+              bres:= false
+            end;
+         inc(cit,PRS_ITEMS);
+         disp_PRS(@PRS);
+         CheckProcesses0;
+       end;
+
+     if poloziek<>pocet then l4_err(a_L4,s,0,err_l4444_chybaju_polia, res);
+     decode_AUP:= (res='') and bres;
+
+     {$IFDEF REQUEST_AUP}
+      save_lastREQ(Ts_REQUEST_AUP,fn_AUPupdated);
+     {$ENDIF}
+
+     smphr_AUP:= false;
+   end;
+
+
+function  O_OPL._is_process_PRS (PRSp,PRS: PPRS): bool;
+    var   res: bool;
+    begin
+      strdispose(PRS^.pozn); PRS^.pozn:= strnew(PRSp^.pozn);
+      if _is_stat(PRSp^.stat,cnst_stat_actived,false) then PRS^.stat:= PRSp^.stat;
+      if (not OPL__UPDATE_CNL_PRS) and _is_stat(PRSp^.stat,cnst_cnl,false) then PRS^.stat:= PRSp^.stat;
+      _is_process_PRS:= chg_PRS(PRSp,PRS);
+    end;
+
+
+
+{ תתתתתתתתתתתתתתתתתת
+   ASM
+  תתתתתתתתתתתתתתתתתת
+
+ Spracovanie spravy o priestoroch:
+
+ $(ASMPL/MI432
+    -ACT
+    -LKR35
+    -200011260700 200011261400
+    -0 12500
+    -200011260730 200011261200
+    -0 12000
+    -NIL
+   )8319
+}
+
+function O_OPL._decode_ASM (data: string;
+                            var PRS: TPRS;
+                            var res: string
+                           ): bool;
+   var   s,t: string;
+
+   function decode_datum(s: string; ind: int; var d: TDatum): bool;
+      begin
+        decode_datum:= true;
+        s:= getstr(s,ind,[icao_NXIT]);
+        d.rok:= scis(s,1,4);
+        d.mes:= scis(s,5,2);
+        d.den:= scis(s,7,2);
+        d.h  := scis(s,9,2);
+        d.m  := scis(s,11,2);
+      end;
+
+   function decode_vys(s: string; ind: int): string;
+      var   v: long;
+      begin
+        s:= getstr(s,ind,[icao_NXIT]);
+        v:= scis(s,1,length(s)) div m_S;
+        decode_vys:= code_vysOPL(code_l4_vyss(v,altS))
+      end;
+
+   begin
+     fillchar (PRS,sizeof(PRS),0);
+
+     PRS.kod:= cut_(getstr(data,1,odd_l4));
+     PRS.typ:= ' ';
+
+     PRS.unt:= cut_(getstr(data,2,odd_l4));
+     PRS.let:= PRS.unt;
+
+     s:= getstr(data,3,odd_l4);
+     decode_datum(s,1,PRS.zac_aup);
+     decode_datum(s,2,PRS.kon_aup);
+
+     s:= getstr(data,4,odd_l4);
+     PRS.vys1_aup:= decode_vys(s,1);
+     PRS.vys2_aup:= decode_vys(s,2);
+
+     s:= getstr(data,5,odd_l4);
+     decode_datum(s,1,PRS.zac);
+     decode_datum(s,2,PRS.kon);
+
+     s:= getstr(data,6,odd_l4);
+     PRS.vys1:= decode_vys(s,1);
+     PRS.vys2:= decode_vys(s,2);
+
+     s:= decode_l4_s(getstr(data,7,odd_l4),false);
+     if s<>'' then PRS.pozn:= strpasnew(s);
+
+     _decode_ASM:= (PRS.kod<>'');
+   end;
+
+
+function O_OPL.decode_ASM (data: pchars; size: word; var res: string): bool;
+   var   PRS,PRSp    : TPRS;
+         s,prsi,stat : string;
+         ires        : int;
+         _2all,_2fdo : bool;
+   begin
+     decode_ASM:= false;
+     prsi:= init_str(data,size);
+     if (prsi='') or (not OPL__PROCESS_ASM) then Exit;
+
+     InfoCakaj('Zpracov n¡ zpr vy ASM ',cut_3(prsi,30));
+     res:= '';
+
+     ires:= pos(icao_ARR,prsi);
+     prsi:= copy(prsi,ires+1,length(prsi)-ires);
+     stat:= getstr(prsi,1,[icao_STD,icao_ARR]);
+
+     ires:= pos(icao_ARR,prsi);
+     prsi:= copy(prsi,ires+1,length(prsi)-ires);
+
+     if     (_decode_ASM(prsi,PRS,res))
+        and (process_PRS_P or (not is_P(PRS.kod)))
+            then
+        begin
+
+         { nacitanie povodnych udajov }
+          fillchar(PRSp,sizeof(PRSp),0);
+          PRS.zacp:= PRS.zac_aup;
+          datum_schvalenia_PRS(@PRS);
+          format_PRS(@PRS);
+          ires:= DB_prehladaj(@najdi_AUPi, @PRS,@PRSp, @disp_PRS,
+                              get_dbPRSifn(@PRS),db_PRS_RIADKOV,@decodeDB_PRS,@codekey_PRS,
+                              false,''
+                             );
+
+         { aktualizacia udajov }
+          if ires>-1 then
+             begin
+               PRS.typ   := PRSp.typ;
+
+               PRS.vys1p := PRSp.vys1p;
+               PRS.vys2p := PRSp.vys2p;
+               PRS.zacp  := PRSp.zacp;
+               PRS.konp  := PRSp.konp;
+
+               PRS.dap   := PRSp.dap;
+               PRS.das   := PRSp.das;
+               PRS.stat  := PRSp.stat;
+             end;
+
+         { urcenie stavu a sposobu spracovania }
+          _2all:= true; _2fdo:= false;
+
+          if         (not OPL__PROCESS_ASMfda)
+                 and (   (stat = 'ACT')
+                      or (stat = 'CHG')
+                      or (stat = 'REV')
+                     ) then PRS.stat:= cnst_active
+          else if (stat = 'BREAK') then PRS.stat:= cnst_pause
+          else if (stat = 'END')   then PRS.stat:= cnst_finish
+          else if (stat = 'CNL')   then PRS.stat:= cnst_cnl
+          else _2all:= false;
+
+          if     OPL__PROCESS_ASMfda
+             and (   (stat = 'ACT')
+                  or (stat = 'CHG')
+                  or (stat = 'REV')
+                 )
+          then begin
+                 if (stat <> 'ACT') then stat:= 'REV';
+                 PRS.stat:= cnst_active;
+                 _2fdo:= true;
+               end;
+
+         { spracovanie spravy }
+          format_PRS(@PRS);
+          PRS.oprava:= (ires>-1) and (PRS.stat = PRSp.stat);
+
+          if (ires<0) or _is_process_PRS (@PRSp,@PRS) then
+             begin
+               if _2all then zarad_PRS(@PRS,PRS.stat,true,src_type);
+               if _2fdo and (FDAnode>-1) then
+                  begin
+                    PRS.stat:= stat;
+                    _PRS.send_PRS(@PRS,NODEs^[FDAnode].desc.adr,false);
+                  end;
+             end;
+
+          disp_PRS(@PRSp);
+        end;
+
+     disp_PRS(@PRS);
+     InfoCakaj_zatvor;
+     decode_ASM:= res = '';
+   end;

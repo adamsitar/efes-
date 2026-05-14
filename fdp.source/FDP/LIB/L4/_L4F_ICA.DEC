@@ -1,0 +1,164 @@
+{ תתתתתתתתתתתתתתתתתת
+   FPL
+  תתתתתתתתתתתתתתתתתת
+}
+
+ function O_L4_FDP.is_FPL4MIL (FPL: DFPL4): bool;
+    begin
+      is_FPL4MIL:= _FPL4.is_FPL4MIL(@FPL)
+    end;
+
+ function O_L4_FDP._process_FPL (data: pchars; size: word; var FPL: DFPL4; var res: string): bool;
+    begin
+      if spracovanie_fpl4 then _process_FPL:= inherited _process_FPL(data,size, FPL,res)
+      {$IFNDEF FPLM_DISABLED}
+       else if is_FPL4MIL(FPL) then _process_FPL:= _process_FPLm(FPL,res)
+      {$ENDIF}
+      else _process_FPL:= _process_FPLc(FPL,res)
+    end;
+
+
+{ תתתתתתתתתתתתתתתתתת
+   FPLc
+  תתתתתתתתתתתתתתתתתת
+}
+
+ function O_L4_FDP._decode_FPLc (var FPL: DFPL4; var FPLc: DcFPL; var res: string): bool;
+    var   FDR : DFDR;
+    begin
+      if     (_decode_FPL4 (FPL,true,res)=0)
+         and (FPL.data<>nil) and (FPL.data^.fdr<>nil) and (FPL.data^.fdr^.fpl<>nil)
+        then
+         begin
+           new_cFPL(FPL.data^.fdr^.fpl,@FPLc);
+           _decode_FPLc:= true;
+         end
+      else _decode_FPLc:= false
+    end;
+
+
+ function O_L4_FDP._process_FPLc (var FPL: DFPL4; var res: string): bool;
+    var   FPLc : DcFPL;
+          bres : bool;
+    begin
+      bres:= _decode_FPLc(FPL,FPLc,res);
+      if bres then _process_message_FPLC (dst_set,hd_EST,cnst_sended,nil,@FPLc);
+      _process_FPLc:= true
+    end;
+
+
+{$IFNDEF FPLM_DISABLED}
+ function O_L4_FDP._process_FPLm (var FPL: DFPL4; var res: string): bool;
+    var   FPLm : DmFPL;
+          bres : bool;
+    begin
+      bres:= _decode_FPLm(FPL,FPLm,res);
+      if bres then _process_message_FPLM (dst_set,hd_FPL,cnst_sended,@FPLm,@FPL);
+      disp_mFPL(@FPLm);
+      _process_FPLm:= bres
+    end;
+
+  { תתתתתתתתתתתתתתתתתת
+     FPLm
+    תתתתתתתתתתתתתתתתתת
+
+    - dekodovanie FPL do struktrury FPLm,
+      vyuzivaju objekty O_OPL a O_CAMUS
+
+    (FPLPL/MI023
+     -6502
+     -IF
+     -01MI17/M
+     -S/C
+     -LKPO0830
+     -K0200F060 EKROT
+     -LKKB0120 LKPO
+     -OPR/33 RMK/UKOL03 RMK/MNM0506
+     )
+  }
+
+  function O_L4_FDP._decode_FPLm (var FPL: DFPL4; var FPLm: DmFPL; var res: string): bool;
+     var   h,m,b,h_,m_,hl,ml : byte;
+           s,t   : string;
+           i,j   : int;
+           rdk   : int;
+     begin
+       res:= '';
+       _decode_FPLm:= false;
+       FillChar(FPLm,sizeof(FPLm),0);
+
+       with FPLm do
+         begin
+
+          { identifikacia ...
+          }
+           decode_l4_7(FPL._7,idn,ssr_,ssr);
+           idn:= cut_(idn);
+           idn_:= ' ';
+           ssr:= code_l4_7c(ssr);
+
+          { typ
+          }
+           typ:= FPL._9;
+           {s:= getstr(typ,1,[icao_NXT]);
+           t:= getstr(typ,2,[icao_NXT]);
+           if t='' then t:= getstr(_get_line(s,@fn_9bICAO,[icao_NXT],1,lst_cely_riadok),2,[icao_NXT]+setOddel);
+           if t='' then t:= getstr(_get_line(s,@fn_9bMIL,[icao_NXT],1,lst_cely_riadok),2,[icao_NXT]+setOddel);
+           typ:= s;
+           if t<>'' then typ:= typ+icao_NXT+t;}
+
+          { pravidla a typ letu...
+          }
+           decode_l4_8(FPL._8, _8a,_8b);
+
+          { vybavenie }
+           decode_l4_10(FPL._10, com_,ssr_);
+           {com_ := getstr(_10,1,[icao_NXT]);
+           ssr_ := getchar(getstr(_10,2,[icao_NXT]));}
+
+          { start, prist ...
+          }
+           decode_l4_13(FPL._13, start.kod,start.h,start.m, h_,m_);
+           decode_l4_16(FPL._16, start.h,start.m, prist.kod,prist.h,prist.m,hl,ml,prist_);
+           if FPL._17<>nil then decode_l4_13(strpas(FPL._17), prist.kod,prist.h,prist.m, h_,m_);
+
+          { rychlost, vyska, trat...
+            pozn - pretoze FPLm ma omedzenu velkost riadku, vklada sa znak odd_rdk_FPLm
+          }
+           decode_l4_rych_vys (GetPStr(FPL._15,1,[icao_NXIT]), rych,rych_, vys,vys_);
+           trat:= nil; rdk:= 0;
+           for i:= 2 to GetPStrItems(FPL._15,[icao_NXIT]) do
+               begin
+                 s:= _decode_bod_trate(GetPStr(FPL._15,i,[icao_NXIT]),cfg_OB);
+                 inc(rdk,length(s)+1);
+                 if trat<>nil then
+                    if rdk <= dlz_rdk_FPLm then s:= icao_NXIT+s
+                    else s:= kbCRLF+s
+                 else dec(rdk,1);
+                 trat:= StrNPCopy(trat,s,true,true);
+                 if rdk >= dlz_rdk_FPLm then rdk:= length(s);
+                 ACheckProcesses0
+               end;
+
+           pozn:= nil; rdk:= 0;
+           for i:= 1 to GetPStrItems(FPL._18,[icao_NXIT]) do
+               begin
+                 s:= GetPStr(FPL._18,i,[icao_NXIT]);
+                 inc(rdk,length(s)+1);
+                 if pozn<>nil then
+                    if rdk <= dlz_rdk_FPLm then s:= icao_NXIT+s
+                    else s:= kbCRLF+s
+                 else dec(rdk,1);
+                 pozn:= StrNPCopy(pozn,s,true,true);
+                 if rdk >= dlz_rdk_FPLm then rdk:= length(s)
+               end;
+           stat:= cnst_sended;
+
+           init_date(date, year,month,day);
+           {init_time(time, hour,min,sec);}
+         end;
+       format_mFPL(@FPLm);
+       _decode_FPLm:= res = ''
+     end;
+
+{$ENDIF}

@@ -1,0 +1,39 @@
+ function decode_OB (kods : string;
+                     typ  : string;
+
+                     var B    : TsBod;
+                     var rych : single; var rych_: char;
+                     var vys  : word;   var vys_,vys_a: char;
+                     var vys2 : word;   var vys2_: char;
+
+                     var mzp  : bool; var tarr,tdep : string;
+
+                     check_en : bool;
+                     var res  : string;
+                     var ires : int
+                    ): bool;
+
+    var   kodB : string;
+          k2   : string;
+
+    begin
+      rych:= 0; rych_:= ' ';
+      vys := 0; vys_ := ' '; vys_a:= ' ';
+      vys2:= 0; vys2_:= ' ';
+
+      mzp:= is_MZP (kods, kodB, tarr,tdep);
+      if mzp then
+         begin
+           if (not _FPL4_MZP_ENABLE) then ires:= l4_err(a_15c,kods, i_15c,err_15c_nepovolene_mzp, res)
+         end
+      else if is_C (kods,typ, kodB, rych,rych_, vys,vys_,vys_a, vys2,vys2_, res,ires) then
+              begin
+              end
+      else begin
+             kodB:= getstr (kods,1,[icao_NXT]);
+             k2:= getstr(kods,2,[icao_NXT]);
+             if (cut_(k2)<>'') then ires:= _check_rychvys_by4444 (k2,typ,rych,rych_,vys,vys_,res);
+           end;
+
+      decode_OB:= is_OB(kodB, B, true); { mal by byt znamy, pretoze presiel predchadzajucimi kontrolami }
+    end;

@@ -1,0 +1,244 @@
+;; AIP ENR 4.3 >>>>> od 8.oktober 1998
+;; odsunuto su uvenene povodne body, ktore neboli reviziou
+;; overene; mozu byt ceske alebo polske hranicne
+;; ------------------------------------------------------------------------
+;; ICAOcode nazov ;suradnice    ;stred  ;typ     ; kreslit[+/-]
+;; ------------------------------------------------------------------------
+
+;"ДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДД"
+;" R dionaviga‡n‚ body FIR LZ"
+;"ДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДД"
+
+  ABKOL        ; 490229  184204 ; ; REP1
+   ABM DBV     ; 485206  184936 ; ; -SP
+   ABM JEL     ; 483342  201706 ; ; SP
+
+  BALAP        ; 480405  191459 ; ; REP2
+  BASTY        ; 482541  185619 ; ; SP
+  BAVAR        ; 485641  200609 ; ; SP
+  BERVA        ; 483703  173228 ; ; -REP1
+  BILNA        ; 492337  182650 ; ; SP
+   BIRMO       ; 490239  192655 ; ; SP
+
+  BOGTO        ; 484101  213023 ; ; -SP
+   BOHUM       ; 495305  181941 ; ; -SP
+   BUBAN       ; 474924  184800 ; ; SP
+  BUKOB        ; 491339  181841 ; ; SP
+
+  CIFER        ; 481928  172610 ; ; SP
+  CN           ; 483412  174836 ; ; NDB1
+
+  DEVIN        ; 481240  165750 ; ; REP1
+  DBV          ; 485130  184806 ; ; SP
+
+  EPEDA        ; 485225  195726 ; ; SP
+  ERGOM        ; 474830  184359 ; ; NDB
+   ERTAS       ; 475700  184618 ; ; REP2
+   FACKO       ; 490200  183200 ; ; SP
+   FS          ; 483345  190754 ; ; NDB
+
+   GELSI       ; 482700  202700 ; ; SP
+  GOKVA        ; 483133  195315 ; ;
+   GRELA       ; 491312  200600 ; ; SP
+
+  IVANA        ; 490509  195314 ; ; REP1
+
+  JASOV        ; 483643  204531 ; ; SP
+  JAB          ; 492900  194054 ; ; VOR
+  JAN          ; 481048  173248 ; ; VOR/DME1
+
+   JAB         ; 492900  194054 ; ; VOR
+   JAN         ; 481048  173248 ; ; VOR-DME1
+   JASOV       ; 483645  204538 ; ; SP
+   JEL         ; 483500  201642 ; ; REP1
+
+  KEKED        ; 483123  211729 ; ; REP2
+   KITSE       ; 481323  171733 ; ; SP
+  KELIM        ; 482909  192716 ; ; SP
+  KOLAL        ; 491834  183030 ; ; SP
+  KOSOR        ; 484646  205703 ; ; SP
+  KUPAS        ; 482221  190444 ; ; SP
+   KSC         ; 483824  211424 ; ; VOR-DME2
+   KST         ; 483042  174300 ; ; REP1
+
+   LATOR       ; 482751  220850 ; ; REP2
+  LENOV        ; 492011  210037 ; ; REP2
+   LIPTA       ; 491644  175402 ; ; -SP
+  LITKU        ; 481350  193555 ; ; SP
+
+  MALBE        ; 484926  222230 ; ; REP2
+  MARKA        ; 485408  204137 ; ; SP
+   MAVOR       ; 485224  173213 ; ; SP
+   MEDLO       ; 490350  171725 ; ; -SP
+   METUL       ; 493616  181755 ; ; -SP
+  MITKO        ; 483232  200413 ; ;
+   MORAV       ; 494800  172700 ; ; -SP
+   MORKO       ; 491310  170141 ; ; -SP
+
+   NAPAG       ; 490936  173158 ; ; -SP
+  NEMPI        ; 484619  220247 ; ; SP
+   NILUK       ; 483542  212810 ; ; SP
+  NIT         ; 481730  180306 ; ; VOR-DME1
+  NWDBV       ; 485130  184804 ; ; -SP
+
+  OKI         ; 474942  184124 ; ; NDB2
+  OLIVA        ; 490138  203553 ; ; SP
+
+   PADKA       ; 495603  181706 ; ; -SP
+  PANOK        ; 483338  212112 ; ; SP
+  PATAK        ; 480423  190736 ; ; SP
+  PERIT        ; 482944  210424 ; ; SP
+  PITUL        ; 495712  181655 ; ; -SP
+  PITOK        ; 481929  202218 ; ;
+  PODAN        ; 492459  212623 ; ; SP
+  PPD          ; 490354  202106 ; ; VOR-DME1
+
+   RANIS       ; 493256  174323 ; ; -SP
+  RASEK        ; 490551  183939 ; ; SP
+  RIMIT        ; 484412  185502 ; ; SP
+   RINAK       ; 483254  200818 ; ; SP
+   ROSIM       ; 491155  165530 ; ; -SP
+  RUTOL        ; 475729  183036 ; ; REP1
+
+  SCN          ; 483414  174834 ; ; -SP
+  SWCN         ; 483414  174834 ; ; -SP
+  SERED        ; 481711  174207 ; ; SP
+   SITLA       ; 490045  165630 ; ; -SP
+   SKIPI       ; 494828  175400 ; ; -SP
+  SLC          ; 482712  190700 ; ; VOR-DME2
+  SOTER        ; 480252  185004 ; ; SP
+  SULOV        ; 491147  195106 ; ; SP
+
+  TESED        ; 480800  174810 ; ; SP
+  TERDI        ; 483039  194323 ; ; SP
+  TIRIS        ; 483906  221541 ; ; SP
+   TUVAK       ; 493745  165902 ; ; -SP
+
+  UBARU        ; 483609  192442 ; ; SP
+   UGS         ; 483842  221212 ; ; SP
+  ULPIS        ; 482337  184259 ; ; SP
+
+   VETEK       ; 494818  174322 ; ; -SP
+  VOLEV        ; 483651  190012 ; ; REP1
+  VYDRA        ; 480209  173245 ; ; SP
+
+  WCN          ; 483414  174834 ; ; -SP
+
+  XELEN        ; 482304  174604 ; ; SP
+   ZETER       ; 480230  185000 ; ; -SP
+  ZLA          ; 491212  183048 ; ; NDB1
+
+
+;"ДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДД"
+;" Zvl Ёtne body SRLP Bratislava "
+;"ДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДД"
+
+  G114         ; 475407  172603 ; ; SP
+  KOMAR        ; 474504  180307 ; ; SP
+
+
+;"ДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДД"
+;" FIR Praha - niektor‚ body "
+;"ДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДД"
+
+  LKPR       PRAHA RUZYNE LKPR     ; 500629 141448
+  LKKB       KBELY LKKB            ; 500733 143328
+  LKVO       VODOCHODY LKVO        ; 501252 142452
+  LKTB       TURANY LKTB           ; 490900 164301
+  LKMT       MOSNOV LKMT           ; 494150 180650
+  LKKV       K.VARY LKKV           ; 501200 125548
+
+  DIBED  DIBED PR!                 ; 495330 230348
+
+  HDO        HERMSDORFA4 HDO.      ; 505548 142218
+
+  BNOB       BRNO NDB BNOB         ; 490844 164614
+
+  NR         NORA MTNDB NR         ; 494354 181012
+  RN         RONA MTNDB RN         ; 493936 180318
+  GT         OTROKOVICE NDB GT     ; 491136 173110
+  OKLB       PRAHA IAFNDB OKLB     ; 500513 141156
+  POL        POLNA NDB 377 POL     ; 492657 154439
+  VLMB       VLASIM NDB VLMB       ; 494206 150409
+  VOZB       VOZICE NDB VOZB       ; 493205 145242
+  KVY        K.VARY NDBDME.KVY     ; 501033 130101
+  KUN        KUNOVICE 416 KUN      ; 490649 173011
+  RCE        ROUDNICE NDB RCE      ; 502706 141242
+
+  BNO        BRNO VOR A4 BNO       ; 490857 164139
+  BNOJE      BNOJE                 ; 485818 175406
+  BNOKS      BNOKS                 ; 490124 175900
+  BNOSL      BNOSL                 ; 485154 174224
+  BNOSO      BNOSO                 ; 485136 171612
+  BODAL      POLNA A152 BODAL      ; 492752 154704
+  BOLMU      HOVORANYW40 BOLMU     ; 485910 165727
+
+  CK         PREROV NDB 213 CK     ; 492426 172027
+
+  EKTIL      OPAVA B45 EKTIL       ; 500051 180000
+  ETBV       LOHNICE ETBV          ; 495400 172600
+  GATSA      NEMANICEW30 GETSA     ; 492700 124000
+  GIMBO                            ; 484647 144925
+  HLV        HOLESOV NDB HLV       ; 491924 173149
+  HLVGE      HLVGE           .     ; 490318 180724
+  HLVJE      HLVJE           .     ; 491006 180800
+  HLVKS      HLVKS           .     ; 491300 180930
+  HLVSL      HLVSL           .     ; 490206 180400
+  HLVZL      HLVZL           .     ; 491454 180854
+  KILNU      JACHYMOVA19 KILNU     ; 502620 125230
+  KNE        KUNOVICE 434KNE       ; 490248 172711
+  KOLAD      FOLMAVA W29 KOLAD     ; 492022 125115
+
+  NVLM       KOURIM NVLM           ; 500026 145012
+  ODNEM      DUBNANY A4 ODNEM      ; 485211 170840
+  OKF        DESNA VRD A15 OKF     ; 485811 153248
+  OKG        CHEB R11 VRD OKG      ; 500354 122430
+  OKL        PRAHA VRD IAF OKL     ; 500623 141348
+  OKX        FRYDLANTR11VR OKX     ; 505412 150200
+
+  TBV        TREBOVA492NDB TBV     ; 494746 164050
+
+  VOZ        VOZICEA15VORD VOZ     ; 493158 145234
+
+  ZAB        ZABREH VORD ZAB       ; 495552 180317
+  ZABJE      ZABJE                 ; 493012 184648
+  ZABKI      ZABKI                 ; 491800 181454
+  ZABPT      ZABPT                 ; 492100 182406
+
+  NOVUM      N.MESTOA152 NOVUM     ; 493423 160430
+
+  OPAVO      OPAVA A152 OPAVO      ; 495421 174640
+
+  POLOM      HRANICE POLOM         ; 493112 174942
+
+  HOLAN      HOLANY APR HOLAN      ; 503513 142954
+
+  VERNE      VERNE APR VERNE       ; 503600 141900
+
+  PR         PRAHA APR PR          ; 500831 142208
+  PG         PRAHA APR PG          ; 500254 142217
+  VO         VODOCHODY APR VO      ; 501215 142904
+  KD         KBELY APR NDB KD      ; 500833 143630
+  PK         PARDUBICE NDB PK      ; 500041 154853
+
+  OKR                              ; 481326 171732
+  OKT                              ; 495527 180318
+  OTA                              ; 494842 181142
+  VLMGE                            ; 490236 180412
+  BITSI                            ; 491830 161411
+  HDOPI                            ; 491300 180908
+  HLVPI                            ; 490755 180648
+
+
+;"ДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДД"
+;" FIR BudapeЁџ - hrani‡n‚ body "
+;"ДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДД"
+
+  BKS        BKS MR!               ; 464754 210430
+
+
+;"ДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДД"
+;" In‚ "
+;"ДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДД"
+
+  KOBUS      KOBUS!                ; 514500 144000

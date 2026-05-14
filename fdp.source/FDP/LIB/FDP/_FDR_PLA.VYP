@@ -1,0 +1,111 @@
+{ תתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתת
+   Vypocty
+  תתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתת
+}
+
+ function eet_FDR (FDR: PFDR): real;
+    var   T: real;
+    begin
+      with FDR^ do
+        begin
+          T:= DTtoSec (date.r,date.m,date.d, eet.h,eet.m,0);
+         { problematicke :  lety s aktivaciou po polnoci....
+         }
+          {if TimeToSec (dep.h,dep.h,0) > TimeToSec(eet.h,eet.m,0) then T:= T+secDAY;}
+        end;
+      eet_FDR:= T
+    end;
+
+ function stav_FDR (FDR: PFDR; cas: real; var zmena: bool): Tpoz;
+    var   prea,prop,coor,nepl,deac : real;
+          z : Tpoz;
+          unkn : bool;
+    begin
+      prea:= dT_preactive_FPL4*60;
+      prop:= dT_propose_FPL4*60;
+      coor:= dT_coordinate_FPL4*60;
+      nepl:= dT_unactive_FPL4*60;
+      deac:= dT_deactive_FPLC*60;
+
+      z:= poz_PLAN;
+
+     { bol aktivovany ?
+     }
+      if in_icao_head (FDR^.stat, ms_ICAOest+ms_ICAOarr, unkn) then
+         begin
+           if cas < FDR^.eet.cas-coor then z:= poz_COORDINATED
+           else if cas >= FDR^.exi.cas+deac then z:= poz_HANGAR
+           else z:= poz_LETI
+         end
+
+     { je planovany ?
+     }
+      else if in_icao_head (FDR^.stat, ms_ICAOplan, unkn) then
+         begin
+           if      cas < FDR^.eet.cas-prea then z:= poz_PLAN
+           else if cas < FDR^.eet.cas-prop then z:= poz_PREACTIVE
+           {else if cas < FDR^.eet.cas-coor then z:= poz_PROPOSE
+           else if cas < FDR^._exi.cas-nepl then z:= poz_COORDINATED
+           else z:= poz_NOT_ACTUAL}
+           else if cas >= FDR^.exi.cas+nepl then z:= poz_NOT_ACTUAL
+           else z:= poz_PROPOSED
+         end
+
+      else if FDR^.stat = hd_CNL then z:= poz_CANCELLED;
+
+      zmena:= z<>FDR^.poz;
+      FDR^.poz:= z;
+      stav_FDR:= z
+    end;
+
+
+ function is_FDR_to_update_FPL4 (FDR: PFDR; FPL: PFPL4): bool;
+    begin
+    end;
+
+
+{ oprava parametrov FDR do FPL
+}
+ procedure update_FDR_to_FPL4 (FDR: PFDR; FPL: PFPL4);
+     var   s,t,u : string;
+           h,m,h_,m_ : byte;
+     begin
+       decode_l4_13 (FPL^._13, s, FDR^.dep.h,FDR^.dep.m, h,m);
+       code_l4_13 (FDR^.dep.kod, h,m, FDR^.dep.h,FDR^.dep.m, true);
+
+       FPL^.eet := FDR^.eet;
+       FPL^.vys := FDR^.vys;
+       FPL^.vys_:= FDR^.vys_;
+       FPL^.exi := FDR^.exi;
+
+       FPL^.stat:= FDR^.stat;
+
+       if (FPL^.src=0) and (FPL^._18<>nil) then fplsrc_decode(FPL^._18,FDR^.src)
+       else FDR^.src:= FPL^.src;
+
+       {FDR^.data:= REG.... az pri aktivacii}
+     end;
+
+
+ procedure update_FDR_date (FDR: PFDR; date: TDate);
+     var   dr : real;
+           i  : int;
+     begin
+       dr:= DateToSec(date.r,date.m,date.d) - DateToSec(FDR^.date.r,FDR^.date.m,FDR^.date.d);
+
+       FDR^.date:= date;
+       with FDR^ do
+         begin
+           eet.cas:= eet.cas + dr;
+           exi.cas:= exi.cas + dr;
+
+           if (rte<>nil) and (bodov>0) then
+             for i:= 0 to bodov-1 do with rte^[i] do
+               begin
+                 casA:= casA + dr;
+                 casD:= casD + dr;
+               end;
+         end;
+
+       if FDR^.fpl<>nil then ;  { nenastane }
+     end;

@@ -1,0 +1,145 @@
+{----------------------------------------------------------}
+{ LINKA OPL :                                              }
+{----------------------------------------------------------}
+{$IFDEF ASTA_FDP}
+
+{
+  (   )Vi
+  (
+    ESTBR/MI518-SAS779/6256-MD80-EKCH-ODNEM/1400F330-N0440F330-LHBP-ODNEM/330/1400
+    BERVA/170/1404 SWCN/170/1405 NIT/170/1407 RUTOL/170/1411 OKI/170/1413
+  )Vi
+}
+
+procedure ReadCOM_ASTA_FDP; interrupt;
+    var   b : byte;
+    label endp;
+    begin
+      if Port[IIR[comASTA_FDP]]<>$04 then goto endp;
+      b:= Port[COM[comASTA_FDP]];
+      if b=0 then goto endp;
+
+      if (b_FDP.t>=sizeof(b_FDP.b)) then b_FDP.t:= 0;
+      b_FDP.b[b_FDP.t]:= chr(b);
+      inc(b_FDP.t);
+
+      if (b=$03) then
+         begin
+           if b_FDP.b[0]='' then save_ASTA_FDP(@b_FDP);
+           b_FDP.t:= 0
+         end;
+
+      if b=$02 then
+         begin
+           b_FDP.b[0]:= '';
+           b_FDP.t:= 1
+         end
+      else if (b_FDP.t>2) and (chr(b)='(') then
+           begin
+             b_FDP.b[0]:= '';
+             b_FDP.b[1]:= '(';
+             b_FDP.t:= 2
+           end;
+
+      endp: Port[$20]:= $20
+    end; { ReadCOM_ASTA_FDP }
+
+{$ENDIF}
+
+
+{----------------------------------------------------------}
+{ LINKA PRN :                                              }
+{----------------------------------------------------------}
+{$IFDEF ASTA_PRN}
+
+{ ^A^T011^J10^L010690001^T021^J10^L040410001^T032
+   ^J10^L040690001^T001^J04^L040010217^T057
+   ^J08^L210010155^J08^T045^L000430001^J10^T057^L000700001
+
+   ^J03^T002^E0201OEFDM                                 idn
+   ^J06^T002^E0101LOWW^J06^T006^E01010615               ETD
+   ^J08^T002^E0101EPWA^J08^T006^E01010735               ETA
+   ^J09^T070^E0201A7307                                 ssr0
+   ^J03^T013^E0201A4410                                 ssr
+   ^J06^T013^E0101S^J06^T014^E02010455                  vys (S0455)
+   ^J08^T013^E0101S^J08^T014^E02010030^J08^T019^E0101A  vys1
+   ^J03^T020^E01010630                                  rych
+   ^J03^T026^E0101C501                                  typ
+   ^J03^T034^E0101OKR^J03^T040^E01010651                trat
+   ^J05^T034^E0101SWCN^J05^T040^E01010656
+   ^J07^T034^E0101ABKOL^J07^T040^E01010704
+   ^J09^T034^E0101JAB^J09^T040^E01010711
+   ^J05^T059^E0101100 200 300 500
+   ^J07^T059^E0101U  1  S^J09^T059^E0101-  *  *
+   ^J02^T059^E0101200696 0640
+   ^J02^T076^E010174                                    ssn
+   ^J03^T065^E0201A7307                                 ssr0
+   ^J06^T023^E0101S^J06^T024^E02010885                  vys3
+
+   ^,                                                   tlac
+   ^X                                                   koniec prenosu
+
+   (   )Vi
+}
+
+procedure ReadCOM_ASTA_PRN; interrupt;
+    var   b : byte;
+    label X;
+    begin
+      if Port[IIR[comASTA_PRN]]<>$04 then goto X;
+
+      b:= Port[COM[comASTA_PRN]];
+      if b=0 then goto X;
+
+      if (b_PRN.t>=sizeof(b_PRN.b)) then b_PRN.t:= 0;
+      b_PRN.b[b_PRN.t]:= chr(b);
+      inc(b_PRN.t);
+
+      if {(b=$02) or (b=$03) or}
+         (b_PRN.t>100) and (chr(b)='X') and (b_PRN.b[b_PRN.t-2]='^')
+         (*
+              or ({(b_PRN.b[b_PRN.t-3]=',')
+                   and} (b_PRN.b[b_PRN.t-2]='^')
+                   and  (b_PRN.b[b_PRN.t-1]='X')
+                 )
+             )*)
+              then
+          begin
+            if b_PRN.b[0]='' then save_ASTA_PRN(@b_PRN);
+            b_PRN.t:= 0
+          end;
+
+      if b=$05 then
+         begin
+           b_PRN.b[0]:= ''; {0x5}
+           b_PRN.t:= 1
+         end
+      else if (b_PRN.t>2) and (b_PRN.b[b_PRN.t-1]='A') and (b_PRN.b[b_PRN.t-2]='^') then
+           begin
+             b_PRN.b[0]:= ''; {0x5}
+             b_PRN.b[1]:= '^';
+             b_PRN.b[2]:= 'A';
+             b_PRN.t:= 3
+           end;
+
+      X: Port[$20]:= $20
+    end; { ReadCOM_ASTA_PRN }
+
+ (*
+
+  { init}
+  
+  { riadky }
+  ^A^T011^J10^L010690001^T021^J10^L040410001
+  ^T032^J10^L040690001^T001^J04^L040010217^T057^J08^L210010155^J08^T045^L000430001^J10^T057^L000700001
+  { data a kecy }
+  ^J03^T002^E0201N8618G^J06^T002^E0101LOWW^J06^T006^E01010740^J08^T002^E0101EDQD
+  ^J08^T006^E01010910^J03^T013^E0201A1427^J06^T013^E0101S^J06^T014^E02010490
+  ^J08^T013^E0101S^J08^T014^E02010030^J08^T019^E0101A^J03^T020^E01010324
+  ^J03^T026^E0101C340^J03^T034^E0101OKF^J03^T040^E01010754^J05^T034^E0101VOZ
+  ^J05^T040^E01010810^J07^T034^E0101RAK^J07^T040^E01010830^J09^T034^E0101OKG
+  ^J09^T040^E01010847^J05^T062^E01012  3  U  C^J07^T062^E0101-  N  N  -
+  ^J09^T058^E0101250493 0733^J09^T077^E010159
+ *)
+
+{$ENDIF}

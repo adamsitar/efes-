@@ -1,0 +1,168 @@
+{
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+Û                                                          Û
+Û zobrazenie                                               Û
+ÛÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÛ
+}
+
+function dxi_NTM: int;
+   begin
+     dxi_NTM:= dxm_NTM
+   end;
+
+function dyi_NTM_pozn(rp: int): int;
+   begin
+     if not bminiNTM then rp:= max_NTM_D_r_hi;
+     if rp > 0 then dyi_NTM_pozn:= dy_rmk + rp*10 + dy_rmk
+     else dyi_NTM_pozn:= 0
+   end;
+
+function dyi_NTM_sur(rs: int): int;
+   begin
+     if not bminiNTM then rs:= max_NTM_E_r_hi;
+     if rs > 0 then dyi_NTM_sur:= dy_rmk + rs*10 + dy_rmk
+     else dyi_NTM_sur:= 0
+   end;
+
+function dyi_NTM: int;
+   begin
+     dyi_NTM:= dym_NTM + dyi_NTM_pozn(max_NTM_D_rm) + dyi_NTM_sur(max_NTM_E_rm)
+
+   end;
+
+
+procedure _plan_NTM(x0,y0,x1,y1: int; bk: int; rp,rs: byte; form: bool);
+    var   dx,dy0,dy : int;
+    begin
+      BGIgraph.button(x0,y0,x1,y1, bk, btSmall, btOFF);
+
+     { identifikacia notamu
+     }
+      on_off(x0+3, y0+2,  x1-3,   y1-2,   bk+clBUTTON_DARK,bk+clBUTTON_LIGHT, btSmall, btOFF);
+      on_off(x0+5, y0+7,  x0+220, y0+19,  bk+clBUTTON_DARK,bk+clBUTTON_LIGHT, btSmall, btON);
+      on_off(x0+5, y0+20, x0+401{x1-5}, y0+34,  bk+clBUTTON_DARK,bk+clBUTTON_LIGHT, btSmall, btON);
+
+     { cas, vyska,...
+     }
+      if not form then dx:= x1-272 else dx:= x0+195;
+      on_off (x0+5,   y0+39, dx, y0+71, bk+clBUTTON_DARK,bk+clBUTTON_LIGHT, btSmall, btON);
+      _linevo(x0+79,  y0+40, y0+71,     bk+1);
+      if not form then _linevo(x0+198, y0+40, y0+71,  bk+1);
+
+      dy:= dym_NTM;
+
+      if rp>0 then
+         begin
+          { popis cinnosti, opakovania
+          }
+           dy0:= dy;
+           dy:= dy + dy_rmk + rp*10;
+           if form then inc(dy,12);
+           on_off(x0+5, y0+dy0,  x1-5, y0+dy+2,  bk+clBUTTON_DARK,bk+clBUTTON_LIGHT, btSmall, btON);
+           inc(dy,dy_rmk);
+         end;
+
+      if rp>0 then
+         begin
+          { suradnice
+          }
+           dy0:= dy;
+           dy:= dy + dy_rmk + rs*10 + dy_rmk;
+           if form then inc(dy,10);
+           on_off(x0+5, y0+dy0, x1-5, minimum(y0+dy,y1-4), bk+clBUTTON_DARK,bk+clBUTTON_LIGHT, btSmall, btON);
+         end;
+
+      if form then on_off(x0+5, y0+dy+3, x0+53, y1-5, bk+clBUTTON_DARK,bk+clBUTTON_LIGHT, btSmall, btON);
+    end;
+
+
+procedure plani_NTM(NTM: PNTM; x,y: int; b,mini: bool);
+    var   cl_stat, bk : byte;
+          dx_plan,dy_plan,dy, i,p,k1,k2,y0 : int;
+          pb : bool;
+    begin
+      pb:= bminiNTM; bminiNTM:= mini;
+
+      y0:= y{+8}{$IFDEF SPEA}+dy_ch{$ENDIF};
+      with NTM^ do
+        begin
+          bk:= bkPLAN_[b];
+
+          dx_plan:= dxi_NTM; dy_plan:= dyi_NTM;
+          _plan_NTM (x,y,x+dx_plan,y+dy_plan,bk, max_NTM_D_rm,max_NTM_E_rm,false);
+
+          {$IFDEF SPEA} SetBkColor(bk); {$ENDIF}
+          settextstyle(0,HorizDir,1);
+
+          setcolor (cl_data);
+          outtextxy(x+10,y0+10, strpas(_NTM));
+          outtextxy(x+10,y0+24, delchar(strpas(_Q),[' ']));
+
+          outtextxy(x+10, y0+59, _A);
+
+          outtextxy(x+86, y0+45, _B);
+          outtextxy(x+86, y0+59, _C);
+
+          outtextxy(x+206,y0+45, cut_(_F){+icao_NXIT+cut_(_G)});
+          outtextxy(x+206,y0+59, cut_(_G));
+
+          dy:= dym_NTM;
+          k1:= getPstritems(_D,setNL+setNL_);
+          if mini then p:= Minimum(k1,max_NTM_D_rm)
+          else p:= Minimum(k1,max_NTM_D_r_hi);
+          if max_NTM_D_rm>0 then inc(dy,dy_rmk);
+          i:= 0; while i<p do
+             begin
+               outtextxy(x+10,y0+dy,getPstr(_D,i+1,setNL+setNL_));
+               inc(dy,10);
+               inc(i);
+             end;
+          if max_NTM_D_rm>0 then
+             begin
+               if i<max_NTM_D_rm then inc(dy,(max_NTM_D_rm-i)*10);
+               inc(dy,dy_rmk)
+             end;
+
+          k2:= getPstritems(_E,setNL+setNL_);
+          if mini then p:= Minimum(k2,max_NTM_E_rm)
+          else p:= Minimum(k2,max_NTM_E_r_hi);
+          i:= 0; while i<p do
+             begin
+               if i=0 then inc(dy,dy_rmk);
+               outtextxy(x+10,y0+dy,getPstr(_E,i+1,setNL+setNL_));
+               inc(dy,10);
+               inc(i)
+             end;
+
+          if    is_plani___(_D, max_NTM_D_r_hi,max_NTM_D_rm,k1)
+             or is_plani___(_E, max_NTM_E_r_hi, max_NTM_E_rm, k2)
+                then outtextxy(x+dx_plan-30,y0+59, '...');
+
+          write_stat(stt,rec,SERVERaddress, x+dx_plan-30,y0+10, get_stat_cl(stt))
+        end;
+
+      bminiNTM:= pb;
+    end; { plan_NTM }
+
+
+procedure plan_NTM(NTM: PNTM; x,y: int; b: bool);
+    begin
+      plani_NTM(NTM, x,y, b,bminiNTM)
+    end;
+
+procedure _info_NTM(x0,y0,x1,y1: int; NTM: PNTM);
+    var   pb : bool; rp,rs: int;
+    begin
+      pb:= bminiNTM; bminiNTM:= false;
+      rp:= max_NTM_D_rm; max_NTM_D_rm:= max_NTM_D_r_hi;
+      rs:= max_NTM_E_rm;  max_NTM_E_rm:=  max_NTM_E_r_hi;
+      plani_NTM(NTM, x0+(x1-x0-dxf_NTM) shr 1, y0,false,false);
+      max_NTM_D_rm:= rp;
+      max_NTM_E_rm:= rs;
+      bminiNTM:= pb;
+    end;
+
+function  info_NTM (NTM: PNTM; title: string): bool;
+   begin
+     info_NTM:= Info(title, @_info_NTM, NTM,dxf_NTM+20,dyf_NTM+10, nil,0)
+   end;

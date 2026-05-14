@@ -1,0 +1,15 @@
+; -------------------
+; Vojenske oznacenie
+; -------------------
+  P   podäa pr°strojov
+  V   "za vidu"
+
+
+; -------------------
+; Oznacenie ICAO
+; -------------------
+
+  I   IFR
+  V   VFR
+  Y   zpoáiatku IFR
+  Z   zpoáiatku VFR

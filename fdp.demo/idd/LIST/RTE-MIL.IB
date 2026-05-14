@@ -1,0 +1,43 @@
+; FIR Bratislava,
+; LaPVO ASR
+; Zoznam vojenskych trati s priradenym nazvom
+;
+; -------------------------
+; File format describtion :
+; -------------------------
+; NDB name followed by "*" means IO point into/out from this FIR
+; ROUTE name followed by "*" means name of AWY used for the flights of CIS aircraft
+; Route is described by name and points sequence beginnig by "(" and ending by ")".
+; Points can be ordered through new line or space.
+;
+; Used format can not be changed.
+;
+
+RT14
+    (
+     D412
+     A772
+     G782
+     Q191
+     Z153
+     D412
+    )
+
+RT114
+    (
+     D412
+     Z153
+     Q191
+     G782
+     A772
+     D412
+    )
+
+RT24 
+    (
+     H971
+     H371
+     D412
+     D181
+     H371
+    )

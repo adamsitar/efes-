@@ -1,0 +1,98 @@
+ procedure _codeDB0_DVZ(DVZ: PDVZ; buff: PDB_buff; desc: PDB_head); far;
+     var   s : string;
+     begin
+       s:= code0_DVZ_1(DVZ);
+       str_toDBstr(s,buff^[0]);
+       s:= code0_DVZ_2(DVZ);
+       {$IFDEF NET} s:= s+KON_SPR+rectostr(DVZ^.rec); {$ENDIF}
+       str_toDBstr(s,buff^[1]);
+     end;
+
+ procedure _decodeDB0_DVZ(buff: PDB_buff; DVZ: PDVZ; desc: PDB_head); far;
+     var   s : string;
+     begin
+       Move(buff^[0],s[0],ord(buff^[0][0])+1);
+       decode0_DVZ_1(s, DVZ);
+       Move(buff^[1],s[0],ord(buff^[1][0])+1);
+       decode0_DVZ_2(s, DVZ);
+      {$IFDEF NET}
+        strtorec(getstr(s,2,[KON_SPR]), DVZ^.rec);    { 6 }
+      {$ENDIF}
+     end;
+
+
+ function code_DVZ_ine(DVZ: PDVZ): string;
+    var   s: string;
+    begin
+      s:= '' {$IFDEF NET} + icao_ARR + rectostr(DVZ^.rec) {$ENDIF};
+      code_DVZ_ine:= s
+    end;
+
+ function decode_DVZ_ine(s: string; DVZ: PDVZ): string;
+    var   i : int;
+    begin
+      i:= 1;
+      {$IFDEF NET} strtorec(getstr(s,i,[icao_ARR]), DVZ^.rec);
+      {$ENDIF}
+      decode_DVZ_ine:= ''
+    end;
+
+
+ procedure _codeDBB_DVZ(DVZ: PDVZ; buff: PDB_buff; desc: PDB_head);
+     var   s: string;
+     begin
+       str_toDBstr(code_DVZ_data(DVZ),buff^[db_DVZ_data]);
+       str_toDBstr(strpas(DVZ^.poziadavka),buff^[db_DVZ_poziadavka]);
+       str_toDBstr(strpas(DVZ^.odoslanie),buff^[db_DVZ_odoslanie]);
+       str_toDBstr(strpas(DVZ^.zabezpecenie),buff^[db_DVZ_zabezpecenie]);
+       str_toDBstr(code_DVZ_19(DVZ,true),buff^[db_DVZ_19]);
+       str_toDBstr(code_DVZ_ine(DVZ),buff^[db_DVZ_ine])
+     end;
+
+ procedure _decodeDBB_DVZ(buff: PDB_buff; DVZ: PDVZ; desc: PDB_head);
+     var   s : string;
+     begin
+       fillchar(DVZ^,sizeof(DVZ^),0);
+
+       s:= DBstr_to_str (buff^[db_DVZ_data]);
+       decode_DVZ_data (@s[1],length(s), DVZ);
+
+       DVZ^.poziadavka   := strpasnew(DBstr_to_str (buff^[db_DVZ_poziadavka]));
+       DVZ^.odoslanie    := strpasnew(DBstr_to_str (buff^[db_DVZ_odoslanie]));
+       DVZ^.zabezpecenie := strpasnew(DBstr_to_str (buff^[db_DVZ_zabezpecenie]));
+
+       decode_DVZ_19 (DBstr_to_str (buff^[db_DVZ_19]),DVZ);
+       decode_DVZ_ine(DBstr_to_str (buff^[db_DVZ_ine]),DVZ);
+
+       {format_DVZ(DVZ);}
+     end;
+
+
+ procedure _codeDBT_DVZ(DVZ: PDVZ; buff: PDB_buff; desc: PDB_head);
+     var   s: string;
+     begin
+       str_toDBstr(code_DVZ_data(DVZ),buff^[db_DVZ_data]);
+       str_toDBstr(strpas(DVZ^.poziadavka),buff^[db_DVZ_poziadavka]);
+       str_toDBstr(strpas(DVZ^.odoslanie),buff^[db_DVZ_odoslanie]);
+       str_toDBstr(strpas(DVZ^.zabezpecenie),buff^[db_DVZ_zabezpecenie]);
+       str_toDBstr(code_DVZ_19(DVZ,true),buff^[db_DVZ_19]);
+       str_toDBstr(code_DVZ_ine(DVZ),buff^[db_DVZ_ine])
+     end;
+
+ procedure _decodeDBT_DVZ(buff: PDB_buff; DVZ: PDVZ; desc: PDB_head);
+     var   s : string;
+     begin
+       fillchar(DVZ^,sizeof(DVZ^),0);
+
+       s:= DBstr_to_str (buff^[db_DVZ_data]);
+       decode_DVZ_data (@s[1],length(s), DVZ);
+
+       DVZ^.poziadavka   := strpasnew(DBstr_to_str (buff^[db_DVZ_poziadavka]));
+       DVZ^.odoslanie    := strpasnew(DBstr_to_str (buff^[db_DVZ_odoslanie]));
+       DVZ^.zabezpecenie := strpasnew(DBstr_to_str (buff^[db_DVZ_zabezpecenie]));
+
+       decode_DVZ_19 (DBstr_to_str (buff^[db_DVZ_19]),DVZ);
+       decode_DVZ_ine(DBstr_to_str (buff^[db_DVZ_ine]),DVZ);
+
+       {format_DVZ(DVZ);}
+     end;

@@ -1,0 +1,28 @@
+; --------------------
+; FDP/S VS ZVOLEN
+; --------------------
+;
+; ------------------------------------------------------------------------------------------------
+; pracovisko    ; adresa                         ; protokol ; typ          ; informacie ;  sektor
+; ------------------------------------------------------------------------------------------------
+
+  SERVER        ; VS SERVER,      192.100.000.32 ; @THIS
+
+
+; ----------------------------------------
+; komunikacne pocitace a ine rozhrania
+; ----------------------------------------
+
+; SERVER        ; STRRLP SERVER,  192.100.141.32 ; ~UDP     ; @SERVER      ; -master
+; BRIDGE        ; STRRLP BRIDGE,  192.100.141.35 ; ~UDX     ; @BRIDGE      ;
+; ASOC          ; ASOC         ,  192.100.0.36   ; ~UDP ~L  ; @ASOC
+
+
+; ------------------
+; VS Zvolen
+; ------------------
+
+; VS DPVL  (IDD); VS DPVL,        192.100.000.33 ; ~UDP     ; @RDP         ; -slave  ALL
+  VS ODSUC (IDD); VS ODSUC,       192.100.000.41 ; ~UDP ~S  ; @RDP         ; -slave  ALL
+; VS OPER  (IDD); VS OPER,        192.100.000.35 ; ~UDP ~L  ; @RDP         ; -slave  ALL
+

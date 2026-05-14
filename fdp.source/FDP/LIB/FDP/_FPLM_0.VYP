@@ -1,0 +1,66 @@
+ { ----------------------------
+   Zjednotenie formatu dat
+   ----------------------------
+ }
+ procedure format_mFPL_(FPL: PDmFPL);
+     var   bod,i : int;
+           zmena : bool;
+     begin
+       with FPL^ do
+         begin
+           {if trat_=nil then
+              begin}
+                start.cas:= DTtoSec(date.r,date.m,date.d, start.h,start.m,0);
+                prist.cas:= DTtoSec(date.r,date.m,date.d, prist.h,prist.m,0);
+                if prist.cas<start.cas then prist.cas:= prist.cas + secDAY;
+                na_bod:= 0; bodov:= 0;
+                poz:= poz_PROPOSED;
+              {end;}
+           stav_mFPL(FPL,absTime,zmena);
+           fillchar(sur,sizeof(sur),0);
+
+           {$IFDEF EDD} if stat='' then stat:= cnst_active; {$ENDIF}
+           cl:= get_stat_cl(stat)
+         end
+     end;
+
+
+
+{ ----------------------------
+  Nastavenie premennych
+  ----------------------------
+}
+ procedure format_mFPL(FPL: PDmFPL);
+     begin
+       with FPL^ do
+         begin
+           idn:= format_s(idn);
+           idn_:= format_(idn_);
+
+           ssr:= code_l4_7c(ssr);
+           ssr_:= format_s_(ssr_);
+           {if (ssr_[1]=' ') and (ssr<>code_l4_7c('')) then ssr_:= mod_A+cut_(ssr_);}
+
+           _8a:= format_(_8a);
+           if not (_8b in set_8bM) then _8b:= _8b_FPLM(FPL);
+
+           typ:= cut_(typ); typ2:= cut_(typ2);
+           rych_:= format_(rych_);
+           vys_ := format_(vys_);
+           vys2_:= format_(vys2_);
+
+           format_mFPL_(FPL)
+         end
+     end;
+
+ function format_mFPL_trat (FPL: PDmFPL): string;
+    var   b : bool;
+    begin
+      format_mFPL_trat:= '';
+      with FPL^ do
+        begin
+          if (trat_=nil) then format_mFPL_trat:= decode_trat_FPLM (FPL, trat_,bodov, false,true,false);
+          stav_mFPL(FPL,absTime,b);
+        end
+    end;
+

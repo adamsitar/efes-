@@ -1,0 +1,77 @@
+{$IFDEF PRN}
+ function print_FPL4(FPL: PFPL4): bool;
+    const max_s = 20;
+    var   s : array[0..max_s-1] of string;
+          t : string;
+          i,p,r : int;
+          b : bool;
+
+    begin
+      print_FPL4:= false;
+
+      if prn_FPL4_ICAO then
+         begin
+           s[0]:= icao_STD+hd_FPL+icao_ARR+FPL^._7+icao_ARR+FPL^._8;
+           s[1]:= icao_ARR+FPL^._9+icao_ARR+FPL^._10;
+           s[2]:= icao_ARR+FPL^._13;
+           r:= 3
+         end
+      else begin
+             s[0]:=   FPL^._7 + icao_ARR + FPL^._8
+                    + icao_ARR + FPL^._9  + icao_ARR + FPL^._10
+                    + icao_ARR + FPL^._13 + icao_ARR + FPL^._16;
+             r:= 1;
+           end;
+
+      for i:= 0 to get_data_lines_i_(FPL^._15)-1 do
+         begin
+           if r=max_s then break;
+           s[r+i]:= get_line_i(FPL^._15,i+1);
+           if i=0 then s[r]:= icao_ARR + s[r];
+           inc(r);
+         end;
+
+      if prn_FPL4_ICAO and (r<max_s) then
+         begin
+           s[r]:= icao_ARR+FPL^._16+icao_ARR+strpas(FPL^._17);
+           inc(r);
+         end;
+
+      for i:= 0 to get_data_lines_i_(FPL^._18)-1 do
+         begin
+           if r=max_s then break;
+           s[r+i]:= get_line_i(FPL^._18,i+1);
+           if i=0 then s[r]:= icao_ARR + s[r];
+           inc(r);
+         end;
+
+      if prn_FPL4_ICAO then s[r-1]:= s[r-1] + icao_ARR;
+
+      {IFDEF DEBUG
+       assign(t,'1.bak');
+       rewrite(t);
+       for i:= 0 to p-1 do writeln(t,s[i]);
+       close(t);
+      ENDIF}
+
+      b:= print_strs(PortNo,@s,r);
+      if b then for p:= 0 to 0 do print_str(PortNo,kbNL);
+      print_FPL4:= true
+    end;
+
+ procedure print_FPL4s(FPL4s: PFPL4s; top: pint; title: string);
+     var   i: int;
+     begin
+         i:= 0; while (i<1) and print_str(PortNo,_CR+_LF) do inc (i);
+         if i<1 then Exit;
+         if not print_head(PortNo, _PRN_TAB+title+_CR+_LF) then Exit;
+         if not print_str(PortNo,_CR+_LF) then Exit;
+
+         i:= 0; while (i<=int(top^)) and print_FPL4(FPL4s^[i]) do
+           begin
+             CheckProcesses;
+             inc(i)
+           end;
+         if i>=int(top^) then print_str(PortNo, kbNL)
+     end;
+{$ENDIF}

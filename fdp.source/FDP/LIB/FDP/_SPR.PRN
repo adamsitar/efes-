@@ -1,0 +1,59 @@
+ {$IFDEF PRN_SERVER}
+   function print_SPR(SPR: PSPR): bool;
+      begin
+        print_SPR:= true
+      end;
+
+ {$ELSE}
+
+   function print_SPR(SPR: PSPR): bool;
+      const m = 3+size_TLGadr+max_SPR_r_hi;
+      var   s: array[0..m-1] of string;
+            i,p: int;
+            ft : text;
+            b: bool;
+      begin
+       {$IFDEF PRN}
+        fillchar(s,sizeof(s),0);
+        with SPR^ do
+          begin
+
+            s[0]:= _spr_od(SPR);
+
+            s[1]:= tit_MSGpre;
+
+            p:= get_lines_i_(adr);
+            for i:= 1 to p do s[i]:= s[i] + get_line_i(adr,i);
+            if p=0 then inc(p);
+            p:= 1+p;
+
+            s[p]:= _spr_cas(SPR)+_spr_acc(SPR);
+            inc(p);
+
+            p:= init_pole_to_print (s,m,p,text,false);
+          end;
+         b:= print_strs(PortNo,@s,p);
+         if b then for i:= 0 to 0 do print_str(PortNo,kbNL);
+         print_SPR:= b
+        {$ENDIF}
+       end;
+ {$ENDIF}
+
+  procedure print_SPRs(SPRs: Pptrs; top: pointer; title: string);
+      var   i: int;
+      begin
+       {$IFDEF PRN}
+        i:= 0; while (i<1) and print_str(PortNo,_CR+_LF) do inc (i);
+        if i<1 then Exit;
+        if not print_head(PortNo, _PRN_TAB+title+_CR+_LF) then Exit;
+        if not print_str(PortNo,_CR+_LF) then Exit;
+
+        i:= 0; while (i<=int(top^)) and print_SPR(SPRs^[i]) do
+          begin
+            CheckProcesses0;
+            inc(i)
+          end;
+        if i>=int(top^) then print_str(PortNo, kbNL)
+       {$ENDIF}
+      end;
+

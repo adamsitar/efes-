@@ -1,0 +1,119 @@
+ {
+   Pr ce se souborem Dbase m  n sleduj¡c¡ kroky:
+
+   1. Metoda Init p©i©ad¡ objektu typu TDBF jm‚no diskov‚ho souboru a
+      inicializuje vnit©n¡ promˆnn‚ objektu. V tomto je podobna
+      procedu©e Assign.
+
+      A. Pr ce s existuj¡c¡m souborem DBASE
+      -------------------------------------
+
+  A.2 Metoda Open otev©e soubor. Po otev©en¡ se mu‘eme zeptat na status
+      pomoc¡ metody Status.
+
+  A.3 Status vrac¡ pro ka‘d‚ IO operaci jej¡ v˜sledek a resetuje
+      vnit©n¡ promˆnnou IOstatus na nulu. Kdy‘ Status vr t¡ nulu,
+      znamen  to, ‘e operace probˆhla bez chyby. Jinak Status vrac¡
+      chybov˜ kod. Chybov‚ kody jsou chyby kter‚ vrac¡ DOS a nˆkter‚
+      specifick‚ chyby soubor– DBASE. Chyby DOS jsou pops ny v manu lu
+      DOS nebo i v definici modulu SOUBORY. Chybov‚ kody DBASE jsou
+      pops ny v tomto souboru v definic¡ch konstant, nap©. MemErr=$2001;
+
+  A.4 Metoda Seek nastavuje pozici v souboru DBASE. Od nastaven‚ pozice
+      lze ‡¡st soubor sekven‡nˆ metodou Read nebo ReadRec.
+
+  A.5 Metody GoTop a GoBot nastavuj¡ pozici v souboru na za‡ tek nebo
+      na konec.
+
+  A.6 Metoda ReadRec ‡te jednu vˆtu na aktu ln¡ pozici v souboru do
+      vnit©n¡ho bufru a posunuje pozici v souboru o vˆtu d l.
+      Po ‡ten¡ pomoc¡ metody ReadRec lze vytahovat jednotliv‚ polo‘ky
+      vetu pomoc¡ metody GetFld.
+
+  A.7 Metoda GetFld je funkc¡ kter  vr t¡ obsah jedn‚ polo‘ky aktu ln¡
+      vˆty, p©e‡ten‚ do vnitrn¡ho bufru metodou ReadRec. Parametrem
+      metody GetFld je jm‚no polo‘ky. Nezapome¤te, ‘e jm‚no polo‘ky
+      mus¡ b˜t uvedeno velk˜mi p¡smeny!
+
+  A.8 Polo‘ky p©e‡ten‚ vˆty m–‘eme i opravovat metodou PutFld.
+      Prvn¡m parametrem metody GetFld je jm‚no polo‘ky. Nezapome¤te, ‘e
+      jm‚no polo‘ky mus¡ b˜t uvedeno velk˜mi p¡smeny!
+      Po opravˆ pot©ebn˜ch polo‘ek vˆtu zap¡¨eme na disk medodou WriteRec.
+      Zde v¨ak je skryta z ludnoust: ReadRec posune smern¡k dop©edu,
+      tak‘e n sledn‚ WriteRec zap¡¨e do n sleduj¡c¡ vˆty. Opravenou
+      vˆtu mus¡me zaps t n sleduj¡c¡ sekvenc¡: GoBack; WriteRec;
+
+  A.9 Metoda WriteRec zap¡¨e vˆtu v bufru a posune smˆrn¡k dop©edu.
+
+  A.10 Metody Read a Write jsou metody ni‘¨¡ £rovnˆ. Read ‡te vˆtu do
+       vnˆj¨¡ho bufru, pascalsk‚ promˆnn‚. Write zapisuje vˆtu v
+       pascalsk‚ promˆnn‚. Obˆ metody posunuj¡ smern¡k v souboru o
+       vˆtu dop©edu. P©i pou‘it¡ tˆchto metod se ztrac¡ mo‘nost
+       vytahovat jednotliv‚ polo‘ky vˆty.
+
+
+      B. Pr ce s nov˜m souborem DBASE
+      -------------------------------
+
+  B.2 ! Je¨tˆ p©ed vytvo©en¡ diskov‚ho souboru metodou Make mus¡me
+      vytvo©it strukturu souboru metodou AddField.
+      Pozor! U ji‘ otev‘en‚ho souboru nelze mˆnit strukturu!
+      Strukturu vytv ©¡me tak, ‘e postupnˆ p©id v me polo‘ky,
+      u nich‘ specifikujeme jm‚no, typ, d‚lku a po‡et desetinn˜ch m¡st.
+      Typy polo‘ek se nekontroluj¡ a tak lze vytv rˆt i polo‘ky
+      kter‚ origil ln¡ DBASE nebo FoxBase nezn . Pak ale je n m takov˜
+      soubor k ni‡emu. D‚lka jedn‚ polo‘ky je omezena na 255 znak–,
+      po‡et polo‘ek nen¡ prakticky omezen, celkov  d‚lka vˆty v¨ak nesm¡
+      p©es hnout 65535 znak–.
+
+  B.3 Metoda Make otev©e soubor. Existuj¡c¡ soubor se stejn˜m jm‚nem
+      ve stejn‚m adres ©i se p©itom vyma‘e. Po otev©en¡ se mu‘eme
+      zeptat na status pomoc¡ metody Status.
+
+  B.4 Status vrac¡ pro ka‘d‚ IO operaci jej¡ v˜sledek a resetuje
+      vnit©n¡ promˆnnou IOstatus na nulu. Kdy‘ Status vr t¡ nulu,
+      znamen  to, ‘e operace probˆhla bez chyby. Jinak Status vrac¡
+      chybov˜ kod. Chybov‚ kody jsou chyby kter‚ vrac¡ DOS a nˆkter‚
+      specifick‚ chyby soubor– DBASE. Chyby DOS jsou pops ny v manu lu
+      DOS nebo i v definici modulu SOUBORY. Chybov‚ kody DBASE jsou
+      pops ny v tomto souboru v definic¡ch konstant, nap©. MemErr=$2001;
+
+  B.5 Metoda Seek nastavuje pozici v souboru DBASE. Od nastaven‚ pozice
+      lze ‡¡st soubor sekven‡nˆ metodou Read nebo ReadRec.
+
+  B.6 Metody GoTop a GoBot nastavuj¡ pozici v souboru na za‡ tek nebo
+      na konec.
+
+  B.7 Metoda ReadRec ‡te jednu vˆtu na aktu ln¡ pozici v souboru do
+      vnit©n¡ho bufru a posunuje pozici v souboru o vˆtu d l.
+      Po ‡ten¡ pomoc¡ metody ReadRec lze vytahovat jednotliv‚ polo‘ky
+      vetu pomoc¡ metody GetFld.
+
+  B.8 Metoda GetFld je funkc¡ kter  vr t¡ obsah jedn‚ polo‘ky aktu ln¡
+      vˆty, p©e‡ten‚ do vnitrn¡ho bufru metodou ReadRec. Parametrem
+      metody GetFld je jm‚no polo‘ky. Nezapome¤te, ‘e jm‚no polo‘ky
+      mus¡ b˜t uvedeno velk˜mi p¡smeny!
+
+  B.9 Polo‘ky p©e‡ten‚ vˆty m–‘eme i opravovat metodou PutFld.
+      Prvn¡m parametrem metody GetFld je jm‚no polo‘ky. Nezapome¤te, ‘e
+      jm‚no polo‘ky mus¡ b˜t uvedeno velk˜mi p¡smeny!
+      Po opravˆ pot©ebn˜ch polo‘ek vˆtu zap¡¨eme na disk medodou WriteRec.
+      Zde v¨ak je skryta z ludnoust: ReadRec posune smern¡k dop©edu,
+      tak‘e n sledn‚ WriteRec zap¡¨e do n sleduj¡c¡ vˆty. Opravenou
+      vˆtu mus¡me zaps t n sleduj¡c¡ sekvenc¡: GoBack; WriteRec;
+
+ B.10 Metoda WriteRec zap¡¨e vˆtu v bufru a posune smˆrn¡k dop©edu.
+
+ B.11 Metody Read a Write jsou metody ni‘¨¡ £rovnˆ. Read ‡te vˆtu do
+      vnˆj¨¡ho bufru, pascalsk‚ promˆnn‚. Write zapisuje vˆtu v
+      pascalsk‚ promˆnn‚. Obˆ metody posunuj¡ smern¡k v souboru o
+      vˆtu dop©edu. P©i pou‘it¡ tˆchto metod se ztrac¡ mo‘nost
+      vytahovat jednotliv‚ polo‘ky vˆty.
+
+ 12.  Zpracov n¡ souboru ukon‡¡me metodou Close. Tato metoda pouze
+      vypl chne bufry na disk a uzav©e soubor. Nenastavuje znovu
+      po‡ te‡n¡ hodnoty objektu typu TDBF. Proto po uzav©en¡ souboru
+      mus¡me ukon‡¡t pr ci s objektem typu TDBF metodou Done.
+      Dal¨¡ pr ci s promˆnnou typu TDBF za‡neme zase od Adama,
+      t.j. Init,Open/Make,ReadRec/WriteRec,GetFld/PutFld,Close,Done.
+   }

@@ -1,0 +1,110 @@
+function code0_ZAM_(ZAM: PZAM): string;
+   var   s,t : string;
+         i   : int;
+   begin
+     with ZAM^ do
+       begin
+         s:=   ZAC_SPR + code_l4_datum(dap)
+             + ODD_SPR + format_s(src)
+             + ODD_SPR + format_s(kod)
+
+             + ODD_SPR + TimeToStr(zac.h,zac.m,'')+' '+TimeToStr(kon.h,kon.m,'')
+             + ODD_SPR + format_s(prav)
+             + ODD_SPR + format_s(vys)
+             + ODD_SPR + ' '{vys_}
+
+             + ODD_SPR + format_s(VU)
+             + ODD_SPR + format_s(strpas(ulohy))
+             + ODD_SPR + format_s(strpas(typy))
+
+             + ODD_SPR + format_s(cut_r(get_line_i(pozn,1)))+' '
+             + ODD_SPR + format_s(cut_r(get_line_i(pozn,2)))+' '
+
+             + ODD_SPR + DateToStr(zac.den,zac.mes,zac.rok,0,'')+' '
+             + ODD_SPR + format_s(code0_stat(stat))
+             + ODD_SPR + DateToStr(kon.den,kon.mes,kon.rok,0,'')+' '
+             + ODD_SPR + TimeToStr2(dap.h,dap.m,dap.s,'','')
+             + KON_SPR;
+       end;
+     code0_ZAM_:= s
+   end;
+
+procedure decode0_ZAM_(s: string; ZAM: PZAM);
+    var   t : string;
+          b : byte;
+          i : int;
+    begin
+      fillchar(ZAM^,sizeof(TZAM),0);
+      with ZAM^ do
+        begin
+
+          decode_l4_datum(GetStr(s,1,setLET_1_1),dap);
+          src:= GetStr(s,2,setLET_1_1);
+          kod:= GetStr(s,3,setLET_1_1);
+
+          t:= GetStr(s,4,setLET_1_1);
+          GetTimeStr(zac.h,zac.m,b, Copy(t,1,4));
+          GetTimeStr(kon.h,kon.m,b, Copy(t,6,4));
+
+          prav:= getchar(GetStr(s,5,setLET_1_1));
+
+          vys := GetStr(s,6,setLET_1_1);
+          {vys_:= getchar(GetStr(s,7,setLET_1_1));}
+
+          VU  := GetStr(s,8,setLET_1_1);
+          ulohy := strpasnew(cut_(GetStr(s,9,setLET_1_1)));
+          typy := strpasnew(cut_(GetStr(s,10,setLET_1_1)));
+
+          pozn:= strpasnew(GetStr(s,11,setLET_1_1) + kbNL + GetStr(s,12,setLET_1_1));
+
+          GetDateStr(zac.rok,zac.mes,zac.den, GetStr(s,13,setLET_1_1), false);
+          datum_init (kon, zac.den,zac.mes,zac.rok, kon.h,kon.m,kon.s);
+          if   DTtoSec(kon.rok,kon.mes,kon.den, kon.h,kon.m,kon.s)
+             < DTtoSec(zac.rok,zac.mes,zac.den, zac.h,zac.m,zac.s)
+             then NextDate(kon.rok,kon.mes,kon.den);
+
+          stat := decode0_stat(GetStr(s,14,setLET_1_1));
+
+          GetTimeStr(dap.h,dap.m,dap.s, GetStr(s,16,setLET_1_1))
+        end
+    end;
+
+
+{ ---------------------
+  kodovanie pre prenos
+  --------------------- }
+
+procedure code0_ZAM(ZAM: PZAM; var pkt: TNETpkt); far;
+    var   s : string;
+    begin
+      s:= code0_ZAM_(ZAM);
+      new_NETpkt_data (@s[1],length(s), pkt.pkt)
+    end;
+
+procedure decode0_ZAM(const pkt: TNETpkt; ZAM: PZAM);
+   begin
+     decode0_ZAM_(init_str(pkt.pkt.data,pkt.pkt.dlz), ZAM)
+     {$IFDEF NET};
+       rec_data(pkt.ods, ZAM^.rec);
+     {$ENDIF}
+   end;
+
+
+{ ---------------------
+  kluc
+  ---------------------
+}
+
+procedure decode0key_ZAM(s: string; ZAM: PZAM);
+    begin
+      fillchar(ZAM^,sizeof(ZAM^),0);
+      with ZAM^ do
+        begin
+          src := getstr(s,1,setLET_1_1);
+          kod := getstr(s,2,setLET_1_1);
+          decode_l4_datum(GetStr(s,3,setLET_1_1),dap);
+          GetDateStr(zac.rok,zac.mes,zac.mes, GetStr(s,4,setLET_1_1), false);
+          GetDateStr(kon.rok,kon.mes,kon.mes, GetStr(s,5,setLET_1_1), false);
+          {dap.rok:= zac.rok; dap.mes:= zac.mes; dap.den:= zac.den;}
+        end
+    end;

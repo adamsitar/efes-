@@ -1,0 +1,276 @@
+{ ------------------------
+   FDP...
+  תתתתתתתתתתתתתתתתתתתתתתתת
+}
+
+ function code_bod_(kod: string; size: byte; h,m: byte): string;
+    begin
+      code_bod_:= rightchar(kod,size,' ')+code_l4_utc(h,m)
+    end;
+
+ procedure decode_bod_(s: string; var kod: string; var h,m: byte);
+     begin
+       kod:= cut_(copy(s,1,length(s)-kod_TIME));
+       decode_l4_utc(copy(s,length(s)-kod_TIME+1,kod_TIME),h,m);
+     end;
+
+
+{ FDP0:  UCR7702-YK40-UKDD1700-UKKK1800-PEKIT1729-KA   1750-PPL-18051999
+}
+
+ function code_PLN_s(PLN: PPLN): string;
+
+    begin
+      with PLN^ do code_PLN_s:=
+
+                        format_s_(idn)
+           + icao_ARR + format_s_(typ)
+
+           + icao_ARR + code_bod_ (dep.kod,kod_AP,  dep.h,dep.m)
+           + icao_ARR + code_bod_ (arr.kod,kod_AP,  arr.h,arr.m)
+
+           + icao_ARR + code_bod_ (eet.kod,kod_NDB, eet.h,eet.m)
+           + icao_ARR + code_bod_ (exi.kod,kod_NDB, exi.h,exi.m)
+
+           + icao_ARR + format_s (strpas(src))
+
+           + icao_ARR + DateToStr (date.d,date.m,date.r,0,'')
+    end;
+
+ procedure decode_PLN_s(s: string; PLN: PPLN); far;
+     begin
+       fillchar(PLN^,sizeof(PLN^),0);
+
+       with PLN^ do
+         begin
+           idn := getstr(s,1,[icao_ARR]);
+           typ := getstr(s,2,[icao_ARR]);
+           with dep do decode_bod_ (getstr(s,3,[icao_ARR]), kod,h,m);
+           with arr do decode_bod_ (getstr(s,4,[icao_ARR]), kod,h,m);
+           with eet do decode_bod_ (getstr(s,5,[icao_ARR]), kod,h,m);
+           with exi do decode_bod_ (getstr(s,6,[icao_ARR]), kod,h,m);
+           src:= strpasnew(getstr(s,7,[icao_ARR]));
+           GetDateStr(date.r,date.m,date.d, getstr(s,8,[icao_ARR]), false);
+         end
+     end;
+
+
+{ =========
+   PLN0 :
+  =========
+}
+
+{ ------------------------
+   kodovanie/de... pre DB
+  תתתתתתתתתתתתתתתתתתתתתתתת
+}
+ procedure _codeDB0_PLN(PLN: PPLN; buff: PDB_buff; desc: PDB_head); far;
+     var   s : string;
+     begin
+       s:= code_PLN_s(PLN);
+       {$IFDEF NET}
+         s:= s + ODD_SPR + rectostr(PLN^.rec);
+       {$ENDIF}
+       str_toDBstr(s,buff^[0])
+     end;
+
+ procedure _decodeDB0_PLN(buff: PDB_buff; PLN: PPLN; head: PDB_head); {far;}
+     var   s : string;
+     begin
+       s:= DBstr_to_str(buff^[0]);
+       decode_PLN_s(getstr(s,1,[ODD_SPR]),PLN);
+       {$IFDEF NET}
+         strtorec(getstr(s,2,[ODD_SPR]),PLN^.rec);
+       {$ENDIF}
+     end;
+
+{ ------------------------
+   kodovanie/de... prenos
+  תתתתתתתתתתתתתתתתתתתתתתתת
+}
+ procedure code0_PLN(PLN: PPLN; var pkt: TNETpkt); far;
+     var   s : string;
+     begin
+       s:= code_PLN_s(PLN);
+       new_NETpkt_data (@s[1],length(s),pkt.pkt)
+     end;
+
+ procedure decode0_PLN(const pkt: TNETpkt; PLN: PPLN); {far}
+     begin
+       decode_PLN_s(init_str(pkt.pkt.data,pkt.pkt.dlz), PLN);
+       {$IFDEF NET}
+         rec_data(pkt.ods, PLN^.rec)
+       {$ENDIF}
+     end;
+
+
+{ =========
+   PLN :
+  =========
+}
+
+
+{ FDPNX :  (PLN                                     ; pole 3
+            -5003                                   ; pole 7
+            -T154                                   ; pole 10
+            -UKBB1000                               ; pole 13
+            -EET1200 EXI1300                        ; pole 15
+            -UEEE1500                               ; pole 17
+            -DATE/                                  ; datum platnosti
+             SRC/                                   ; povolenie
+           )
+}
+
+ function code_l4_PLN_ (PLN: PPLN; cislo: string): pchar;
+    var   pch : pchar;
+    begin
+      with PLN^ do
+        pch:= StrPasNew
+        (   icao_STD + hd_PLN + cislo
+          + icao_ARR + idn
+          + icao_ARR + typ
+          + icao_ARR + code_bod_ (dep.kod,kod_AP,dep.h,dep.m)
+          + icao_ARR + code_bod_ (eet.kod,kod_NDB,eet.h,eet.m)
+          + icao_ARR + code_bod_ (exi.kod,kod_NDB,exi.h,exi.m)
+          + icao_ARR + code_bod_ (arr.kod,kod_AP,arr.h,arr.m)
+          + icao_ARR + rmk_DATE + icao_NXT + code_l4_date(date)
+          + icao_NXIT+ rmk_SRC  + icao_NXT + strpas(l4_format_p(src))
+          + icao_END
+        );
+      code_l4_PLN_:= pch
+    end;
+
+ function  decode_l4_PLN_ (src: pchars; size: TNETdlz; PLN: PPLN): string;
+    var    data: pchars;
+           s: string;
+    begin
+      decode_l4_PLN_:= '';
+      fillchar(PLN^,sizeof(PLN^),0);
+      data:= src; frame_l4_pkt(data,size,s);
+
+      with PLN^ do
+        begin
+          idn:= get_str(data,size,2,[icao_ARR],sizeof(idn)-1);
+          typ:= get_str(data,size,3,[icao_ARR],sizeof(typ)-1);
+
+          with dep do decode_bod_ (get_str(data,size,4,[icao_ARR],sizeof(string)-1), kod,h,m);
+          with eet do decode_bod_ (get_str(data,size,5,[icao_ARR],sizeof(string)-1), kod,h,m);
+          with exi do decode_bod_ (get_str(data,size,6,[icao_ARR],sizeof(string)-1), kod,h,m);
+          with arr do decode_bod_ (get_str(data,size,7,[icao_ARR],sizeof(string)-1), kod,h,m);
+
+          s:= get_str(data,size,8,[icao_ARR],sizeof(string)-1)+NULL;
+          decode_l4_date(_item_18_(@s[1],rmk_DATE,1),date);
+          src:= strpasnew(decode_l4_s(_item_18_(@s[1],rmk_SRC,1),true));
+       end;
+    end;
+
+
+{ ------------------------
+   kodovanie/de... pre DB
+  תתתתתתתתתתתתתתתתתתתתתתתת
+}
+ procedure _codeDBB_PLN(PLN: PPLN; buff: PDB_buff; head: PDB_head); far;
+     var   s,t,u : string;
+     begin
+       with PLN^ do
+         begin
+           s:= '';
+          { pri kazdej zmene upravit
+               "_codeDBB_PLNrec"
+          }
+           add_s(@idn[0],sizeof(idn), s,t);
+           add_s(@typ[0],sizeof(typ), s,t);
+
+           add_s(@dep,sizeof(dep), s,t);
+           add_s(@eet,sizeof(eet), s,t);
+           add_s(@exi,sizeof(exi), s,t);
+           add_s(@arr,sizeof(arr), s,t);
+
+           u:= strpas(src);
+           add_s(@u[0],1+length(u), s,t);
+
+           add_s(@date,sizeof(date),s,t);
+
+           add_s(@rec, sizeof(rec), s,t);
+         end;
+       str_toDBstr_(s,buff^[db_PLN_data])
+     end;
+
+ procedure _decodeDBB_PLN(buff: PDB_buff; PLN: PPLN; head: PDB_head); {far;}
+     var   s,t,u : string;
+           p : pchars;
+           i : int;
+     begin
+       s:= DBstr_to_str_ (buff^[db_PLN_data]); p:= @s[1];
+       with PLN^ do
+         begin
+           get_s(p, @idn[0],sizeof(idn));
+           get_s(p, @typ[0],sizeof(typ));
+
+           get_s(p, @dep,sizeof(dep));
+           get_s(p, @eet,sizeof(eet));
+           get_s(p, @exi,sizeof(exi));
+           get_s(p, @arr,sizeof(arr));
+
+           get_s_x(p, u,sizeof(u)-1);
+           src:= strpasnew(u);
+
+           get_s(p, @date,sizeof(date));
+
+           get_s(p, @rec,sizeof(rec));
+         end;
+     end;
+
+
+ procedure codeDB_PLN (PLN: PPLN; buff: PDB_buff; head: PDB_head);
+     begin
+       if head^.attr and DBbin <> 0 then _codeDBB_PLN(PLN,buff,head)
+       else if head^.attr and DBtxt = 0 then _codeDB0_PLN(PLN,buff,head)
+       {else _codeDBT_PLN(PLN,buff,head)}
+     end;
+
+ procedure decodeDB_PLN (buff: PDB_buff; PLN: PPLN; head: PDB_head);
+     begin
+       fillchar(PLN^,sizeof(PLN^),0);
+       if head^.attr and DBbin <> 0 then _decodeDBB_PLN(buff,PLN,head)
+       else if head^.attr and DBtxt = 0 then _decodeDB0_PLN(buff,PLN,head)
+       {else _decodeDBT_PLN (buff,PLN,head);}
+     end;
+
+
+{ ------------------------
+   kodovanie/de... prenos
+  תתתתתתתתתתתתתתתתתתתתתתתת
+}
+ procedure code_PLN(PLN: PPLN; var pkt: TNETpkt);
+     var   pch : pchar;
+     begin
+       pch:= code_l4_PLN_ (PLN,'');
+       new_NETpkt_data (pchars(pch),strlen(pch), pkt.pkt);
+       strdispose(pch)
+     end;
+
+ procedure decode_PLN(const pkt: TNETpkt; PLN: PPLN);
+     begin
+       decode_l4_PLN_ (pkt.pkt.data,pkt.pkt.dlz,PLN);
+       {$IFDEF NET}
+         rec_data(pkt.ods, PLN^.rec)
+       {$ENDIF}
+     end;
+
+
+{ ---------------------
+  kluc
+  ---------------------
+}
+ function  codekey_PLN(PLN: PPLN): string;
+    begin
+      if PLN<>nil then codekey_PLN:= codekey_fpl(PLN^.idn,PLN^.dep.kod,PLN^.date)
+      else codekey_PLN:= ''
+    end;
+
+ procedure decodekey_PLN(s: string; PLN: PPLN);
+     begin
+       fillchar(PLN^,sizeof(PLN^),0); { nesmie sa zrusit ! }
+       decodekey_fpl(s, PLN^.idn,PLN^.dep.kod,PLN^.date);
+     end;

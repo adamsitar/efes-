@@ -1,0 +1,46 @@
+{ תתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתת
+   opravy poloziek
+  תתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתת
+}
+function _format_FPL4_14 (FPL: PFPL4; var _14a,_14b,_14c,_14d,_14e : string): bool;
+
+   var   FDR  : DFDR;
+         Bi   : TOBxy;
+         eetB : TsBod;
+         sres : string;
+         ires : int;
+         is14 : bool;
+   begin
+     _14a:= ''; _14b:= ''; _14c:= ''; _14d:= ''; _14e:= '';
+
+     fillchar(FDR,sizeof(FDR),0);
+     fillchar(Bi,sizeof(Bi),0);
+
+     (*
+     if
+
+     _decode_FDR (FPL^,FDR,false,sres);
+     ires:= _cas_na_vstupnom_bode(FPL^,FDR, Bi,eetB, false, sres,ires, is14);
+     if (not is14) and (FDR.rte.rte_<>nil) and (FDR.rte.bodov>0) then
+        with FDR.rte.rte_^[0] do
+          begin
+            Bi.kod:= kod;
+            Bi.h:= h; Bi.m:= m
+          end;
+
+     _14a:= Bi.kod;
+     _14b:= TimeToStr(Bi.h,Bi.m,'');
+     _14c:= alt_to_str(FDR.vys, FDR.vys_,'', in_FL {(FDR.vys_ in [altA,altFL])}, alt_VFR_sym);
+     if FDR.vys2<>0 then
+        begin
+          _14d:= alt_to_str(FDR.vys2,FDR.vys2_,'',(FDR.vys_ in [altA,altFL]),alt_VFR_sym);
+          _14e:= FDR.vys2_a
+        end
+     else begin
+            _14d:= ''; _14e:= '';
+          end;
+
+     disp_FDR(@FDR);
+     *)
+     _format_FPL4_14:= _14a<>''
+   end;

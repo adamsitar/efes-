@@ -1,0 +1,152 @@
+{ ---------------------
+  DB
+  ---------------------
+}
+ procedure _codeDB0_ZAM(ZAM: PZAM; buff: PDB_buff; desc: PDB_head); far;
+     var   s : string;
+     begin
+       s:= code0_ZAM_(ZAM);
+       {$IFDEF NET} s:= s+KON_SPR+rectostr(ZAM^.rec); {$ENDIF}
+       Move(buff^[0],s[0],ord(buff^[0][0])+1);
+     end;
+
+ procedure _decodeDB0_ZAM(buff: PDB_buff; ZAM: PZAM; desc: PDB_head); far;
+     var   s : string;
+     begin
+       Move(buff^[0],s[0],ord(buff^[0][0])+1);
+       decode0_ZAM_(s, ZAM);
+       {$IFDEF NET}
+        strtorec(getstr(s,2,[KON_SPR]), ZAM^.rec);
+       {$ENDIF}
+     end;
+
+
+ procedure _codeDBB_ZAM(ZAM: PZAM; buff: PDB_buff; desc: PDB_head); far;
+     var   size: int;
+           s,t: string;
+     begin
+       with ZAM^ do
+         begin
+(*          { data
+          }
+           s:= '';
+           add_s(@kod[0],sizeof(kod), s,t);
+
+           add_s(@zac, sizeof(zac), s,t);
+           add_s(@kon, sizeof(kon), s,t);
+
+           add_s(@prav,sizeof(prav), s,t);
+           add_s(@vys[0],sizeof(vys), s,t);
+
+           add_s(@vu[0], sizeof(vu), s,t);
+
+           add_s(@stat[0],sizeof(stat),s,t);
+
+           add_s(@src[0], sizeof(src),s,t);
+           add_s(@dap,sizeof(dap),s,t);
+
+           str_toDBstr(s,buff^[db_ZAM_data]);
+
+
+             ulohy : pchar;
+             typy  : pchar;          { 41 }
+             pozn  : pchar;
+
+             src   : string[KOD_AP]; { letisko podania planu }
+             dap   : TDatum;         { datum podania/opravy  }
+
+             stat  : string[kod_plan_status];
+
+
+          { pozn
+          }
+           str_toDBstr_(strpas(ZAM^.pozn),buff^[db_ZAM_18]);
+
+
+             {$IFDEF NET}
+              rec  : Tplan_rec;
+             {$ENDIF}
+
+             poz   : Tpoz
+
+          { poznamka
+          }
+           str_toDBstr(strpas(ZAM^.pozn),buff^[db_ZAM_18]);
+
+          { prevzatie spravy
+          }
+           s:= '';
+           add_s(@rec,sizeof(rec), s,t);
+           str_toDBstr(s,buff^[db_ZAM_ine])
+*)       end;
+       end;
+
+ procedure _decodeDBB_ZAM(buff: PDB_buff; ZAM: PZAM; desc: PDB_head); far;
+     var   s,t : string;
+           i : int;
+           p : pchars;
+     begin
+       fillchar(ZAM^,sizeof(ZAM^),0);
+(*       with ZAM^ do
+         begin
+          { data
+          }
+           s:= DBstr_to_str (buff^[db_ZAM_data]); p:= @s[1];
+           get_s(p, @kod[0],sizeof(kod));
+
+           get_s(p, @vys1[0],sizeof(vys1));
+           get_s(p, @vys2[0],sizeof(vys2));
+           get_s(p, @vys1p[0],sizeof(vys1p));
+           get_s(p, @vys2p[0],sizeof(vys2p));
+
+           get_s(p, @zac, sizeof(zac));
+           get_s(p, @kon, sizeof(kon));
+           get_s(p, @zacp,sizeof(zacp));
+           get_s(p, @konp,sizeof(konp));
+
+           get_s(p, @unt[0], sizeof(unt));
+           get_s(p, @stat[0],sizeof(stat));
+           get_s(p, @let[0], sizeof(let));
+
+           get_s(p, @dap,sizeof(dap));
+           get_s(p, @das,sizeof(das));
+
+          { poznamka
+          }
+           ZAM^.pozn:= strpasnew(DBstr_to_str (buff^[db_ZAM_18]));
+
+          { prevzatie spravy
+          }
+           s:= DBstr_to_str (buff^[db_ZAM_ine]); p:= @s[1];
+           get_s(p, @rec,sizeof(rec));
+         end;
+*)   end;
+
+
+ procedure _codeDBT_ZAM(ZAM: PZAM; buff: PDB_buff; desc: PDB_head);
+     var   s : string;
+     begin
+       str_toDBstr(code_ZAM_data(ZAM),buff^[db_ZAM_data]);
+       str_toDBstr(strpas(ZAM^.pozn),buff^[db_ZAM_18]);
+       str_toDBstr(code_ZAM_19(ZAM,true),buff^[db_ZAM_19]);
+       s:= '' {$IFDEF NET} + icao_ARR + rectostr(ZAM^.rec) {$ENDIF};
+       str_toDBstr(s,buff^[db_ZAM_ine])
+     end;
+
+ procedure _decodeDBT_ZAM(buff: PDB_buff; ZAM: PZAM; desc: PDB_head);
+     var   res, s,t : string;
+           i : int;
+     begin
+       fillchar(ZAM^,sizeof(ZAM^),0);
+
+       decode_ZAM_data (DBstr_to_str (buff^[db_ZAM_data]), ZAM, res,false);
+       ZAM^.pozn:= strpasnew(DBstr_to_str (buff^[db_ZAM_18]));
+       decode_ZAM_19 (DBstr_to_str (buff^[db_ZAM_19]), ZAM);
+
+       s:= DBstr_to_str (buff^[db_ZAM_ine]); i:= 1;
+       {$IFDEF NET} strtorec(getstr(s,i,[icao_ARR]), ZAM^.rec);
+       {$ENDIF}
+
+       {format_ZAM(ZAM);}
+     end;
+

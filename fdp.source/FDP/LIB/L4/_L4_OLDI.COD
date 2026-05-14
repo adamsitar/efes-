@@ -1,0 +1,37 @@
+function O_L4444._code_ACT (var FPL: DFPL4): pchar;
+   var   pch : pchar;
+         s   : string;
+   begin
+     with FPL do
+       begin
+         s:=   _7
+             + icao_ARR + _13 {code_l4_13a(_13,false)}
+             + icao_ARR + _14
+             + icao_ARR + _16 {code_l4_16a(_16,false)};
+
+         if _8<>'' then s:= s + icao_ARR + '8'+ icao_NXT+_8;
+         s:= s + icao_ARR + '9'+icao_NXT+_9;
+         s:= s + icao_ARR +'10'+icao_NXT+_10;
+
+         s:= s +icao_ARR + '15'+icao_NXT;
+         pch:= StrPasNew(s);
+         pch:= StrNCopy(pch,FPL._15,true,false);
+
+         {   +icao_ARR + '18'+icao_NXT
+          pch:= StrNCopy(pch,FPL._18,true,false);
+         }
+      end;
+     _code_ACT:= pch
+   end;
+
+function O_L4444.send_ACT(var FPL: DFPL4; key: string; typ: TNETtyp): bool;
+   var   pch: pchar;
+   begin
+      pch:= _code_ACT(FPL);
+      send_ACT:= pch<>nil;
+      if pch<>nil then
+         begin
+           send_data(NODE_REMOTE, hd_ICAO[msACT],'','', pchars(pch),strlen(pch), key,typ);
+           StrDispose(pch)
+         end
+   end;

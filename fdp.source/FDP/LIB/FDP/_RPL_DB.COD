@@ -1,0 +1,77 @@
+{ ---------------------
+  DB
+  ---------------------
+}
+
+{ pri kazdej zmene upravit i "_decodeDBB_FPL4_FDR"...
+}
+ procedure _codeDBB_RPL (RPL: PRPL; buff: PDB_buff; desc: PDB_head); far;
+     var   s,t,u: string;
+     begin
+       with RPL^ do
+         begin
+           s:= '';
+           add_s(@val, sizeof(val), s,t);
+
+           add_s(@zac,sizeof(zac), s,t);
+           add_s(@kon,sizeof(kon), s,t);
+           add_s(@dni,sizeof(dni), s,t);
+
+           add_s(@_7a,sizeof(_7a), s,t);
+           add_s(@_7x,sizeof(_7x), s,t);
+
+           add_s(@_9b,sizeof(_9b), s,t);
+           add_s(@_9c,sizeof(_9c), s,t);
+
+           add_s(@_13a,sizeof(_13a), s,t);
+           add_s(@_13b,sizeof(_13b), s,t);
+
+           add_s(@_16a,sizeof(_16a), s,t);
+           add_s(@_16b,sizeof(_16b), s,t);
+
+           str_toDBstr_(s,buff^[db_rpl_data]);
+
+           str_toDBstr(code_line_i(_15,1,3),buff^[db_rpl_15]);
+
+           str_toDBstr(code_line_i(_18,1,3),buff^[db_rpl_18]);
+         end;
+     end;
+
+
+ procedure _decodeDBB_RPL (buff: PDB_buff; RPL: PRPL; desc: PDB_head); far;
+     var   s,t,u : string;
+           p : pchars;
+           i : int;
+     begin
+       fillchar(RPL^,sizeof(RPL^),0);
+       with RPL^ do
+         begin
+           s:= DBstr_to_str_ (buff^[db_rpl_data]); p:= @s[1];
+
+           get_s(p, @val,sizeof(val));
+
+           get_s(p, @zac,sizeof(zac));
+           get_s(p, @kon,sizeof(kon));
+           get_s(p, @dni,sizeof(dni));
+
+           get_s(p, @_7a,sizeof(_7a));
+           get_s(p, @_7x,sizeof(_7x));
+
+           get_s(p, @_9b,sizeof(_9b));
+           get_s(p, @_9c,sizeof(_9c));
+
+           get_s(p, @_13a,sizeof(_13a));
+           get_s(p, @_13b,sizeof(_13b));
+
+           get_s(p, @_16a,sizeof(_16a));
+           get_s(p, @_16b,sizeof(_16b));
+
+          { trat: 15
+          }
+           _15:= decode_line_i (DBstr_to_str(buff^[db_rpl_15]), _15,[]);
+
+          { pozn : 18,19,20
+          }
+           _18:= decode_line_i (DBstr_to_str(buff^[db_rpl_18]), _18,[]);
+         end;
+     end;

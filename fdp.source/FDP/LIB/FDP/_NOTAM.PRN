@@ -1,0 +1,54 @@
+
+ {$IFDEF PRN_SERVER}
+   function print_NTM(NTM: PNTM): bool;
+      begin
+        print_NTM:= true
+      end;
+
+ {$ELSE}
+
+   function print_NTM(NTM: PNTM): bool;
+      const m = 3+max_NTM_D_r_hi+max_NTM_E_r_hi;
+      var   s: array[0..m-1] of string;
+            i,p: int;
+            t: text;
+            b: bool;
+      begin
+        with NTM^ do
+          begin
+            s[0]:= _PRN_TAB + icao_STD  + strpas(_NTM);
+            s[1]:= _PRN_TAB + icao_ARR  + strpas(_Q);
+            s[2]:= _PRN_TAB + icao_ARR  + _A
+                            + icao_ARR  + _B + ' ' + _C
+                            + icao_ARR  + _F + ' ' + _G
+                            ;
+            p:= init_pole_to_print (s,m,3,_D,false);
+            p:= init_pole_to_print (s,m,p,_E,true)
+          end;
+        {$IFDEF DEBUG}
+         assign(t,'1.bak');
+         rewrite(t);
+         for i:= 0 to p-1 do writeln(t,s[i]);
+         close(t);
+        {$ENDIF}
+         b:= print_strs(PortNo,@s,p);
+         if b then for i:= 0 to 0 do print_str(PortNo,kbNL);
+         print_NTM:= b
+       end;
+ {$ENDIF}
+
+  procedure print_NTMs(NTMs: Pptrs; top: pointer; title: string);
+      var   i: int;
+      begin
+        i:= 0; while (i<1) and print_str(PortNo,_CR+_LF) do inc (i);
+        if i<1 then Exit;
+        if not print_head(PortNo, _PRN_TAB+title+_CR+_LF) then Exit;
+        if not print_str(PortNo,_CR+_LF) then Exit;
+
+        i:= 0; while (i<=int(top^)) and print_NTM(NTMs^[i]) do
+          begin
+            CheckProcesses;
+            inc(i)
+          end;
+        if i>=int(top^) then print_str(PortNo, kbNL)
+      end;

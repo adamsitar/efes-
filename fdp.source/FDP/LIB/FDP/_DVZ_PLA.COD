@@ -1,0 +1,245 @@
+{$IFDEF DATA_BIN}      { Povodny prenosovy format }
+  {$I _DVZ0.cod}
+{$ENDIF}
+
+ { ------------------------------------------------------
+
+   Priklad : (DVZ                          ; pole  3
+              -600/500                     ; diverzia drzana/pre
+              -981023 0400 0600 0530 0330  ; od do vyhlasena
+              -poziadavka                  ; popis poziadaviek na diverziu (od koho)
+              -odoslanie                   ; upresnenie situacie pri odoslani diverziu (od koho)
+              -zabezpecenie                ; popis zabezpecenia diverzie (u koho)
+              -DATE/datum podania planu
+               FDP/stav spracovania planu
+             )
+ }
+
+
+ { -----------------------------
+    kodovanie podla vzoru 4444,
+    pomocne procedury
+   -----------------------------
+ }
+
+ function code_DVZ_data(DVZ: PDVZ): string;
+    begin
+      code_DVZ_data:=
+                                         l4_format_s(DVZ^.pre)
+                           + icao_NXT +  l4_format_s(DVZ^.kym)
+              + icao_ARR +               code_l4_date(DVZ^.date)
+                           + icao_NXIT + l4_format_s(DVZ^.zac)
+                           + icao_NXIT + l4_format_s(DVZ^.kon)
+                           + icao_NXIT + l4_format_s(DVZ^.od)
+                           + icao_NXIT + l4_format_s(DVZ^.vystraha)
+    end;
+
+ procedure decode_DVZ_data(data: pchars; size: TNETdlz; DVZ: PDVZ);
+     var   s : string;
+           k : int;
+     begin
+       s:= get_str(data,size,1,[icao_ARR],sizeof(s)-1);
+       DVZ^.pre:= decode_l4_s(getstr(s,1,[icao_NXT]),true);
+       DVZ^.kym:= decode_l4_s(getstr(s,2,[icao_NXT]),true);
+
+       s:= get_str(data,size,2,[icao_ARR],sizeof(s)-1);
+       decode_l4_date (decode_l4_s(getstr(s,1,[icao_NXIT]),true),DVZ^.date);
+       DVZ^.zac:= decode_l4_s(getstr(s,2,[icao_NXIT]),true);
+       DVZ^.kon:= decode_l4_s(getstr(s,3,[icao_NXIT]),true);
+       DVZ^.od := decode_l4_s(getstr(s,4,[icao_NXIT]),true);
+       DVZ^.vystraha := decode_l4_s(getstr(s,5,[icao_NXIT]),true);
+     end;
+
+
+ function code_DVZ_19(DVZ: PDVZ; archive: bool): string;
+   var   s: string;
+   begin
+     s:= '';
+     if archive then
+        begin
+          s:=               rmk_DATE + icao_NXT + code_l4_datums(DVZ^.dap)
+              + icao_NXIT + rmk_FDP  + icao_NXT + format_s(DVZ^.stat)
+        end;
+     code_DVZ_19:= s
+   end;
+
+ function decode_DVZ_19(_19: string; DVZ: PDVZ): string;
+    var   t: string;
+    begin
+      _19:= _19+#0; { nebude > 254 }
+
+      decode_l4_datum(_item_18_(@_19[1],rmk_DATE,1),DVZ^.dap);
+      DVZ^.stat:= _item_18_(@_19[1],rmk_FDP,1);
+
+      decode_DVZ_19:= ''
+    end;
+
+
+ { -----------------------------
+    kodovanie podla vzoru 4444,
+    hlavne funkcie
+   -----------------------------
+ }
+ function code_l4_DVZ_ (DVZ: PDVZ; cislo: string): pchar;
+    var   pch : pchar;
+          hd  : Thead_ICAO;
+          p   : pchar;
+    begin
+      hd:= hd_DVZ;
+      pch:= StrPasNew(   icao_STD + hd + cislo
+                       + icao_ARR + code_DVZ_data(DVZ)
+                     );
+
+      pch:= StrNPCopy(pch, icao_ARR, true,true);
+      p:= l4_format_p(DVZ^.poziadavka);
+      pch:= StrNCopy (pch, p,true,false);
+
+      pch:= StrNPCopy(pch, icao_ARR, true,true);
+      p:= l4_format_p(DVZ^.odoslanie);
+      pch:= StrNCopy (pch, p,true,false);
+
+      pch:= StrNPCopy(pch, icao_ARR, true,true);
+      p:= l4_format_p(DVZ^.zabezpecenie);
+      pch:= StrNCopy (pch, p,true,false);
+
+      pch:= StrNPCopy(pch,  icao_ARR
+                          + code_DVZ_19(DVZ,true)
+                          + icao_END,
+                      true,true
+                     );
+
+      code_l4_DVZ_:= pch
+    end;
+
+ function  decode_l4_DVZ_ (data: pchars; size: TNETdlz; DVZ: PDVZ): string;
+    var    p : pchar;
+           k : int;
+           res : string;
+    begin
+      decode_l4_DVZ_:= '';
+      fillchar(DVZ^,sizeof(DVZ^),0);
+      frame_l4_pkt(data,size, res);
+
+      p:= get_strs0(data,size, 2,3, [icao_ARR]);
+      decode_DVZ_data(pchars(p),strlen(p), DVZ);
+      strdispose(p);
+
+      p:= get_strs0(data,size, 4,4, [icao_ARR]);
+      DVZ^.poziadavka:= strnew(decode_l4_p({decode_line_ip (p),nil,[])} p,true));
+      strdispose(p);
+      p:= get_strs0(data,size, 5,5, [icao_ARR]);
+      DVZ^.odoslanie:= strnew(decode_l4_p({decode_line_ip (p),nil,[])} p,true));
+      strdispose(p);
+      p:= get_strs0(data,size, 6,6, [icao_ARR]);
+      DVZ^.zabezpecenie:= strnew(decode_l4_p({decode_line_ip (p),nil,[])} p,true));
+      strdispose(p);
+
+      decode_DVZ_19 (get_str(data,size,7,[icao_ARR],sizeof(string)-1),DVZ)
+    end;
+
+
+ { ---------------------
+   kodovanie pre prenos
+   ---------------------
+ }
+ procedure code_DVZ(DVZ: PDVZ; var pkt: TNETpkt);
+     var   pch : pchar;
+     begin
+       pch:= code_l4_DVZ_(DVZ,'');
+       new_NETpkt_data (pchars(pch),strlen(pch), pkt.pkt);
+       strdispose(pch)
+     end;
+
+ procedure decode_DVZ(const pkt: TNETpkt; DVZ: PDVZ);
+     begin
+       decode_l4_DVZ_ (pkt.pkt.data,pkt.pkt.dlz,DVZ);
+       {format_DVZ(DVZ);}
+       {$IFDEF NET}
+         rec_data(pkt.ods, DVZ^.rec)
+       {$ENDIF}
+     end;
+
+ (*
+ procedure code_DVZ_mess(DVZ: PDVZ; var pkt: TNETpkt);
+     var   s: string;
+     begin
+       s:=    icao_STD + decode_code_to_hd(pkt.head.typ)
+            + icao_ARR + codekey_DVZ(DVZ)
+            + icao_END;
+       new_NETpkt_data (@s[1],length(s), pkt.pkt)
+     end;
+
+ procedure decode_DVZ_mess(const pkt: TNETpkt; DVZ: PDVZ);
+     var   s: string;
+           i: int;
+     begin
+       s:= get_str(pkt.pkt.data,pkt.pkt.dlz,1,[icao_STD,icao_END],sizeof(s)-1);
+       i:= pos(icao_ARR,s);  { odfiltrovanie hlavicky }
+       if i>0 then s:= copy(s,i+1,length(s)-i);
+       decodekey_DVZ(s,DVZ)
+     end;
+ *)
+
+
+ { ---------------------
+   kodovanie pre DB
+   ---------------------
+ }
+
+ {$I _DVZ_DB.cod}
+
+ procedure codeDB_DVZ (DVZ: PDVZ; buff: PDB_buff; desc: PDB_head);
+     begin
+       if desc^.attr and DBbin <> 0 then _codeDBB_DVZ(DVZ,buff,desc)
+       {$IFDEF OPL} else if desc^.attr and DBtxt = 0 then _codeDBT_DVZ(DVZ,buff,desc) {$ENDIF}
+       else _codeDBT_DVZ(DVZ,buff,desc)
+     end;
+
+ procedure decodeDB_DVZ(buff: PDB_buff; DVZ: PDVZ; desc: PDB_head);
+     begin
+       fillchar(DVZ^,sizeof(DVZ^),0);
+       if desc^.attr and DBbin <> 0 then _decodeDBB_DVZ(buff,DVZ,desc)
+       {$IFDEF OPL} else if desc^.attr and DBtxt = 0 then _decodeDB0_DVZ(buff,DVZ,desc) {$ENDIF}
+       else _decodeDBT_DVZ (buff,DVZ,desc);
+     end;
+
+
+
+ { ---------------------
+   kluc
+   ---------------------
+ }
+
+ function codekey_DVZ(DVZ: PDVZ): string;
+    begin
+      codekey_DVZ:=   mtks_rus_to_lat(upstring(
+                                   format_s(_mairbase(DVZ^.pre))
+                      + icao_NXT + format_s(_mairbase(DVZ^.kym))
+                      + icao_ARR + code_l4_date(DVZ^.date)
+                      + icao_ARR + code_l4_datums(DVZ^.dap)
+                      ))
+    end;
+
+ procedure decodekey_DVZ(key: string; DVZ: PDVZ);
+     var   s: string;
+     begin
+       fillchar(DVZ^,sizeof(DVZ^),0);
+       s:= getstr(key,1,[icao_ARR]);
+       DVZ^.pre:= getstr(s,1,[icao_NXT]);
+       DVZ^.kym:= getstr(s,2,[icao_NXT]);
+       decode_l4_date(getstr(key,2,[icao_ARR]),DVZ^.date);
+       decode_l4_datum(getstr(key,3,[icao_ARR]),DVZ^.dap)
+     end;
+
+ {
+ function codekey_DVZ_RPL(DVZ: PDVZ): string; far;
+    begin
+      codekey_DVZ_RPL:= codekey_DVZ(DVZ) + icao_ARR + code_l4_datums(DVZ^.dap)
+    end;
+
+ procedure decodekey_DVZ_RPL(s: string; DVZ: PDVZ); far;
+     begin
+       decodekey_DVZ(s,DVZ);
+       decode_l4_datum(getstr(s,3,[icao_ARR]),DVZ^.dap)
+     end;
+ }

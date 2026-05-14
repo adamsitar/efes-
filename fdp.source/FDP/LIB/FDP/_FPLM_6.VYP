@@ -1,0 +1,288 @@
+
+{ ----------------------------
+  Narusenie priestorov
+  ----------------------------
+}
+ {$IFDEF PRS}
+
+  function _planovany_priestor (kod, zoznam: string): bool;
+     var   i : int;
+           s : string;
+     begin
+       for i:= 1 to GetStrItems(zoznam,[icao_NXIT]) do
+         begin
+           s:= GetStr(zoznam,i,[icao_NXIT]);
+           if (kod=s) {TSA9a=TSA9a} {or posTSA9 a TSA9a} then
+              begin
+                _planovany_priestor:= true;
+                Exit
+              end
+         end;
+       _planovany_priestor:= false;
+     end;
+
+
+  type PFPLM_PRS_conflict_test = ^TFPLM_PRS_conflict_test;
+       TFPLM_PRS_conflict_test = record
+         FPL  : PDmFPL;
+         PRSc : string;
+         form : PFDP_AForm;
+         cez  : bool
+       end;
+
+  function _decode_vm(vys: string): word;
+     var   v: word; v_: char;
+     begin
+       if decode_l4_vyss (vys,v,v_,nil) then _decode_vm:= get_altM(v_,v)
+       else _decode_vm:= 0;
+     end;
+
+  function _konflikt_s_planovanym_priestorom (PRS: PPRS; data: PFPLM_PRS_conflict_test): byte; far;
+     var   err  : bool;
+           sres : string;
+     begin
+       _konflikt_s_planovanym_priestorom:= do_item__NEXT;
+
+       if     (PRS^.poz <= poz_PRIST)
+          and ((not FPLM_REGULARITA_FUA_ACT) or (PRS^.poz <> poz_LETI))
+          and (not _planovany_priestor(PRS^.kod,data^.PRSc))
+          and _trat_cez_priestor
+                ( PRS^.kod, DatumToSec(PRS^.zac),DatumToSec(PRS^.kon),
+                  _decode_vm(PRS^.vys1), _decode_vm(PRS^.vys2),
+                  data^.FPL^.trat_, data^.FPL^.bodov,
+                  @cas_suradnice_a_vyska_tratOBxy,
+                  data^.form<>nil,err
+                )
+          then
+              begin
+                l4_err(a_FPLM,'',i_15M,err_FPLM_let_cez_FUA_PLAN,sres);
+                if (data^.form<>nil) then
+                   if data^.form^.Ask(i_15M,msgWARNING,sres+'('+PRS^.kod+')'+' '+askAPPROVED)<>ansAno then
+                      begin
+                        _konflikt_s_planovanym_priestorom:= do_item__BREAK;
+                        data^.cez:= true
+                      end
+              end;
+     end;
+
+ {$ENDIF}
+
+ function regularita_mFPL(FPL,FPLp: PDmFPL;
+                          zmenena_trat : bool;
+                          staticka,dynamicka: bool;
+                          var res: string; var ires: int;
+                          form: PFDP_AForm
+                         ): bool;
+
+    var   M : PMapy;
+          err,is,mimo,cez : bool;
+          s,sres : string;
+          i : int;
+          L : PList;
+
+         {$IFDEF PRS}
+          PRSc : string;
+          PRSp : PPRS;
+          PRS  : TPRS;
+          dats,datp : TDatum;
+          das,dap : TDate;
+          data : TFPLM_PRS_conflict_test;
+         {$ENDIF}
+
+    label X,E;
+
+    begin
+      {$IFNDEF FPLM_REGULARITA}
+        regularita_mFPL:= true;
+        Exit;
+      {$ENDIF}
+
+      regularita_mFPL:= false;
+
+      is:= FPL^.trat_<>nil;
+      if not is then decode_trat_FPLM(FPL, FPL^.trat_,FPL^.bodov, false,true,false);
+
+
+      if staticka then
+         begin
+
+         { ----------------------------------
+           a) Dodrzane pravidla VFR ?
+           ----------------------------------
+         }
+          {if (FPL^._8a in [VFR_let]) and (not is_VFR_FL_FPLM(FPL)) then ires:= l4_err(a_8a,'',i_8Ma,11,res);}
+          if (res<>'') then goto X;
+
+
+         { ----------------------------------
+           b) Narusene statne hranice ?
+           ----------------------------------
+         }
+         {$IFDEF FPLM_REGULARITA}
+
+          if     FPLM_REGULARITA_FIR
+             and (zmenena_trat or (zmenena_trat_FPLm(FPLp,FPL,false,false,false)))
+             and (FPLM_REGULARITA_FIR_FN<>'') then
+             begin
+               sres:= '';
+               M:= New(PMapy,Init);
+               if M^.najdi_a_nacitaj_subor(FPLM_REGULARITA_FIR_FN+ext_MAP)<>nil then
+                  begin
+                    mimo:= _trat_mimo_hranice_sektora
+                                  (M,FPLM_REGULARITA_FIR_FN,
+                                   FPL^.trat_, FPL^.bodov,
+                                   @suradnice_a_vyska_tratOBxy,
+                                   err
+                                  );
+                    if mimo and (form<>nil) then
+                       begin
+                         l4_err(a_FPLM,'',i_15M,err_FPLM_let_mimo_FIR,sres);
+                         if form^.Ask(i_15M,msgWARNING,sres+' '+askAPPROVED)=ansAno then sres:= '';
+                       end;
+                  end;
+                Dispose(M,Done);
+                if sres<>'' then goto X;
+              end;
+         {$ENDIF}
+
+
+
+         { ---------------------------------------------------
+           c) Naruseny zakazany vzdusny priestor ?
+           ---------------------------------------------------
+         }
+         {$IFDEF FPLM_REGULARITA}
+
+           - v exe tvare pada pri testovani ineho vfr letu...
+
+         {$IFDEF PRS}
+          if     FPLM_REGULARITA_P
+             and (zmenena_trat or (zmenena_trat_FPLm(FPLp,FPL,false,false,true))) then
+             begin
+             { podla zoznamu zakazanych priestorov P+firExt
+             }
+               L:= New(PList,Init(@fnP,'',[],lst_cely_riadok,false,nil,true));
+               cez:= false; i:= 0;
+               while (i<=L^.top) and (not cez) do
+                 begin
+                   if not L^.is_nil(i) then
+                      begin
+                        s    := cut_(getstr(L^.get(i),lst_PRS_kod,setKomen));
+                        sres := cut_(getstr(L^.get(i),lst_PRS_vys,setKomen));
+                        cez  := _trat_cez_priestor
+                                 ( s,0,0,
+                                   _decode_vm(getstr(sres,1,[icao_NXIT,icao_ARR])),
+                                   _decode_vm(getstr(sres,2,[icao_NXIT,icao_ARR])),
+                                   FPL^.trat_, FPL^.bodov,
+                                   @cas_suradnice_a_vyska_tratOBxy,
+                                   form<>nil,err
+                                 )
+                              or cez;
+                      end;
+                   inc(i)
+                 end;
+               if cez then
+                  begin
+                    l4_err(a_FPLM,'',i_15M,err_FPLM_let_cez_P,sres);
+                    if form^.Ask(i_15M,msgWARNING,sres+'('+s+')'+' '+askAPPROVED)=ansAno then sres:= '';
+                  end;
+               Dispose(L,Done);
+             end;
+          {$ENDIF}
+          {$ENDIF}
+         end;
+
+
+      if dynamicka then
+         begin
+
+          {$IFDEF FPLM_REGULARITA}
+          {$IFDEF PRS}
+           if (zmenena_trat or (zmenena_trat_FPLm(FPLp,FPL,false,false,true))) then
+              begin
+                PRSc:= _cinnost_v_priestore(FPL); { zoznam priestorov planovanych v poli 15 }
+
+                { ---------------------------------------------------
+                  d) Kontrola na narusenie aktivovovanych priestorov
+                  ---------------------------------------------------
+                }
+                if FPLM_REGULARITA_FUA_ACT then
+                   begin
+                   { Vypocet na konflikt s aktivovanym priestorom
+                     podla zoznamu (pre)aktiovanych
+                   }
+                     cez:= false; i:= 0;
+                     while (i<=PRSs^.top) do
+                       begin
+                         PRSp:= PPRS(PRSs^.ap^[i]);
+                         if     (PRSp^.poz=poz_LETI)
+                            and (not _planovany_priestor(PRSp^.kod,PRSc))
+                            and _trat_cez_priestor
+                                  ( PRSp^.kod, DatumToSec(PRSp^.zac),DatumToSec(PRSp^.kon),
+                                    _decode_vm(PRSp^.vys1), _decode_vm(PRSp^.vys2),
+                                    FPL^.trat_, FPL^.bodov,
+                                    @cas_suradnice_a_vyska_tratOBxy,
+                                    form<>nil,err
+                                  )
+                            then begin
+                                   l4_err(a_FPLM,'',i_15M,err_FPLM_let_cez_FUA_ACT,sres);
+                                   if form^.Ask(i_15M,msgWARNING,sres+'('+PRSp^.kod+')'+' '+askAPPROVED)<>ansAno then goto X
+                                 end;
+                         inc(i)
+                       end;
+                   end;
+
+                { ---------------------------------------------------
+                  e) Kontrola na narusenie planovanych priestorov
+                  ---------------------------------------------------
+                }
+                if FPLM_REGULARITA_FUA_PLAN then
+                   begin
+                    { Vypocet na konflikt s planovanym priestorom;
+                      - kontroluju sa priestory podla datumu schvalenia,
+                        pretoze su planovane do 06,00 a od 06,00.
+                    }
+                    datum_init (dats, FPL^.date.d,FPL^.date.m,FPL^.date.r, FPL^.start.h,FPL^.start.m,0);
+                    datum_init (datp, FPL^.date.d,FPL^.date.m,FPL^.date.r, FPL^.prist.h,FPL^.prist.m,0);
+                    if dats.den>datp.den then NextDate (datp.rok,datp.mes,datp.den);
+                    _PRS._datum_schvalenia_PRS (dats,das);
+                    _PRS._datum_schvalenia_PRS (datp,dap);
+
+                    fillchar(data,sizeof(data),0);
+                    data.FPL:= FPL;
+                    data.PRSc:= PRSc;
+                    data.form:= form;
+                    data.cez:= false;
+
+                    do_items_DB (@_konflikt_s_planovanym_priestorom,@data,
+                                 @PRS, @disp_PRS,
+                                 get_dbPRSdfn(das),
+                                 db_PRS_RIADKOV,nil,@decodeDB_PRS,nil,
+                                 nil
+                                );
+
+                    if (dats.den<>datp.den) and (not data.cez) then
+                       do_items_DB (@_konflikt_s_planovanym_priestorom,@data,
+                                    @PRS, @disp_PRS,
+                                    get_dbPRSdfn(dap),
+                                    db_PRS_RIADKOV,nil,@decodeDB_PRS,nil,
+                                    nil
+                                   );
+
+
+                     cez:= false; i:= 0;
+                     if cez then
+                        begin
+                          l4_err(a_FPLM,'',i_15M,err_FPLM_let_cez_FUA_PLAN,sres);
+                          if form^.Ask(i_15M,msgWARNING,sres+'('++')'+' '+askAPPROVED)=ansAno then sres:= '';
+                        end;
+                   end;
+              end;
+           {$ENDIF}
+           {$ENDIF}
+         end;
+
+      regularita_mFPL:= res='';
+
+      X: if not is then zrus_trat_FPLM (FPL^.trat_,FPL^.bodov);
+    end;

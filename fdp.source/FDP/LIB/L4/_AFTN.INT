@@ -1,0 +1,72 @@
+(*var  f: file of char;
+
+procedure ReadAFTN; interrupt;
+    var   b,z : byte;
+          i   : int;
+          c   : char;
+    label endp;
+    begin
+      if (Port[IIR[2]]<>$04) then goto endp;
+      b:= Port[COM[2]];
+      if b=0 then goto endp;
+
+      z:= 0;
+      for i:= 1 to 5 do z:= z or (((b shr (i-1)) and 1) shl (5-i));
+
+      z:= ord(MTK_2[rdk_MTK_2_LAT,z]); c:= chr(z);
+      write(c);
+      write(f,c);
+
+      endp: Port[$20]:= $20
+    end;
+*)
+
+{ potebujem tuto funcki v preruseni pre vyhodnotenie konca dat
+}
+function str_comp_i(Str1, Str2: PChar): Integer; assembler;
+     asm
+	PUSH	DS
+	CLD
+	LES	DI,Str2
+	MOV	SI,DI
+	MOV	CX,0FFFFH
+	XOR	AX,AX
+	CWD
+	REPNE	SCASB
+	NOT	CX
+	MOV	DI,SI
+	LDS	SI,Str1
+	REPE	CMPSB
+	MOV	AL,DS:[SI-1]
+	MOV	DL,ES:[DI-1]
+	SUB	AX,DX
+	POP	DS
+     end;
+
+procedure ReadAFTN; interrupt;
+    var   b : byte;
+    label endp;
+
+    begin
+      if    (DEV_AFTN=nil)
+         or (DEV_AFTN^.p_aftnEOT=nil)
+         or (Port[IIR[DEV_AFTN^.asyncCOM]]<>$04) then goto endp;
+
+      b:= Port[COM[DEV_AFTN^.asyncCOM]];
+
+      with DEV_AFTN^ do
+        begin
+         if AFTNpkt^.p>=sizeof(AFTNpkt^.b) then fillchar(AFTNpkt^,ipkt_size,0);
+         AFTNpkt^.b[AFTNpkt^.p]:= chr(b);
+         inc(AFTNpkt^.p);
+
+         if     (AFTNpkt^.p>kod_aftnEOT)
+            and (str_comp_i(p_aftnEOT, pchar(@AFTNpkt^.b[AFTNpkt^.p-kod_aftnEOT]))=0) then
+            begin
+              if (ibuff<>nil) then ibuff^.save(AFTNpkt);
+              fillchar(AFTNpkt^,ipkt_size,0) { musi byt, inak sa nevyhodnoti koniec spravy }
+            end;
+        end;
+
+      endp: Port[$20]:= $20
+    end;

@@ -1,0 +1,165 @@
+{
+‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹
+€                                                          €
+€ zobrazenie                                               €
+€‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹€
+}
+
+const  dxf_PRS = 375;  { rozmery PRS }
+       dyf_PRS = 38;
+
+
+function dxi_PRS: int; far;
+   begin
+     dxi_PRS:= dxf_PRS
+   end;
+
+function dyi_PRS: int; far;
+   begin
+     dyi_PRS:= dyf_PRS
+   end;
+
+
+
+procedure _plan_PRS(x0,y0,x1,y1: int; bk: int; sm: byte);
+    begin
+      BGIgraph.button(x0,y0,x1,y1, bk, btSmall, btOFF);
+      on_off(x0+2,y0+2,x1-2,y1-2, bk+clBUTTON_DARK,bk+clBUTTON_LIGHT, btSmall, btOFF);
+      on_off(x0+3,y0+3,x1-3,y1-3, bk+clBUTTON_DARK,bk+clBUTTON_LIGHT, btSmall, btON);
+      _linevo(x0+42, y0+3,y1-3,bk);
+      _linevo(x0+146,y0+3,y0+18,bk);
+      _linevo(x0+251,y0+3,y0+18,bk);
+      _lineho(x0+44, x1-3,y0+19,bk)
+    end;
+
+procedure plan_PRS(PRS: PPRS; x,y: int; b: bool);
+    var   y0: int;
+          cl_stat, bk: byte;
+    begin
+      y0:= y+8{$IFDEF SPEA}+dy_ch{$ENDIF};
+      with PRS^ do
+        begin
+          bk:= bkPLAN_[b];
+          cl_stat:= get_stat_cl(stat);
+          _plan_PRS(x,y,x+dxf_PRS,y+dyf_PRS, bk, 1);
+         {$IFDEF SPEA}
+          SetBkColor(bk);
+          SetTextStyle(BIT8x8, HorizDir,0);
+         {$ELSE}
+          SetTextStyle(SmallFont, HorizDir,4);
+         {$ENDIF}
+          settextstyle(0,HorizDir,1);
+
+          if let<>kod then
+             begin
+               setcolor (cl_DATA-2);
+               outtextxy(x+10 ,y0+8,copy(let,1,3))
+             end;
+
+          setcolor (cl_stat);
+          outtextxy(x+155,y0,timetostr(zac.h,zac.m,':'));
+          outtextxy(x+204,y0,timetostr(kon.h,kon.m,':'));
+          outtextxy(x+ 55,y0,kod);
+          setcolor (cl_DATA);
+         { outtextxy(x+264,y0,vys_); 357,264}
+          outtextxy(x+264,y0,vys);
+
+          outtextxy(x+55,y0+17{$IFDEF SPEA}{$ENDIF},strpas(pozn));
+
+          write_stat(stt,rec,SERVERaddress, x+dxf_PRS-22,y0, cl_stat)
+        end
+    end; { plan_PRS }
+
+
+  procedure strip_PRS(PRS: PPRS; x,y: int; b: bool);
+      var   i,x0,dx0, dx,dy,dxl,dx1, y0,y_1,y1, y01,y02,y03, yc0,yc1, x_,y_: int;
+            indc,bk,bg : byte;
+            dir     : Ts_dir;
+            s,s1,s2 : string;
+            b1,b2   : bool;
+            font    : byte;
+            lo,hi   : byte;
+      const ds_PRS  : array[Low(T_strip)..High(T_strip)] of byte =
+                     {$IFNDEF EDD_20} (24,36,56)
+                     {$ELSE}          (30,56,90)
+                     {$ENDIF};
+      begin
+        bk:= bkPLAN_[b];
+        font:= SPfont;
+        y0 := y+dy0;  { 8x16 v hornom riadku }
+        y_1:= {$IFDEF SPEA} y+dy_ed+17 {$ELSE} y+dy_ed+11 {$ENDIF} {$IFNDEF EDD_20}-5{$ENDIF};
+        y1 := y+dy1;  { 8x16 v spodnom riadku }
+        y01:= y+dy01; { 8x8 v hornom riadku }
+        y02:= y+dy02; { 8x8 v strednom riadku }
+        y03:= y+dy03; { 8x8 v spodnom riadku }
+        x0:= x; dx:= dx_strip_[miniSTRIP]; dx0:= dx;
+
+        BGIgraph.button(x,y,x+dx0,y+dy_strip_[lineSTRIP], bk, btSmall, btOFF);
+        dir:= dir_no;
+
+        with PRS^ do
+          begin
+            bg:= bk; indc:= get_stat_cl(stt);
+            {$IFDEF SPEA}SetBkColor(bg);{$ENDIF} settextstyle(0,HorizDir,1);
+
+            setcolor(indc);
+            outtextxy(x+5 ,y_1,kod);
+
+            if (miniSTRIP=full_strip) and (not lineSTRIP) then s:= ':' else s:= '';
+            s1:= timetostr(zac.h,zac.m,s);
+            s2:= timetostr(kon.h,kon.m,s);
+            if (not lineSTRIP) then
+               begin
+                 outtextxy(x+71,y01{$IFNDEF EDD_20}-1{$ENDIF}, s1);
+                 outtextxy(x+71,y02{$IFNDEF EDD_20}-3{$ENDIF}, s2);
+                 dxl:= 0;
+               end
+            else begin
+                   dxl:= kod_TIME shl 3 + 4;
+                   outtextxy(x+70,y_1, s1);
+                   outtextxy(x+70+dxl,y_1, s2)
+                 end;
+
+            setcolor(citem);
+            if (not lineSTRIP) then dx:= {$IFNDEF EDD_20}120{$ELSE}121{$ENDIF} else dx:= 113;
+            outtextxy(x+dx+dxl,y_1, vys);
+
+            s:= cut_(strpas(pozn));
+            if (not lineSTRIP) then
+               begin
+                 dx1:= 5;
+                 x_:= ds_PRS[miniSTRIP];
+                 y_:= y03+1
+              end
+            else begin
+                   dx1:= dx+dxl+(((altS_+1)) shl 3)+8;
+                   x_:= ds_PRS[miniSTRIP]-(dx1 shr 3);
+                   y_:= y_1
+                 end;
+            if length(s) > x_ then s:= copy(s,1,x_-3)+'...';
+            outtextxy(x+dx1,y_,s);
+
+            yc0:= y+3; yc1:= y+dy_strip_[lineSTRIP]-3;
+            if (not lineSTRIP) then dy:= {$IFNDEF EDD_20}13{$ELSE}10{$ENDIF} else dy:= 0;
+            _linev(x+65,      yc0, yc1-dy, bk);
+            _linev(x+dx+dxl-6,yc0, yc1-dy, bk);
+            if (not lineSTRIP) then _lineh(x+3,x+dx0-3,yc1-12, bk)
+            else _linev(x+dx1-5,yc0, yc1-dy, bk)
+          end;
+
+        (*{$IFDEF EDD}
+          if dir<>dir_no then strip_frame(x0,y,dx0-3,dy_strip, cl_dir[0,dir],cl_dir[1,dir]);
+        {$ENDIF}*)
+        {$IFDEF SPEA} SetTextStyle(font, 0,0) {$ENDIF}
+      end;
+
+
+procedure _info_PRS(x0,y0,x1,y1: int; PRS: PPRS); far;
+    begin
+      plan_PRS(PRS, x0+(x1-x0-dxf_PRS) shr 1, y0{+winHEIGHT},true)
+    end;
+
+function info_PRS(PRS: PPRS; title: string): bool;
+    begin
+      info_PRS:= Info(title, @_info_PRS, PRS,dxf_PRS+20,dyf_PRS+10, nil,0)
+    end;

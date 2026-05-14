@@ -1,0 +1,116 @@
+{ civilny plan :
+
+  MPUwrite (adr, 0,0, '    < ! SPEED BIRD      ! TEST  TEST  TEST  TEST  ');
+  MPUwrite (adr, 0,1, '      ! BAW3252    HOSP ! 1220  1220  1220  1220  ');
+  MPUwrite (adr, 0,2, '      ! A7111           ! ----------- S0930 ----- ');
+  MPUwrite (adr, 0,3, '      ! S0800     K0450 ! UEEE                    ');
+  MPUwrite (adr, 0,4, 'S0860 ! B797/M     SC/F ! UKBB                 K1 ');
+
+  vojensky plan :
+
+  MPUwrite (adr, 0,0, '      ! MIL             ! BOD1B BOD2A BOD1A BOD3A ');
+  MPUwrite (adr, 0,1, '      ! 43245        IM ! 1220  1230  1250  1330  ');
+  MPUwrite (adr, 0,2, '      ! A34562          ! ----------------------- ');
+  MPUwrite (adr, 0,3, '      ! S0800+    K0450 ! UEEE  +S0500            ');
+  MPUwrite (adr, 0,4, 'S0760 ! 02MI21/L+    SD ! UKBB  +02MI23/L     MIL ');
+}
+
+function print_mFPL_MPU(FPL: PDmFPL; nd: int; adr: byte): bool;
+   var   c : char;
+         s : string;
+         v1,v2 : string[10];
+         FPL2 : DmFPL;
+
+   procedure NDBi(x, ind: int; is_vys: bool);
+       var  b: bool;
+       begin
+         if (ind<FPL2.bodov) and (FPL2.trat_<>nil) then
+            with FPL2 do
+              begin
+                MPUwrite (adr, x,0, trat_^[ind].kod);
+                MPUwrite (adr, x,1, TimeToStr(trat_^[ind].h,trat_^[ind].m,''));
+                if is_vys then MPUwrite (adr, x-1,2,' '+alt_to_str(trat_^[ind].vys,trat_^[ind].vys_,'',in_FL,alt_VFR_sym))
+              end
+       end;
+
+   begin
+     print_mFPL_MPU:= false;
+     fillchar(FPL2,sizeof(FPL2),0);
+     _new_mFPL(FPL,@FPL2);
+
+     MPUclear (adr);
+     with FPL2 do
+       begin
+
+         MPUwrite (adr, 5,0,c+' ! MIL');
+         MPUwrite (adr, 7,1,   '! '+idn);
+         MPUwrite (adr, 22,1, prav+typ_pl);
+
+         MPUwrite (adr, 7,2,   '! '+ssr_+ssr);
+
+         s:= code_l4_vys(vys,vys_, 0,true); if vys2<>0 then s:= s+'+';
+         MPUwrite (adr, 7,3,   '! '+s);
+
+         s:= code_l4_rychkmh(rych,rych_, in_km);
+         MPUwrite (adr, 24-length(s),3, s);
+
+         s:= typ; if typ2<>'' then s:= s+'+';
+         MPUwrite (adr, 7,4,   '! '+s);
+
+         s:= delchar(com_,[' ']); s:= copy(s,1,minimum(14-length(typ),length(s)));
+         MPUwrite (adr, 24-length(s),4, s);
+
+         if bodov>1 then s:= alt_to_str(trat_^[1].vys,trat_^[1].vys_,'',in_FL,alt_VFR_sym)
+         else s:= code_l4_vys(vys,vys_, 0,true);
+         MPUwrite (adr, 0,4, s);
+
+         MPUwrite (adr, 25,0,  '! ');
+         MPUwrite (adr, 25,1,  '! ');
+         MPUwrite (adr, 25,2,  '! -----------------------');
+         MPUwrite (adr, 25,3,  '! '+start.kod);
+         MPUwrite (adr, 25,4,  '! '+prist.kod);
+
+         if nd>-1 then s:= getPstr(NODEs^[nd].desc.name,1,[' ']) else s:= '';
+         MPUwrite (adr, 48-length(s)+1,4, s);
+
+         if (trat_<>nil) and (bodov>1) then NDBi(27, 1, trat_^[1].vys<>vys);
+         if (trat_<>nil) and (bodov>2) then NDBi(33, 2, trat_^[2].vys<>trat_^[1].vys);
+         if (trat_<>nil) and (bodov>3) then NDBi(39, 3, trat_^[1].vys<>trat_^[2].vys);
+         if (trat_<>nil) and (bodov>4) then NDBi(45, bodov-2, trat_^[bodov-2].vys<>trat_^[3].vys);
+
+         if vys2<>0  then MPUwrite (adr, 32,3,'+'+code_l4_vys(vys2,vys2_, 0,true));
+         if typ2<>'' then MPUwrite (adr, 32,4,'+'+typ2)
+       end;
+
+     disp_mFPL(@FPL2);
+     print_mFPL_MPU:= MPUprint(adr)=0;
+   end;
+
+
+{$IFDEF DEBUG}
+ procedure test_print_mFPL;
+     var   FPL1 : DmFPL;
+           s: string;
+     begin
+       with FPL1 do
+         begin
+           fillchar(fpl1,sizeof(fpl1),0);
+
+           idn:= 'MIL44'; prav:= 'I'; typ_pl:= 'X'; ssr_:= 'C'; ssr:= '45422';
+           typ:= '02TU54/H';  typ2:= '02MI29/L';
+           com_:= 'SX345678/D';
+           rych:= 1.1; rych_:= 'M';
+           vys:= 0960; vys_:= 'S'; vys2:= 0460; vys2_:= 'F';
+           start.kod:= 'UKKB'; start.h:= 10;  start.m:= 11;
+           prist.kod:= 'UKKB'; prist.h:= 20;  prist.m:= 22;
+
+           trat:= strpasnew('BORAT LAKTA UKKK UKKB MILKY');
+           pozn:= strpasnew('POZNAMKA');
+           VU:= 'XX';
+           ulohy[0]:= '01';
+
+           print_mFPL_MPU(@FPL1, 4,NODEs^[4].desc.ai);
+           disp_mFPL(@FPL1)
+         end;
+     end;
+{$ENDIF}

@@ -1,0 +1,21 @@
+{ pri prijme od IPX v protokole RTR alebo RTI sa prekoduje
+  na NETpacket a naspat vlozi do LANpaketu
+}
+
+function  decode_ipxRTRpkt_to_NETpkt (const Lp: TIPXdpkt; var Np: TNETpkt): bool;
+   var    res,err : bool;
+   begin
+     FillChar(Np,SizeOf(Np),0); { musi byt ! }
+     {$IFDEF ARCHIVE_NET_BIN}
+      archive_data (path_NET,get_ARCHfn(0)+'.'+extNET,@Lp.data,Lp.size,'RTIi,',true,false);
+     {$ENDIF}
+     res:= decode_RTRpkt_to_NETpkt(PRTRpkt_bin(@Lp.data)^, Np, err);
+     {if res then
+        begin
+          Lp^.size:= Minimum(sizeof(Np^),sizeof(Lp^.data));
+          Move(Np^,Lp^.data,Lp^.size)
+        end;}
+     decode_ipxRTRpkt_to_NETpkt:= res
+   end;
+
+

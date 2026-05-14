@@ -1,0 +1,192 @@
+{ ---------------------
+   22
+  ---------------------
+}
+{ - vybera postupne vsetky polia oddelene icao_NXIT;
+    prve a potom v cykle druhe, ak nema na zaciatku napr. '13/', potom
+    ho pripoji ku prvemu, atd...
+  - po navrate vracia adresu na koniec uz spracovaneho pola
+
+  - v pripade opravy pola trate musi prist cela
+}
+
+(*
+ function _item_22(_22: pchar; var _item: string; var pres: pchar): pchar;
+    var   zac,dal, i,j,poc : int;
+          s,t   : string;
+          p1,p2 : pchar;
+    begin
+      _item:= ''; pres:= nil;
+
+     { najdenie zaciatku pola oprav }
+      zac:= 0; poc:= GetPStrItems(_22,[icao_NXIT]);
+      i:= 1; while (zac=0) and (i<poc) do
+        begin
+          s:= cut_(GetPStr(_22,i,[icao_NXIT]));
+          t:= getstr(s,1,[icao_NXT]);
+          if pos(t+icao_NXT,s)=1 then
+             begin
+               t:= mtks_rus_to_lat(t);
+               j:= 0; while (j<max_arFPL4) and (not eq_str(t,ArFPL4[j])) do inc(j);
+               if j<max_arFPL4 then
+                  begin
+                    zac:= i;
+                    _item:= t
+                  end
+             end;
+          inc(i)
+        end;
+
+    { najdenie dalsieho pola }
+      dal:= poc+1;
+      while (i<=poc) do
+        begin
+          s:= cut_(GetPStr(_22,i,[icao_NXIT]));
+          t:= getstr(s,1,[icao_NXT]);
+          if pos(t+icao_NXT,s)=1 then
+             begin
+               t:= mtks_rus_to_lat(t);
+               j:= 0; while (j<max_arFPL4) and (not eq_str(t,ArFPL4[j])) do inc(j);
+               if j<max_arFPL4 then
+                  begin
+                    dal:= i;
+                    break
+                  end
+              end;
+          inc(i)
+        end;
+
+      for j:= 1 to zac-1 do _22:= strpos(_22,icao_NXIT);
+      j:= zac; while j<dal do
+        begin
+          p1:= Get0Str(_22,1,[icao_NXIT]);
+          p2:= StrNPCopy(p1,icao_NXIT,true,true);
+          pres:= StrNCopy (pres,p2,true,true);
+          _22:= strpos(_22,icao_NXIT);
+          while (_22<>nil) and (_22^<>#0) and (_22^=icao_NXIT) do incptr(pointer(_22),1);
+          inc(j)
+        end;
+
+      if pres<>nil then
+         begin
+           p2:= nil; poc:= GetPStrItems(pres,[icao_NXT]);
+           for j:= 1 to poc-1 do
+               begin
+                 p1:= Get0Str(pres,j+1,[icao_NXT]);
+                 if j<poc-1 then p1:= StrNPCopy(p1,icao_NXT,true,true);
+                 p2:= StrNCopy(p2,p1,true,true)
+               end;
+           strdispose(pres);
+           pres:= p2
+         end;
+      _item_22:= _22
+    end;
+*)
+
+ function _item_22 (p22: pchar; sITEM: string): pchar;
+    var   p0,pn,pi,item,pITEM : pchar;
+          eop22 : bool;
+          litem : word;
+          s,t : string;
+          i : int;
+
+    begin
+      _item_22:= nil;
+
+     { vyhladanie ukazovatela na zaciatok sekvencie pola
+       item/.... v poradi uvedenom ind-exom
+     }
+      s:= sITEM+icao_NXT+NULL;
+      item:= @s[1];
+      litem:= strlen(item);
+      p0:= _item_l4(p22,item);
+      if (p0=nil) then Exit;
+
+      incptr(pointer(p0),litem);
+
+
+     { vyhladanie zaciatku ostatnych poli,
+       zacinaju po mezere, slove z mnoziny "arrayFPL4" a lomke
+     }
+      eop22:= false; pn:= p0;
+      while not eop22 do
+       begin
+         pn:= strpos(pn,icao_NXIT);   { najdenie zaciatku dalsieho slova item/xxx slovo }
+         if pn<>nil then
+            begin
+              t:= getpstr(pn,1,[icao_NXIT]);  { je to klucove slovo s lomkou ? }
+              if pos(icao_NXT,t)>0 then
+                 begin
+                   t:= getstr(t,1,[icao_NXT]);
+                   i:= 0; while (i<max_arrayFPL4) and (t<>arrayFPL4[i]) do inc(i);
+                   if i<max_arrayFPL4 then eop22:= true
+                   else if pn[0]=icao_NXIT then incptr(pointer(pn),1)
+                 end 
+              else incptr(pointer(pn),1)
+            end
+         else eop22:= true;
+       end;
+
+     { nacitanie pola
+     }
+      if pn<>nil then litem:= pn-p0 else litem:= strlen(p0);
+      pITEM:= StrAlloc(litem);
+      strLcopy(pITEM,p0,litem);
+      _item_22:= pITEM;
+    end;
+
+
+ function _item_22_is (p22: pchar; sITEM: string; var item: string; item_size: byte): bool;
+    var   p,pi : pchar;
+    begin
+      pi:= _item_22 (p22, sITEM);
+      if pi<>nil then
+         begin
+           item:= copy(strpas(pi),1,item_size);
+           strdispose(pi);
+           _item_22_is:= true
+         end
+      else _item_22_is:= false
+    end;
+
+ function _item_22_ip (p22: pchar; sITEM: string; var item: pchar): bool;
+    var   p,pi : pchar;
+    begin
+      pi:= _item_22 (p22, sITEM);
+      if pi<>nil then
+         begin
+           strdispose(item);
+           item:= pi;
+           _item_22_ip:= true
+         end
+      else _item_22_ip:= false
+    end;
+
+
+ function _decode_FPL4_22(var FPL: DFPL4; var res: string): bool;
+    var   bres : bool;
+          p : pchar;
+    begin
+      res:= '';
+
+     {$IFDEF A36YKA} p:= mtkp_rus_to_lat(FPL._22,true)
+     {$ELSE}         p:= FPL._22
+     {$ENDIF};
+
+      bres:= _item_22_is(p, a_8, FPL._8,  sizeof(FPL._8)-1);
+      bres:= _item_22_is(p, a_9,  FPL._9,  sizeof(FPL._9)-1)  or bres;
+      bres:= _item_22_is(p, a_10, FPL._10, sizeof(FPL._10)-1) or bres;
+      bres:= _item_22_is(p, a_13, FPL._13, sizeof(FPL._13)-1) or bres;
+      bres:= _item_22_is(p, a_14, FPL._14, sizeof(FPL._14)-1) or bres;
+      bres:= _item_22_ip(p, a_15, FPL._15) or bres;
+      bres:= _item_22_is(p, a_16, FPL._16, sizeof(FPL._16)-1) or bres;
+      bres:= _item_22_ip(p, a_18, FPL._18) or bres;
+      bres:= _item_22_ip(p, a_19, FPL._19) or bres;
+
+      _decode_FPL4_22:= bres;
+
+     {$IFDEF A36YKA} strdispose(p);
+     {$ENDIF}
+
+      if not bres then l4_err(a_22,'',0,err_22_,res);
+    end;

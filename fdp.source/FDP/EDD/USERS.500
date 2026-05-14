@@ -1,0 +1,39 @@
+; -----------------------------------------
+; NET.CFG pre FDP/IDD 500
+; =========================================
+
+; -------------------------------------------------------------------------------------------------------------
+; Pracovisko ; Adresa logicka, RTR, IP          ; Protokol ; Typ stanice   ; informacie
+; -------------------------------------------------------------------------------------------------------------
+  RC IDD     ; 500 APP       ,   192.100.110.32 ; @THIS  @AIRBASE = 500
+
+  RC RDP RL  ; RC RL         ,   192.100.110.17 ; ~UDP     ; @RDP          ; -slave  EST FPLm FPLc
+  RC RDP TMA ; RC TMA        ,   192.100.110.20 ; ~UDP     ; @RDP          ; -slave  EST FPLm FPLc
+
+
+; -------------------------
+; OPL
+; -------------------------
+  TWR OPL    ; 500 OPL       ,   192.100.105.32 ; ~UDX     ; @FDP @SERVER  ; -master -heartbeat ALL MSG
+
+  100        ; 100 OPL       ,   192.100.037.32 ; ~X25     ; @FDP @OPL     ; -AP  MSG
+  200        ; 200 OPL       ,   192.100.035.32 ; ~X25     ; @FDP @OPL     ; -AP  MSG
+  250        ; 250 OPL       ,   192.100.013.32 ; ~X25     ; @FDP @OPL     ; -AP  MSG
+  300        ; 300 OPL       ,   192.100.073.32 ; ~X25     ; @FDP @OPL     ; -AP  MSG
+  600        ; 600 OPL       ,   192.100.106.32 ; ~X25     ; @FDP @OPL     ; -AP  MSG
+
+  SMD        ; StrRLP SMD    ,   192.100.141.41 ; ~UDX     ; @FDP @OPL     ; -ACC MSG
+  SOD        ; StrRLP SOD    ,   192.100.141.42 ; ~UDX     ; @FDP @OPL     ; -ACC MSG
+  SAR        ; StrRLP SAR    ,   192.100.143.32 ; ~UDX     ; @FDP @OPL     ; -ACC MSG
+
+
+; -------------------------
+; PVO
+; -------------------------
+  UVS DPVL   ; UVS EDD       ,   192.100.000.32 ; ~UDX     ; @FDP @OPL     ; -PVO MSG
+
+
+; -------------------------
+; Inso
+; -------------------------
+  BRIDGE     ; StrRLP BRIDGE ,   192.100.141.35 ; ~UDX     ; @BRIDGE       ;

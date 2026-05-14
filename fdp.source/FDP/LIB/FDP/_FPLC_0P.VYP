@@ -1,0 +1,196 @@
+{ kontrola spravnosti uvedenia casov bodov na trati,
+  pretoze :
+   a) od externeho systemu
+   b) od operatora moze byt
+  zadany cas preletu nasledujuceho bodu pred casom bodu
+  predchadzajuceho...
+}
+ function regularita_casov_na_bodoch_cFPL (FPL: PDcFPL; oprav: bool): int;
+    var   i,ires : int;
+          h,m : byte;
+
+    function _is_next_time (h0,m0, h1,m1: byte): bool;
+       begin
+         _is_next_time:= is_next_time(h0,m0, h1,m1) or (h0-h1>22)
+       end;
+
+    begin
+      ires:= -1;
+      with FPL^ do
+        begin
+          if (start.ind>-1) and ((start_.h<>0) or (start_.m<>0)) then
+             begin
+               i:= 0;
+               h:= start_.h;
+               m:= start_.m;
+             end
+          else begin
+                 i:= 1;
+                 h:= trat[0].h;
+                 m:= trat[0].m;
+               end;
+          while (i<bodov) do
+            begin
+              if not _is_next_time (h,m, trat[i].h,trat[i].m) then
+                 begin
+                   if ires=-1 then ires:= i;
+                   if oprav then
+                      begin
+                        trat[i].h:= h;
+                        trat[i].m:= m
+                      end
+                 end;
+              h:= trat[i].h;
+              m:= trat[i].m;
+              inc(i)
+            end;
+          if     (prist.ind>-1)
+             and ((prist.h<>0) or (prist.m<>0))
+             and (not _is_next_time (h,m, prist.h,prist.m))
+             and oprav
+               then
+             begin
+               prist.h:= h;
+               prist.m:= m
+             end
+        end;
+      regularita_casov_na_bodoch_cFPL:= ires
+    end;
+
+
+ procedure format_trat_cFPL (Trat: PTrat; max_bodov: byte;
+                             _vys: word; _vys_: char;
+                             date: Tdate; eet: TTime;
+                             var start,prist: TAP;
+                             var bodov: int; var na_bod: byte;
+                             var _poz: Tpoz
+                            );
+     var   sec_den : real;
+           nopl,isdep,isarr: bool;
+           i : int;
+     begin
+
+       start.ind:= _OBind(start.kod, LK);
+       prist.ind:= _OBind(prist.kod, LK);
+
+       isdep:= (start.ind>-1) and ((start.h<>0) or (start.m<>0));
+       isarr:= (prist.ind>-1) and ((prist.h<>0) or (prist.m<>0));
+
+      { vypocet casov na bodoch trate
+      }
+       bodov:= 0; na_bod:= 0;
+
+       nopl:= false;
+       if (cut_(trat^[0].kod)='') then with trat^[0] do
+            begin
+            { plan bez trate letu : NO PLAN
+            } kod:= no_pl; ind:= -1;
+              h:= hour; m:= min;
+              cas:= AbsTime;
+            end
+       else begin
+            { regularny plan
+            }
+              MilleniumDate(date.r);
+              with date do sec_den:= DateToSec(r,m,d);
+
+              while (bodov<max_bodov) and (trat^[bodov].kod<>'') do with trat^[bodov] do
+                begin
+                  ind:= _OBind(kod, OB);
+                  cas:= sec_den + TimeToSec(h{p},m{p},0);
+                  if    (    (bodov>0)
+                         and (not is_next_time(trat^[bodov-1].h,trat^[bodov-1].m, h,m))
+                        )
+                     or (    (bodov=0)
+                         and (isdep) and (start.kod<>kod)
+                         and (not is_next_time(start.h,start.m, h,m))
+                        )
+                     then begin
+                            sec_den:= sec_den+secDAY;
+                            cas:= cas + secDAY
+                          end;
+                  {h:= hp; m:= mp;}
+                  if vysab=NULL then vysab := ' ';
+                  if vys=0 then begin vys:= _vys; vysab:= _vys_ end;
+                  inc(bodov)
+                end
+            end;
+       for i:= bodov to max_bodov-1 do trat^[i].vysab:= ' ';
+
+
+      { vypocet casov startu a pristatia
+      }
+       nopl:= (cut_(trat^[0].kod)='') or (trat^[0].kod=NO_PL);
+
+       if isdep then start.cas:= DTtoSec(date.r,date.m,date.d, start.h,start.m,0)
+       else start.cas:= trat^[0].cas;
+       if isdep and (not nopl) and (start.cas>trat^[0].cas) then
+          begin
+          { ak je cas startu vcera a EST teraz }
+            start.cas:= start.cas-secDay
+          end;
+
+       if isarr {or nopl} then
+          begin
+            prist.cas:= DTtoSec(date.r,date.m,date.d, prist.h,prist.m,0);
+            if    ((bodov>1) and (trat^[bodov-1].cas - prist.cas > est_dT_pred*secHOUR))
+               or (start.cas-prist.cas > est_dT_pred*secHOUR) then
+                   prist.cas:= prist.cas + secDAY
+            else if (bodov>1) and (trat^[bodov-1].cas > prist.cas) then prist.cas:= trat^[bodov-1].cas
+            else if (start.cas > prist.cas) then prist.cas:= start.cas
+          end
+       else if bodov>0 then prist.cas:= trat^[bodov-1].cas
+       else prist.cas:= start.cas;
+
+     { pozicia
+     } _poz:= poz_PROPOSED
+
+     end; { format_trat_cFPL }
+
+
+{ nastavenie parametrov,
+  aby mohli byt plany porovnavane
+  a realizovane vypocty nad nimi
+}
+
+ procedure format_cFPL_(FPL: PDcFPL);
+     var   is_DLA, z : bool;
+           vstart : TAP;
+           i : int;
+     begin
+       with FPL^ do
+         begin
+           if (not in_icao_head(stt,ms_ICAOact+ms_ICAOarr+ms_ICAOcnl,z)) then stt:= hd_EST;
+
+           idn := format_s(idn);
+           ssr0:= code_l4_7c(ssr0);
+           ssr := code_l4_7c(ssr);
+
+           _8a:= format_(_8a);
+           _8b:= format_(_8b);
+
+           com_ := format_s_(com_);
+           ssr_ := format_s_(ssr_);
+
+           rych_:= format_(rych_);
+           vys1_a:= format_(vys1_a);
+           vyso_a:= format_(vyso_a);
+
+           for i:= 0 to max_bod_FPLC-1 do format_(FPL^.trat[i].vysab);
+
+           vstart:= start;
+           is_DLA:= (start_.h<>start.h) or (start_.m<>start.m);
+           if is_DLA then begin vstart.h:= start_.h; vstart.m:= start_.m end;
+           format_trat_cFPL(@trat,max_bod_FPLC,
+                            vys,' '{vysab},
+                            date,eet,
+                            vstart,prist,
+                            bodov,na_bod,
+                            poz
+                           );
+           if is_DLA then begin start.cas:= vstart.cas; start.ind:= vstart.ind end
+           else start:= vstart;
+
+           fillchar(sur,sizeof(sur),0)
+         end
+     end;

@@ -1,0 +1,335 @@
+{ -----------------
+   FPL
+ תתתתתתתתתתתתתתתתתת
+}
+{$IFDEF FPL0}
+
+ {$I ..\lib\mnu\_FPLM.h}
+
+ procedure mnuFPLMvolby_init(MMenu: PSubmenu); far;
+     var   smnu : TPItems;
+           i,items,nl,ihk: int;
+     begin
+       items:= 0; nl:= 0; ihk:= 0;
+
+       {smnu[items]:= NewTLine(FPLMM,nil);
+       inc(items);}
+       smnu[items]:= NewTLine(mnuSPRACOVANIE,nil);
+       inc(items);
+
+       smnu[items]:=  Switch2(' '+hk(ihk)+PLANGET,   @find_and_process_FPLM,nil);
+       inc(items);
+       {$IFDEF FPLM_REPORT}
+       {$IFDEF VLASTNE_PLANY}
+        smnu[items]:= Switch2(' '+hk(ihk)+FPLMFPL,   @hlas_vlastne_FPLM,nil);
+        inc(items);
+        smnu[items]:= Switch2(' '+hk(ihk)+FPLMLET,   @hlas_vsetky_FPLM,nil);
+        inc(items);
+       {$ELSE}
+        smnu[items]:= Switch2(' '+hk(ihk)+FPLMFPL,   @hlas_vsetky_FPLM,nil);
+        inc(items);
+       {$ENDIF}
+       {$ENDIF}
+
+       {$IFDEF PROCESS_FPLM}
+       {$IFDEF OPL}
+        smnu[items]:= Switch2(' '+hk(ihk)+FPLPREDAY, @_propose_dayFPLM,nil);
+        inc(items);
+       {$ENDIF}
+       {$ENDIF}
+        smnu[items]:= SwitchI(' '+hk(ihk)+FPLMPRE,   @dT_propose_FPLM,tit_min,dT_propose_FPLM_lo,dT_propose_FPLM_hi,nil);
+        inc(items);
+
+       {$IFDEF PROCESS_FPLM}
+       {$IFDEF OPL}
+        {smnu[items]:= SwitchI(' '+hk(ihk)+FPLREQCNL,
+                       @dT_deactive_FPLM_REQ, dT_deactive_FPLM_REQ_lo,dT_deactive_FPLM_REQ_hi,nil);
+        inc(items);}
+
+        smnu[items]:= Switch2(' '+hk(ihk)+FPLCNLDAY, @_unactive_dayFPLM,nil);
+        inc(items);
+        smnu[items]:= SwitchI(' '+hk(ihk)+FPLMCNL,   @dT_unactive_FPLM,tit_min,dT_unactive_FPLM_lo,dT_unactive_FPLM_hi,nil);
+        inc(items);
+       {$ENDIF}
+       {$ENDIF}
+
+       {$IFDEF REPORT_FPLM_ARW}
+        smnu[items]:= Switch2(' '+hk(ihk)+FPLMARW,  @FPLM_ARR_WARN,nil);
+        inc(items);
+       {$IFDEF AIRBASE}
+        smnu[items]:= Switch2(' '+hk(ihk)+FPLMARWC, @FPLM_ARR_WARN_ALL,nil);
+        inc(items);
+       {$ENDIF}
+        smnu[items]:= SwitchI(' '+hk(ihk)+FPLMARR,  @dT_arr_warn_FPLM,tit_min,dT_arr_warn_FPLM_lo,dT_arr_warn_FPLM_hi,nil);
+        inc(items);
+       {$ENDIF}
+
+       smnu[items]:= SwitchI(' '+hk(ihk)+FPLMDEL,   @dT_deactive_FPLM,tit_min,dT_deactive_FPLM_lo,dT_deactive_FPLM_hi,nil);
+       inc(items);
+
+       {$IFDEF L4444M}
+        {smnu[items]:= Switch2(' '+hk(ihk)+FPLMINE,   @FPLM_INE,    nil);
+        inc(items);
+        smnu[items]:= Switch2(' '+hk(ihk)+FPLMINE9,  @FPLM_INE_9,  nil);
+        inc(items);
+        smnu[items]:= Switch2(' '+hk(ihk)+FPLMINEAP, @FPLM_INE_AP, nil);
+        inc(items);}
+       {$ENDIF}
+
+       {$IFDEF PRS}
+       {$IFDEF FPLM_REGULARITA}
+        if ENABLE_FPLM then
+           begin
+             add_newline_(0,nl,items,smnu);
+             smnu[items]:= NewTLine(FPLMREGULARITA,nil);
+             inc(items);
+             {smnu[items]:= Switch2(' '+hk(ihk)+FPLMREGFPLM, @FPLM_REGULARITA_FPLM, nil);
+             inc(items); }
+             smnu[items]:= Switch2(' '+hk(ihk)+FPLMREGFIR,      @FPLM_REGULARITA_FIR, nil);
+             inc(items);
+             smnu[items]:= Switch2(' '+hk(ihk)+FPLMREGFUAPLAN,  @FPLM_REGULARITA_FUA_PLAN, nil);
+             inc(items);
+             smnu[items]:= Switch2(' '+hk(ihk)+FPLMREGFUAACT,   @FPLM_REGULARITA_FUA_ACT, nil);
+             inc(items);
+           end;
+       {$ENDIF}
+       {$ENDIF}
+
+       add_newline_(2,nl,items,smnu);
+       smnu[items]:= NewTLine(mnuZOBRAZENIE,nil);
+       inc(items);
+
+       {$IFDEF FPLM_L}
+        smnu[items]:= Switch2(' '+hk(ihk)+PLANL,  @bminimFPL,nil);
+        inc(items);
+        smnu[items]:= SwitchI(' '+hk(ihk)+FPLML15,@max_mFPL_15_rm,'',max_mFPL_15_r_lo,max_mFPL_15_r_hi,nil);
+        inc(items);
+        smnu[items]:= SwitchI(' '+hk(ihk)+FPLML18,@max_mFPL_18_rm,'',max_mFPL_18_r_lo,max_mFPL_18_r_hi,nil);
+        inc(items);
+       {$ENDIF}
+       smnu[items]:= Switch2 (' '+hk(ihk)+FPLMSTRIP,@pis_STRIP_mFPL,nil);
+       inc(items);
+       smnu[items]:= Switch2 (' '+hk(ihk)+FPLMSTRIP15B,@pis_STRIP_mFPL_15body,nil);
+       inc(items);
+
+       smnu[items]:= SubMenu (hk(ihk)+cut_(mnu_miniSTRIP)+'... ', OptMenu (mnu_miniSTRIP,nil,cmDefault,
+                        Radio(mnu_miniSTRIP, @miniSTRIP_mFPL,0,
+                          RadioItem(mnu_MINI,
+                          RadioItem(mnu_SHORT,
+                          RadioItem(mnu_LARGE,
+                          nil ) ) ),
+                         nil)
+                        ),nil);
+       inc(items);
+
+       smnu[items]:= Switch2(' '+hk(ihk) + FPL_FL,  @in_FL, nil);
+       inc(items);
+       smnu[items]:= Switch2(' '+hk(ihk) + FPL_VFR, @alt_VFR_sym, nil);
+       inc(items);
+
+       add_newline_(2,nl,items,smnu);
+       smnu[items]:= NewTLine(mnuTLAC,nil);
+       inc(items);
+       smnu[items]:= Switch2(' '+hk(ihk)+FPLMPRNICAO,@prn_FPLM_ICAO, nil);
+       inc(items);
+
+       for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i]);
+     end;
+
+
+ procedure mnuFPLM_init_(var smnu: TPItems; var items,nl: int);
+     var   sbmnu : PSubMenu;
+     begin
+      {$IFDEF VLASTNE_PLANY}
+       smnu[items]:= SubMenu (tit_PRED_, WinMenu(tit_PRED,nil,
+                              Item (tit_VLASTNE+PLANY_, cmPREHLAD_mFPL_PPL_nase,
+                              Item (tit_VSETKY+PLANY_,  cmPREHLAD_mFPL_PPL,
+                              nil ) )
+                             ),nil);
+       inc(items);
+       smnu[items]:= SubMenu (tit_ARCH_, WinMenu(tit_ARCH,nil,
+                              Item (tit_VLASTNE+PLANY_, cmPREHLAD_mFPL_ARCH_nase,
+                              {Item (tit_PRIJATE, cmPREHLAD_mFPL_ARCH_ine,}
+                              Item (tit_VSETKY+PLANY_,  cmPREHLAD_mFPL_ARCH,
+                              nil ) )
+                             ),nil);
+       inc(items);
+      {$ELSE}
+       smnu[items]:= Item (tit_PRED, cmPREHLAD_mFPL_PPL,  nil);
+       inc(items);
+       smnu[items]:= Item (tit_ARCH, cmPREHLAD_mFPL_ARCH, nil);
+       inc(items);
+      {$ENDIF}
+
+      {$IFDEF OPL} {$IFDEF PROCESS_FPLM}
+       smnu[items]:= Item (tit_SAMPLE, cmPREHLAD_mFPL_RPL, nil);
+       inc(items);
+      {$ENDIF} {$ENDIF}
+
+      if not mnu_data_opt_common then
+         begin
+           add_newline_(2,nl,items,smnu);
+           sbmnu:= SubMenu(cut_r(mnu_OPTi)+'... ', OptMenu_S(tit_OPTi, hlp_mnu_FPLM_NASTAV,cmNASTAV_SPRACOVANIE,15,nil),nil);
+           sbmnu^.PMenu_init:= @mnuFPLMvolby_init;
+           smnu[items]:= SubMenuInitialized(sbmnu,nil);
+           inc(items);
+         end;
+     end;
+
+
+ {$IFDEF MACC_MENU}
+   procedure _mnuMACC_FPLM_init(MMenu: PSubmenu); far;
+       var   smnu  : TPItems;
+             sbmnu : PSubMenu;
+             i,items,nl,ihk : int;
+       begin
+         items:= 0; nl:= 0;
+
+         {$IFDEF PROCESS_FPLM}
+          smnu[items]:= SubMenu (mnu_FPLM_PLAN, WinMenu(mnu_FPLM_PLAN,hlpmnuFPLM,
+                                 Item(mnu_FPLM_F5,  cmFPLm,
+                                 Item(mnu_FPLM_CHG, cmCHGm,
+                                 Item(mnu_FPLM_CNL, cmCNLm,
+                                 {$IFDEF OPL}
+                                  Item(mnu_FPLM_REQ, cmREQm,
+                                  {$IFDEF MACC}
+                                   {Item(mnu_FPLM_REQ2, cmREQ2m,}
+                                  {$ENDIF}
+                                 {$ENDIF}
+                                 NewLine2(0,
+                                 Item(mnu_FPLM_DEP, cmDEPm,
+                                 {$IFDEF OPL}
+                                  {$IFNDEF AIRBASE}
+                                   Item(mnu_FPLM_EST, cmESTm,
+                                  {$ENDIF}
+                                 {$ENDIF}
+                                 Item(mnu_FPLM_MZP, cmMZPm,
+                                 {Item(mnu_FPLM_MZS, cmMZS,}
+                                 Item(mnu_FPLM_ETO, cmETOm,
+                                 Item(mnu_FPLM_ARR, cmARRm,
+                                 nil ) ) )
+                                      )
+                                     {$IFDEF OPL} )
+                                       {$IFDEF MACC}   {$ENDIF}
+                                       {$IFNDEF AIRBASE} ) {$ENDIF}
+                                     {$ENDIF}
+                                     ) ) ) )
+                                ), nil);
+          inc(items);
+         {$ENDIF}
+
+         add_newline_(2,nl,items,smnu);
+         ihk:= 0;
+         {$IFDEF VLASTNE_PLANY}
+          smnu[items]:= Item (' '+hki(ihk)+PLA_PLA, cmPREHLAD_mFPL_plan_nase,nil);
+          inc(items);
+          smnu[items]:= Item (' '+hki(ihk)+PLA_INE, cmPREHLAD_mFPL_plan_ine, nil);
+          inc(items);
+          smnu[items]:= Item (' '+hki(ihk)+tit_VSETKY+PLANY_, cmPREHLAD_mFPL_plan_sicke, nil);
+          inc(items);
+         {$ELSE}
+          smnu[items]:= Item (' '+hki(ihk)+PLA_PLA, cmPREHLAD_mFPL_plan,nil);
+          inc(items);
+         {$ENDIF}
+
+         {$IFDEF OPL}
+          smnu[items]:= Item (' '+hki(ihk)+PLA_SCH, cmPREHLAD_mFPL_acc, nil);
+          inc(items);
+         {$ENDIF}
+         smnu[items]:= Item (' '+hki(ihk)+FPLM_ACT, cmPREHLAD_mFPL_dep, nil);
+         inc(items);
+         smnu[items]:= Item (' '+hki(ihk)+FPLM_ARR, cmPREHLAD_mFPL_arr, nil);
+         inc(items);
+         smnu[items]:= Item (' '+hki(ihk)+PLA_ALL+ctrlFPLM,  cmPREHLAD_mFPL_all, nil);
+         inc(items);
+         add_newline_(0,nl,items,smnu);
+
+         mnuFPLM_init_(smnu,items,nl);
+
+         for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i])
+       end;
+ {$ENDIF}
+
+
+ procedure _mnuFPLM_init(MMenu: PSubmenu); far;
+     var   smnu  : TPItems;
+           sbmnu : PSubMenu;
+           i,items,nl,ihk : int;
+     begin
+       items:= 0; nl:= 0;
+
+       {$IFDEF PROCESS_FPLM}
+        smnu[items]:= Item(mnu_FPLM_F5,  cmFPLm, nil);
+        inc(items);
+        smnu[items]:= Item(mnu_FPLM_CHG, cmCHGm, nil);
+        inc(items);
+        smnu[items]:= Item(mnu_FPLM_CNL, cmCNLm, nil);
+        inc(items);
+        {$IFDEF OPL}
+         smnu[items]:= Item(mnu_FPLM_REQ, cmREQm, nil);
+         inc(items);
+         {$IFDEF MACC}
+          {smnu[items]:= Item(mnu_FPLM_REQ2, cmREQ2m, nil);
+          inc(items);}
+         {$ENDIF}
+        {$ENDIF}
+        smnu[items]:= NewLine2(0, nil);
+        inc(items);
+        smnu[items]:= Item(mnu_FPLM_DEP, cmDEPm, nil);
+        inc(items);
+        {$IFDEF OPL}
+         {$IFNDEF AIRBASE}
+          smnu[items]:= Item(mnu_FPLM_EST, cmESTm, nil);
+          inc(items);
+         {$ENDIF}
+        {$ENDIF}
+        smnu[items]:= Item(mnu_FPLM_ETO, cmETOm, nil);
+        inc(items);
+        smnu[items]:= Item(mnu_FPLM_MZP, cmMZPm, nil);
+        inc(items);
+        {smnu[items]:= Item(mnu_FPLM_MZS, cmMZS, nil);}
+        smnu[items]:= Item(mnu_FPLM_ARR, cmARRm, nil);
+        inc(items);
+       {$ENDIF}
+
+       add_newline_(2,nl,items,smnu);
+       ihk:= 0;
+       smnu[items]:= SubMenu (cut_r(PREHLADPLA_)+'... ', WinMenu(PREHLADPLA_,nil,
+                              {$IFDEF VLASTNE_PLANY}
+                               Item (' '+hki(ihk)+PLA_PLA,           cmPREHLAD_mFPL_plan_nase,
+                               Item (' '+hki(ihk)+PLA_INE,           cmPREHLAD_mFPL_plan_ine,
+                               Item (' '+hki(ihk)+tit_VSETKY+PLANY_, cmPREHLAD_mFPL_plan_sicke,
+                              {$ELSE}
+                               Item (' '+hki(ihk)+PLA_PLA,           cmPREHLAD_mFPL_plan,
+                              {$ENDIF}
+                              {$IFDEF OPL}
+                               Item (' '+hki(ihk)+PLA_SCH, cmPREHLAD_mFPL_acc,
+                              {$ENDIF}
+                              Item (' '+hki(ihk)+FPLM_ACT, cmPREHLAD_mFPL_dep,
+                              Item (' '+hki(ihk)+FPLM_ARR, cmPREHLAD_mFPL_arr,
+                              Item (' '+hki(ihk)+PLA_ALL+ctrlFPLM,  cmPREHLAD_mFPL_all,
+                              nil )
+                              ) )
+                              {$IFDEF VLASTNE_PLANY} ) ) {$ENDIF}
+                              {$IFDEF OPL} ) {$ENDIF}
+                              ) ),
+                              nil);
+       inc(items);
+
+       mnuFPLM_init_(smnu,items,nl);
+
+       for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i])
+     end;
+
+
+ procedure mnuFPLM_init(MMenu: PSubmenu); far;
+     begin
+      {$IFDEF MACC_MENU}
+       if MENU_MACC then _mnuMACC_FPLM_init(MMenu)
+       else _mnuFPLM_init(MMenu);
+      {$ELSE}
+       _mnuFPLM_init(MMenu);
+      {$ENDIF}
+     end;
+
+{$ENDIF}

@@ -1,0 +1,31 @@
+{
+‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹
+€                                                          €
+€ zobrazenie                                               €
+€‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹€
+}
+
+procedure _plan_PRZ(x0,y0,x1,y1: int; bk: int; rp,rs: byte; form: bool);
+    begin
+      _plan_NTM (x0,y0,x1,y1, bk, rp,rs, form)
+    end;
+
+procedure plani_PRZ(PRZ: PPRZ; x,y: int; b,mini: bool);
+    begin
+      plani_NTM (PNTM(PRZ), x,y, b,mini)
+    end;
+
+procedure plan_PRZ(PRZ: PPRZ; x,y: int; b: bool); far;
+    begin
+      plani_PRZ(PRZ, x,y, b,bminiNTM)
+    end;
+
+procedure _info_PRZ(x0,y0,x1,y1: int; PRZ: PPRZ); far;
+    begin
+      _info_NTM(x0,y0,x1,y1, PNTM(PRZ))
+    end;
+
+function  info_PRZ (PRZ: PPRZ; title: string): bool; far;
+   begin
+     info_PRZ:= Info(title, @_info_PRZ, PRZ,dxf_NTM+20,dyf_NTM+10, nil,0)
+   end;

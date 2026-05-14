@@ -1,0 +1,96 @@
+
+ procedure plan_FDR_ (FDR: PFDR; x,y: int; b: bool); far;
+     var   dx : int;
+           s  : string;
+           rd,rp : real;
+           cl,bi : byte;
+     begin
+       with FDR^ do
+         begin
+           rd:= DateToSec(Year,Month,Day);
+           rp:= DateToSec(date.r,date.m,date.d);
+           if b then cl:= cl_data+1 else cl:= cl_data;
+
+           {s:= code_FDR_s(FDR);
+           if rd<>rp then s:= s + code_l4_dat(date.d,date.m);
+           setcolor (cl);
+           outtextxy(x,y+1,s);}
+
+           if fpl_approved(FDR^.src,_FPL4_APROVED_DISPLAY) then
+              if (poz<poz_SEDI) or (rd>=rp) then bi:= pozCL[FDR^.poz]
+              else bi:= cl
+           else bi:= red;
+           SetColor (bi);
+           outtextxy(x,y+1, _lat_FPL4(idn));                   dx:= (kod_7a+1) shl 3;
+
+           setcolor (cl);
+           outtextxy(x+dx,y+1, _lat_FPL4(typ));                inc(dx,(kod_9b+1+kod_9c+2) shl 3);
+
+           if (dep.kod<>'') then
+              begin
+                outtextxy(x+dx,y+1, _lat_FPL4(dep.kod));       inc(dx,(kod_AP) shl 3 +4);
+                outtextxy(x+dx,y+1, code_l4_utc(dep.h,dep.m)); inc(dx,(kod_TIME+1) shl 3 +4);
+              end
+           else inc(dx,((kod_AP+kod_TIME+1) shl 3) +8);
+
+           if (eet.kod<>'') then
+              begin
+                outtextxy(x+dx,y+1, _lat_FPL4(eet.kod));       inc(dx,(kod_NDB shl 3) +4);
+                outtextxy(x+dx,y+1, code_l4_utc(eet.h,eet.m)); inc(dx,(kod_TIME+1) shl 3 +4);
+              end
+           else inc(dx,((kod_NDB+kod_TIME+1) shl 3) +8);
+
+           if exi.kod<>'' then
+              begin
+                outtextxy(x+dx,y+1, _lat_FPL4(exi.kod));       inc(dx,(kod_NDB shl 3) +4);
+                outtextxy(x+dx,y+1, code_l4_utc(exi.h,exi.m)); inc(dx,(kod_TIME+1) shl 3 +4);
+              end
+           else inc(dx,((kod_NDB+kod_TIME+1) shl 3) +8);
+
+           if arr.kod<>'' then
+              begin
+                outtextxy(x+dx,y+1, _lat_FPL4(arr.kod));       inc(dx,((kod_AP+1) shl 3) +4);
+                outtextxy(x+dx,y+1, code_l4_utc(arr.h,arr.m)); inc(dx,(kod_TIME+1) shl 3 +4);
+              end
+           else inc(dx,((kod_AP+kod_TIME+1) shl 3) +8);
+
+           if vys<>0 then outtextxy(x+dx,y+1, code_l4_vys(vys,vys_));
+           inc(dx,(1+altS_+1) shl 3);
+
+           outtextxy(x+dx,y+1, fplsrc_idn(src));
+           inc(dx,(fplsrcs+1) shl 3);
+
+           if rd<>rp then outtextxy(x+dx,y+1, code_l4_date_r(date.d,date.m,false))
+         end
+     end;
+
+ procedure plan_FDR(FDR: PFDR; x,y: int; b: bool);
+     var   bk : byte;
+           dx : int;
+     begin
+       if b then bk:= bkPLAN_[b] else bk:= black;
+       FillWin(x-1,y,x+dx_FDR_plan,y+dy_FDR_plan,bk);
+       plan_FDR_(FDR, x,y, b)
+     end;
+
+ procedure plan_FDR_info (FDR: PFDR; x,y: int; b: bool); far;
+     var   bk : byte;
+           dx : int;
+     begin
+       bk:= bkPLAN_[b];
+       BGIgraph.button(x,y,x+dx_FDR_plan, y+dy_FDR_plan+4, bk, btSmall, btOFF);
+       plan_FDR_ (FDR, x+5,y+2, b);
+       _linev(x+((kod_7a+1+kod_9a+kod_9b+1+kod_9c+1) shl 3),y+2,y+dy_FDR_plan-2,bk)
+     end;
+
+ procedure _info_FDR(x0,y0,x1,y1: int; FDR: PFDR); far;
+     begin
+       plan_FDR_info (FDR, x0+(x1-x0-dx_FDR_plan) shr 1,y0,false)
+     end;
+
+ function info_FDR(FDR: PFDR; title: string): bool;
+     begin
+       if title='' then title:= FDR^.idn;
+       info_FDR:= Info(title, @_info_FDR, FDR,dx_FDR_plan+20,dy_FDR_plan+5, nil,0)
+     end;
+

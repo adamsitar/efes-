@@ -1,0 +1,371 @@
+{ ---------------------
+   receive_pkt
+  ---------------------
+
+   - okamzite spracovanie systemovych sprav kvoli rychlosti odozvy
+   - udrziavanie informacii o stave uzlov
+   - prijem a zaradenie paketu do pamate alebo na disk
+   - okamzite generovanie a odoslanie potvrdenia pre prijaty paket
+
+   - prijate data a potvrdenia sa spracovavaju zvlast v samostanej slucke.
+     Je potrebne zarucit, aby sa naraz nespracovali :
+        ש data toho isteho typu
+        ש data a potvrdenia toho isteho typu,
+     pretoze na tejto urovni nie je mozne zarucit, ze na aplikacnej vrstve
+     nedojde ku konfliktom, napriklad ak :
+        ת sa spracovavaju data rovnakeho typu nadvazujuce na seba,
+          mohli by sa prehodit, t.j. posledny spracovany predbehne
+          vdaka filozofii "Main" prvy spracovavany
+        ת to iste sa moze stat s potvrdenim na predchadzajucu spravu.
+     Vynimka sa moze pouzit pri spracovani dat a potrdeni rovnakeho
+     typu, ak data nie su viacnasobne spracovatelne, napriklad spravy.
+}
+
+
+{ spracovanie prichodivsieho paketu,
+  spojenie/zaradenie;
+  vrati ci sa paket potvrdzuje
+}
+
+ function TNET.add_data_pkt (const pkt: TNETpkt): bool;
+    var   i,ind : int;
+          potvrd,in_bufe : bool;
+
+          pi : PNETpkt;
+
+          dlz  : TNETdlz;
+          data : pchars;
+
+    begin
+      potvrd:= true;
+     { je to dalsia cast paketu ?
+     }
+      if pkt_for_this_node(pkt) and (pkt.head.ind>0) and (pkt.head.poc>0) then
+         begin
+          { najdenie predchadzajucej casti
+          }
+           i:= 0; while (i<=top) and (not eq_NETpkt_(pkt,buff^[i]^,false)) do inc(i);
+           if (i<=top) then
+              if (buff^[i]^.head.ind+1=pkt.head.ind) then
+                 begin
+                 { spojenie datovych casti predchadzajuceho paketu
+                   a prichodivsieho paketu
+                 }
+                   pi:= buff^[i];
+                   in_bufe:= true;
+                   if pi^.pkt.bufe=nil then
+                      begin
+                        pi^.pkt.bufe:= New(PstreamBuffer,Init(1,pi^.pkt.dlz));
+                        if pi^.pkt.bufe^.is then
+                           begin
+                             in_bufe:= true;
+                             pi^.pkt.bufe^.add_to_buffer(pi^.pkt.data^,pi^.pkt.dlz);
+                             disp_NETpkt_data(pi^.pkt) { odalokuje data }
+                           end
+                        else begin
+                               in_bufe:= false;
+                             end;
+                      end
+                   else in_bufe:= pi^.pkt.bufe^.is;
+                   if in_bufe then pi^.pkt.bufe^.add_to_buffer(pkt.pkt.data^,pkt.pkt.dlz)
+                   else begin
+                          dlz:= pi^.pkt.dlz+pkt.pkt.dlz;
+                          if (dlz<MIN_NET_HEAP_SIZE) and (MaxAvail>MIN_NET_HEAP_SIZE) then
+                             begin
+                               getmem(data,dlz);
+                               move(pi^.pkt.data^,data^,pi^.pkt.dlz);
+                               move(pkt.pkt.data^,data^[pi^.pkt.dlz],pkt.pkt.dlz);
+                               disp_NETpkt_data(pi^.pkt);
+                               pi^.pkt.data:= data;
+                               pi^.pkt.dlz := dlz
+                             end
+                        end;
+
+                   pi^.head:= pkt.head;
+                   pi^.tick:= getticks;
+                   potvrd:= true
+                 end
+              else begin
+                   { chyba predchadzajuci paket : i-1 <-> i,
+                     preto sa zrusi prijaty zaciatok paketu,
+                     res=-1 zabezpeci nepotvrdenie spravy
+                     a inicializaciu uzla
+                   }
+                     Del(i);
+                     potvrd:= false
+                   end
+           else potvrd:= false
+         end
+      else potvrd:= Add(@pkt)>=0;
+      add_data_pkt:= potvrd
+    end;
+
+
+{ Spracovanie prichodivsieho potvrdenia,
+  Ak prislo potvrdenie na
+   - poslednu (prvu z jednej) casti paketu, znamena to, ze vsetky
+     predchadzajuce casti paketu tiez presli a je mozne
+     zaradenie paketu do radu na cakanie na spracovanie spravy
+     o potvrdeni spracovnanie vysledku o doruceni
+   - na spravu i/m, potom sa generuje dalsi paket,
+     je docasne ulozeny v pamati
+}
+
+ function TNET.add_ack_pkt (var pkt: TNETpkt): bool;
+    var   pkti  : TNETpkt;
+          ack   : PNETack;
+          key   : string;
+          dlz   : long;
+          off   : long;
+    begin
+      add_ack_pkt:= true;
+      if (pkt.head.ind<pkt.head.poc) then
+         begin
+         { vyhladanie nasledujucej casti spravy
+           a odoslanie nasledujuceho paketu
+         }
+           ack:= NETack^.get_ack_pkt(pkt);
+           if (ack=nil) then Exit;
+
+           fillchar(pkti,sizeof(pkti),0);
+           pkti.ods:= pkt.adr;
+           pkti.adr:= pkt.ods;
+           pkti.head:= ack^.head;
+
+           inc(pkti.head.ind);
+           off:= pkti.head.ind*size_of_NETdata;
+           if (ack^.pkt.bufe<>nil) and (ack^.pkt.bufe^.is) then
+              begin
+                dlz:= minimum(N(ack^.pkt.bufe^.getsize-off),size_of_NETdata); { zacina od nuly, preto nie je +1 }
+                if not ack^.pkt.bufe^.read_buffer_int (off,dlz, pkti.pkt.data,pkti.pkt.dlz, false) then
+                   begin
+                     NETack^.del_pkt_ack(pkt,true,false);
+                     Exit;
+                   end
+              end
+           else begin
+                  dlz:= minimum(N(ack^.pkt.dlz-off),size_of_NETdata); { zacina od nuly, preto nie je +1 }
+                  if not new_NETpkt_data(@ack^.pkt.data^[off],dlz, pkti.pkt) then
+                     begin
+                       NETack^.del_pkt_ack(pkt,true,false);
+                       Exit;
+                     end
+                end;
+           ack^.head.ind:= pkti.head.ind;
+           ack^.tick:= getticks;
+           NETsend_pkt(pkti,net_flag_SEND,false,'',nil,true);
+           add_ack_pkt:= false
+         end
+      else begin
+             key:= NETack^.get_ack_key (pkt);
+             disp_NETpkt_data (pkt.pkt);
+             new_NETpkt_data  (pchars(@key[1]),length(key), pkt.pkt);
+             add_ack_pkt:= Add(@pkt)>=0
+           end
+    end;
+
+
+ function TNET.receive_pkt(var pkt: TNETpkt): int;
+
+    var   ack : TNETpkt;
+          res,nd,ires : int;
+          zarad, potvrd, potvrdene, spracuj : bool;
+          co : string;
+
+    label X;
+
+    begin
+      res:= -1;
+      indicate_net(1);
+
+     { kvoli staremu protokolu - uprava adresy do standartneho formatu
+     }
+      pkt.adr:= NETadr(NETadr_wan(pkt.adr),NETadr_lan(pkt.adr));
+      pkt.ods:= NETadr(NETadr_wan(pkt.ods),NETadr_lan(pkt.ods));
+      nd:= is_NETadr(pkt.ods);
+
+      spracuj:= true;
+
+      {$IFDEF BACKUP} {$IFNDEF BACKUP_ACTIVE_2_NET}
+       spracuj:= (not SERVERstatus) or (nd=SERVERnode) or (-1=SERVERnode);
+      {$ENDIF} {$ENDIF}
+
+      {$IFDEF MASTER} {$IFDEF BACKUP_ACTIVE_2_NET}
+       spracuj:= (not BACKUPstatus) or (nd=BACKUPnode) or (-1=BACKUPnode);
+      {$ENDIF} {$ENDIF}
+
+      if spracuj then co:= arch_PKT_REC else co:= arch_PKT_RECU;
+      writeln_pkt(pkt, writeln_NET_REC,archive_NET_REC, cl_NET_REC, co, netRES_OK);
+
+      if not is_correct_pkt(pkt) then
+         begin
+           writeln_mess(pkt,'Uncorrect packet.',true,true,cl_ERR,arch_ERR);
+           {Beep(500,100);}
+           goto X
+         end;
+
+      if pkt_from_this_node(pkt) then
+         begin
+           writeln_mess(pkt,'Packet from this node.',true,true,cl_ERR,arch_ERR);
+           goto X;
+         end;
+
+      if not SERVERstatus then
+         begin
+           SERVERstatus:= (nd>-1) and (nd=SERVERnode);
+           {$IFDEF BACKUP}
+           { aktualizacia stavu MASTER SERVERA
+           }
+            send_mail(nil,MainApp,cmSERVER_STATUS,One,nil,0)
+           {$ENDIF}
+         end;
+
+      if (not BACKUPstatus) then
+         begin
+           BACKUPstatus:= (nd>-1) and (nd=BACKUPnode);
+           {$IFDEF MASTER}
+            {send_mail(nil,MainApp,cmSERVER_STATUS,One,nil,0)}
+           {$ENDIF}
+         end;
+
+      if not spracuj then goto X;
+
+      pkt.tick:= getticks;
+      res:= netRES_OK;
+
+      if pkt_for_this_node(pkt) then
+         begin
+
+         { --------------------------------------
+            spracovanie alebo zaradenie paketu
+           --------------------------------------
+         }
+           zarad:= false;
+           potvrd:= true;
+
+           case pkt.head.typ of
+
+            { a) Systemove spravy sa musia spracovavat okamzite
+                 תתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתת
+            }
+             spr_CAS    : begin
+                            {$IFDEF CAS_SERVER} if pkt.ods=SERVERaddress then decode_netUTC(pkt.pkt.data,pkt.pkt.dlz) {$ENDIF}
+                            {$IFDEF CAS_RTR}    if pkt.ods=ROUTERaddress then decode_netUTC(pkt.pkt.data,pkt.pkt.dlz) {$ENDIF};
+                            potvrd:= false
+                          end;
+
+             ack_CAS    : { kvoli odmazaniu z buffera };
+
+             spr_ON     : { podriadena stanica sa zapla }      nodeON(pkt.ods, true,true,true);
+             ack_ON     : { potvrdenie spravy o zapnuti (ON) } nodeON(pkt.ods, true,true,false);
+
+             spr_CALL   : if MaxAvail > MIN_NET_HEAP_SIZE then nodeON(pkt.ods, false,false,true);
+             ack_CALL   : nodeON(pkt.ods, {15.2. z false}true,false,true);
+
+
+             spr_HEARTBEAT,
+             ack_HEARTBEAT,
+
+             ack_INITIALIZE,
+             ack_INITIALIZED,
+             ack_INIT_FAILED
+
+                        : pkt_received(pkt);
+
+
+             spr_OFF    : nodeOFF(pkt.ods,true,nil);
+             ack_OFF    : ;
+
+             spr_CONFIG : if Owner<>nil then Owner^.set_app_config (pkt.pkt.data,pkt.pkt.dlz);
+
+             spr_SIM    : { spracovava sa uz normalne, nie cez sim pkt    }
+
+             else zarad:= true
+           end;
+
+           if zarad then pkt_received(pkt);
+
+           if is_ack_pkt(pkt) then
+              begin
+                is_ack:= true;
+
+               { תתתתתתתתתתתתתתתתתתתתתתתתתתתתתתת
+                 b) Potvrdenie odoslaneho paketu
+                    תתתתתתתתתתתתתתתתתתתתתתתתתתתת
+                 Do datovej casti sa zakoduje kluc, odlozeny v zozname
+                 ocakavanych potvrdeni, aby sa mohlo priradit potvrdenie
+                 ku konkretnym datam...
+
+                 Ak je potvrdenie typu i/n, generuje sa odoslanie
+                 nasledujuceho paketu i+1/m, prijatie posledneho
+                 m/m znamena generovanie potvrdenia -
+                 zabezpecia "read_ack_pkt" a "_send_next_pkt"
+
+               }
+                if zarad then potvrdene:= add_ack_pkt(pkt)
+                else potvrdene:= true;
+
+               { Vyradenie spravy zo zoznamu ocakavanych potvrdeni,
+                 ak to nebol paket typu i/m a i<m
+               }
+                if potvrdene then NETack^.del_pkt_ack(pkt,false,false)
+              end
+
+           else begin
+                  is_pkt:= true;
+
+                 { תתתתתתתתתתתתתתתתתתתתתתתתתתתתתתת
+                   c) Zaradenie prijateho paketu
+                      תתתתתתתתתתתתתתתתתתתתתתתתתתתת
+
+                   Overenie, ci prijaty paket nie je dalsim paketom i/n,
+                   jeho zaradenie ku predchadzajucemu, alebo vylucenie,
+                   ak predchadzajuci chyba...
+
+                   Generovanie a odoslanie potvrdenia.
+                   Pretoze sa neda zabezpecit, aby pri spracovani paketu
+                   nedoslo ku zdrzaniu (nazbera sa viac dat, zdrzanie pri
+                   zapise na disk...), potvrdzuje sa ihned.
+                 }
+                  if zarad then potvrd:= add_data_pkt(pkt) and potvrd
+                  else potvrd:= true;
+
+                  if potvrd then
+                     begin
+                       net_pkt_ack(pkt,ack);
+                       NETsend_pkt(ack,net_flag_SEND,false,'',nil,true)
+                     end
+                end
+         end
+
+      else begin
+           { --------------------------------------
+              presmerovanie paketu
+             --------------------------------------
+           }
+            {$IFDEF NET_BRIDGE}
+             if not s_reroute then
+                begin
+                  NETsend_pkt(pkt,net_flag_SEND,false,'',nil,false);
+                end
+             else begin
+                    res:= Add(@pkt);
+                    is_reroute:= true
+                  end
+            {$ELSE}
+              writeln_mess(pkt,'Packet for another node.',true,true,cl_ERR,arch_ERR);
+              goto X;
+            {$ENDIF}
+           end;
+
+      X: {Diagnose;}
+      disp_NETpkt(@pkt);
+
+      indicate_net(-1);
+      receive_pkt:= res
+    end;
+
+
+ procedure TNET.receive_brc (const Bpkt : TNETBpkt {$IFDEF PCTCP}; from : T_IPaddress {$ENDIF});
+     begin
+     end;

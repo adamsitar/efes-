@@ -1,0 +1,183 @@
+{ -----------------
+   Diverzie
+ תתתתתתתתתתתתתתתתתת
+}
+{$I ..\lib\mnu\_DVZ.h}
+
+{$IFDEF DVZ}
+
+ procedure mnuDVZvolby_init(MMenu: PSubmenu); far;
+     var   smnu : TPItems;
+           i,items,nl,ihk: int;
+     begin
+       items:= 0; nl:= 0; ihk:= 0;
+
+       smnu[items]:= NewTLine(mnuSPRACOVANIE,nil);
+       inc(items);
+       smnu[items]:= Switch2 (' '+hk(ihk)+DVZPLANREQ, @posliZiadostDVZ,nil);
+       inc(items);
+       smnu[items]:= Switch2 (' '+hk(ihk)+DVZREP, @hlas_DVZ,nil);
+       inc(items);
+       {$IFDEF VLASTNE_PLANY}
+        smnu[items]:= Switch2 (' '+hk(ihk)+DVZREPALL, @hlas_vsetky_DVZ,nil);
+        inc(items);
+       {$ENDIF}
+       smnu[items]:= Switch2 (' '+hk(ihk)+DVZVAR, @varovanie_DVZ,nil);
+       inc(items);
+
+
+       {add_newline_(2,nl,items,smnu);
+       smnu[items]:= NewTLine(mnuZOBRAZENIE,nil);
+
+       add_newline_(2,nl,items,smnu);
+       smnu[items]:= NewTLine(mnuTLAC,nil);}
+
+
+       for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i]);
+     end;
+
+
+ procedure mnuDVZ_init_(var smnu: TPItems; var items,nl: int); far;
+     var   sbmnu : PSubMenu;
+     begin
+
+       {add_newline_(0,nl,items,smnu);
+       sbmnu:= SubMenu(cut_r(mnuPREHLAD)+'... ', WinMenu('DIVERZIE LET‹SK', nil,nil),nil);
+       sbmnu^.PMenu_init:= @mnuDVZprehlad_init;
+       smnu[items]:= SubMenuInitialized(sbmnu,nil);
+       inc(items);}
+
+       {$IFDEF PROCESS_DVZ}
+        smnu[items]:= Item (DVZ_PPL,  cmPREHLAD_DVZ_PPL,nil);
+        inc(items);
+       {$ENDIF}
+
+       smnu[items]:=  Item (DVZ_ARCH, cmPREHLAD_DVZ_ARCH,nil);
+       inc(items);
+
+       if not mnu_data_opt_common then
+          begin
+            add_newline_(2,nl,items,smnu);
+            sbmnu:= SubMenu(cut_r(mnu_OPTi)+'... ', OptMenu_S(tit_OPTi, hlp_mnu_DVZ_NASTAV,cmNASTAV_SPRACOVANIE,15,nil),nil);
+            sbmnu^.PMenu_init:= @mnuDVZvolby_init;
+            smnu[items]:= SubMenuInitialized(sbmnu,nil);
+            inc(items);
+          end;
+     end;
+
+
+ {$IFDEF MACC_MENU}
+  procedure _mnuMACC_DVZ_init(MMenu: PSubmenu); far;
+      var   smnu  : TPItems;
+            sbmnu : PSubMenu;
+            i,items,nl : int;
+      begin
+        items:= 0; nl:= 0;
+
+        {$IFDEF PROCESS_DVZ}
+         smnu[items]:= SubMenu (cut_r(mnu_DVZ_PLAN), WinMenu(mnu_DVZ_PLAN,nil,
+                        Item(DVZPLAN, cmDVZ,
+                        Item(DVZCHG,  cmDVZchg,
+                        Item(DVZCNL,  cmDVZcnl,
+                        NewLine2(0,
+                        {Item(DVZREQ,  cmDVZreq,}
+                        Item(DVZACT,  cmDVZact,
+                        Item(DVZEND,  cmDVZend,
+                        NewLine2(0,
+                        Item(DVZACC,  cmDVZacc,
+                        Item(DVZALR,  cmDVZalr,
+                        Item(DVZCLN,  cmDVZcln,
+                        Item(DVZACN,  cmDVZacn,
+                        nil ) ) ) ) ) ) ) ) ) ) ) {)}
+                       ),nil);
+         inc(items);
+        {$ENDIF}
+
+        add_newline_(2,nl,items,smnu);
+        {$IFDEF PROCESS_DVZ}
+         smnu[items]:= Item (DVZ_PLAN, cmPREHLAD_DVZ_nase, nil);
+         inc(items);
+         smnu[items]:= Item (DVZ_REC,  cmPREHLAD_DVZ_ine, nil);
+         inc(items);
+         smnu[items]:= Item (DVZ_ALL,  cmPREHLAD_DVZ_plan, nil);
+         inc(items);
+        {$ELSE}
+         smnu[items]:= Item (PREHLADREQ_, cmPREHLAD_DVZ_plan,nil);
+         inc(items);
+        {$ENDIF}
+        {smnu[items]:= Item (DVZ_ACT, cmPREHLAD_DVZ,nil);
+        inc(items);}
+        add_newline_(0,nl,items,smnu);
+
+        mnuDVZ_init_(smnu, items,nl);
+
+        for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i])
+      end;
+ {$ENDIF}
+
+ procedure _mnuDVZ_init(MMenu: PSubmenu); far;
+     var   smnu  : TPItems;
+           sbmnu : PSubMenu;
+           i,items,nl : int;
+     begin
+       items:= 0; nl:= 0;
+
+       {$IFDEF PROCESS_DVZ}
+        smnu[items]:= Item(DVZPLAN, cmDVZ, nil);
+        inc(items);
+        smnu[items]:= Item(DVZCHG,  cmDVZchg, nil);
+        inc(items);
+        smnu[items]:= Item(DVZCNL,  cmDVZcnl, nil);
+        inc(items);
+        smnu[items]:= NewLine2(0, nil);
+        inc(items);
+        smnu[items]:= Item(DVZREQ,  cmDVZreq, nil);
+        inc(items);
+        smnu[items]:= Item(DVZACT,  cmDVZact, nil);
+        inc(items);
+        smnu[items]:= Item(DVZEND,  cmDVZend, nil);
+        inc(items);
+        smnu[items]:= NewLine2(0, nil);
+        inc(items);
+        smnu[items]:= Item(DVZACC,  cmDVZacc, nil);
+        inc(items);
+        smnu[items]:= Item(DVZALR,  cmDVZalr, nil);
+        inc(items);
+        smnu[items]:= Item(DVZCLN,  cmDVZcln, nil);
+        inc(items);
+        smnu[items]:= Item(DVZACN,  cmDVZacn, nil);
+        inc(items);
+       {$ENDIF}
+
+       add_newline_(2,nl,items,smnu);
+       {$IFDEF PROCESS_DVZ}
+        smnu[items]:= SubMenu (cut_r(PREHLADREQ_)+'... ', WinMenu(PREHLADREQ_,nil,
+                               Item (DVZ_PLAN, cmPREHLAD_DVZ_nase,
+                               Item (DVZ_REC,  cmPREHLAD_DVZ_ine,
+                               Item (DVZ_ALL,  cmPREHLAD_DVZ_plan,
+                               nil ) ) )
+                              ),nil);
+        inc(items);
+       {$ELSE}
+        smnu[items]:= Item (PREHLADREQ_, cmPREHLAD_DVZ_plan,nil);
+        inc(items);
+       {$ENDIF}
+        {smnu[items]:= Item (DVZ_ACT, cmPREHLAD_DVZ,nil);
+        inc(items);}
+
+       mnuDVZ_init_(smnu, items,nl);
+
+       for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i])
+     end;
+
+
+ procedure mnuDVZ_init(MMenu: PSubmenu); far;
+     begin
+      {$IFDEF MACC_MENU}
+       if MENU_MACC then _mnuMACC_DVZ_init(MMenu)
+       else _mnuDVZ_init(MMenu);
+      {$ELSE}
+       _mnuDVZ_init(MMenu);
+      {$ENDIF}
+     end;
+{$ENDIF}

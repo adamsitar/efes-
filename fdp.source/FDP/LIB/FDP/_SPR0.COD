@@ -1,0 +1,83 @@
+function code0_SPR_1(SPR: PSPR): string;
+   var   s    : string;
+         i,po : int;
+   begin
+     with SPR^ do
+       begin
+         s:=    ZAC_SPR + typ
+              + ODD_SPR + inttostr(cis,3,0)
+              + ODD_SPR + TimeToStr(dap.h,dap.m,'')
+              + ODD_SPR + DateToStr2(dap.den,dap.mes,dap.rok)
+              + ODD_SPR + code_line_i_ (text, 1,4, ODD_SPR)
+       end;
+     code0_SPR_1:= s
+   end;
+
+function code0_SPR_2(SPR: PSPR): string;
+   begin
+     code0_SPR_2:= code_line_i_ (SPR^.text, 5,9, ODD_SPR) + KON_SPR
+   end;
+
+
+
+procedure decode0_SPR_1(s: string; SPR: PSPR);
+   var    i,k: int;
+          b: byte;
+   begin
+     fillchar(SPR^,sizeof(DSPR),0);
+     with SPR^ do
+       begin
+         typ := GetStr(s,1,setLET_1_1);
+         prty:= tlgSS;
+         cis := GetInt(s,2,setLET_1_1);
+         GetTimeStr(dap.h,dap.m,b, GetStr(s,3,setLET_1_1));
+         GetDateStr(dap.rok,dap.mes,dap.den, GetStr(s,4,setLET_1_1),false);
+
+         k:= N(getstritems(s,setLET_1_1)-4);
+         for i:= 1 to k do text:= StrNPCopy(text, getstr(s,i+4,setLET_1_1)+kbNL, true,true);
+         {for i:= 0 to 4 do text[i]:= StrPasNew(GetStr(s,i+5,setLET_1_1));}
+       end
+   end;
+
+procedure decode0_SPR_2(s: string; SPR: PSPR);
+   var    i,k : int;
+   begin
+     k:= N(getstritems(s,setLET_1_1));
+     for i:= 1 to k do SPR^.text:= StrNPCopy(SPR^.text, getstr(s,i,setLET_1_1)+kbNL, true,true);
+     {for i:= 5 to 9 do SPR^.text[i]:= StrPasNew(GetStr(s,i-4,setLET_1_1)) }
+   end;
+
+
+
+{ ---------------------
+  kodovanie pre prenos
+  --------------------- }
+
+procedure code0_SPR(SPR: PSPR; var pkt: TNETpkt);
+    var   pch : pchar;
+    begin
+      pch:= strpasnew (code0_SPR_1(SPR));
+      pch:= StrNPCopy (pch, code0_SPR_2(SPR), true,true);
+      new_NETpkt_data (pchars(pch),strlen(pch), pkt.pkt);
+      strdispose (pch)
+    end;
+
+
+procedure decode0_SPR(const pkt: TNETpkt; SPR: PSPR);
+   var    s : string;
+          b : byte;
+          p : pchar;
+          i,ii : int;
+   begin
+     ii:= pkt_split(pkt.pkt,9);
+     s:= init_str(@pkt.pkt.data^[0],ii);
+     decode0_SPR_1(s, SPR);
+     s:= init_str(@pkt.pkt.data^[ii],pkt.pkt.dlz-ii{+1 -> bez END});
+     decode0_SPR_2(s, SPR);
+     ii:= get_data_lines_i_(SPR^.text);
+     p:= nil; for i:= 1 to ii do p:= StrNPCopy(p, get_line_i(SPR^.text,i)+kbNL, true,true);
+     strdispose(SPR^.text);
+     SPR^.text:= p;
+     SPR^.adr := strpasnew(pkt.adr);
+     SPR^.ods := pkt.ods
+   end;

@@ -1,0 +1,23 @@
+{$IFDEF FPL4} {$IFDEF PROCESS_FPL4}
+ {$DEFINE FPL4_MENU}
+{$ENDIF} {$ENDIF}
+
+{$IFDEF FPL4_ACT}
+ {$DEFINE FPL4_MENU}
+{$ENDIF}
+
+{$I comp_FP4.h}
+
+{$I ..\lib\mnu\_menu.h}
+{$I ..\lib\mnu\_prehlad.h}
+{$I ..\lib\mnu\_mmi.h}
+
+{$I ..\lib\mnu\_data.mnu}
+{$I ..\lib\mnu\_prehlad.mnu}      { prehlad (pre)aktivovanych udajov }
+{$I ..\lib\mnu\_search.mnu}
+{$I ..\lib\mnu\_dekodovanie.mnu}
+{$I ..\lib\mnu\_options.mnu}
+{$I ..\lib\mnu\_mmi.mnu}          { nastavenie uzivatelskeho rozhrania }
+
+{$I ..\lib\mnu\_stream.mnu}
+{$I ..\lib\mnu\_system.mnu}       { program - verzia, konfiguracia, ukoncenie }

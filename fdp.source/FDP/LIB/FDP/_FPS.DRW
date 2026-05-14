@@ -1,0 +1,44 @@
+ const    dx_plan_FPS  = 522;
+          dy_plan_FPS  = 36;
+
+
+ procedure plan_FPS(FPS: PFPS; x,y: int; b: bool); far;
+     var   s,o,r : string;
+           bk  : byte;
+     begin
+       with FPS^ do
+         begin
+         { INDIAN AIRLINES CORPORATION
+           OPR/XXXX REG/XXXX
+           IAC123  TU-54/M     XXXX1220 BULAP1434 LANTA1600 YYYY1400   405km
+         }
+          bk:= bkPLAN_[b];
+          BGIgraph.button(x,y,x+dx_plan_FPS, y+dy_plan_FPS, bk, btSmall, btOFF);
+          _lineho(x+5,x+dx_plan_FPS-5,y+22,bk);
+          _linevo(x+140,y+23,y+34,bk);
+          _linevo(x+460,y+23,y+34,bk);
+
+          s:= cut_3(strpas(flo),dx_plan_FPS shr 3);
+          o:= strpas(opr); if o<>'' then o:= rmk_OPR+icao_NXT+o+'  ';
+          r:= strpas(reg); if r<>'' then r:= rmk_RMK+icao_NXT+r;
+          o:= cut_3(o+r,dx_plan_FPS shr 3);
+          {if (length(s)-1 > ) then s:= copy(s,1,(dx_plan_FPS shr 3)-4)+'...';
+          if (length(o)-1 > dx_plan_FPS shr 3) then o:= copy(o,1,(dx_plan_FPS shr 3)-4)+'...';}
+          SetColor(cl_DATA);
+          outtextxy(x+5,y+3,  s);
+          outtextxy(x+5,y+13, o);
+          outtextxy(x+5,  y+26, fdr.idn);
+          outtextxy(x+80, y+26, fdr.typ);
+          outtextxy(x+146,y+26, code_FDRrte_s(@fdr,true));
+
+          s:= '';
+          if dr<>0 then s:= cstr(dr,0)+' km'
+          else if dr_='?' then s:= dr_
+          {else begin
+                 if pos(#24,dr_)<>0 then s:= hd_DEP;
+                 if pos(#25,dr_)<>0 then s:= s+hd_ARR
+               end};
+          outtextxy(x+465, y+26, s);
+        end
+     end;
+

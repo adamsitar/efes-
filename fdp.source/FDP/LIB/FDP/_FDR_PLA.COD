@@ -1,0 +1,76 @@
+{ תתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתת
+   kodovanie
+  תתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתתת
+}
+
+ procedure decodeDB_FDR (buff: PDB_buff; FDR: PFDR; head: PDB_head);
+     var   FPL : DFPL4;
+     begin
+       fillchar(FDR^,sizeof(FDR^),0);
+       if head^.attr and DBbin <> 0 then __decodeDBB_FPL4_FDR (buff,@FPL,FDR,head)
+       else if head^.attr and DBtxt = 0 then
+       else ;
+     end;
+
+
+ function  codekey_FDR(FDR: PFDR): string;
+    begin
+      if FDR<>nil then codekey_FDR:= codekey_fpl(FDR^.idn,FDR^.dep.kod,FDR^.date)
+      else codekey_FDR:= ''
+    end;
+
+ procedure decodekey_FDR(s: string; FDR: PFDR);
+     begin
+       fillchar(FDR^,sizeof(FDR^),0); { nesmie sa zrusit ! }
+       decodekey_fpl(s, FDR^.idn,FDR^.dep.kod,FDR^.date);
+     end;
+
+
+ { fcie dekodovania db su v module _fpl4_db.cod ...
+ }
+
+ function code_FDRrte_s(FDR: PFDR; _fpl: bool): string;
+    var   s,t,u : string;
+          is : bool;
+    begin
+      with FDR^ do
+        begin
+          is:= (dep.h<>0) or (arr.h<>0) or (dep.m<>0) or (arr.m<>0);
+
+          {if eet.kod<>'' then t:= eet.kod+icao_NXT+code_l4_utc(eet.h,eet.m) else t:= '';
+          u:= rightchar(t,kod_NDB+1+kod_TIME+1,' ');
+
+          if exi.kod<>'' then t:= exi.kod+icao_NXT+code_l4_utc(exi.h,exi.m) else t:= '';
+          u:= u + rightchar(t,kod_NDB+1+kod_TIME+1,' ');}
+
+          if eet.kod<>'' then u:= rightchar(eet.kod,kod_NDB,' ')+code_l4_utc(eet.h,eet.m)+' '
+          else u:= rightchar('',kod_NDB+kod_TIME+1,' ');
+
+          if exi.kod<>'' then u:= u + rightchar(exi.kod,kod_NDB,' ')+code_l4_utc(exi.h,exi.m)+' '
+          else u:= u + rightchar('',kod_NDB+kod_TIME+1,' ');
+
+          if is then t:= code_l4_utc(dep.h,dep.m) else t:= '';
+          s:= rightchar(dep.kod+t,kod_AP+kod_TIME+1,' ');
+
+          if is then t:= code_l4_utc(arr.h,arr.m) else t:= '';
+          t:= rightchar(arr.kod+t,kod_AP+kod_TIME+1,' ');
+
+          if _fpl then s:= s + u + t else s:= s + t + ' ' + u;
+
+          code_FDRrte_s:= s
+        end
+    end;
+
+ function code_FDR_s(FDR: PFDR): string;
+    var   s,t: string;
+    begin
+      with FDR^ do
+        begin
+          s:=     rightchar(idn,kod_7a+1,' ')
+                + rightchar(typ,kod_9b+1+kod_9c+2,' ')
+                + code_FDRrte_s(FDR,true)
+                + rightchar(code_l4_vys(vys,vys_),1+altS_+2,' ')
+                + rightchar(fplsrc_idn(src),fplsrcs,' ')
+        end;
+      code_FDR_s:= _lat_FPL4(s)
+    end;

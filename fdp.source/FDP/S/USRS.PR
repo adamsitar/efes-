@@ -1,0 +1,76 @@
+; -------------------------------------------
+; MACC Praha
+; FDP/S-LETVIS
+; Komunikacny server s externymi systemami
+; ESUP/CAMUS, OPL/UDP, VERA
+; -------------------------------------------
+
+; ---------------------------------------------------------------------------------------------------------
+; pracovisko ; adresa                                ; Protokol ; Typ klienta ; Jine udaje
+; ---------------------------------------------------------------------------------------------------------
+
+; ------------------------
+; MACC - Technicke pozice
+; ------------------------
+
+  FDP/S-1      ; FDP-1         ,$0708, 10.192.49.80  ; @THIS
+  FDP/S-2      ; FDP-2         ,$0707, 10.192.49.85  ; ~UDP ~L  ; @BSERVER ~OX ; -slave all
+
+  LEDIS        ; MET           ,     , 10.192.49.124 ; ~UDP     ; @MET ~OX    ;
+
+  ROUTER (UDP) ; ROUTER        ,$0702, 10.192.49.100 ;            @ROUTER
+  MONITORING   ; MON           ,$0703                ; ~RTU     ; @RDP        ; -slave -noinit  ALL
+
+  Zdenek RDP   ; TESTR         ,       10.192.48.26  ; ~UDP     ; @RDP ~NX    ; -slave  FPLc,FPLm,FPLo, PRS     
+  Zdenek FDP   ; TESTF         ,$070E                ; ~RTU     ; @FDP ~NX    ; -slave  ALL      
+
+; ------------------
+; MACC - FDP pozice
+; ------------------
+
+  EDD-VYCHOD   ; EDD_VYCHOD    ,$070D, 10.192.49.84  ; ~UDX     ; @EDD ~NX  ; -slave        FPLc,FPLm,FPLo      ; timeout=10
+  EDD-TEREN    ; EDD_TEREN     ,$070C, 10.192.49.82  ; ~UDX     ; @EDD ~NX  ; -slave        FPLc,FPLm,FPLo      ; timeout=10
+  FDO-SOD      ; FDO_SOD       ,     , 10.192.49.90  ; ~UDP     ; @IDD ~NX  ; @FDA -slave -initall  FPLc,FPLm,FPLo, PRS ; timeout=10
+
+
+; ------------------
+; MACC - RDP pozice
+; ------------------
+
+  RDP-SC       ; RDP_SC        ,$0705, 10.192.49.73  ; ~UDP     ; @RDP ~NX  ; -slave        PRS   ; timeout=10
+  RDP-TEREN    ; RDP_TEREN     ,$070A, 10.192.49.71  ; ~UDP     ; @RDP ~NX  ; -slave        PRS   ; timeout=10
+  RDP-VYCHOD   ; RDP_VYCHOD    ,$070B, 10.192.49.77  ; ~UDP     ; @RDP ~NX  ; -slave        PRS   ; timeout=10
+
+
+; ------------------
+; SAR a VELITELE
+; ------------------
+
+  RDP-ZKS      ; RDP-ZKS       ,$0740, 10.192.49.79  ; ~UDP     ; @RDP ~NX  ; -slave        PRS   ; timeout=10
+  RDP-LANCI    ; RDP-BOSS      ,$0730, 10.192.49.81  ; ~UDP     ; @RDP ~NX  ; -slave        PRS   ; timeout=10
+
+  IDD-ILP      ; ILP           ,$5905                ; ~RTU     ; @IDD      ; -slave        FPLc,FPLm,FPLo, PRS ; timeout=10
+
+
+; ------------------
+; UVS a PVO
+; ------------------
+                                                                                                                ; timeout=10
+  UVS          ; UVS           ,$1009                ; ~RTU ~L  ; @IDD     ; -slave -inf    ALL                 ;            ; tlf=1110
+
+
+; ------------------
+; LETISTE
+; ------------------
+
+  Kbely        ; 420           ,$5009                ; ~RTU     ; @EDD ~NX ; -slave -inf    FPLc,FPLm,FPLo, PRS ; timeout=10 ; tlf=1111
+  Pardubky     ; 260           ,$5209                ; ~RTU     ; @EDD ~NX ; -slave -inf    FPLc,FPLm,FPLo, PRS ; timeout=10 ; tlf=1112
+  Prerov       ; 650           ,$5409                ; ~RTU     ; @EDD ~NX ; -slave -inf    FPLc,FPLm,FPLo, PRS ; timeout=10 ; tlf=1113
+  Namest       ; 140           ,$5309                ; ~RTU     ; @EDD ~NX ; -slave -inf    FPLc,FPLm,FPLo, PRS ; timeout=10 ; tlf=1114
+  CeskeBudejice; 100           ,$5509                ; ~RTU     ; @EDD ~OX ; -slave -inf    FPLc,FPLm,FPLo, PRS ; timeout=10 ; tlf=1115
+  Hradec       ; 380           ,$5603                ; ~RTU     ; @RDP     ; -slave         FPLc,FPLm,FPLo, PRS ; timeout=10 ; tlf=1116
+  Cernovice    ; 230           ,$6030                ; ~RTU     ; @RDP     ; -slave         FPLc,FPLm,FPLo, PRS ; timeout=10 ; tlf=1117
+  Caslav       ; 250           ,$5109                ; ~RTU     ; @EDD ~NX ; -slave -inf    FPLc,FPLm,FPLo, PRS ; timeout=10 ; tlf=1118
+
+  Line TWR     ; 550-TWR       ,$5703, 10.136.0.70   ; ~UDP     ; @RDP ~NX ; -slave         FPLc,FPLm,FPLo, PRS ; timeout=10 ; tlf=1119
+  Line SAR     ; 550-SAR       ,$5740, 10.136.0.80   ; ~UDP     ; @RDP ~NX ; -slave         FPLc,FPLm,FPLo, PRS ; timeout=10 ; tlf=1120

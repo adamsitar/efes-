@@ -1,0 +1,201 @@
+function OPLmenu_init: PBarMenu;
+    begin
+      OPLmenu:= New(PBarMenu);
+      OPLmenu_init:= OPLmenu;
+
+    { polozky menu pre mapy inicializovane v inom module }
+      OBMmenu   := SubMenu(OBMstr, OptMenu_S('Zapni/Vypni',nil,cmMAPchanged,OMenuS_items,nil),nil);
+      ZAKmenu   := SubMenu(ZAKstr, OptMenu_S('Zapni/Vypni',nil,cmMAPchanged,OMenuS_items,nil),nil);
+      TMAmenu   := SubMenu(TMAstr, OptMenu_S('Zapni/Vypni',nil,cmMAPchanged,OMenuS_items,nil),nil);
+      CTRmenu   := SubMenu(CTRstr, OptMenu_S('Zapni/Vypni',nil,cmMAPchanged,OMenuS_items,nil),nil);
+      LETmenu   := SubMenu(LETstr, OptMenu_S('Zapni/Vypni',nil,cmMAPchanged,OMenuS_items,nil),nil);
+      TRTmenu   := SubMenu(TRTstr, OptMenu_S('Zapni/Vypni',nil,cmMAPchanged,OMenuS_items,nil),nil);
+      STHmenu   := SubMenu(STHstr, OptMenu_S('Zapni/Vypni',nil,cmMAPchanged,OMenuS_items,nil),nil);
+      MAPmenu   := SubMenu(MAPstr, OptMenu_S('Zapni/Vypni',nil,cmMAPchanged,OMenuS_items,nil),nil);
+      SYMmenu   := SubMenu(SYMstr, OptMenu_S('Zapni/Vypni',nil,cmMAPchanged,OMenuS_items,nil),nil);
+
+      NSMmenu   := SubMenu(NSMstr, WinMenu('Zapni/Vypni',nil,nil),nil);
+
+    { inicializacia menu }
+      OPLmenu^.Init('', {'LETVIS FDP/OPL-let'}
+
+              {
+                FPL -
+                       ... vid 500
+
+                KRL -
+
+
+              }
+
+              Item2('~ÿ~FDP/OPL... ', kbCtrlF1, cmAbout,
+
+              SubMenu('~S~pr vy', WinMenu('Spr vy',nil,
+                      SubMenu(' ~S~chopnosti        ', WinMenu('Schopnosti',nil,
+                              Item(' ~S~chopnosti               F9  ',  cmQGO,
+                              Item(' ~Z~ru¨enie                     ',  cmQGOzru,
+                              NewLine(
+                              Item(' Po¨l~i~ spr vu o schopnostiach ',  cmQGOpos_,
+                              nil ) ) ) )
+                             ), { Schopnosti }
+                      NewLine(
+                      Item   (' ~M~ES (spr va)  F10 ', cmMESSAGE,
+                      nil ) ) )
+                      ), { Spravy }
+
+              SubMenu('P~r~ehŒad', WinMenu('PrehŒad',nil,
+                      Item   (' ~V~ojensk‚ lety   ', cmPREHLAD_mFPL,
+                      Item   (' ~C~iviln‚ lety    ', cmPREHLAD_cFPL,
+                      Item   (' ~I~n‚ lety        ', cmPREHLAD_aFPL,
+                      NewLine(
+                      SubMenu(' ~F~PL             ', WinMenu('FPL',nil,
+                              Item   (' ~V~lastn‚  pl ny ', cmPREHLAD_mFPL_nase,
+                              Item   (' ~P~rij¡man‚ lety ', cmPREHLAD_mFPL_ine,
+                              Item   (' V~¨~etky pl ny   ', cmPREHLAD_mFPL_sicke,
+                              nil ) ) )
+                              ), { SubMenu FPL }
+                      SubMenu(' ~P~l ny           ', WinMenu('Pl ny',nil,
+                              Item   (' ~Z~amestnania ', cmPREHLAD_ZAM,
+                              Item   (' ~P~riestory   ', cmPREHLAD_PRS,
+                              nil) )
+                              ), { SubMenu Plany }
+                      SubMenu(' ~S~pr vy          ', WinMenu('Spr vy',nil,
+                              Item   (' ~D~iverzie   ', cmPREHLAD_DVZ,
+                              Item   (' ~S~chopnosti ', cmPREHLAD_QGO,
+                              NewLine(
+                              Item   (' ~M~ES        ', cmPREHLAD_spravy,
+                              nil) ) ) )
+                              ), { SubMenu Spravy }
+                      NewLine(
+                      SubMenu(' P~r~edbe‘n‚ pl ny ', WinMenu('Predbe‘n‚ pl ny',nil,
+                              SubMenu(' ~F~PL             ', WinMenu('FPL',nil,
+                                      Item   (' ~F~PL     ', cmPREHLAD_mFPL_PPL,
+                                      nil)
+                                      ),
+                              SubMenu(' ~P~l ny           ', WinMenu('Pl ny',nil,
+                                      Item   (' ~Z~amestnania ', cmPREHLAD_ZAM_PPL,
+                                      Item   (' ~P~riestory   ', cmPREHLAD_PRS_PPL,
+                                      nil) )
+                                      ),
+                              SubMenu(' ~S~pr vy          ', WinMenu('Spr vy',nil,
+                                      Item   (' ~D~iverzie   ', cmPREHLAD_DVZ_PPL,
+                                      Item   (' ~S~chopnosti ', cmPREHLAD_QGO_PPL,
+                                      nil) )
+                                      ),
+                              nil) ) )
+                             ), { SubMenu Predbe‘n‚ pl ny }
+                      SubMenu(' ~A~rch¡v          ', WinMenu('    Arch¡v     ',nil,
+                              SubMenu(' ~F~PL         ', WinMenu('FPL',nil,
+                                      Item   (' ~F~PL     ', cmPREHLAD_mFPL_ARCH,
+                                      nil)
+                                      ),
+                              SubMenu(' ~P~l ny       ', WinMenu('Pl ny',nil,
+                                      Item   (' ~Z~amestnania ', cmPREHLAD_ZAM_ARCH,
+                                      Item   (' ~P~riestory   ', cmPREHLAD_PRS_ARCH,
+                                      nil) )
+                                      ),
+                              SubMenu(' ~S~pr vy      ', WinMenu('Spr vy',nil,
+                                      Item   (' ~D~iverzie   ', cmPREHLAD_DVZ_ARCH,
+                                      Item   (' ~S~chopnosti ', cmPREHLAD_QGO_ARCH,
+                                      {
+                                      NewLine(
+                                      Item   (' ~S~pr vy     ', cmPREHLAD_spravy,
+                                      }
+                                      nil) )
+                                      ),
+                              nil) ) )
+                             ),  { SubMenu Archiv }
+                      nil ) ) ) ) ) ) ) ) ) )
+                      ), { Prehlad }
+
+              SubMenu('~N~astav', WinMenu('VoŒby',nil,
+                      SubMenu(' ~M~apy      ', WinMenu('Nastav mapy',nil,
+                              SubMenuInitialized(OBMmenu,
+                              SubMenuInitialized(ZAKmenu,
+                              SubMenuInitialized(TMAmenu,
+                              SubMenuInitialized(CTRmenu,
+                              SubMenuInitialized(LETmenu,
+                              SubMenuInitialized(TRTmenu,
+                              SubMenuInitialized(STHmenu,
+                              SubMenuInitialized(MAPmenu,
+                              SubMenuInitialized(SYMmenu,
+                              NewLine(
+                              SubMenuInitialized(NSMmenu,
+                              SubMenu(' ~R~ozsah              ', WinMenu('Nastavenie',nil,
+                                      Item(' ~R~ozsah    Alt+7 ', cmROZSAH,
+                                      Item(' ~P~riestor  Alt+8 ', cmPRIESTOR,
+                                      Item(' ~V~ystreƒ   Alt+9 ', cmSTRED,
+                                      Item(' ~C~entruj   Alt+0 ', cmCENTRUJ,
+                                      nil) ) ) )
+                                      ), { SubMenu Rozsah }
+                              NewLine(
+                              Switch1(' ~F~arebn‚ mapy', cmMAPAinit, @FILLOVAT,
+                              nil ) ) ) ) ) ) ) ) ) ) ) ) ) )
+                              ), { SubMenu MAPY }
+                      SubMenu(' ~C~iele     ', OptMenu('Kreslenie cieŒov',nil, cmDefault,
+                              Switch2('~V~ojensk‚ ciele', @draw_mFPL_en,
+                              Switch2('~C~iviln‚ ciele' , @draw_cFPL_en,
+                              Switch2('~I~n‚ ciele'     , @draw_aFPL_en,
+                              NewLine(
+                              Switch2('~O~zna‡enie cieŒa', @cursMAPY,
+                              nil) ) ) ) )
+                              ), { SubMenu Prelety }
+                      SubMenu(' ~Z~oznamy   ', OptMenu('Zoznamy letov',nil, cmZOZNAM_FPL,
+                              Switch2('~V~ojensk‚ lety', @tab_mFPL,
+                              Switch2('~C~iviln‚ pl ny', @tab_cFPL,
+                              Switch2('~I~n‚ pl ny    ', @tab_aFPL,
+                              NewLine(
+                              Switch2('V~o~jensk‚ FPL ', @fpl_mFPL,
+                              Switch2('I~n~‚ FPL      ', @fpl_aFPL,
+                              nil) ) ) ) ) )
+                              ), { SubMenu Prelety }
+                      SubMenu(' ~P~l ny     ', OptMenu('Pl ny',nil, cmDefault,
+?                              Switch2('~M~ini-stripy   ', @miniSTRIP,
+                              NewLine(
+                              Switch2('~S~tav pl nu    ', @STAV_PLANU,{@system_nastav[7],}
+                              Switch2('~V~˜pis CNL,ARR ', @CNL_VYPIS, {@system_nastav[6],}
+                              Switch2('~P~r zdny zoznam', @LIST_EMPTY_SCROLL,
+                              nil) ) ) ) )
+                              ), { SubMenu Plany }
+                      nil ) ) ) )
+                      ), { SubMenu NASTAV }
+
+              SubMenu('S~y~st‚m', WinMenu('Syst‚m',nil,
+                      Item   (' ~U~TC            ', cmTIMEset ,
+                      SubMenu(' ~S~yst‚m         ', WinMenu('Syst‚m',nil,
+                              Item(' ~I~nform cie ', cmSTATUS,
+                              Item(' ~S~erver     ', cmSERVER,
+                              nil) )
+                              ), { SubMenu System }
+                      SubMenu(' ~D~isplay        ',OptMenu('Grafick˜ m¢d',nil, cmGraphModeChanged,
+                              Radio('M¢dy', @GraphMode,
+                                RadioItem('~1~. EGA  (640x400)',
+                                RadioItem('~2~. VGA  (640x480)',
+                                RadioItem('~3~. VESA (800x600)',
+                                RadioItem('~4~. SVGA (1024x768)',
+                                nil) ) ) ),
+                              nil)
+                              ), { SubMenu DISPLAY }
+                      Item   (' ~R~efresh  Alt+D ', cmRefresh,
+                      NewLine(
+                      SubMenu(' ~N~astav         ', OptMenu('Nastav',nil, cmSYSTEM_VOLBY,
+                              Switch2('~R~eproduktor     ', @system_nastav[2],
+                              Switch2('~A~larm spr vy    ', @system_nastav[3],
+                              Switch2('~€~asov‚ znamenie ', @system_nastav[4],
+                              Switch2('~Z~has¡nanie      ', @system_nastav[5],
+                              Switch2('~J~as             ', @system_nastav[8],
+                              NewLine(
+                              Switch2('~O~PL  config     ', @system_nastav[0],
+                              Switch2('~M~apy config     ', @system_nastav[1],
+                              nil) ) ) ) ) ) ) )
+                              ), { SubMenu System }
+                      Item   (' ~P~remenn‚       ', cmSYSTEM_PREMENNE,
+                      NewLine(
+                      { Item   (' ~C~fg ulo‘       ', cmCFG_SAVE, }
+                      Item   (' E~x~it     Alt+X ', cmQUIT,
+                      nil ) ) ) ) ) ) ) ) )
+                      ), { SubMenu SYSTEM }
+
+              nil) ) ) ) )
+              );
+    end;

@@ -1,0 +1,42 @@
+ function print_PRS(PRS: PPRS): bool;
+    var   s : array[0..15] of string;
+          i,j,p : int;
+          t : text;
+          b : bool;
+    begin
+     {$IFDEF PRN}
+       with PRS^ do
+         begin
+           {
+           s[0]:= _PRN_TAB + icao_STD  + inschar(kod,kod_PRS,' ',1)
+                           + '     '   + inschar(DateToStr(zac.den,zac.mes,zac.rok, 1,'.'),10,' ',1)
+                           + '  '      + timetostr(zac.h,zac.m,'')
+                           + '     '   + vys1;
+
+           s[1]:= _PRN_TAB + ' '       + inschar(unt,kod_PRS,' ',1)
+                           + '     '   + inschar('',10,' ',1)
+                           + '  '      + timetostr(kon.h,kon.m,'')
+                           + '     '   + vys2;
+           }
+           s[0]:= _PRN_TAB + icao_STD  + format_s(kod)
+                           + icao_ARR  + code_l4_datum(zac)
+                           + ' '       + code_l4_datum(kon)
+                           + icao_ARR  + vys1
+                           + ' '       + vys2
+                           + icao_ARR  + typ
+                           + icao_ARR  + unt
+                           ;
+
+           p:= init_pole_to_print (s,15,1,pozn,true)
+         end;
+       {IFDEF DEBUG
+        assign(t,'1.bak');
+        rewrite(t);
+        for i:= 0 to p-1 do writeln(t,s[i]);
+        close(t);
+       ENDIF}
+       b:= print_strs(PortNo,@s,p);
+       if b then for i:= 0 to 0 do print_str(PortNo,kbNL);
+       print_PRS:= b
+     {$ENDIF}
+    end;

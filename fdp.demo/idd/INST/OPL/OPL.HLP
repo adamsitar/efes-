@@ -1,0 +1,1247 @@
+; *********************************************
+;  MMI
+; *********************************************
+
+MMI OPL
+
+~ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ~
+~ U‘¡vateŒsk‚ rozhranie programu ~
+~ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ~
+
+Obrazovka obsahuje nasleduj£ce z kladn‚ prvky:
+
+  - menu
+  - plan‘et
+  - zoznamy letov
+  - stavov˜ riadok.
+
+Pre r˜chle prepnutie nastavenia grafick‚ho rozl¡¨enia sl£‘ia
+kl vesy "Alt"+"1"-"5".
+
+~Plan‘et~ sl£‘i pre zobrazenie pol“h cieŒov vypo‡¡tan˜ch podŒa
+£dajov ich letov‚ho pl nu a pre vykreslenie ich dr h.
+
+Viƒ mapy :
+
+Plan‘et sa ovl da nasleduj£cim sp“sobom :
+
+   ~+~, ~-~   - plynul  zmena mierky
+   ~|~     - posun.
+
+   ~Alt~+~7~  - nastavenie rozsahu mapy
+   ~Alt~+~8~  - nastavenie pohŒadu na priestor...
+   ~Alt~+~9~  - vystredenie mapy
+   ~Alt~+~0~  - nastavenie z kladn‚ho zobrazenia
+
+   ~Alt~+~F~  - zmena veŒkosti fontu popisu cieŒov
+   ~Alt~+~H~  - zapnutie/vypnutie hist¢rie letu
+   ~Alt~+~S~  - zobrazenie k¢du SSR
+
+   ~Alt~+~V~  - zobrazenie vojensk˜ch letov
+   ~Alt~+~L~  - zobrazenie civiln˜ch letov
+   ~Alt~+~I~  - zobrazenie in˜ch (nevojensk˜ch) letov
+
+
+ƒalej je mo‘n‚ nastaviŸ zobrazenie :
+
+   ~T~"yp bodov"      - rozl¡¨enie orienta‡n˜ch bodov, ...
+   ~P~"opis bodov"    - popis n zvov orienta‡n˜ch bodov, ...
+   ~8~"x8 veŒkosŸ"    - veŒkosŸ popisu orienta‡n˜ch bodov, ...
+
+   ~S~"SR"            - zobrazenie k¢du SSR
+
+
+Ostan‚ hor£ce kl vesy:
+
+   "F1"               - n poveda
+   "Ctrl"+"F1"          - verzia a tlf spr vcu syst‚mu
+
+   "Ctrl"+""           - obnovenie obsahu mapy
+   "Ctrl"+"PrintScreen" -       - // -
+   "Shift"+"F12"        - stav syst‚mu
+
+
+~Zoznamy letov~ obsahuj£ zoznam identifik ci¡ pl nov a letov pre
+  - vojensk‚ pl ny a lety       (~V~"ojaci"),
+  - lety po letov˜ch cest ch    (~L~"inky"),
+  - in‚ nevojensk‚ lety a pl ny (~I~"n‚").
+
+Prechod medzi tabuŒkami stla‡en¡m zv˜raznej hl sky, kl vesou ~Tab~
+alebo ~Shift~+~Tab~ (naopak), kliknut¡m my¨i na zozname.
+
+Pri v˜bere identifik cie cieŒa sa zobraz¡ jeho £pln˜ pl n alebo sa
+vygeneruje menu pre jeho spracovanie.
+
+Funkciou ~N~"astav"->~P~"relety" je mo‘n‚ nastaviŸ zobrazenie
+zoznamu letov.
+
+
+~Stavov˜ riadok~ obsahuje nasleduj£ce polo‘ky :
+
+ - "Hodiny"  zobrazuj£ce ‡as podŒa pam„te po‡¡ta‡a.
+           Ak nie je presn˜, je ho potrebn‚ nastaviŸ
+           buƒ cez ~S~"yst‚m"->~U~"TC", alebo kliknut¡m
+           na hodin ch.
+ - "MSG   "  posledn  spr va nebola prevzan 
+ - "KRL   "  na LSRLP : bol doru‡en˜ pripraven˜ FPL
+           bez pridelen‚ho poradov‚ho ‡¡sla ("KR‹DLO").
+ - "FPL   "  na LSRLP : bol prijat˜ FPL pre let
+           kon‡iaci na tomto letisku.
+           pre StrRLP : prijat˜ nov˜ FPL.
+ - "REQ   "  na StrRLP : na monitore riadiaceho
+           po‡¡ta‡a sa zobraz¡, ak bola odlo‘en 
+           ‘iadosŸ o pripomienku.
+           pre LSRLP: zobraz¡ sa, ak bola prijat 
+           oprava pl nu letu alebo pripomienka
+           pred ¨tartom.
+ - "ARR   "  varovanie o tom, ‘e nebola vydan  alebo
+           doru‡en  spr va o ukon‡en¡ (ARR alebo
+           CNL) letu pl novan‚ho z letiska alebo
+           prist vaj£ceho na ¤om.
+ - "ZAM   "  pre StrRLP: doru‡en˜ pl n zamestnania
+           letiska alebo prijat  a neprevzat  spr va
+           o zmene stavu zamestnania.
+ - "PRS   "  prijat  spr va o vyu‘it¡ priestorov.
+ - "DVZ   "  doru‡en  a nepre‡¡tan  spr va
+           o diverzii.
+ - "QGO   "  prijat  spr va o schopnostiach a QGO.
+
+Kliknut¡m Œav˜m tla‡idlom my¨i sa zobraz¡ v˜pis
+po‘adovan‚ho druhu pl nov alebo spr v, kliknut¡m cez
+prav‚ sp¡na‡ zhasne (s v˜nimkou REQ a ARR, ktor‚
+musia byŸ spracovan‚).
+
+
+Ozaj, pozn te Murphyho z kon pre program torov?
+Ka‘d  chyba je predposledn .
+
+
+Mapa
+
+Mapy sl£‘ia pre zobrazenie priestorov riadenia/monitorovania.
+Zap¡naj£ sa manu lne, alebo automaticky (v pr¡pade pl novan˜ch
+a aktivovan˜ch obmedzen˜ch priestorov ~R~, ~D~ alebo ~TSA~.
+
+V menu pre nastavenie m p su dve polo‘ky:
+
+ ~mapy~    - zapnutie jednotliv˜ch m p alebo skupiny symbolov,
+ ~symboly~ - zapnutie jednotliv˜ch symbolov v skupin ch.
+
+Menu pre mapy sa na‡¡tava podŒa adres ra mapy. V pr¡pade, ‘e
+je otvoren‚ u‘ submenu pre zapnutie jednotliv˜ch m p, potvrd¡
+sa kl vesami "Ctrl"+"Enter" alebo "Enter", ak aktu lny riadok
+je na prep¡na‡i a nie na polo‘ke pre dal¨ie submenu.
+
+
+Plan‘et sa ovl da nasleduj£cim sp“sobom :
+
+   ~+~, ~-~   - plynul  zmena mierky
+   ~|~     - posun.
+
+   ~Alt~+~7~  - nastavenie rozsahu mapy
+   ~Alt~+~8~  - nastavenie pohŒadu na priestor...
+   ~Alt~+~9~  - vystredenie mapy
+   ~Alt~+~0~  - nastavenie z kladn‚ho zobrazenia
+
+   ~Alt~+~F~  - zmena veŒkosti fontu popisu cieŒov
+   ~Alt~+~H~  - zapnutie/vypnutie hist¢rie letu
+   ~Alt~+~S~  - zobrazenie k¢du SSR
+
+   ~Alt~+~V~  - zobrazenie vojensk˜ch letov
+   ~Alt~+~L~  - zobrazenie civiln˜ch letov
+   ~Alt~+~I~  - zobrazenie in˜ch (nevojensk˜ch) letov
+
+
+ƒalej je mo‘n‚ nastaviŸ zobrazenie :
+
+   ~T~"yp bodov"      - rozl¡¨enie orienta‡n˜ch bodov,...
+   ~P~"opis bodov"    - popis n zvov orienta‡n˜ch bodov,...
+   ~8~"x8 veŒkosŸ"    - veŒkosŸ popisu orienta‡n˜ch bodov,...
+
+   ~S~"SR"            - zobrazenie k¢du SSR
+
+
+Civiln‚ lety
+
+V˜pis letov˜ch pr£‘kov so spr vami o lety po tratiach letov˜ch
+prev dzkov˜ch slu‘ieb. V z vislosti na zvolenom grafickom re‘ime
+sa zobrazia 'pln‚' alebo 'mini' stripy. TraŸ pl nu je aktualizovan 
+v z vislosti na vypo‡¡tanej polohe cieŒa.
+
+  Vyfarbenie polo‘iek trate:
+   - tmavozelen  : preleten˜ bod trate
+   - zelen       : nasleduj£ci bod
+   - ¨ed         : pl novan˜ bod.
+
+  Farby identifik cie:
+   - ‘lt         : akt¡vny let.
+   - tmavosiv    : let pred zru¨en¡m.
+
+
+Vojensk‚ pl ny
+
+Zoznam obsahuje pl ny vojensk˜ch alebo in˜ch letov.
+Obsahuje buƒ v¨etky pl ny na dan˜ de¤ alebo len
+preaktivovan‚ (o‡ak van˜ ¨tart) a akt¡vne lety
+(s vydanou spr vou o ¨tarte).
+
+Zoznam ~V~"ojaci" (~I~"n‚") obsahuje tie ist‚ £daje, ale len
+v˜pisom identifik cie.
+
+Pl ny s£ zoraden‚ do nasleduj£cich skup¡n, odl¡¨en˜ch
+farbou v˜pisu identifik cie letu:
+
+ - pl novan‚ lety: FPL ulo‘en‚ na disku alebo odoslan‚.
+                   Farba: siv  (svetlej¨ie s£ odoslan‚).
+ - ‘iadosti o pripomienku : Farba: biela.
+ - schv len‚ pl ny : Farba ‘lt .
+ - ostatn‚ lety
+ - aktivovan‚ pl ny podan‚ z tohto pracoviska
+ - aktivovan‚ ostatn‚ pl ny.
+
+   Farba posledn˜ch troch skup¡n:
+     - tmavozelen   - pred ¨tartom
+     - svetlozelen  - po ¨tarte
+     - svetlo¨ed    - na trati
+     - ¨ed          - po poslednom bode, pred prist t¡m
+     - tmavo¨ed     - po prist t¡
+     - ¨edo-‡ierna  - pred zru¨en¡m
+     - biela na
+       ‡ervenom
+       pozad¡       - na FPL nebola vydan  spr va ARR
+
+Pl ny v ka‘dej podskupine s£ usporiadan‚ vzostupne
+podŒa ‡asu ¨tartu.
+
+Kliknutie my¨ou na pl ne alebo stla‡enie "Enter" vyvol 
+menu s ponukou pre spracovanie FPL.
+
+
+Zoznam
+
+Zoznam polo‘iej dan‚ho typu (, napr¡klad letov˜ch pl nov, spr v, atƒ).
+
+Prv  polo‘ka je na vrchole zoznamu. Ak je ich po‡et v„‡¨¡, ako umo‘¤uje
+veŒkosŸ okna pre¤ otvoren‚ho, polo‘ky sa pres£vaj£ pomocou kl ves :
+
+   ~ ~       posun o jednu
+   ~PgUp PgDn~ posun o str nku ku za‡iatku (hore)
+               alebo koncu (dole)
+   ~Home End~  skok na prv£ alebo posledn£,
+
+
+alebo kliknut¡m na scrollovac¡ stpec :
+
+   - stla‡en¡m ¨¡pky pre posun v˜pisu v po‘adovanom smere
+   - nastaven¡m relat¡vnej polohy od za‡iatku priraden‚mu
+     horn‚mu okraju stpca
+   - Ÿahan¡m polohovej zna‡ky.
+
+Ak je povolen‚ spracovanie polo‘ky, vyberie sa nastaven¡m aktu lneho
+riadku (odl¡¨en‚ho farbou) na ¤u a potvrden‚m stla‡en¡m kl vesy Enter
+alebo dvojit˜m kliknut¡m na nej. V tom pr¡pade sa aktivizuje funkcia
+pre spracovanie polo‘ky alebo sa rozbal¡ menu pre voŒbu ƒal¨ieho
+postupu.
+
+
+Formul r
+
+~a) z pis polo‘iek do formul ra~: do ka‘dej kolonky je mo‘n‚
+   zap¡saŸ len dovolen‚ znaky (napr. pri zadan¡ ‡asu len
+   ‡¡slice). Riadiace kl vesy pre z pis:
+
+   "Presun kurzora medzi polo‘kami formul ra"
+   ~Tab,  ÄÙ~   posun na nasleduj£cu,
+   ~Shift Tab~   n vrat na predch dzaj£cu,
+   ~Ctrl Home~   prv  polo‘ka formul ra
+   ~Ctrl End~    posledn  polo‘ka formul ra
+   ~Ctrl |,~  presun na in£ polo‘ku
+
+   "Edit cia"
+   ~Ins(ert)~    prep¡nanie re‘imu vkladanie(=)/prepis(Û)
+   ~Del(ete)~    zmazanie znaku na poz¡cii kurzora
+   ~Ä~          zru¨enie znaku pred kurzorom
+
+   ~Ctrl Del~    zmazanie celej polo‘ky,
+   ~Alt  Del~    zmazanie v¨etk˜ch polo‘iek formul ra
+
+   "Kl vesy Enter"
+   ~Enter~       presun kurzora nanasledujucu polo‘ku
+   ~Alt  Del~    zobrazenie mo‘nej ponuky hodn“t pre polo‘ku
+   ~Ctrl Enter~  potvrdenie obsahu formul ra,
+
+   "Ukon‡enie pr ce"
+   ~Ctrl Enter~  potvrdenie obsahu formul ra,
+   ~Alt  P~      odoslanie pl nu (len OPL-let)
+   ~Alt  U~      ulo‘enie do s£bora (len OPL-let)
+   ~Esc~         zru¨enie
+
+
+~b) obsah polo‘iek~:  v¨etky d“le‘it‚ polo‘ky pl nu s£ pri
+   jeho potvrdzovan¡ kontrolovan‚. Ako pom“cka m“‘e sl£‘iŸ
+   to, ‘e ak sa pri presune kurzora na polo‘ku formul ra
+   objav¡ tla‡idlo ~I~"ndex", potom cez ~Alt~+~I~ (~Ctrl~+~F1~) je
+   mo‘n‚ zobraziŸ "index" - ponuku pr¡pustn˜ch hodn“t.
+
+
+; *********************************************
+;  FPLC
+; *********************************************
+
+Podanie spr vy o lete po tratiach LPS
+~ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ~
+~ Podanie spr vy o lete po tratiach LPS~
+~ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ~
+
+~a)~ Do ‡asti traŸ sa m“‘u uv dzaŸ body trat¡ LPS a civiln‚ letisk 
+   na riadenom £zem¡ a pr¡padne hrani‡n˜ch oblastiach, ak s£
+   nakonfigurovan‚.
+
+   Vojensk  aplik cia umo‘¤uje pou‘¡vaŸ i in‚ ako civiln‚ body
+   ako s£ vojensk‚ oto‡n‚ body, k¢d ¨tvorcov LDM alebo abecedu.
+   Ako bod trate nie je mo‘n‚ zap¡saŸ letov£ cestu.
+
+   V pr¡pade, ak s£ v¨etky body ‡asti trate uvedenej v spr ve
+   o civilnom lete zn me, pri jej podan¡/oprave je pon£knut 
+   moznosŸ prepo‡tu ‡asov na bodoch trate:
+
+   ~E~"ST"         - prepo‡¡ta cel˜ cel£ traŸ od jej prv‚ho bodu
+   "N"~O~"PL"        - ‡asy na bodoch bud£ uveden‚ tak, ako s£ zap¡san‚.
+
+   ~L~"AST -> ..." - prepo‡et trate od posledneho bodu ...
+   ~N~"EXT -> ..." - prepo‡et trate od nasledujuceho bodu ...
+
+   Ak niektor˜ z bodov trate nie je zn my, je potrebn‚ zap¡saŸ odhadnut˜
+   ‡as na ka‘dom z nich.
+
+
+~b)~ Z pis polo‘iek do formul ra~: do ka‘dej kolonky je mo‘n‚
+   zap¡saŸ len dovolen‚ znaky (napr. pri zadan¡ ‡asu len
+   ‡¡slice). Riadiace kl vesy pre z pis:
+
+   "Presun kurzora medzi polo‘kami formul ra"
+   ~Tab,  ÄÙ~   posun na nasleduj£cu,
+   ~Shift Tab~   n vrat na predch dzaj£cu,
+   ~Ctrl Home~   prv  polo‘ka formul ra
+   ~Ctrl End~    posledn  polo‘ka formul ra
+   ~Ctrl |,~  presun na in£ polo‘ku
+
+   "Edit cia"
+   ~Ins(ert)~    prep¡nanie re‘imu vkladanie(=)/prepis(Û)
+   ~Del(ete)~    zmazanie znaku na poz¡cii kurzora
+   ~Ä~          zru¨enie znaku pred kurzorom
+
+   ~Ctrl Del~    zmazanie celej polo‘ky,
+   ~Alt  Del~    zmazanie v¨etk˜ch polo‘iek formul ra
+
+   "Kl vesy Enter"
+   ~Enter~       presun kurzora na nasledujucu polo‘ku
+   ~Alt  Del~    zobrazenie mo‘nej ponuky hodn“t pre polo‘ku
+   ~Ctrl Enter~  potvrdenie obsahu formul ra,
+
+   "Ukon‡enie pr ce"
+   ~Ctrl Enter~  potvrdenie obsahu formul ra a odoslanie
+   ~Alt  P~      odoslanie pl nu (len pre OPL)
+   ~Alt  U~      ulo‘enie do s£bora (len pre OPL)
+   ~Esc~         zru¨enie
+
+
+
+; *********************************************
+;  FPLM
+; *********************************************
+
+Podanie vojensk‚ho pl nu letu
+~ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ~
+~ Podanie vojensk‚ho pl nu letu ~
+~ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ~
+
+~a) Vojensk‚ a in‚ pl ny~ letov sa rozli¨uj£ podŒa k¢du
+   prev dzkovateŒa, pre in˜ch s£ sur‡en‚ k¢dy 88 a 99.
+
+   ~Identifik cia letu~ vojensk˜ch pl nov letov sa priradzuje
+   podŒa nov˜ch pravidiel.
+
+   - ~TraŸov‚ lety~ :  index vojensk‚ho letu dvoj‡¡sl¡m zhodn˜m
+     so za‡iato‡n˜mi dvoma znakmi k¢du letiska, potom kon‡¡
+     ‡¡slicou definuj£cou typ letu:
+      1,3,7,9  - let nar£¨a in˜ letiskov˜ priestor
+      0,5      - prelet
+      2,4,6,8  - p“vodne pou‘¡van‚ pre in‚ lety, zatiaŒ voŒn‚
+                 pou‘itie.
+
+   - ~Lety do TSA~ obsahuj£ zvy‡ajne index pilota a p¡smeno "i".
+                 Preto‘e zatiaŒ neboli ur‡en‚ pravidl  pre tento
+                 z pis, progrsm nekontroluje jeho spr vnosŸ.
+
+
+~b) Hodnoty v˜¨ky a r˜chlosti~ zapisovan‚ do pl nu letu musia
+   zodpovedaŸ pravidl m uveden˜m v L-4444.
+
+   - ~V˜¨ka~ za‡¡na p¡smenom ozna‡uj£cim jej veli‡inu [G,M,S,A,F]
+     za ktor˜m nasleduje ‡¡seln  hodnota s po‡tom miest dan˜mi
+     veli‡inou v˜¨ky [3,4,4,3,3].
+
+   - ~R˜chlosŸ~ za‡¡na p¡smenom ozna‡uj£cim jej veli‡inu [K,N,M]
+     za ktor˜m nasleduje ‡¡seln  hodnota s po‡tom miest dan˜mi
+     veli‡inou r˜chlosti [4,4,3].
+
+
+~c) Z pis trate~: pl n trate letu je veta zlo‘en  zo slov,
+   ktor‚ s£ oddelen‚ medzerami. Slov  s£ tvoren‚ skupina-
+   mi znakov oddelen‚ lom¡tkom "/". Povinnou prvou ‡asŸou
+   slova je defin¡cia oto‡n‚ho bodu. Existuje 5 mo‘nost¡:
+
+   "501"           - k¢d OB podŒa ‡¡seln¡ka
+   "JEL"           - k¢d r dionaviga‡n‚ho bodu podŒa AIP-u
+   "LZPP"          - k¢d letiska podŒa ‡¡seln¡ka alebo AIP-u
+   "Z123"          - k¢d LDM
+   "492312N190034E"  - zemepisn  ¨¡rka a dl‘ka, m“‘u byŸ
+                   oddelen‚ znakom "-".
+   "RT14"          - k¢d trate podŒa ‡¡seln¡ka
+
+   Za OB m“‘e nasledovaŸ upresnenie ‡innosti na ¤om:
+
+   "/ARR"  ‡as pr¡chodu na OB - hod:min
+   "/DEP"  ‡as odchodu z OB - hod:min
+
+   "/L"    oneskorenie pr¡letu nad OB oproti pl nu - v min,
+         pre spr vu o zdr‘an¡
+   "/C"    doba ‡innosti nad OB - v min
+
+   "/V"    zmena r˜chlosti nad OB
+
+   "/H,S"  zmena v˜¨ky nad OB v desiatkach metrov STD
+         alebo QNH - musia nasledovaŸ 4 ‡¡slice
+   "/A,F"  zmena v˜¨ky nad OB v desiatkach st“p -
+         musia nasledovaŸ 3 ‡¡slice
+   "/G"    zmena v˜¨ky nad ter‚nom v desiatkach metrov
+         (do 300 m NT)
+
+   "/MZP"  medziprist tie (m“‘e sa ur‡iŸ doba v min)
+         (ak sa na v¨etk˜ch MZP ¨pecifikuje doba, cieŒ sa
+         na plan‘ete vykresŒuje)
+
+   "/STH"  od tohto bodu a‘ po nasleduj£ci let¡ po ¨t tnej
+         hranici
+   "/IP"   od tohto bodu a‘ po nasleduj£ci let¡
+         v identifika‡nom p sme
+
+   - zmena parametrov letu nad OB men¡ dovtedy platn£
+     hodnotu letu na novonastaven£ (v˜¨ka, r˜chlosŸ).
+
+   - zmena ‡asov˜ch £dajov (me¨kanie, ‡innosŸ na bode,
+     medziprist tie, pr¡let, odlet) sp“sob¡ prepo‡et ‡asov
+     pr¡letov na ƒal¨ie body.
+
+   - pr¡znaky "DEP" a "ARR" maj£ najvy¨¨iu prioritu pri v˜po‡te
+     ‡asu pr¡letu a odletu na (z) bod(u). Ak je ‡as "ARR"
+     men¨¡ ako ‡as opustenia predch dzaj£ceho bodu alebo
+     ‡as "DEP" men¨¡ ako ‡as pr¡letu na bod, program to
+     interpretuje ako ‡as v nasleduj£com dni. To ist‚ je
+     mo‘n‚ dosiahn£Ÿ, ak je za pr¡znakom "ARR" alebo "DEP"
+     vlo‘en˜ znak "+".
+
+   Plat¡ len jedna (posledn ) ¨pecifik cia ‡innosti
+   rovnak‚ho typu na bode.
+
+   €as prist tia je vypo‡¡tan˜ podŒa trate. Ak sa m 
+   zadaŸ, v tom pr¡pade sa neuv dza r˜chlosŸ letu, ani
+   sa neuva‘uje so ¨pecifikovan¡m ‡innosti na bode.
+
+
+   "AREA/" - v pr¡pade ~letu do v˜cvikov‚ho alebo obmedzen‚ho~
+   ~priestoru~ mus¡ byŸ uvedn˜ k¢d priestoru v poli trate,
+   aby bolo mo‘n‚ vyhodnotiŸ jeho naru¨enie a zaradiŸ let
+   do priestoru do ~¨tatistiky~. Zapisuje sa kl£‡ov˜m slovom
+   AREA nasledovan˜m lomkou a k¢dom priestoru.V pr¡pade
+   viacer˜ch priestorov sa z pis opakuje alebo nasleduje
+   …al¨¡ k¢d po ‡iarke alebo lomke, napr. AREA/TSA09a,TSA09b.
+
+
+~d) ovl danie editora~:  v¨etky d“le‘it‚ polo‘ky pl nu s£ pri
+   jeho potvrdzovan¡ kontrolovan‚. Ako pom“cka m“‘e sl£‘iŸ
+   to, ‘e ak sa pri presune kurzora na polo‘ku formul ra
+   objav¡ tla‡idlo ~I~"ndex", potom cez ~Alt~+~I~ (~Ctrl~+~F1~) je
+   mo‘n‚ zobraziŸ "index" - ponuku pr¡pustn˜ch hodn“t.
+
+   PodŒa nastaven‚ho re‘imu vkladanie(=)/prepis(Û) sa text
+   vlo‘¡ na poz¡ciu kurzora a zvy¨ok riadka sa posunie
+   alebo vyma‘e.
+
+   Pri zad van¡ trate letu sa zobrazia ƒal¨ie tla‡idl :
+
+   ~I~"ndex"    - zobrazenie ponuky pr¡pustn˜ch hodn“t pre pole
+
+   ~d~"oRPL"    - z pis FPL do s£bora opakuj£cich sa pl nov RPL
+   ~R~"PL "     - v˜ber FPL zo s£bora pripraven˜ch pl nov RPL
+
+   "A"~I~"P"      - menu pre zobrazenie popisu riadenej oblasti
+   ~M~"apa"     - zobrazenie trate letu.
+
+   ~T~"raŸ"     - v˜ber trate
+   ~B~"ody"     - v˜ber oto‡n‚ho bodu podŒa ‡¡seln¡ka
+   ~N~"DB/VOR"  - v˜ber bodu na trati LPS
+   ~A~"beceda"  - v˜ber oto‡n‚ho bodu podŒa abecedy
+   "Pop"~i~"s"    - upresnenie ‡innosti alebo zmeny parametrov
+              letu nad OB (viƒ dole)
+
+
+~e) z pis polo‘iek do formul ra~: do ka‘dej kolonky je mo‘n‚
+   zap¡saŸ len dovolen‚ znaky (napr. pri zadan¡ ‡asu len
+   ‡¡slice). Riadiace kl vesy pre z pis:
+
+   "Presun kurzora medzi polo‘kami formul ra"
+   ~Tab,  ÄÙ~   posun na nasleduj£cu,
+   ~Shift Tab~   n vrat na predch dzaj£cu,
+   ~Ctrl Home~   prv  polo‘ka formul ra
+   ~Ctrl End~    posledn  polo‘ka formul ra
+   ~Ctrl |,~  presun na in£ polo‘ku
+
+   "Edit cia"
+   ~Ins(ert)~    prep¡nanie re‘imu vkladanie(=)/prepis(Û)
+   ~Del(ete)~    zmazanie znaku na poz¡cii kurzora
+   ~Ä~          zru¨enie znaku pred kurzorom
+
+   ~Ctrl Del~    zmazanie celej polo‘ky,
+   ~Alt  Del~    zmazanie v¨etk˜ch polo‘iek formul ra
+
+   "Kl vesy Enter"
+   ~Enter~       presun kurzora na nasledujucu polo‘ku
+   ~Alt  Del~    zobrazenie mo‘nej ponuky hodn“t pre polo‘ku
+   ~Ctrl Enter~  potvrdenie obsahu formul ra,
+
+   "Ukon‡enie pr ce"
+   ~Ctrl Enter~  potvrdenie obsahu formul ra a odoslanie
+   ~Alt  P~      odoslanie pl nu (len pre OPL)
+   ~Alt  U~      ulo‘enie do s£bora (len pre OPL)
+   ~Esc~         zru¨enie
+
+
+FPLM - CHG
+~ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ~
+~ CHG - oprava pl nu letu~
+~ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ~
+
+Pl n je mo‘n‚ opraviŸ. V pr¡pade, ‘e e¨te nebol schv len˜,
+t.j. je ulo‘en˜ na disku ("."), je odoslan˜ ("*") alebo je
+na¤ po‘adovan  pripomienka ("?"), sta‡¡ ho opraviŸ.
+Po oprave je buƒ ulo‘en˜ alebo odoslan˜.
+Ak bol u‘ odoslan˜, nezobraz¡ sa mo‘nosŸ jeho ulo‘enia.
+
+Pri oprave schv len‚ho pl nu ("+") sa automaticky
+vy‘iada pripomienka na¤.
+
+V zozname pl nov m“‘u byŸ v tomto pr¡pade pon£knut‚ aj
+zru¨en‚ pl ny ("@"). Je to preto, aby sa podobn˜ pl n
+nemusel p¡saŸ odznova, sta‡¡ zmeniŸ identifik ciu a
+opraviŸ pr¡slu¨n‚ parametre.
+
+;Na SRLP je mo‘n‚ opraviŸ pl n u‘ pripomienkovan‚ho letu.
+;Ten je n sledne odoslan˜ sp„Ÿ na LSRLP, kde sa zobraz¡
+;oprava a vy‘iada sa vyjadrenie na¤:
+;  ~S~"£hlas" s opravou pl nu a jeho zaradenie medzi ostatn‚.
+;  ~O~"prava" navrhovan˜ch zmien a sp„tn‚ odoslanie na StrRLP.
+;  ~Z~"ru¨  " znamen  zamietnutie pl nu a jeho zru¨enie.
+
+
+FPLM - CNL
+~ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ~
+~ CNL - zru¨enie pl nu~
+~ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ~
+
+Zru¨enie pl nu letu. V pr¡pade ru¨enia pl nu z letiska
+podania je o tom odoslan  spr va na v¨etky pracovisk ,
+kde bol pl n letu doru‡en˜.
+
+
+FPLM - REQ
+~ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ~
+~ REQ - ‘iadosŸ o vydanie pripomienky~
+~ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ~
+
+"Na LSRLP" s£ pre vydanie pripomienky pon£knut‚ pl ny,
+ktor‚ podliehaj£ schv leniu SRLP
+ - traŸov‚ lety IFR,
+ - lety do TSA,
+ - m“‘u byŸ pon£knut‚ i u‘ schv len‚/zamietnut‚ pl ny
+   pre op„tovn‚ vy‘iadanie pripomienky.
+
+"Na SRLP" sa zobraz¡ ‘iadan  pripomienka na let na
+pracovisk ch SMD a SOD s nasleduj£cimi mo‘nosŸami :
+
+ ~O~"dlo‘" - odlo‘enie ‘iadosti na disk. V stavovom
+         riadku sa zobraz¡ tla‡idlo "REQ".
+ ~P~"ovoŒ" - povolenie letu.
+ ~O~"prav" - schv lenie letu s pripomienkou.
+ ~Z~"ak ‘" - zak zanie letu.
+
+Po vydan¡ pripomienky na SRLP sa na "LSRLP" zobraz¡
+v˜sledok ako hl senie o spracovan¡. V v pr¡pade zmeny,
+‡i zamietnutia ‘iadosti sa op„tovne otvor¡ formul r
+‘iadosti a pon£kne sa mo‘nosŸ upraviŸ pl n.
+
+ ~S~"£hlas" s pripomienkou na pl n a jeho zaradenie medzi
+         schv len‚ lety.
+ ~O~"prava" navrhovan˜ch zmien a op„tovn‚ vyslanie ‘iadosti
+         o pripomienku.
+ ~Z~"ru¨  " znamen  zamietnutie pl nu a jeho zru¨enie.
+
+
+FPLM - DEP
+~ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ~
+~ DEP - odlet~
+~ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ~
+
+Ozn menie o ¨tarte letu. Od¨tartovaŸ je mo‘n‚ len pl ny,
+ktor‚ boli schv len‚. V ponuke sa zobrazia aj lety, na
+ktor‚ nebola e¨te vydan  pripomienka, ktor  sa v pr¡pade
+pred vydan¡m spr vy o ¨tarte automaticky vy‘iada.
+
+Pri ¨tare je kontrolovan˜ pl novan˜ a skuto‡n˜ ‡as
+vzletu. PokiaŒ sa nel¡¨ia o viac ako povolen£ hodnotu
+(¨tandartne je to ñ 5 min£t), je ‡as ¨tartu automaticky
+opraven˜. V opa‡nom pr¡pade bude automaticky vy‘iadan 
+nov  pripomienka.
+
+
+FPLM - MZP
+~ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ~
+~ MZP - medziprist tie~
+~ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ~
+
+Funkcia MZP je ur‡en  pre upresnenie ‡asu prist tia alebo
+¨tartu na zvolenom bode medziprist tia (MZP). Vyd vaŸ by
+sa mala z letiska medziprist tia.
+
+Ku defin¡cii "MZP" sa dop¡¨e ‡as:
+
+  /"ARR"    ‡as prist tia - hod:min
+  /"DEP"    ‡as ¨tartu    - hod:min
+
+Pr¡klad: 250/MZP,ARR1220,DEP1550.
+
+V pr¡pade, ‘e pri bode s MZP je definovan˜ :
+a) ‡as pr¡letu - "ARR"(rrival), odo¨le sa spr va
+                 ~Prist tie na bode MZP~ (~M~).
+b) ‡as ¨tartu  - "DEP"(eparture), je vydan  spr va
+                 ~›tart z bodu MZP~ (~M~)
+
+Let sa na plan‘ete pohybuje, k˜m nie je podan  spr va ARR
+o medziprist t¡ na bode. Potom je vykreslen˜ na bode MZP.
+Po spr ve DEP sa op„Ÿ po‡¡ta a zobrazuje jeho poloha na
+trati.
+
+V pr¡pade, ‘e nie je vydan  spr va o MZP (ARR alebo DEP),
+bod MZP je ch pan˜ ako jednoduch˜ OB trate.
+
+
+FPLM - RTE
+~ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ~
+~ RTE - opravu trate letu~
+~ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ~
+
+Funkciou RTE je mo‘n‚ zmeniŸ traŸ letu alebo vydaŸ
+spr vu o oprave polohy letu. Je dovolen‚ vypustenie
+alebo pridanie bodu trate, oprava ‡innosti alebo ‡asu
+na bode.
+
+V riadku formul ra pre popis OB je mo‘n‚ ¨pecifikovaŸ
+‡innosŸ a zmenu re‘imu letu:
+
+  "/ARR"  ‡as pr¡chodu na OB - hod:min
+  "/DEP"  ‡as odchodu z OB - hod:min
+
+  "/L"    oneskorenie pr¡letu nad OB oproti pl nu - v min,
+        pre spr vu o zdr‘an¡
+  "/C"    doba ‡innosti nad OB - v min
+
+  "/V"    zmena r˜chlosti nad OB
+
+  "/H,S"  zmena v˜¨ky nad OB v desiatkach metrov STD
+        alebo QNH - musia nasledovaŸ 4 ‡¡slice
+  "/A,F"  zmena v˜¨ky nad OB v desiatkach st“p -
+        musia nasledovaŸ 3 ‡¡slice
+  "/G"    zmena v˜¨ky nad ter‚nom v desiatkach metrov
+        (do 300 m NT)
+
+  "/MZP"  medziprist tie (m“‘e sa ur‡iŸ doba v min)
+        (ak sa na v¨etk˜ch MZP ¨pecifikuje doba, cieŒ sa
+        na plan‘ete vykresŒuje)
+  "/STH"  od tohto bodu a‘ po nasleduj£ci let¡ po ¨t tnej
+        hranici
+  "/IP"   od tohto bodu a‘ po nasleduj£ci let¡
+        v identifika‡nom p sme
+
+
+Zmena parametrov letu nad OB men¡ dovtedy platn£
+hodnotu letu na novonastaven£ (v˜¨ka, r˜chlosŸ).
+
+Zmena ‡asov˜ch £dajov (me¨kanie, ‡innosŸ na bode,
+medziprist tie, pr¡let, odlet) sp“sob¡ prepo‡et ‡asov
+pr¡letov na ƒal¨ie body.
+
+Pr¡znaky "D" a "A" maj£ najvy¨¨iu prioritu pri v˜po‡te
+‡asu pr¡letu a odletu na (z) bod(u). Ak upres¤ovan˜ ‡as
+patr¡ do nasleduj£ceho d¤a po ¨tarte, za pr¡znakom "A"
+alebo "D" sa vlo‘¡ znak "+".
+
+
+Pr¡klady: 331/ARR1220,K0450  - pr¡let nad bod 331 o 12.20,
+                             zmena r˜chlosti na 450 km/h
+          150/L50 - oneskorenie 50 min pri pr¡lete
+                    nad bod 150
+
+"AREA/" - v pr¡pade ~letu do v˜cvikov‚ho alebo obmedzen‚ho~
+~priestoru~ mus¡ byŸ uvedn˜ k¢d priestoru v poli trate,
+aby bolo mo‘n‚ vyhodnotiŸ jeho naru¨enie a zaradiŸ let
+do priestoru do ~¨tatistiky~. Zapisuje sa kl£‡ov˜m slovom
+AREA nasledovan˜m lomkou a k¢dom priestoru.V pr¡pade
+viacer˜ch priestorov sa z pis opakuje alebo nasleduje
+…al¨¡ k¢d po ‡iarke alebo lomke, napr. AREA/TSA09a,TSA09b.
+
+
+FPLM - ARR
+~ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ~
+~ ARR - prist tie~
+~ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ~
+
+Ozn menie o prist t¡ letu z pracoviska zodpovedn‚ho za¤.
+
+Let sa pova‘uje za akt¡vny do okamihu ‡asu uveden‚ho ako
+ako ‡as prist tia. To znamen , ‘e ak je ‡as prist tia in˜,
+ako je uveden˜ v pl ne letu, je potrebn‚ zadaŸ ho presne.
+
+V pr¡pade, ‘e nebola vydan  alebo doru‡en  spr va o ukon‡en¡
+(ARR) alebo zru¨en¡ (CNL) letu pl novan‚ho z letiska alebo
+prist vaj£ceho na ¤om, je indikovan˜ tento stav
+ - prefarben¡m FPL v zozname na biely na ‡ervenom podklade.
+ - tla‡idlom "ARR" v stavovom riadku, ktor‚ aktivuje vydanie
+   spracovanie spr v ARR. V˜straha, ‘e na let nebola podan 
+   spr va ARR je akt¡vna nastaven˜ ‡as po predpokladanom
+   pr¡lete (iplicitne 60 min).
+
+
+; *********************************************
+;  ZAM
+; *********************************************
+
+Pl n zamestania letiska
+~ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ~
+~ Pl n zamestania letiska ~
+~ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ~
+
+~a) Pl n pre z pis £dajov o leteckej ‡innosti v priestore~
+   ~zodpovednosti letiska~ (TMA/CTR). Jeho ur‡en¡m je vydanie
+   spr v o ‡innosti a evidencia po‡tu realizovan˜ch letiskov˜ch
+   letov pre potrebu ¨tatistiky.
+
+~b) Pre sp“sob pl novania~ zamestnan¡ let¡sk nie s£ ur‡en‚
+   ‘iadne pravidl , okrem £plnosti z pisu £dajov.
+
+~c) Zobrazenie pl nu~.
+   Pl n sa zobrazuje podŒa pravidiel spolo‡n˜ch pre v¨etky
+   spracov van‚ £daje. Navy¨e sa zobrazuje na plan‘ete, kde
+   sa zobrazuj£ oblasti (TMA alebo CTR), kde s£ realizovan‚,
+   ako obrys, ak je o‡ak van  ich aktiv cia v nastavenom
+   limite. Za‡at‚ zamestania sa zobrazuj£ ako vyfarben‚ mapy.
+   Pri preru¨en¡ ‡innosti v nich sa op„Ÿ zobrazia ako obrys.
+   Ak v syst‚me sa nenach dza mapa priestoru, je vydan‚ o tom
+   varovanie. Ak s£ syst‚mu zn me s£radnice letiska, zobraz¡
+   sa aspo¤ kruh s definovan˜m polomerom.
+
+~d) z pis polo‘iek do formul ra~: do ka‘dej kolonky je mo‘n‚
+   zap¡saŸ len dovolen‚ znaky (napr. pri zadan¡ ‡asu len
+   ‡¡slice). Riadiace kl vesy pre z pis:
+
+   "Presun kurzora medzi polo‘kami formul ra"
+   ~Tab,  ÄÙ~   posun na nasleduj£cu,
+   ~Shift Tab~   n vrat na predch dzaj£cu,
+   ~Ctrl Home~   prv  polo‘ka formul ra
+   ~Ctrl End~    posledn  polo‘ka formul ra
+   ~Ctrl |,~  presun na in£ polo‘ku
+
+   "Edit cia"
+   ~Ins(ert)~    prep¡nanie re‘imu vkladanie(=)/prepis(Û)
+   ~Del(ete)~    zmazanie znaku na poz¡cii kurzora
+   ~Ä~          zru¨enie znaku pred kurzorom
+
+   ~Ctrl Del~    zmazanie celej polo‘ky,
+   ~Alt  Del~    zmazanie v¨etk˜ch polo‘iek formul ra
+
+   "Kl vesy Enter"
+   ~Enter~       presun kurzora na nasledujucu polo‘ku
+   ~Alt  Del~    zobrazenie mo‘nej ponuky hodn“t pre polo‘ku
+   ~Ctrl Enter~  potvrdenie obsahu formul ra,
+
+   "Ukon‡enie pr ce"
+   ~Ctrl Enter~  potvrdenie obsahu formul ra a odoslanie
+   ~Alt  P~      odoslanie pl nu (len pre OPL)
+   ~Alt  U~      ulo‘enie do s£bora (len pre OPL)
+   ~Esc~         zru¨enie
+
+
+; *********************************************
+;  PRZ
+; *********************************************
+
+’iadosŸ o pridelenie priestoru
+~ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ~
+~ ’iadosŸ o pridelenie priestoru ~
+~ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ~
+
+~a) Formul r NOTAM-u so ‘iadosŸou o vydelenie vzdu¨en‚ho~
+   ~priestoru~ v strategickej f ze pl novania a jej odoslanie
+   na pracovisko VLIS.
+
+   V˜znam polo‘iek je zrejm˜ z ich popisu. ’iadateŒ vyp¤a
+   £daje o ‡asovom, priestorovom a v˜¨kovom vydelen¡ priestoru.
+   Ostatn‚ £daje s£ dop¤an‚ v procese schvaŒovania rozdelenia
+   vzdu¨n‚ho priestoru.
+
+~b) z pis polo‘iek do formul ra~: do ka‘dej kolonky je mo‘n‚
+   zap¡saŸ len dovolen‚ znaky (napr. pri zadan¡ ‡asu len
+   ‡¡slice). Riadiace kl vesy pre z pis:
+
+   "Presun kurzora medzi polo‘kami formul ra"
+   ~Tab,  ÄÙ~   posun na nasleduj£cu,
+   ~Shift Tab~   n vrat na predch dzaj£cu,
+   ~Ctrl Home~   prv  polo‘ka formul ra
+   ~Ctrl End~    posledn  polo‘ka formul ra
+   ~Ctrl |,~  presun na in£ polo‘ku
+
+   "Edit cia"
+   ~Ins(ert)~    prep¡nanie re‘imu vkladanie(=)/prepis(Û)
+   ~Del(ete)~    zmazanie znaku na poz¡cii kurzora
+   ~Ä~          zru¨enie znaku pred kurzorom
+
+   ~Ctrl Del~    zmazanie celej polo‘ky,
+   ~Alt  Del~    zmazanie v¨etk˜ch polo‘iek formul ra
+
+   "Kl vesy Enter"
+   ~Enter~       presun kurzora na nasledujucu polo‘ku
+   ~Alt  Del~    zobrazenie mo‘nej ponuky hodn“t pre polo‘ku
+   ~Ctrl Enter~  potvrdenie obsahu formul ra,
+
+   "Ukon‡enie pr ce"
+   ~Ctrl Enter~  potvrdenie obsahu formul ra a odoslanie
+   ~Alt  P~      odoslanie pl nu (len pre OPL)
+   ~Alt  U~      ulo‘enie do s£bora (len pre OPL)
+   ~Esc~         zru¨enie
+
+
+; *********************************************
+;  PRS
+; *********************************************
+
+Pl n vyu‘itia priestoru
+~ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ~
+~ Pl n vyu‘itia priestoru ~
+~ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ~
+
+~a) Pl n pre z pis £dajov o vyu‘¡vanom vzdu¨nom priestore.~
+   Jeho ur‡en¡m je identifikovaŸ u‘¡vateŒa priestoru,
+   poskytn£Ÿ inform cie o ‡asovom, priestorovom
+   a v˜¨kovom obmedzen¡ vypl˜vaj£com u jeho pou‘itia.
+
+~b) Sp“sob pl novania a prideŒovania~ vzd¨n‚ho priestoru dan˜
+   koncepciou jeho pru‘n‚ho vyu‘itia ur‡uje pravidl , ako je
+   mo‘n‚ priestor z¡skaŸ pre vyu‘itie a pou‘¡vaŸ. Pravidl 
+   vypl˜vaj£ce z jej pou‘¡vania s£ nasleduj£ce :
+
+   "1." Priestor sa prideŒuje od 06ú00 UTC d¤a ‡innosti
+      maxim lne na 24 hod¡n.
+   "2." Pl n priestoru na dan˜ de¤ by sa mal podaŸ do 12ú00 UTC
+     d¤a predch dzaj£ceho.
+   "3."  Zmeny v pl ne priestoru je dovolen‚ vykonaŸ len
+     do 07ú00 UTC d¤a ‡innosti.
+   "4." Spodn  letov  hladina nesmie byŸ zmenen  pod
+     schv len£ hladinu.
+   "5." Horn  letov  hladina nesmie byŸ zmenen  nad
+     schv len£ hladinu.
+   "6." Priestor je mo‘n‚ pou‘¡vaŸ len v dobe potvrdenej pri
+     schv len¡ pl nu.
+
+   V˜nimky z t˜chto pravidiel m“‘e schvaŒovaŸ a realizovaŸ
+   len pracovisko AMC pre priestory definov‚ dohodou
+   s civilnou stranou.
+
+~c) Pre ¨tatistick‚ vyhodnocovanie pou‘itia priestorov~ je
+   potrebn‚ dodr‘iavaŸ roz¨¡ren‚ pravidl  z pisu £dajov.
+   - ~pre rozl¡¨enie ur‡enia priestoru~ pre pozemn£ ‡innosŸ
+     od leteckej ‡innosti je potrebn‚ do poŒa pozn mka
+     zap¡saŸ kŒ£‡ov‚ slovo, lomka a identifk tor "ACT/GND".
+   - ~N zov strelnice~ m“‘e byŸ uveden˜ v poli pozn mka za
+     kŒ£‡ov˜m slovom a lomkou "NAZOV/", ako napr¡klad
+     NAZOV/MYSLAVA. V tomto pr¡pade bude v ¨tatistike
+     vyu‘ita priestorov uveden˜ n zov priestoru a nie jeho
+     k¢d.
+
+~d) Zobrazenie pl nu~.
+   Pl n sa zobrazuje podŒa pravidiel spolo‡n˜ch pre v¨etky
+   spracov van‚ £daje. Navy¨e sa zobrazuje na plan‘ete, kde
+   sa zobrazuj£ mapy priestorov, ktor‚ s£ schv len‚ a je
+   o‡ak van  ich aktiv cia v nastavenom limite (obrysy
+   priestorov). Aktivovan‚ priestory sa zobrazuj£ ako
+   vyfarben‚ mapy. Pri preru¨en¡ ‡innosti v nich sa op„Ÿ
+   zobrazia ako obrys. Ak v syst‚me sa nenach dza mapa
+   priestoru, je vydan‚ o tom varovanie a priestor sa
+   eviduje be‘n˜m sp“sobom.
+
+
+~e) Z pis polo‘iek do formul ra~: do ka‘dej kolonky je mo‘n‚
+  zap¡saŸ len dovolen‚ znaky (napr. pri zadan¡ ‡asu len
+  ‡¡slice). Riadiace kl vesy pre z pis:
+
+   "Presun kurzora medzi polo‘kami formul ra"
+   ~Tab,  ÄÙ~   posun na nasleduj£cu,
+   ~Shift Tab~   n vrat na predch dzaj£cu,
+   ~Ctrl Home~   prv  polo‘ka formul ra
+   ~Ctrl End~    posledn  polo‘ka formul ra
+   ~Ctrl |,~  presun na in£ polo‘ku
+
+   "Edit cia"
+   ~Ins(ert)~    prep¡nanie re‘imu vkladanie(=)/prepis(Û)
+   ~Del(ete)~    zmazanie znaku na poz¡cii kurzora
+   ~Ä~          zru¨enie znaku pred kurzorom
+
+   ~Ctrl Del~    zmazanie celej polo‘ky,
+   ~Alt  Del~    zmazanie v¨etk˜ch polo‘iek formul ra
+
+   "Kl vesy Enter"
+   ~Enter~       presun kurzora na nasledujucu polo‘ku
+   ~Alt  Del~    zobrazenie mo‘nej ponuky hodn“t pre polo‘ku
+   ~Ctrl Enter~  potvrdenie obsahu formul ra,
+
+   "Ukon‡enie pr ce"
+   ~Ctrl Enter~  potvrdenie obsahu formul ra a odoslanie
+   ~Alt  P~      odoslanie pl nu (len pre OPL)
+   ~Alt  U~      ulo‘enie do s£bora (len pre OPL)
+   ~Esc~         zru¨enie
+
+
+; *********************************************
+;  MSG
+; *********************************************
+
+Spr va/Telegram
+~ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ~
+~ Spr va/Telegram ~
+~ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ~
+
+Spr va je textov‚ pole s ŒubovoŒn˜m obsahom ur‡en  pre
+pr¡jemcov s po‡¡ta‡om rovnak‚ho ur‡enia (FDP) prijen˜ch
+ku dan‚mu syst‚mu.
+
+Telegram m  rovnak‚ ur‡enie ako spr va, ale m  v„‡¨¡ rozsah.
+Z niektor˜ch pracov¡sk je mo‘n‚ odosielaŸ ho i do in˜ch siet¡
+a syst‚mov riadenia (napr¡klad AFTN).
+
+
+"Adresovanie spr vy"
+
+Adresa pr¡jemcu spr vy sa jedn˜m slovom. Adresy s£ oddelen‚
+medzerou. V pr¡pade, ak sa adresa sklad  z viacer˜ch slov
+alebo ‡ast¡, ako adresa siete a adresa pracoviska, potom sa
+ako oddeŒova‡ namiesto medzery pou‘ije znak "_" (napr¡klad
+300 RDC sa zap¡¨e ako 300_RDC). Je mo‘n‚ pou‘iŸ i IP adresu,
+ale nebude vyhodnoten‚ je doru‡enie.
+
+Existuje mo‘noŸ rozoslania obe‘n¡ka, kde :
+
+ "L" - adresa v¨etkych pracov¡sk konfigurovan˜ch ako LSRLP
+ "*" - ako L a navy¨e na SRLP.
+
+
+; *********************************************
+;  NASTAVENIA
+; *********************************************
+
+Nastavenie syst‚mu
+
+~U~"TC"                - nastavenie UTC, ak je vypnut  ‡asov  synchroniz cia
+~D~"ISPLAY"            - nastavenie rozli¨ovacej schopnosti displeja
+
+~R~"EFRESH  Ctrl+Ä"   - obnova obrazovky, ak tam zostane neodmazan  inform cia
+
+~T~"LA€IARE¥"          - nastavenie tla‡e a test
+~N~"ASTAV"             - nastavenie parametrov OPL
+~P~"REMENN"           - nastavenie ‡¡seln˜ch parametrov
+"E"~X~"IT     Alt+X"     - ukon‡enie programu
+
+
+Nastavenie programu
+
+"€ASOV "~Z~NAMENIE"       - ‡asov‚ znamenie ka‘d£ hodinu
+"€ASOV "~S~YNCHRONIZCIA" - pr¡jem ‡asu od centr lneho po‡¡ta‡a
+
+~R~"EPRODUKTOR"           - povolenie zvukov˜ch efektov
+
+"Z"~H~"AS‹NANIE"            - povolenie pohasnutia obrazovky, ak nie je
+                          pou‘it  my¨, kl vesnica, alebo nie je prijat 
+                          ‘iadna spr va, ‡i generovan‚ hl senie
+~J~"AS"                   - zv˜¨enie jasu m p
+
+;~O~"PL  config"           - povolen  aktualiz cia konfigura‡n‚ho s£bora programu
+;~M~"APY config"           - povolen  aktualiz cia konfigura‡n‚ho s£bora m p
+
+
+Nastavenie tla‡iarne
+
+~T~"EST"               - jednoduch˜ test tla‡iarne
+~N~"ASTAVENIE"         - nastavenie parametrov tla‡e
+
+
+Nastavenie ostatn˜ch
+
+"HLSENIE O "~V~"LASTNCH FPL" - hl senie o priebehu letu FPL podan˜ch
+                           z dan‚ho pracoviska
+"HLSENIE O "~O~"STATNCH FPL" - hl senie o priebehu letu FPL podan˜ch
+                           na ostatn˜ch pracovisk ch
+"HLSENIE O "~Z~"AMESTNANIACH" - zobrazenie hl sen¡ o priebehu
+                           zamestnan¡ let¡sk
+"HLSENIE O "~S~"CHOPNOSTIACH" - zobrazenie hl sen¡ o zmen ch
+                           v schopnostiach let¡sk
+
+~V~"OJENSK STRIPY"          - zobrazenie akt¡vnych neciviln˜ch FPL
+                           v tvare stripu s rozpo‡¡tan˜mi ‡asmi
+                           preletov bodov
+~M~"INI-STRIPY"              - zobrazenie stripov v skr tenom tvare
+~S~"TAV PLNU"               - zobrazenie stavu pl nu symbolom
+                             ~.~   - ulo‘en˜ na disku
+                             ~@~   - zru¨en˜ pl n
+                             ~*~   - odoslan˜ na StrRLP
+
+                             ~?~   - vy‘iadan  pripomienka
+                             ~??~  - odlo‘en  pripomienka (StrRLP)
+                             ~+~   - schv len˜ pl n
+                             ~-~   - zamietnut˜ pl n
+
+                             ~A~  - akt¡vny pl n
+                             ~D~   - oneskoren˜ pl n
+                             ~M~  - medziprist tie
+                             ~M~  - ¨tart z bodu medziprist tia
+                             ~@~  - prist tie
+"Z"~R~U›EN PLNY"            - povolenie zobrazenia zru¨en˜ch a ukon‡en˜ch
+                           pl nov
+~P~"RZDNY ZOZNAM"           - dovolenie otvorenia zoznamu, ak je pr zdny
+
+"POSLEDN "~A~"DRESA"          - uchovanie poslednej adresy v spr ve
+"S"~I~"GNALIZCIA SPRVY"      - zapnutie/vypnutie signaliz cie prijatia spr vy
+
+
+; *********************************************
+;  NASTAVENIA OPL
+; *********************************************
+
+Nastavenie tabuliek
+
+Zapnutie/Vypnutie :
+
+  ~V~"OJENSK PLNY"      - zoznam vojensk˜ch pl nov/letov
+  ~C~"IVILN PLNY"       - zoznam civiln˜ch letov
+  ~I~"N PLNY"           - zoznam in˜ch pl nov/letov.
+
+Vlo‘enie/Zru¨enie neschv len˜ch a neaktivovan˜ch
+pl nov letov :
+
+  "V"~O~"JENSK FPL"        - do zoznamu vojensk˜ch pl nov/letov
+  "I"~N~" FPL"             - do zoznamu in˜ch pl nov/letov.
+
+Triedenie v zoznamoch vojensk˜ch a in˜ch pl nov/letov :
+
+  ~R~"ADENIE PODœA STAVU" - podŒa stavu (pl novan˜, odoslan˜,
+                        ‘iadosŸ o pripomienku, schv len˜,
+                        aktivovan˜) alebo podŒa abecedy.
+
+
+Nastavenie rozsahu plan‘etu
+
+~R~"OZSAH    Alt+7"  - mierka zobrazenia
+~P~"PRIESTOR Alt+8"  - vystredenie nad zvolen˜ priestor
+~V~"YSTRE…   Alt+9"  - vystredenie nad bod zadan˜ my¨ou
+~C~"ENTRUJ   Alt+0"  - nastavenie z kladn‚ho zobrazenia
+
+
+Nastavenie zobrazenia cieŒov
+
+~V~"OJENSK CIELE" - kreslenie cieŒov podŒa vojensk˜ch pl nov letov
+~C~"IVILN CIELE"  - kreslenie cieŒov podŒa civiln˜ch pl nov letov
+~I~"N CIELE"      - kreslenie cieŒov podŒa in˜ch pl nov letov
+
+~S~"SR"            - zobrazenie k¢du SSR
+
+~T~"yp bodov"      - rozl¡¨enie NDB, orienta‡n˜ch bodov, ...
+~P~"opis bodov"    - popis n zvov NDB, orienta‡n˜ch bodov, ...
+~8~"x8 veŒkosŸ"    - veŒkosŸ popisu NDB, orienta‡n˜ch bodov, ...
+
+
+; *********************************************
+;  MENU OPL
+; *********************************************
+
+Menu pre letov‚ pl ny
+
+Menu pre spracovanie vojensk˜ch a in˜ch letov˜ch pl nov po in˜ch
+ako civiln˜ch tratiach. Ak s£ podan‚ i predbe‘n‚ pl ny, vyber 
+sa d tum, z ktor‚ho sa neaktivovan‚ FPL opracov vaj£. PodŒa typu
+OPL-ka menu FPL obsahuje niektor‚ z nasleduj£cich polo‘iek :
+
+Spracovanie :
+
+  ~F~"PL"  - podanie predbe‘n‚ho, operat¡vneho pl nu letu, kr¡dla
+  ~C~"HG"  - oprava neaktivovan‚ho letov‚ho pl nu (pred ¨tartom)
+  ~R~"EQ"  - vy‘iadanie/vydanie pripomienky k letu
+  "C"~N~"L"  - zru¨enie neaktivovan‚ho pl nu letu
+  ~D~"EP"  - vydanie spr vy o ¨tarte
+  "M"~Z~"P"  - vydanie spr vy o medziprist t¡ (prist tie/¨tart)
+  "R"~T~"E"  - oprava parametrov letu aktivovan‚ho letov‚ho
+         pl nu (oprava na trati)
+  ~A~"RR"  - vydanie spr vy o prist t¡
+
+
+PrehŒad podan˜ch letov˜ch pl nov na letisku :
+
+  Na letisku sa prehŒad pl novan˜ch predbe‘n˜ch
+  a operat¡vnych FPL del¡ podŒa pracoviska podania
+  pl nu letu :
+
+  ~1~". VLASTN FPL   Alt+F5 " - prehŒad neaktivovan˜ch,
+         aktivovan˜ch, pr¡padne zru¨en˜ch a ukon‡en˜ch
+         letov˜ch pl nov podan˜ch na danom alebo pre dan‚
+         letisko (StrRLP m“‘e pl novaŸ pre v¨etky letisk ).
+  ~2~". PRIJAT FPL" - prehŒad prijat˜ch neaktivovan˜ch,
+         aktivovan˜ch, pr¡padne ukon‡en˜ch letov˜ch pl nov
+         podan˜ch na inom pracovisku a t˜kaj£cich sa tohto
+         letiska.
+  ~3~". V›ETKY FPL" - ... Je to jasn‚.
+
+  "UK"~O~"N€EN FPL" - z kladn‚ nastavenie programu je tak‚, ‘e pl ny
+         letov, ktor‚ prist li, alebo ktor‚ boli ukon‡en‚, sa
+         ƒalej nezobrazuj£. Ta naco, ne? T to funkcia zobraz¡
+         len tak‚.
+         Pozn mka : spom¡nan‚ nastavenie sa d  potla‡iŸ
+                    v menu "N"~A~"STAV".
+
+
+PrehŒad podan˜ch letov˜ch pl nov na StrRLP :
+
+  Podobne ako na letisku sa prehŒad pl novan˜ch predbe‘n˜ch
+  a operat¡vnych FPL del¡ do skup¡n. Na StrRLP je to podŒa
+  stavu letu :
+
+  ~1~". PLNOVAN    Alt+F5 " - prijat‚ FPL.
+  ~2~". SCHVAœOVAN"  - FPL s vy‘iadanou/vydanou pripomienkou
+  ~3~". AKTIVOVAN"   - po vydan¡ spr vy DEP
+  ~4~". V›ETKY"       - v¨etky okrem ukon‡en˜ch
+  ~5~". UKON€EN"     - vysvetlen‚ vy¨¨ie
+
+
+Menu pre kr¡dla
+
+Pod pojmom kr¡dla sa rozumie FPL pripraven˜ na letisku
+bez pridelenej identifik cie, ktor  bude upresnen 
+letiskom ¨tartu. Okrem toho menu ~K~"RL" umo‘¤uje odoslaŸ
+pripraven˜ FPL na zvolen‚ letisko na jeho trase.
+
+
+ ~1~". VLASTN KR‹DLA " - kr¡dla pl novan‚ na tomto LSRLP
+ ~2~". PRIJAT KR‹DLA " - kr¡dla doru‡en‚ pre toto LSRLP
+ ~3~". PODAN FPL     " - FPL podan‚ na tomto LSRLP
+
+
+     Pri aktivovan¡ v˜pisu po‘adovan‚ho druhu pl nov
+sa zobraz¡ ich zoznam. V˜berom polo‘ky sa zobraz¡
+menu pre jej ƒal¨ie spracovanie.
+
+    V spodnej ‡asti zoznamu s£ dve tla‡idl . Prv‚,
+~T~"la‡" vytla‡¡ v¨etky vyp¡san‚ pl ny, druh‚, ~P~"o¨li"
+odo¨le kr¡dla alebo letov‚ pl ny na zvolen‚ letisko
+¨tartu.
+
+
+
+Menu pre zamestnania let¡sk
+
+"P"~L~"N            F6" - podanie predbe‘n‚ho/operat¡vneho pl nu
+                     zamestnania vojensk‚ho alebo aeroklubov‚ho
+                     letiska
+"Z"~M~"ENA"              - zmena pl novan‚ho/oprava aktivovan‚ho
+                     zamestnania
+"Z"~R~"U›ENIE PLNU"     - zru¨enie pl novan‚ho zamestnania
+
+"ZA"~€~"IATOK"           - ...
+"PR"~E~"RU›ENIE"         - ...
+"PO"~K~"RA€OVANIE"       - ...
+~U~"KON€ENIE"          - ...
+
+~Z~"AMESTNANIA Alt+F6" - prehŒad podan˜ch predbe‘n˜ch
+                     a operat¡vnych pl nov zamestnan¡
+
+
+Vyu‘itie priestorov
+
+"PL"~~"N VYU’ITIA PRIESTORU   F7" - podanie predbe‘n‚ho/operat¡vneho
+                               pl nu vyu‘itia priestoru
+"OP"~R~"AVA"                       - oprava pl novan˜ch a zmeny
+                               v aktivovan˜ch priestoroch
+"ZR"~U~"›ENIE"                     - pl novan˜ch priestorov
+
+"ZA"~€~"ATIE €INNOSTI V PRIESTORE" - ...
+"PR"~E~"RU›ENIE"                   - ...
+"PO"~K~"RA€OVANIE"                 - ...
+"UK"~O~"N€ENIE"                    - ...
+
+~P~"RIESTORY             Alt+F7" - prehŒad podan˜ch predbe‘n˜ch
+                               a operat¡vnych pl nov vyu‘itia
+                               priestorov
+
+
+Menu pre syst‚mov‚ NOTAMy
+
+~P~"ODANIE SPRVY NOTAM  F8"  - podanie pl nu vyu‘itia letiskov˜ch
+                            prostriedkov alebo odoslanie spr vy
+                            o technickom alebo meteorologickom
+                            QGO
+~A~"KTUALIZCIA"              - upresnenie pl nu vyu‘itia prostriedkov
+                            alebo hl senie o zmene v QGO
+~Z~"RU›ENIE"                  - ukon‡enie platnosti pl nu/spr vy
+
+"SYSTMOV "~N~"OTAMY  Alt+F8"  - prehŒad podan˜ch predbe‘n˜ch a opera-
+                            t¡vnych pl nov vyu‘itia prostriedkov
+                            a spr v o aktu lnom stave
+
+
+Menu pre diverzie
+
+"P"~O~"DANIE ’IADOSTI O DIVERZIU F9" - podanie pl nu so ‘iadosŸou
+                                 o zabezpe‡enie diverzie
+~A~"KTUALIZCIA"                   - aktualiz cia pl nu pl novanej
+                                 alebo zabezpe‡enej diverzie
+~P~"O’IADAVKA NA DIVERZIU"         - odoslanie ‘iadosti o zabezpe‡enie
+                                 diverzie
+~U~"KON€ENIE/ZRU›ENIE"             - zru¨enie pl novanej alebo ukon‡enie
+                                 zabezpe‡enej diverzie
+
+~S~"PRACOVANIE ’IADOSTI   Ctrl+F9" - spracovanie odlo‘enej ‘iadosti
+                                 o diverziu
+~V~"STRAHA PRED ZRU›EN‹M"         - odoslanie v˜strahy na zru¨enie
+                                 zabezpe‡ovanej diverzie
+"Z"~R~"U›ENIE VSTRAHY"              - zru¨enie v˜strahy pred zru¨en¡m
+
+~Z~"RU›ENIE DIVERZIE"              - zru¨enie diverzie (po vydan¡
+                                 v˜strahy)
+
+~D~"IVERZIE                Alt+F9" - prehŒad pl novan˜ch a aktivovan˜ch
+                                 diverzi¡
+
+Menu pre slu‘obn‚ spr vy
+
+~S~"PRVA          F10" - odoslanie slu‘obnej spr vy na ŒubovoŒn‚
+                      pracovisko prpojen‚ ku sieti OPL
+
+~D~"ORU€EN    Alt+F10" - prehŒad doru‡en˜ch spr v v danom dni
+~O~"DOSLAN   Ctrl+F10" - prehŒad odoslan˜ch spr v v danom dni
+~V~"›ETKY    Shift+F10" - prehŒad v¨etk˜ch spracovan˜ch spr v dan‚ho d¤a
+
+

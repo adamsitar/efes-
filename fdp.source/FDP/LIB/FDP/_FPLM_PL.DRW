@@ -1,0 +1,368 @@
+{ ------------------
+   PLAN
+  ------------------
+}
+
+{$IFDEF FPLM_L}
+
+ function dxi_mFPL: int;
+    begin
+      {if bminimFPL then dxi_mFPL:= dm_mFPL
+      else} dxi_mFPL:= dx_mFPL
+    end;
+
+ function dyi_mFPL_15(r15: int): int;
+    begin
+      if not bminimFPL then r15:= max_mFPL_15_r_hi;
+      if r15 > 0 then dyi_mFPL_15:= dyr_mFPL + r15*10 + dyr_mFPL
+      else dyi_mFPL_15:= 0
+    end;
+
+ function dyi_mFPL_18(r18: int): int;
+    begin
+      if not bminimFPL then r18:= max_mFPL_18_r_hi;
+      if r18 > 0 then dyi_mFPL_18:= dyr_mFPL + r18*10 + dyr_mFPL
+      else dyi_mFPL_18:= 0
+    end;
+
+ function dyi_mFPL: int;
+    begin
+      dyi_mFPL:= dym_mFPL + dyi_mFPL_15(max_mFPL_15_rm) + dyi_mFPL_18(max_mFPL_18_rm)
+    end;
+
+{$ELSE}
+
+ function dxi_mFPL: int;
+    begin
+      dxi_mFPL:= dx_mFPL
+    end;
+
+ function dyi_mFPL: int;
+    begin
+      dyi_mFPL:= dyf_mFPL
+    end;
+
+{$ENDIF}
+
+
+{$IFDEF FPLM_L}
+  procedure _plan_mFPL(x0,y0,x1,y1: int; bk: int; r15,r18: byte);
+      var   dy : int;
+      begin
+        BGIgraph.button(x0,y0,x1,y1, bk, btSmall, btOFF);
+
+        dy:= y0+dym_mFPL;
+        {$IFDEF L4444M}
+          _linev(x0+168,y0+3,dy, bk);
+          _linev(x0+265,y0+3,dy, bk);
+          _linev(x0+331,y0+3,dy, bk);
+        {$ELSE}
+          _linev(x0+136,y0+3,dy, bk);
+          _linev(x0+234,y0+3,dy, bk);
+          _linev(x0+303,y0+3,dy, bk);
+        {$ENDIF}
+
+        if (r15=0) and (r18=0) then Exit;
+
+        _lineh(x0+5,x1-5,dy, bk);
+
+        if (r18<>0) then
+           begin
+             dy:= y0+dym_mFPL+dyi_mFPL_15(r15);
+             _lineh(x0+5,x1-5,dy,bk)
+           end
+      end;
+
+  {function  write_pole(pole: pchar; mini: bool; r,m: int; var p: int;
+                       x,y, dx,dy: int
+                       ): int;
+      var   i,k, dyofss: int;
+      begin
+        k:= getpstritems(pole,setNL+setNL_);
+        if mini then p:= Minimum(k,r) else p:= Minimum(k,m);
+        for i:= 0 do p-1 do
+          begin
+            if i=0 then inc(dy,dyr_mFPL);
+            outtextxy(x+10,y0+dy,getPstr(_D,i+1,setNL+setNL_));
+            inc(dy,10);
+            inc(i);
+            if i=p then inc(dy,dyr_mFPL)
+          end;}
+{$ELSE}
+  procedure _plan_mFPL(x0,y0,x1,y1: int; bk: int; sm: byte);
+      var   y36,y84: int;
+      begin
+        y36:= y0+36-sm*5; y84:= y0+74-sm*16;
+        BGIgraph.button(x0,y0,x1,y1{-sm*22}, bk, btSmall, btOFF);
+        {$IFDEF L4444M}
+          _lineh(x0+5,x1-5, y36, bk);
+          _lineh(x0+5,x1-5, y84, bk);
+          _linev(x0+172,y0+3,y36, bk);
+          _linev(x0+269,y0+3,y36, bk);
+          _linev(x0+335,y0+3,y36, bk);
+        {$ELSE}
+          _lineh(x0+5,x1-5,y36, bk);
+          _lineh(x0+5,x1-5,y84, bk);
+          _linev(x0+140,y0+3,y36, bk);
+          _linev(x0+238,y0+3,y36, bk);
+          _linev(x0+307,y0+3,y36, bk);
+        {$ENDIF}
+      end;
+{$ENDIF}
+
+
+{$IFDEF OPL}  {$DEFINE FPLM_STT} {$ENDIF}
+{$IFDEF IDD}  {$DEFINE FPLM_STT} {$ENDIF}
+
+procedure plani_mFPL(FPL: PDmFPL; x,y: int; b,mini: bool);
+    var   dx_plan,dy_plan, i,p,k1,k2, dx,dy, y0,y1,y2, yi,yd,ya : int;
+          ind_cl,bk, font : byte;
+          {$IFDEF BGI}
+           TextInfo   : TextSettingsType;
+          {$ENDIF}
+          s,t        : string;
+          adr        : TNETadr;
+          dnesny,cez : bool;
+
+    begin
+      bk:= bkPLAN_[b];
+      {$IFDEF BGI} GetTextSettings(TextInfo); {$ENDIF}font:= SPfont;
+      y0:= y+dy_ch + {$IFDEF SPEA}+ 6{$ENDIF} {$IFDEF BGI}+ 0{$ENDIF};
+      y1:= y+dy_ch + {$IFDEF SPEA}+18{$ENDIF} {$IFDEF BGI}+12{$ENDIF};
+      y2:= y+dy_ch + {$IFDEF SPEA}+12{$ENDIF} {$IFDEF BGI}+ 6{$ENDIF};
+
+      with FPL^ do
+        begin
+
+        { vypocet, ako zobrazit datum platnosti
+        }
+          dnesny:= DateToSec(Year,Month,Day) = DateToSec(date.r,date.m,date.d);
+          cez:= TimeToSec(prist.h,prist.m,0) < TimeToSec(start.h,start.m,0);
+
+        { okno
+        }
+          dx_plan:= dxi_mFPL; dy_plan:= dyi_mFPL;
+          {$IFDEF FPLM_L}  _plan_mFPL(x,y,x+dx_plan,y+dy_plan, bk, max_mFPL_15_rm,max_mFPL_18_rm);
+          {$ELSE}          _plan_mFPL(x,y,x+dx_plan,y+dy_plan, bk, 1);
+          {$ENDIF}
+          {$IFDEF SPEA}SetBkColor(bk);{$ENDIF}
+
+        { data letu
+        }
+          {$IFDEF RDP_ACCEPT}
+            if _is_stat(stat,cnst_stat_act,false) then ind_cl:= TRG_color[TRG]
+            else ind_cl:= FPL^.cl;
+          {$ELSE}
+            ind_cl:= FPL^.cl;
+          {$ENDIF}
+           if poz in[poz_SEDI,poz_HANGAR] then ind_cl:= cl_HANGAR;
+           setcolor (ind_cl);
+           outtextxy(x+11,y0, idn_mFPL(FPL));
+
+          {$IFNDEF RDP_ACCEPT}
+           setcolor (cl_DATA);     { (citem); }
+          {$ENDIF}
+
+          {$IFDEF L4444M}
+           outtextxy(x+74,y0,ssr_);
+           outtextxy(x+84,y0,ssr);
+           outtextxy(x+124,y0,_8a+_8b);
+          {outtextxy(x+150,y0,com_+ssr_);}
+           outtextxy(x+11,y1,typ+' '+typ2);
+           outtextxy(x+124,y1,code_l4_rych (rych,rych_));
+           dx:= 30;
+          {$ELSE}
+           outtextxy(x+71,y0,ssr_);
+           outtextxy(x+81,y0,ssr);
+           outtextxy(x+123,y0,_8a);
+           outtextxy(x+11,y1,typ+' '+typ2);
+           outtextxy(x+86,y1,code_l4_rych (rych,rych_));
+           dx:= 0;
+          {$ENDIF}
+
+          if (not dnesny or cez) then
+             begin
+               setcolor (cl_DATA-2);
+              {$IFDEF BGI}
+               SetTextStyle(SmallFont, 0,0);
+               outtextxy(x+dx+186,y0-8,TimeToStr(date.d,date.m,'.'));
+               SetTextStyle(TextInfo.font, 0,0);
+              {$ELSE}
+               outtextxy(x+dx+186,y0-6,TimeToStr(date.d,date.m,'.'));
+              {$ENDIF}
+               setcolor (cl_DATA);
+               yd:= y0+4; ya:= y1+1
+             end
+          else begin
+                 yd:= y0; ya:= y1
+               end;
+
+          if start.kod<>'' then with start do
+             begin
+               {if poz in[pozPRED,pozSTART] then setcolor(cnext)
+               else setcolor(citem);}
+               outtextxy(x+dx+147,yd{0},kod);
+               outtextxy(x+dx+186,yd, TimeToStr(h,m,':'))
+             end;
+          if prist.kod<>'' then with prist do
+             begin
+               {if poz in[pozSEDI,pozHANGAR] then setcolor(clast)
+               else setcolor(citem);}
+               outtextxy(x+dx+147,ya{1},kod);
+               outtextxy(x+dx+186,ya, TimeToStr(h,m,':'))
+             end;
+
+          setcolor(cl_DATA);
+          if vys2<>0 then
+             begin
+               outtextxy(x+dx+246,y0,code_l4_vys(vys,vys_)   {alt_to_str,'',in_FL,alt_VFR_sym)});
+               outtextxy(x+dx+246,y1,code_l4_vys(vys2,vys2_) {,'',in_FL,alt_VFR_sym)});
+             end
+          else begin
+                 outtextxy(x+dx+246,y+12,code_l4_vys(vys,vys_){,'',in_FL,alt_VFR_sym)});
+               end;
+
+          outtextxy(x+dx+319,y2,VU);
+          {$IFNDEF L4444M}
+           for i:= 0 to 5 do outtextxy(x+352 + i*22,y2,ulohy[i]);
+          {$ENDIF}
+
+
+        { trat/poznamka
+        }
+          {$IFDEF FPLM_L}
+            dy:= dym_mFPL-dyr_mFPL;
+
+            k1:= getPstritems(trat,setNL+setNL_);
+            if mini then p:= Minimum(k1,max_mFPL_15_rm)
+            else p:= Minimum(k1,max_mFPL_15_r_hi);
+            if max_mFPL_15_rm>0 then inc(dy,dyr_mFPL);
+            i:= 0; while i<p do
+              begin
+                outtextxy(x+10,y0+dy,getPstr(trat,i+1,setNL+setNL_));
+                inc(dy,10);
+                inc(i)
+              end;
+            if max_mFPL_15_rm>0 then
+               begin
+                 if i<max_mFPL_15_rm then inc(dy,(max_mFPL_15_rm-i)*10);
+                 inc(dy,dyr_mFPL);
+               end;
+
+            k2:= getPstritems(pozn,setNL+setNL_);
+            if mini then p:= Minimum(k2,max_mFPL_18_rm)
+            else p:= Minimum(k2,max_mFPL_18_r_hi);
+            i:= 0; while i<p do
+              begin
+                if i=0 then inc(dy,dyr_mFPL);
+                outtextxy(x+10,y0+dy,getPstr(pozn,i+1,setNL+setNL_));
+                inc(dy,10);
+                inc(i)
+              end;
+
+            if    is_plani___(trat, max_mFPL_15_r_hi, max_mFPL_15_rm, k1)
+               or is_plani___(pozn, max_mFPL_18_r_hi, max_mFPL_18_rm, k2)
+                  then outtextxy(x+dx_plan-30,y2+8, '...');
+
+          {$ELSE}
+            s:= strpas(trat);
+            for i:= 0 to 1 do outtextxy(x+11,y0+30+i*10,getstr(s,i+1,setNL+setNL_));
+            s:= strpas(pozn);
+            for i:= 0 to 1 do
+              begin
+                t:= getstr(s,i+1,setNL+setNL_);
+                outtextxy(x+11,y0+59+i*10,copy(t,1,60))
+              end;
+          {$ENDIF}
+
+          {$IFDEF FPLM_STT}
+            if cut_(FPL^.idn)<>'' then adr:= SERVERaddress
+            else adr:= adr_airbase(FPL^.start.kod);
+            write_stat(stat, rec,adr, x+dx_mFPL-18,y0-2, cl)
+          {$ENDIF}
+        end;
+
+      {$IFDEF SPEA} SetTextStyle(font, 0,0) {$ENDIF}
+    end; { draw_mFPL_plan }
+
+{$IFDEF FPLM_STT} {$UNDEF FPLM_STT} {$ENDIF}
+
+
+procedure plan_mFPL (FPL: PDmFPL; x,y: int; b: bool);
+    begin
+      plani_mFPL(FPL, x,y, b,bminimFPL)
+    end;
+
+
+function dx_sc_mFPL: int;
+   begin
+     if pis_STRIP_mFPL then dx_sc_mFPL:= dx_sc_strip(miniSTRIP_mFPL)
+     else dx_sc_mFPL:= dxi_mFPL
+   end;
+
+function dy_sc_mFPL: int;
+   begin
+     if pis_STRIP_mFPL then dy_sc_mFPL:= dy_sc_strip
+     else dy_sc_mFPL:= dyi_mFPL
+   end;
+
+procedure sc_mFPL(FPL: PDmFPL; x,y: int; b: bool);
+    var   _miniSTRIP: T_strip;
+    begin
+      if pis_STRIP_mFPL then
+         begin
+           _miniSTRIP:= miniSTRIP;
+           miniSTRIP := _is_mini_strip(miniSTRIP_mFPL);
+           strip_mFPL(FPL, x,y, b);
+           miniSTRIP:= _miniSTRIP
+         end
+      else plan_mFPL(FPL, x,y, b)
+    end;
+
+
+procedure planf_mFPL(FPL: PDmFPL; x,y: int; b: bool);
+    var   pb : bool; r15,r18: int;
+    begin
+     {$IFDEF FPLM_L}
+      pb:= bminimFPL; bminimFPL:= false;
+      r15:= max_mFPL_15_rm; max_mFPL_15_rm:= max_mFPL_15_r_hi;
+      r18:= max_mFPL_18_rm; max_mFPL_18_rm:= max_mFPL_18_r_hi;
+      plani_mFPL(FPL, x,y,b,false);
+      max_mFPL_15_rm:= r15;
+      max_mFPL_18_rm:= r18;
+      bminimFPL:= pb;
+     {$ELSE}
+      plani_mFPL(FPL, x,y,b,false);
+     {$ENDIF}
+    end;
+
+procedure _info_mFPL(x0,y0,x1,y1: int; FPL: PDmFPL); far;
+    begin
+      planf_mFPL(FPL, x0+(x1-x0-dx_mFPL) shr 1, y0, false)
+    end;
+
+function info_mFPL(FPL: PDmFPL; title: string): bool;
+    begin
+      if title='' then title:= idn_mFPL(FPL);
+      info_mFPL:= Info(title, @_info_mFPL, FPL,dx_mFPL+20,dyf_mFPL+10, nil,0)
+    end;
+
+
+
+{ ----------------------------
+   vykreslenie polohy ciela
+  ----------------------------
+}
+
+{$IFDEF MAPY}
+  procedure zobraz_trat_mFPL(FPL: PDmFPL);
+      var   OBs : POBxys;
+            bod : int;
+      begin
+        New(OBs);
+        if (FPL^.trat_<>nil) then begin Move(FPL^.trat_^,OBs^,FPL^.bodov*SizeOf(TOBxy)); bod:= FPL^.bodov end
+        else with FPL^ do _decode_FPL0_15 (trat, start,prist, OBs^,bod,rych,rych_,vys,vys_,date, true,false,false,true,false);
+        zobraz_trat(code_FPLM_7a(FPL), OBs,bod, dx_ZOBRAZ_TRAT,dy_ZOBRAZ_TRAT, cl_zobraz_trat_FPL);
+        Dispose(OBs)
+      end;
+{$ENDIF}

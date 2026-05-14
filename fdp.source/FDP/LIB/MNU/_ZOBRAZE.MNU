@@ -1,0 +1,87 @@
+{$I ..\lib\mnu\_zobrazenie.h}
+
+
+procedure mnuPROSTREDIE_init(MMenu: PSubmenu); far;
+    var   smnu : TPItems;
+          i,items,ihk,nl : int;
+    begin
+      items:= 0; ihk:= 0; nl:= 0;
+
+      smnu[items]:= SwitchI (hk(ihk) + HLASENIE, @waitINFO, tit_sec,30,180,nil);
+      inc(items);
+      smnu[items]:= SwitchI (hk(ihk) + OTAZKA,   @waitASK,  tit_sec,30,180,nil);
+      inc(items);
+      smnu[items]:= SwitchI (hk(ihk) + CHYBA,    @waitERR,  tit_sec,30,180,nil);
+      inc(items);
+      smnu[items]:= Switch2 (hk(ihk) + KODCHYBY, @disp_ERRCODE,nil);
+      inc(items);
+
+      add_newline_(0,nl,items,smnu);
+
+      smnu[items]:= Switch2 (hk(ihk) + ZRUSITEM, @ask_zrus_item,  nil);
+      inc(items);
+      smnu[items]:= Switch2 (hk(ihk) + ZRUSPLAN, @ask_zrus_plan,  nil);
+      inc(items);
+
+      {$IFDEF OPL}
+       smnu[items]:= Switch2 (hk(ihk) + mnu_CMNU, @mnu_data_opt_common,nil);
+       inc(items);
+       smnu[items]:= Switch2 (hk(ihk) + mnu_MACC, @MENU_MACC,nil);
+       inc(items);
+      {$ENDIF}
+      smnu[items]:= Switch2 (hk(ihk) + mnu_VYB,  @mnu_mouse_scroll,nil);
+      inc(items);
+
+      add_newline_(0,nl,items,smnu);
+
+      smnu[items]:= Switch2 (hk(ihk) + mnu_ZHAS,    @ZHASINANIE,nil);
+      inc(items);
+      smnu[items]:= SwitchI (hk(ihk) + mnu_ZHAS_PO, @ZHASNI_PO,tit_min,ZHASNI_PO_lo,ZHASNI_PO_hi,nil);
+      inc(items);
+      {$IFDEF OPL}
+        smnu[items]:= Switch2 (hk(ihk) + mnu_JAS,     @JAS,nil);
+        inc(items);
+      {$ENDIF}
+      {$IFDEF EDD}
+       smnu[items]:= Switch2(hk(ihk) + mnu_UKR,     @SKRYVANIE,nil);
+       inc(items);
+      {$ENDIF}
+
+      {$IFNDEF NO_SOUND}
+       add_newline_(0,nl,items,smnu);
+       smnu[items]:= Switch2 (hk(ihk) + mnu_ZVUK,   @ZVUK,nil);
+       inc(items);
+      {$ENDIF}
+
+      for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i])
+    end;
+
+
+procedure mnuZOBRAZENIE_init(MMenu: PSubmenu); far;
+    var   smnu : TPItems;
+          i,items,ihk,nl : int;
+    begin
+      items:= 0; ihk:= 0; nl:= 0;
+
+      smnu[items]:= Switch2 (hk(ihk) + mnu_pis_CNL_PLAN, @CNL_VYPIS,nil);
+      inc(items);
+      smnu[items]:= Switch2 (hk(ihk) + mnu_pis_DEC_PLAN, @DEC_VYPIS,nil);
+      inc(items);
+      smnu[items]:= Switch2 (hk(ihk) + mnu_pis_ARR_PLAN, @ARR_VYPIS,nil);
+      inc(items);
+      smnu[items]:= Switch2 (hk(ihk) + mnu_pis_CNL_RPL,  @CNL_RPL_VYPIS,nil);
+      inc(items);
+      {smnu[1]:= Switch2(mnu_pis_EMPTY, @LIST_EMPTY_SCROLL,nil);
+      inc(items);
+      }
+
+      add_newline_(0,nl,items,smnu);
+
+      smnu[items]:= Switch2(hk(ihk) + mnu_pis_STAV, @STAV_PLANU,nil);
+      inc(items);
+
+      {smnu[items]:= Switch2(hk(ihk) + mnu_pis_STRIP_MINI, @bminiSTRIP, nil);
+      inc(items);}
+
+      for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i])
+    end;

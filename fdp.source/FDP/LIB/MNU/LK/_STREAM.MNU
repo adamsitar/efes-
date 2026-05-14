@@ -1,0 +1,86 @@
+procedure mnuSTREAM_init(MMenu: PSubmenu); far;
+    var   smnu : TPItems;
+          i,items,nl : int;
+    begin
+      items:= 0; nl:= 0;
+      {$IFDEF ARCHIVE_ASTA}
+       smnu[items] := Item   (' ~A~STA ',             cmARCHIV_ASTA, {@enASTA_ARCH, true,}nil);
+       inc(items);
+      {$ENDIF}
+      {$IFDEF ARCHIVE_CAMUS}
+       smnu[items] := Item   (' ~C~AMUS ',            cmARCHIV_CAMUS,nil);
+       inc(items);
+      {$ENDIF}
+      {$IFDEF ARCHIVE_ASSOC}
+       smnu[items] := Item   (' ASSO~C~ ',            cmARCHIV_ASSOC,nil);
+       inc(items);
+      {$ENDIF}
+      {$IFDEF ARCHIVE_OPL}
+       smnu[items] := Item   (' ~O~PL ',              cmARCHIV_OPL,nil);
+       inc(items);
+       {$IFDEF OPL__SAVE_STREAM}
+        smnu[items] := Item_ (' OPL ~s~tream',        cmARCHIV_OPS, @OPL__SAVE_STREAM, true,nil);
+        inc(items);
+       {$ENDIF}
+      {$ENDIF}
+      add_newline(nl,items,smnu);
+      {$IFDEF ARCHIVE_DAR}
+       smnu[items] := Item   (' ~R~LI broadcast ',    cmARCHIV_DAR,  {@enRLI_ARCH,  true,}nil);
+       inc(items);
+      {$ENDIF}
+      {$IFDEF ARCHIVE_NET}
+       smnu[items] := Item   (' ~F~DP komunikace ',   cmARCHIV_NET,  {@enNET_ARCH,  true,}nil);
+       inc(items);
+      {$ENDIF}
+      add_newline(nl,items,smnu);
+      smnu[items]:= Item     (' L~o~govac° soubory ', cmARCHIV_COM,nil);
+      inc(items);
+
+      for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i]);
+    end;
+
+
+procedure mnuSTREAM_LIST_init(MMenu: PSubmenu); far;
+    var   smnu : TPItems;
+          i,items,nl : int;
+
+    begin
+      items:= 0; nl:= 0;
+
+      smnu[items] := Switch2   ('~V~ùPIS PAKET¶  Alt(Ctrl)+F11 ', @WRITELN_FLOW, nil);
+      inc(items);
+
+      {$IFDEF CONNECT_TO_ASTA_EXT}
+        add_newline(nl,items,smnu);
+        smnu[items] := Switch2 ('~A~STA pakety ',    @writeln_ASTA, nil);
+        inc(items);
+      {$ENDIF}
+
+      {$IFDEF CONNECT_TO_OPL_EXT}
+        add_newline(nl,items,smnu);
+        smnu[items] := Switch2   ('~O~PL pakety ',    @writeln_OPL, nil);
+        inc(items);
+        smnu[items] := Switch2   ('OPL ~h~eartbeat ', @writeln_OPL_HeartBeat, nil);
+        inc(items);
+      {$ENDIF}
+
+      {$IFDEF CONNECT_TO_CAMUS}
+        add_newline(nl,items,smnu);
+        smnu[items] := Switch2_ ('~C~AMUS pakety ', @writeln_CAMUS, @X25_initialized, true, nil);
+        inc(items);
+      {$ENDIF}
+
+      {$IFDEF WRITELN_NET}
+        add_newline(nl,items,smnu);
+        smnu[items] := Switch2 ('~P~©ijaty pakety FDP ',   @writeln_NET_REC,  nil);
+        inc(items);
+        smnu[items] := Switch2 ('~O~deslany pakety FDP ',  @writeln_NET_SEND, nil);
+        inc(items);
+        smnu[items] := Switch2 ('~D~ata FDP paketu ',      @writeln_NET_DATA, nil);
+        inc(items);
+        smnu[items] := Switch2 ('~H~eartbeat FDP ',        @writeln_NET_HeartBeat, nil);
+        inc(items);
+      {$ENDIF}
+
+      for i:= 0 to items-1 do AddItemToMenu(MMenu,smnu[i]);
+    end;

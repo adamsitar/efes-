@@ -1,0 +1,87 @@
+{$IFDEF DATA_BIN}
+  {$I _FPL0c.cod}
+  {$I _FPLc0RDP.cod}
+{$ENDIF}
+
+{$I _FPLC_L4.cod}
+
+{ ---------------------
+   prenos
+  ---------------------
+}
+ procedure code_FPLC(FPL: PDcFPL; var pkt: TNETpkt);
+     var   pch : pchar;
+     begin
+       pch:= code_l4_FPLC__(FPL,true,'');
+       new_NETpkt_data (pchars(pch),strlen(pch), pkt.pkt);
+       strdispose(pch)
+     end;
+
+ procedure decode_FPLC(const pkt: TNETpkt; FPL: PDcFPL);
+     begin
+       decode_l4_FPLC_ (pkt.pkt.data,pkt.pkt.dlz,FPL);
+       format_cFPL(FPL);
+       {$IFDEF NET}
+         rec_data(pkt.ods, FPL^.rec)
+       {$ENDIF}
+     end;
+
+
+ procedure code_FPLC_mess(FPL: PDcFPL; var pkt: TNETpkt);
+     var   s: string;
+     begin
+       s:=    icao_STD + decode_code_to_hd(pkt.head.typ)
+            + icao_ARR + codekey_FPLC(FPL)
+            + icao_END;
+       new_NETpkt_data (@s[1],length(s), pkt.pkt)
+     end;
+
+ procedure decode_FPLC_mess(const pkt: TNETpkt; FPL: PDcFPL);
+     var   s: string;
+           i: int;
+     begin
+       s:= get_str(pkt.pkt.data,pkt.pkt.dlz,1,[icao_STD,icao_END],sizeof(s)-1);
+       i:= pos(icao_ARR,s);
+       if i>0 then s:= copy(s,i+1,length(s)-i);
+       decodekey_FPLC(s,FPL)
+     end;
+
+
+{ ---------------------
+  kodovanie pre DB
+  ---------------------
+}
+ {$I _FPLC_DB.cod}
+
+ procedure codeDB_FPLC (FPL: PDcFPL; buff: PDB_buff; head: PDB_head);
+     begin
+       if head^.attr and DBbin <> 0 then _codeDBB_FPLC(FPL,buff,head)
+       {$IFDEF OPL} else if head^.attr and DBtxt = 0 then _codeDB0_FPLC(FPL,buff,head) {$ENDIF}
+       else _codeDBT_FPLC(FPL,buff,head)
+     end;
+
+ procedure decodeDB_FPLC (buff: PDB_buff; FPL: PDcFPL; head: PDB_head);
+     begin
+       fillchar(FPL^,sizeof(FPL^),0);
+       if head^.attr and DBbin <> 0 then _decodeDBB_FPLC(buff,FPL,head)
+       {$IFDEF OPL} else if head^.attr and DBtxt = 0 then _decodeDB0_FPLC(buff,FPL,head) {$ENDIF}
+       else _decodeDBT_FPLC (buff,FPL,head);
+       format_cFPL(FPL);
+     end;
+
+
+{ ---------------------
+   kluc
+  ---------------------
+}
+ function  codekey_FPLC(FPL: PDcFPL): string;
+    begin
+      if FPL<>nil then codekey_FPLC:= codekey_fpl(FPL^.idn,FPL^.start.kod,FPL^.date)
+      else codekey_FPLC:= ''
+    end;
+
+ procedure decodekey_FPLC(s: string; FPL: PDcFPL);
+     begin
+       fillchar(FPL^,sizeof(FPL^),0); { nesmie sa zrusit ! }
+       if FPL<>nil then decodekey_fpl(s, FPL^.idn,FPL^.start.kod,FPL^.date);
+     end;

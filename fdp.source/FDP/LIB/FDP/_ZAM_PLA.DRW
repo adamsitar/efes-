@@ -1,0 +1,215 @@
+{
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+Û                                                          Û
+Û zobrazenie                                               Û
+ÛÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÛ
+}
+
+procedure _plan_ZAM(x0,y0,x1,y1: int; bk: int; sm: byte); far;
+    begin
+      BGIgraph.button(x0,y0,x1,y1-sm*20, bk, btSmall, btOFF);
+
+      on_off(x0+2,y0+2,x1-2,y1-sm*20-2, bk+clBUTTON_DARK,bk+clBUTTON_LIGHT, btSmall, btOFF);
+      on_off(x0+3,y0+3,x1-3,y1-sm*20-3, bk+clBUTTON_DARK,bk+clBUTTON_LIGHT, btSmall, btON);
+
+      _lineho(x0+3,   x1-3, y0+23-sm*7,  bk);
+      _lineho(x0+3,   x1-3, y0+58-sm*16, bk);
+      _linevo(x0+52,  y0+3, y0+23-sm*7,  bk);
+      _linevo(x0+161+{ord(not bool(sm))*}57, y0+3, y0+23-sm*7,  bk)
+    end;
+
+
+procedure plan_ZAM(ZAM: PZAM; x,y: int; b: bool); far;
+    var   y0,y1,y2,y3,y4, i: int;
+          cl_stat,bk: byte;
+    begin
+      y0:= y+7{10} {$IFDEF SPEA}+dy_ch-2{$ENDIF};
+      y1:= y+21{30}{$IFDEF SPEA}+dy_ch{$ENDIF};
+      y2:= y+31{44}{$IFDEF SPEA}+dy_ch{$ENDIF};
+      y3:= y+46{65}{$IFDEF SPEA}+dy_ch{$ENDIF};
+      y4:= y+56{75}{$IFDEF SPEA}+dy_ch{$ENDIF};
+      with ZAM^ do
+        begin
+          bk:= bkPLAN_[b];
+          cl_stat:= get_stat_cl(stat);
+          _plan_ZAM(x,y,x+dx_ZAM,y+dy_ZAM+20, bk, 1);
+         {$IFDEF SPEA}
+          SetBkColor(bk);
+          SetTextStyle(BIT8x8, HorizDir,0);
+         {$ELSE}
+          SetTextStyle(SmallFont, HorizDir,4);
+         {$ENDIF}
+          settextstyle(0,HorizDir,1);
+
+          setcolor (cl_DATA);
+          outtextxy(x+10 ,y0,kod);
+
+          setcolor (cl_stat);
+          outtextxy(x+60,    y0,code_l4_date_(zac.rok,zac.mes,zac.den));
+          outtextxy(x+57+60, y0,timetostr(zac.h,zac.m,':'));
+          outtextxy(x+57+110,y0,timetostr(kon.h,kon.m,':'));
+
+          setcolor (cl_DATA);
+          outtextxy(x+57+170,y0,prav);
+         {outtextxy(x+185,y0,vys_);}
+          outtextxy(x+57+185,y0,{vys_+}vys);
+
+          outtextxy(x+10, y1,VU + ' ' +strpas(ulohy));
+          {outtextxy(x+40,y1,ulohy[0]);
+          for i:= 0 to 11 do outtextxy(x+70+20*i,y1,ulohy[i+1]);}
+          outtextxy(x+10, y2,strpas(typy)+'    '+cstr(planov,1)+'/'+cstr(letov,1));
+          {outtextxy(x+131,y2,cstr(planov,1)+'/'+cstr(letov,1));}
+
+          outtextxy(x+10,y3, get_line_i(pozn,1));
+          outtextxy(x+10,y4, get_line_i(pozn,2));
+
+          {$IFDEF FDP_OPL}
+            write_stat(stat,rec,SERVERaddress, x+dx_ZAM-20,y4, cl_stat)
+          {$ENDIF}
+        end
+    end; { drawZAM }
+
+
+
+
+{ IFDEF TABLET_ZAM}
+  procedure strip_ZAM(ZAM: PZAM; x,y: int; b: bool);
+      var   i,x0,dx0, dx,dy, y0,y_1,y1, y01,y02,y03, yc0,yc1, y_: int;
+            indc,bk,bg : byte;
+            dir   : Ts_dir;
+            s     : string;
+            b1,b2 : bool;
+            font  : byte;
+            lo,hi : byte;
+      const ds_ZAM : array[Low(T_strip)..High(T_strip)] of byte =
+                     {$IFNDEF EDD_20} (4,14,35)
+                     {$ELSE}          (10,24,52)
+                     {$ENDIF};
+      begin
+        bk:= bkPLAN_[b];
+        font:= SPfont;
+        y0 := y+dy0;  { 8x16 v hornom riadku }
+        y_1:= {$IFDEF SPEA} y+dy_ed+17 {$ELSE} y+dy_ed+11 {$ENDIF} {$IFNDEF EDD_20} - 4 {$ENDIF};
+        y1 := y+dy1;  { 8x16 v spodnom riadku }
+        y01:= y+dy01; { 8x8 v hornom riadku }
+        y02:= y+dy02; { 8x8 v strednom riadku }
+        y03:= y+dy03; { 8x8 v spodnom riadku }
+        yc0:= y+3; yc1:= y+dy_strip_[lineSTRIP]-3; x0:= x;
+        dx:= dx_strip_[miniSTRIP]; dx0:= dx;
+
+        BGIgraph.button(x,y,x+dx,y+dy_strip_[lineSTRIP], bk, btSmall, btOFF);
+        dir:= dir_no;
+
+        with ZAM^ do
+          begin
+            bg:= bk; indc:= get_stat_cl(stat);
+            {$IFDEF SPEA}SetBkColor(bg);{$ENDIF};settextstyle(0,HorizDir,1);
+
+            setcolor(indc);
+            outtextxy(x+5 ,y_1,kod);
+            outtextxy(x+52{62},y_1,prav);
+
+            if miniSTRIP = full_strip then s:= ':' else s:= '';
+            outtextxy(x+71{81},y01{$IFNDEF EDD_20}-1{$ENDIF}, timetostr(zac.h,zac.m,':'));
+            outtextxy(x+71{81},y02{$IFNDEF EDD_20}-3{$ENDIF}, timetostr(kon.h,kon.m,':'));
+
+            setcolor(citem);
+            dx:= {$IFNDEF EDD_20}119{$ELSE}121{$ENDIF};
+            (*
+            outtextxy(x+dx,y01{$IFNDEF EDD_20}-1{$ENDIF}, vys_+getstr(vys,1,['-',' ']));
+            outtextxy(x+dx,y02{$IFNDEF EDD_20}-3{$ENDIF},' ' +getstr(vys,2,['-',' ']));
+            *)
+            outtextxy(x+dx,y_1{$IFNDEF EDD_20}-1{$ENDIF}, vys);
+
+            s:= strpas(typy);
+            if length(s)>17 then s:= copy(s,1,17)+'...';
+            outtextxy(x+5,y03+3{$IFNDEF EDD_20}-2{$ENDIF},s);
+
+            dy:= {$IFNDEF EDD_20}13{$ELSE}10{$ENDIF};
+            _linev(x+65,  yc0,yc1-dy, bk);
+            _linev(x+dx-6,yc0,yc1-dy, bk);
+            _linev(x+166, yc0,yc1,    bk);
+            _lineh(x+3,x+166,yc1-12,  bk);
+
+            dx:= {$IFNDEF EDD_20}171{$ELSE}174{$ENDIF};
+            setcolor(citem);
+            s:= VU+' '+strpas(ulohy);{+ulohy[0];
+            for i:= 0 to 11 do s:= s+' '+ulohy[i+1];}
+            s:= cut_(s);
+            if length(s)>ds_ZAM[miniSTRIP] then s:= copy(s,1,ds_ZAM[miniSTRIP])+'...';
+            outtextxy(x+dx, y01,s);
+
+            s:= get_line_i(pozn,1);
+            if length(s)>ds_ZAM[miniSTRIP] then s:= copy(s,1,ds_ZAM[miniSTRIP])+'...';
+            outtextxy(x+dx, y02+1,s);
+
+            s:= get_line_i(pozn,2);
+            if length(s)>ds_ZAM[miniSTRIP] then s:= copy(s,1,ds_ZAM[miniSTRIP])+'...';
+            outtextxy(x+dx, y03+1,s)
+          end;
+
+        (*{$IFDEF EDD}
+          if dir<>dir_no then strip_frame(x0,y,dx0-3,dy_strip, cl_dir[0,dir],cl_dir[1,dir]);
+        {$ENDIF}*)
+        {$IFDEF SPEA} SetTextStyle(font, 0,0) {$ENDIF}
+      end;
+{ ENDIF}
+
+
+
+procedure _info_ZAM(x0,y0,x1,y1: int; ZAM: PZAM); far;
+    begin
+      plan_ZAM(ZAM, x0+(x1-x0-dx_ZAM) shr 1, y0{+winHEIGHT},true)
+    end;
+
+function info_ZAM(ZAM: PZAM; title: string): bool;
+    begin
+      if title='' then title:= tit_ZAM+' '+ZAM^.kod;
+      info_ZAM:= Info(title, @_info_ZAM, ZAM,dx_ZAM+20,dy_ZAM+10, nil,0)
+    end;
+
+
+{ --------------------
+  Spracovanie hlasenia
+  --------------------
+}
+ function report_ZAM (ZAM: PZAM; title: string): bool;
+     var   res : bool;
+           p   : pointer;
+     begin
+       if varovanie_ZAM then
+          begin
+            Beep2;
+            p:= @Beep99
+          end
+       else p:= nil;
+       res:= Info(title, @_info_ZAM, ZAM,dx_ZAM+20,dy_ZAM+10,p,0);
+       if varovanie_ZAM then isZAM:= isZAM or (not res)
+     end;
+
+
+function dx_sc_ZAM: int; far;
+   begin
+     if pis_STRIP_ZAM then dx_sc_ZAM:= dx_sc_strip(miniSTRIP_ZAM)
+     else dx_sc_ZAM:= dx_ZAM
+   end;
+
+function dy_sc_ZAM: int; far;
+   begin
+     if pis_STRIP_ZAM then dy_sc_ZAM:= dy_sc_strip
+     else dy_sc_ZAM:= dy_ZAM
+   end;
+
+procedure sc_ZAM(ZAM: PZAM; x,y: int; b: bool); far;
+    var   _miniSTRIP: T_strip;
+    begin
+      if pis_STRIP_ZAM then
+         begin
+           _miniSTRIP:= miniSTRIP;
+           miniSTRIP := _is_mini_strip(miniSTRIP_ZAM);
+           strip_ZAM(ZAM, x,y, b);
+           miniSTRIP:= _miniSTRIP
+         end
+      else plan_ZAM(ZAM, x,y, b)
+    end;
+

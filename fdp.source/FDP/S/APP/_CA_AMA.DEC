@@ -1,0 +1,171 @@
+
+{ תתתתתתתתתתתתתתתתתת
+   CPL
+  תתתתתתתתתתתתתתתתתת
+}
+ {$IFDEF LKPR_MACC}
+  procedure _decode_CPL_EST_LKPR_MACC (data: pchars; size: word; var FPL: DFPL4; var res: string);
+     var    ind,poc : int;
+            s : string;
+            p : pchar;
+            rych: single; rych_ : char;
+            vys: word; vys_ : char;
+     begin
+       res:= '';
+       FPL._3 := get_str (data,size, 1,odd_ICAO, sizeof(FPL._3));
+       FPL._7 := get_str (data,size, 2,odd_ICAO, sizeof(FPL._7));
+       FPL._8 := get_str (data,size, 3,odd_ICAO, sizeof(FPL._8));
+       FPL._9 := get_str (data,size, 4,odd_ICAO, sizeof(FPL._9));
+       FPL._13:= get_str (data,size, 5,odd_ICAO, sizeof(FPL._13));
+       FPL._14:= get_str (data,size, 6,odd_ICAO, sizeof(FPL._14));
+       FPL._16:= get_str (data,size, 7,odd_ICAO, sizeof(FPL._16));
+
+      { algoritmus vyskusa, ci je nastaveny spravny protokol,
+        ak ano, potom musi byt (pri CAMUS_15a) v nasledujucom poli
+        rychlost a vyska, co sa predradi do pola 15
+      }
+       ind:= 8;
+       s:= get_str (data,size, ind,odd_ICAO, sizeof(s));
+       if {CAMUS_15a or} decode_l4_rych_vys (s, rych,rych_, vys,vys_) then
+          begin
+            FPL._15:= strpasnew(s+icao_NXIT);
+            inc(ind)
+          end;
+       p:= get_str0(data,size, ind,odd_ICAO);
+       FPL._15:= StrNCopy(FPL._15,p,true,true);
+       inc(ind);
+
+       FPL._18:= get_strs0(data,size, ind,Maximum(ind,N(get_str_items(data,size,[icao_ARR]))), odd_ICAO)
+     end;
+ {$ENDIF}
+
+
+ {$IFDEF BLAVA}
+  procedure _decode_CPL_EST_LZIB_ACC (data: pchars; size: word; var FPL: DFPL4; var res: string);
+      begin
+        res:= '';
+        FPL._3 := get_str (data,size, 1,odd_ICAO, sizeof(FPL._3));
+        FPL._7 := get_str (data,size, 2,odd_ICAO, sizeof(FPL._7));
+        FPL._8 := get_str (data,size, 3,odd_ICAO, sizeof(FPL._8));
+        FPL._9 := get_str (data,size, 4,odd_ICAO, sizeof(FPL._9));
+        FPL._13:= get_str (data,size, 5,odd_ICAO, sizeof(FPL._13));
+        FPL._14:= get_str (data,size, 6,odd_ICAO, sizeof(FPL._14));
+        FPL._16:= get_str (data,size, 7,odd_ICAO, sizeof(FPL._16));
+        FPL._15:= get_str0(data,size, 8,odd_ICAO);
+
+        FPL._18:= get_strs0(data,size,9,Maximum(9,N(get_str_items(data,size,[icao_ARR]))), odd_ICAO)
+      end;
+ {$ENDIF}
+
+
+{ תתתתתתתתתתתתתתתתתת
+   CPL
+  תתתתתתתתתתתתתתתתתת
+}
+ procedure O_CAMUS._decode_CPL (data: pchars; size: word; var FPL: DFPL4; var res: string);
+    begin
+     {$IFDEF LKPR_MACC}
+      _decode_CPL_EST_LKPR_MACC (data,size,FPL,res)
+     {$ENDIF}
+
+     {$IFDEF BLAVA}
+      _decode_CPL_EST_LZIB_ACC  (data,size,FPL,res)
+     {$ENDIF}
+    end;
+
+{ תתתתתתתתתתתתתתתתתת
+   EST
+  תתתתתתתתתתתתתתתתתת
+}
+ procedure O_CAMUS._decode_EST (data: pchars; size: word; var FPL: DFPL4; var res: string);
+    begin
+     {$IFDEF LKPR_MACC}
+      _decode_CPL_EST_LKPR_MACC (data,size,FPL,res)
+     {$ENDIF}
+
+     {$IFDEF BLAVA}
+      _decode_CPL_EST_LZIB_ACC  (data,size,FPL,res)
+     {$ENDIF}
+    end;
+
+ function O_CAMUS._include_ESTc_bod(kod: string): bool;
+    var   j: int;
+    begin
+      _include_ESTc_bod:= true;
+      {$IFDEF BLAVA}
+       { vypustenie bodov zacinajucich XR
+       }
+        if poc_EXC_NDB>0 then
+          begin
+            j:= 0; while (j<poc_EXC_NDB) and (pos(strpas(EXC_NDB^[j]),kod)<>1) do inc(j);
+            _include_ESTc_bod:=  j>=poc_EXC_NDB
+          end;
+      {$ENDIF}
+    end;
+
+
+ function O_CAMUS._decode_ESTc (var FPL: DFPL4; var FPLc: DcFPL; var res: string): bool;
+
+    var   s,t     : string;
+
+          kodL    : string;
+          hL,mL   : byte;
+          vysL    : word;
+          vysL_,
+          vysO_,
+          vysH_   : char;
+
+          h,m : byte;        { vypocitany cas na bode }
+          v   : word;
+          v_,vab : char;
+          ires : int;
+
+          br1,br2,br3 : bool;
+
+    begin
+      _decode_ESTc:= inherited _decode_ESTc(FPL, FPLc, res);
+
+     { Doplnena informacia rychlosti a vyske :
+       - spracuje sa z pola 15 v standartnom algoritme
+     }
+
+     { Doplnena informacia o ssr0 a vystupnej/nasledujucej hladine (pre ESUP):
+       -4330-EXI-VLM/0142F150F350B-F100
+     }
+
+     { - ssr0 pred vstupom do FIR
+     } s:= getPstr(FPL._18,1,[icao_ARR]);
+       if s<>'0' then FPLc.ssr0:= s
+       else FPLc.ssr0:= FPLc.ssr;
+
+
+     if res='' then
+       begin
+         {$IFDEF LKPR_MACC}
+          decode_l4_16_ (FPL._16,
+                         FPLc.start.h,FPLc.start.m,
+                         FPLc.prist.kod, s,FPLc.prist.h,FPLc.prist.m,
+                         h,m, t, br1,br2,br3
+                        );
+          if (not br2) then pristatie_cFPL(@FPLc);
+
+         { - vyska na vystupnom bode a v nasledujucej oblasti
+           ...-EXI-OKG/2231F120-F120
+           ...-EXI-ASTUT/2247F150F200B-F130
+         }
+             decode_l4_EXI (get_strs0p(pchars(FPL._18),strlen(FPL._18), 3,4, [icao_ARR]),
+                            kodL, hL,mL, vysL,vysL_,
+                            FPLc.vysO,vysO_,FPLc.vysO_a,
+                            FPLc.vysH,vysH_
+                           );
+             FPLc.vysO:= _vys_OB (FPLc.vysO,vysO_);
+             {if (FPLc.vysO=0) and (FPLc.bodov>1) then FPLc.vysO:= FPLc.trat[FPLc.bodov-1].vys;}
+             FPLc.vysH:= _vys_OB (FPLc.vysH,vysH_);
+         {$ENDIF}
+
+         {format_cFPL(@FPLc);}
+       end;
+
+
+      _decode_ESTc:= res=''
+    end;

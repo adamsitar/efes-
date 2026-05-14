@@ -1,0 +1,121 @@
+{$IFDEF FPL4}
+
+{ תתתתתתתתתתתתתתתתתת
+   CLR
+  תתתתתתתתתתתתתתתתתת
+
+}
+
+ procedure O_OPL._decode_CLR (data: pchars; size: word; var FPL: DFPL4; var res: string);
+     begin
+       res:= '';
+       FPL._3 := get_str (data,size, 1,odd_ICAO, sizeof(FPL._3));
+       FPL._7 := get_str (data,size, 2,odd_ICAO, sizeof(FPL._7));
+       FPL._13:= get_str (data,size, 3,odd_ICAO, sizeof(FPL._13));
+       FPL._16:= get_str (data,size, 4,odd_ICAO, sizeof(FPL._16))
+     end;
+
+{ Prijata ziadost o schvalenie pripomienky k planu letu
+}
+ function O_OPL._process_CLR (data: pchars; size: word; var FPL: DFPL4; var res: string): bool;
+    var   FPLm,FPLmi : DmFPL;
+    begin
+      _process_CLR:= false;
+      _decode_FPLm(FPL,FPLm, res);
+      if najdi_FPLM(FPLm,FPLmi) then { najde vsetky udaje daneho FPL... }
+         begin
+           _process_message_FPLM (dst_set,hd_CLR,cnst_prop,@FPLm,@FPLmi);
+           _process_CLR:= true;
+         end
+      else if not OPL__LAM_NOT_FOUND then l4_err(a_FDP,code_FPLM_7a(@FPLm),0,100, res);
+      disp_mFPL(@FPLmi);
+      disp_mFPL(@FPLm)
+    end;
+
+ function O_OPL.decode_CLR (data: pchars; size: word; var FPL: DFPL4; var res: string): bool;
+    begin
+      res:= '';
+      _decode_CLR (data,size, FPL, res);
+      decode_CLR:= (res='') and _process_CLR(data,size, FPL,res)
+    end;
+
+
+
+{ תתתתתתתתתתתתתתתתתת
+   ABI
+  תתתתתתתתתתתתתתתתתת
+  moze to byt len vojenske ABI
+}
+
+ function O_OPL._process_ABI (data: pchars; size: word; var FPL: DFPL4; var res: string): bool;
+
+    var   FPLm,FPLmi : DmFPL;
+          FPLi: DFPL4;
+          bres,zmeneny : bool;
+          vys   : word;
+          vys_  : char;
+          s     : string;
+          dt    : real;
+          B1,B2 : TOBxy;
+          hod,min,sec : byte;
+
+    label X;
+
+    begin
+      _process_ABI:= false;
+      _decode_FPLm(FPL,FPLm, res);
+
+      bres:= najdi_FPLM(FPLm,FPLmi);
+      {if not bres then res:= 'FPL '+idn_mFPL(@FPL)+' nebyl dosud zpracov n.');}
+
+      if bres {or (FPL._22<>nil)} then
+         begin
+
+          { v poli _15 mozu byt zmeny...
+          }
+           if FPL._22<>nil then
+              begin
+                _code_FPLm(FPLmi,FPLi);
+                strdispose(FPLi._22); FPLi._22:= strnew(FPL._22);
+                _decode_FPL4_22(FPLi,res);
+                disp_mFPL(@FPLmi);
+                _decode_FPLm(FPLi,FPLmi, res);
+                disp_FPL4(@FPLi);
+              end;
+
+          { Od OPLka zeriem len vojenske ABI - zbytocna podmienka
+            if not (is_mFPL(@FPLmi) or is_oFPL(@FPLmi)) then goto X;
+          }
+
+          { v poli _7 moze byt SSR kod }
+            s:= getstr(FPL._7,2,[icao_NXT]);
+            if s<>'' then FPLmi.ssr:= s;
+
+          { nasadenie na trat - pole _14 obsahuje vysku a vypocitany cas
+            na vstupnom bode trate, zvycajne blizko letiska
+          }
+            decode_l4_vys(getstr(FPL._14,2,[icao_NXT]),FPLmi.vys,FPLmi.vys_);
+            s:= getstr(FPL._14,1,[icao_NXT]);
+            if GetTimeStr(hod,min,sec, copy(FPL._14,length(FPL._14)-3,4)) then
+               begin
+                 FPLmi.start.h:= hod; FPLmi.start.m:= min;
+                 if     (s<>FPLmi.start.kod)
+                    and (FPLmi.rych<>0)
+                    and get_OB_XY(FPLmi.start.kod,B1)
+                    and get_OB_XY(s,B2) then
+                    begin
+                      dt:= 60*(vzdialenost(B1.x,B1.y,B2.x,B2.y) / get_rych_kmh(FPLmi.rych,FPLmi.rych_, vys,vys_))/1000;
+                      IncTimeMin(FPLmi.start.h,FPLmi.start.m,-trunc(0.5+dt))
+                    end
+                 end;
+
+           _process_message_FPLM (dst_set,hd_ACT,cnst_stat_DEP,@FPLm,@FPLmi);
+           _process_ABI:= true
+         end
+      else if not OPL__LAM_NOT_FOUND then l4_err(a_FDP,idn_mFPL(@FPLmi),0,100, res);
+
+      X: disp_mFPL(@FPLmi);
+         disp_mFPL(@FPLm)
+    end;
+
+{$ENDIF}

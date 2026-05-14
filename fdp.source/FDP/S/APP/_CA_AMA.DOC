@@ -1,0 +1,64 @@
+{ תתתתתתתתתתתתתתתתתת
+   CPL
+  תתתתתתתתתתתתתתתתתת
+
+ - protokol do septembra 1998
+
+   (CPLPR/MI001
+    -JAC1
+    -IS
+    -EA32/M
+    -EDDF
+    -EDDF/1100F000
+    -LZIB
+    -EDDF/F000/1100 BAY/F200/1119 OKG/F200/1124 BALTU/F200/1129 RAK/F200/1131 OKL/F200/1134 VLM/F200/1140 BODAL/F200/1145
+    -0-NIL
+   )
+
+ - protokol od septembra 1998
+
+   (CPLPR/MI033
+    -TVS232
+    -IN
+    -02B73B/M
+    -LPFR2330
+    -OKG/0100F330F350B
+    -LKPR
+    -N0400F350
+    -OKG/330/0100 RAK/150/0107
+    -0-EXI-RAK/0142F180F150A-F210
+   )
+
+
+  תתתתתתתתתתתתתתתתתת
+   EST
+  תתתתתתתתתתתתתתתתתת
+
+ - protokol do septembra 1998
+
+  (ESTPR/MI126
+   -FIN7176/A3371
+   -IX
+   -DC9/M
+   -LKPR
+   -LKPR/0845F000
+   -LKTB
+   -LKPR/F000/0844 OKL/F035/0845 RATIS/F109/0849 VOZ/F190/0855 BODAL/F132/0900 LKTB/F000/0908
+   -4220  ; ssr0
+   -NIL
+  )
+
+ - protokol od septembra 1998
+
+  (ESTPR/MI036
+   -CSA1421/A4237
+   -IN
+   -02B737B/M
+   -LGAT2220
+   -BNOSL/0124F350
+   -LKPR
+   -N0400F350
+   -BNOSL/350/0124 BNO/350/0131 BODAL/350/0138 VLM/150/0142
+   -0-EXI-VLM/0142F150F350B-F100
+   )
+}

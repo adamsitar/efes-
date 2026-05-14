@@ -1,0 +1,100 @@
+{
+  MPUwrite (adr, 0,0, '    < ! SPEED BIRD      ! TEST  TEST  TEST  TEST  ');
+  MPUwrite (adr, 0,1, '      ! BAW3252    HOSP ! 1220  1220  1220  1220  ');
+  MPUwrite (adr, 0,2, '      ! A7111           ! ----------- S0930 ----- ');
+  MPUwrite (adr, 0,3, '      ! S8000     K0450 ! UEEE                    ');
+  MPUwrite (adr, 0,4, 'S8600 ! B797/M     SC/F ! UKBB                 K1 ');
+}
+
+function print_cFPL_MPU(FPL: PDcFPL; nd: int; adr: byte): bool;
+   var   s : string;
+         c : char;
+
+   procedure NDBi(x, ind: int; is_vys: bool);
+       var  b: bool;
+       begin
+         with FPL^ do
+           begin
+             MPUwrite (adr, x,0, trat[ind].kod);
+             MPUwrite (adr, x,1, TimeToStr(trat[ind].h,trat[ind].m,''));
+             if is_vys then MPUwrite (adr, x-1,2,' '+code_l4_vys(trat[ind].vys,vysOB, 0,true)+' ')
+           end
+       end;
+
+   begin
+     print_cFPL_MPU:= false;
+
+     MPUclear (adr);
+     with FPL^ do
+       begin
+         c:= fl_dir_alt(vysOB,vys);
+         s:= flo_call(idn);
+         MPUwrite (adr, 5,0,c+' ! '+copy(s,1,15));
+         MPUwrite (adr, 7,1,   '! '+idn);
+
+         s:= copy(inf,1,minimum(14-length(idn),length(inf)));
+         MPUwrite (adr, 24-length(s),1, s);
+
+         s:= cut_(ssr);
+         if s<>'' then s:= mod_A+s;
+         if delchar(ssr0,['0',' '])<>'' then s:= icao_NXT+ssr0;
+         MPUwrite (adr, 7,2,   '! '+s);
+
+         MPUwrite (adr, 7,3,   '! '+code_l4_vys (vys,vysOB, 0,true));
+
+         s:= code_l4_rychkmh(rych,rych_, in_km);
+         MPUwrite (adr, 24-length(s),3, s);
+
+         MPUwrite (adr, 7,4,   '! '+typ{+' '+com_});
+
+         s:= delchar(com_,[' ']); if s<>'' then s:=s+icao_NXT+ssr_;
+         s:= copy(s,1,minimum(14-length(typ),length(s)));
+         MPUwrite (adr, 24-length(s),4, s);
+
+         if (vys1<>0) then s:= code_l4_vys(vys1,vysOB, 0,true)+vys1_a
+         else if bodov>0 then s:= code_l4_vys(trat[0].vys,vysOB, 0,true)+trat[0].vys_a
+         else s:= '';
+         MPUwrite (adr, 0,4, s);
+
+         MPUwrite (adr, 25,0,  '! ');
+         MPUwrite (adr, 25,1,  '! ');
+         MPUwrite (adr, 25,2,  '! -----------------------');
+         MPUwrite (adr, 25,3,  '! '+start.kod);
+         MPUwrite (adr, 25,4,  '! '+prist.kod);
+
+         if nd>-1 then s:= getPstr(NODEs^[nd].desc.name,1,[' ']) else s:= '';
+         MPUwrite (adr, 49-length(s)+1,4, s);
+
+         if bodov>0 then NDBi(27, 0, trat[0].vys<>vys);
+         if bodov>1 then NDBi(33, 1, trat[1].vys<>trat[0].vys);
+         if bodov>2 then NDBi(39, 2, trat[2].vys<>trat[1].vys);
+         if bodov>3 then NDBi(45, bodov-1, trat[bodov-1].vys<>trat[2].vys)
+       end;
+
+     print_cFPL_MPU:= MPUprint(adr)=0;
+   end;
+
+
+
+{$IFDEF DEBUG}
+ procedure test_print_cFPL;
+     var   FPL: DcFPL;
+           s: string;
+     begin
+       with FPL do
+         begin
+           idn:= 'BAW3344'; ssr_:= 'C'; ssr:= '45422'; ssr0:= '0000'; inf:= 'TESTICEK';
+           typ:= '02TU54/H'; com_:= 'SX345678/D';
+           rych:= 400; rych_:= ' ';
+           vys:= 0960; vys1:= 0345; vys1_a:= 'A';
+           start.kod:= 'SSSS'; start.h:= 10;  start.m:= 11;
+           prist.kod:= 'PPPP'; prist.h:= 20;  prist.m:= 22;
+           with trat[0] do begin kod:= 'T1'; h:= 10; m:= 10; vys:= 0670; vys_a:= 'A' end;
+           with trat[1] do begin kod:= 'T2'; h:= 11; m:= 10; vys:= 0670; vys_a:= 'A' end;
+           with trat[2] do begin kod:= 'T2'; h:= 12; m:= 10; vys:= 0670; vys_a:= 'A' end;
+           with trat[3] do begin kod:= 'T3'; h:= 13; m:= 10; vys:= 0670; vys_a:= 'A' end;
+           bodov:= 4;
+           print_cFPL_MPU(@FPL, 4,NODEs^[4].desc.ai)
+         end;
+     end;
+{$ENDIF}

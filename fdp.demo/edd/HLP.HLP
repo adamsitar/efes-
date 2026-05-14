@@ -1,0 +1,241 @@
+AFTN MESSAGE
+
+  ???
+
+
+ICAO FLIGHT PLAN
+
+
+~a) Entering items into the form~: each column is to
+   be filled with approved characters  only
+   (e.g. definition time is done with figures only).
+   Command keys:
+
+   "Moving cursor among items of the form"
+   ~Tab, Enter~  move to the following item
+   ~Shift Tab~   return to  the porevious item
+   ~Ctrl Home~   the first item in the form
+   ~Ctrl End~    the last item in the form
+   ~Ctrl |,~  move to any of the items
+
+   "Editing"
+   ~Ins(ert)~    changing  modes enter /insert
+   ~Del(ete)~    erasing  character under the cursor
+   ~BS~          cancelling character before the cursor
+
+   ~Ctrl Del~    erasing a complete item
+   ~Alt  Del~    erasing all items in the form
+
+   "End of planning" ?????????????
+   ~Esc~         cancellation
+
+
+
+MIL FPL
+
+~FILING AND PROCESSING OF MILTARY FLIGHT PLANS~
+
+~b) Item contents~: Before confirmation all important items
+   of the plans are checked. It might be helpful to know
+   that if the ~I~"ndex" changeover button appears, when
+   moving cursor onto a form item, then one can present
+   "index" -  offer of approved values - using ~Alt~+~I~
+   (~Ctrl~+~F1~).
+
+   ~Caution !~ In accordance with the mode set, Enter/Insert,
+   the text is put on the cursor position and the rest
+   of the line is either shifted or erased.
+
+   When defining route the following changeover switches
+   are presented:
+
+   ~P~"oints" - selection of turning point
+   ~O~"ver"   - instructions to activities or changes
+             in flight parameters over TP (see further)
+   ~R~"oute"  - route presentation
+
+
+~c) entering  route~: a route plan is a sentence made up
+   of words, separated by spacings. The words are formed
+   by groups of characters separated by "/". The first
+   part of the word defines the turning point. There are
+   five options available:
+
+   "501"          - TP  Code  by the dial
+   "JEL"          - Code of the radionav point by the AIP
+   "LZPP"         - Airfield Code by the dial or by the AIP
+   "Z123"         - LDM Code
+   "492312190034" - latitude and longitude that can be
+                  separated by "-".
+
+   There is possible to specify actions, changes on the TP
+   by the following instructions:
+
+   "/L"    delay over TP against the plan - in minutes
+         for delay message
+   "/C"    time spent over the TP - in minutes
+
+   "/A"    arrival to TP - hour:min
+   "/D"    departure from TP - hour:min
+
+   "/V"    change in speed over TP
+   "/H"    change in altitude  over TP in tens of metres
+         STD or QNH
+   "/G"    change in terrain clearance  in tens of metres
+         (terrain clearance up to 300  over terrain)
+
+   "/MZP"  stopover (defining time in minutes is available)
+   "/STH"  from this point on to the  next flight as far as
+         to the state border
+
+   "/IP"   from this point  on, to the next flight within the
+         identification area
+
+   "/DES"  descent over TP  (only informative)
+   "/ASC"  climb over TP (only informative)
+
+
+      Change in flight parameters over TP also changes the
+   hitherto valid flight parameters (altitude, speed).
+      Change in time references (due to delay, activities
+   over the turning point, stopover, arrival, departure)
+   results in recalculation of arrival time data over next
+   points of the flight planned route.
+      Symptoms "D" and "A" enjoy highest priority when
+   calculating arrival time an departure to (from) the point.
+   If time "A" is less than the time of departure from the
+   latest point or time "D" is less than the time of arrival
+   to the point, the programme takes it for time data
+   relating to the next day. The same can be achieved if
+   symptoms "A" or "D" are followed  by  "+".
+
+      On a point, only one specification of activities
+   of the same kind (the last one) can be valid.
+
+
+EN-ROUTE FLIGHT PLAN
+
+~FILING, CORRECTING EN-ROUTE FLIGHT PLANS~
+
+~a) Entering items into the form.~ The columns can be
+   filled with approved characters only. Command keys
+   of entering data:
+
+   "Moving cursor among items"
+
+   ~Tab, Enter~  move to the next item
+   ~Shift Tab~   return to the previous item
+   ~Ctrl Home~   the first item in  ther form
+   ~Ctrl End~    the last item in the form
+   ~Ctrl |,~  move to other item 
+
+   "Editing"
+   ~Ins(ert)~    switching modes enter/insert
+   ~Del(ete)~    erasing character under the cursor
+   ~BS~          cancelling character before the cursor
+
+   ~Ctrl Del~    erasing an entire item
+   ~Alt  Del~    erasing all items in the form
+
+   "End of planning"
+   ~Alt  S~      distribution of plans
+   ~Alt  U~      confirmation of plans and their tracking
+   ~Esc~         cancellation
+
+b) If there there is more than one turning point defined,
+   the editor einquires wether it is to recalculate the route:
+
+   ~L~"AST -> ..." - starting with the recent turning point
+   ~N~"EXT -> ..." - starting with the next  turning point
+
+   ~E~"ST"         - the entire plan
+   "N"~O~"PL"      - without calculation
+
+FILLING THE FPL
+
+Compiling  EST message with respect to either civilian
+or military FPL.
+
+EN-ROUTE CHANGE
+
+Rerouting of a plan selected.
+
+CANCELLING FPL
+
+Cancelling strip from the EDD and RDP monitors.
+
+PREVIEW OF FPLs
+
+Preview of all FPLs of selected types.
+
+RECEIVED STRIPS
+
+Setting strip confirmation and printing strips received.
+
+ACCEPTED STRIPS
+
+Setting mode of processing and presenting strips:
+
+~T~"ABLET" - setting strip sequencing and presentation
+~N~"DB"    - setting beacon positions in the tablet
+~F~"PL"    - setting strip processing parameters.
+
+SETTING THE TABLET
+
+Setting mode of strip processing and presentation:
+
+~I~"NPUT NDB" - sequencing strips on entry beacon
+            or on the active beacon
+~E~"MPTY NDB" - presenting list with the beacon,
+            even without any aircraft inbound
+
+~D~"IRECTION" - introducing  a coloured underlay
+            in accordance with flight direction
+              - red for EAST->WEST,
+              - grey for WEST->EAST
+~A~"LTIDUDE FL/M" - changeover switch of altitude
+            presentation in meters
+            or in flight level
+~M~"IL STRIP" - writing out military route in line
+            form or with turning points and time
+            calculated
+
+STRIP TAKEOVER
+
+~A~"CCEPT"  - introducing strip into the tablet
+~D~"ECLINE" - cancelling strip
+
+STRIP PROCESSING
+
+~R~"TE"   -  ammmending route
+~L~"AM"   -  presenting LASM message
+~C~"NL"   -  cancelling strip from  EDD and  RDP monitors
+~V~"IEW"  -  writing out  the entire plan for the strip
+~P~"RINT" -  printing out strip
+
+ROUTE CALCULATION
+
+While ammending a civilian strip it is possible
+to recalculate  the route applying:
+
+~L~"AST -> ..." - starting with the recent point
+~N~"EXT -> ..." - starting with the next  point 
+
+~E~"ST"         - entire plan
+"N"~O~"PL"      - without recalculation
+
+TABLET
+
+Sequencing  beacons into a column can be set while
+running the programme. The comments show which of
+the columns is edited. Beacons are written out
+starting from the lower one.
+
+Indication of other types of beacons:
+ "MIL"   - military flights
+ "FPL"   - nor nilitary nor en-route flights
+ "OTHER" - flights that cannot be assigned to none
+         of the beacons
+ "NOPL"  - flights  with no routes asssigned
+
+

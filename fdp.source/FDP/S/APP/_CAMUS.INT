@@ -1,0 +1,39 @@
+procedure ReadCAMUS; interrupt;
+    var   IBUFF    : PO_EXT_ibuff;
+          CAMUSpkt : PCAMUSpkt;
+          b        : char;
+
+    label endp;
+
+    begin
+      IBUFF:= P_DEV_CAMUS^;
+      if (P_DEV_CAMUS=nil) or (IBUFF=nil) or (Port[IIR[IBUFF^.asyncCOM]]<>$04) then goto endp;
+
+      b:= chr(Port[COM[IBUFF^.asyncCOM]]);
+      if (b=NULL) or (IBUFF^.ipkt=nil) or (IBUFF^.ibuff=nil) then goto endp;
+
+      CAMUSpkt:= IBUFF^.ipkt;
+
+      { Paket s nespravnym ramcom sa nevyhodi,
+        nahraje sa do buffera
+        a aplikacny objekt vyhodnoti jeho spravnost
+        [#]
+      }
+      if ((b=_ca_def.STX) and (CAMUSpkt^.poc>1)) or (CAMUSpkt^.poc>=sizeof(CAMUSpkt^.buf)) then
+         begin
+           IBUFF^.ibuff^.save(CAMUSpkt);   {[#]}
+           CAMUSpkt^.poc:= 0;
+         end;
+
+      CAMUSpkt^.buf[CAMUSpkt^.poc]:= b;
+      inc(CAMUSpkt^.poc);
+
+      if (b=_ca_def.EOT) then
+         begin
+           {if (CAMUSpkt^.b[0]=STX) then} {[#]}
+           IBUFF^.ibuff^.save(CAMUSpkt);
+           CAMUSpkt^.poc:= 0
+         end;
+
+      endp: Port[$20]:= $20
+    end;

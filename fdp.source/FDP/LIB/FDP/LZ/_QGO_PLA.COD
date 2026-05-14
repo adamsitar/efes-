@@ -1,0 +1,263 @@
+{$IFDEF DATA_BIN}      { Povodny prenosovy format }
+  {$I _QGO0.cod}
+{$ENDIF}
+
+ { ------------------------------------------------------
+
+   Priklad : (QGO                      ; pole  3
+              -500                     ; kod letiska
+              -981023                  ; datum platnosti
+              -stav prostriedkov       ; popis stavu letiska podla predpisov, povolene "-" !
+              -TQO-CAS-poznamka        ; popis technickeho obmedzenia
+              -TQO-CAS-poznamka        ; popis meteorologickeho obmedzenia
+              -ine udaje               ; pole 19
+             )
+ }
+
+ { -----------------------------
+    kodovanie podla vzoru 4444,
+    pomocne procedury
+   -----------------------------
+ }
+
+ function code_QGO_stav(QGO: PQGO): pchar;
+    var   pch,p : pchar;
+    begin
+      pch:= StrPasNew(              l4_format_s(QGO^.kod)
+                       + icao_ARR + code_l4_date(QGO^.date)
+                       + icao_ARR
+                     );
+      p:= l4_format_p(QGO^.stav);
+      pch:= StrNCopy (pch,p,true,false);
+      code_QGO_stav:= pch
+    end;
+
+ procedure decode_QGO_stav(data: pchars; size: TNETdlz; QGO: PQGO);
+     var   p : pchar;
+           k : int;
+     begin
+       QGO^.kod:= get_str(data,size,1,[icao_ARR],sizeof(QGO^.kod)-1);
+       decode_l4_date (get_str(data,size,2,[icao_ARR],sizeof(string)-1),QGO^.date);
+       k:= get_str_items(data,size,[icao_ARR]);
+       p:= get_strs0(data,size, 3,k, [icao_ARR]);
+       QGO^.stav:= strnew(decode_l4_p(p,true));
+       strdispose(p);
+     end;
+
+
+ function code_QGO_qgo(QGO,QGOc: string; QGO_: pchar): pchar;
+    var   pch,p : pchar;
+    begin
+      pch:= StrPasNew(              replchar(l4_format_s(QGO),[icao_ARR],'_')
+                       + icao_ARR + l4_format_s(QGOc)
+                       + icao_ARR
+                     );
+      p:= l4_format_p(QGO_);
+      pch:= StrNCopy(pch, p, true,false);
+      code_QGO_qgo:= pch
+    end;
+
+ procedure decode_QGO_qgo(data: pchars; size: TNETdlz;
+                           var QGO,QGOc: string; var QGO_: pchar
+                          );
+     var   p : pchar;
+     begin
+       QGO := replchar(decode_l4_s(get_str(data,size,1,[icao_ARR],sizeof(string)-1),true),['_'],icao_ARR);
+       QGOc:= decode_l4_s(get_str(data,size,2,[icao_ARR],sizeof(string)-1),true);
+       p:= get_str0(data,size,3,[icao_ARR]);
+       QGO_:= strnew(decode_l4_p(p,true));
+       strdispose(p);
+     end;
+
+
+ function code_QGO_19(QGO: PQGO; archive: bool): string;
+    var   s: string;
+    begin
+      s:= '';
+      if archive then
+         begin
+           s:=               rmk_DATE + icao_NXT + code_l4_datums(QGO^.dap)
+               + icao_NXIT + rmk_FDP  + icao_NXT + format_s(QGO^.stat)
+         end;
+      code_QGO_19:= s
+    end;
+
+ function decode_QGO_19(_19: string; QGO: PQGO): string;
+    var   t: string;
+    begin
+      _19:= _19+#0; { nebude > 254 }
+
+      decode_l4_datum(_item_18_(@_19[1],rmk_DATE,1),QGO^.dap);
+      QGO^.stat:= _item_18_(@_19[1],rmk_FDP,1);
+
+      decode_QGO_19:= ''
+    end;
+
+
+ { -----------------------------
+    kodovanie podla vzoru 4444,
+    hlavne funkcie
+   -----------------------------
+ }
+ function code_l4_QGO_ (QGO: PQGO; cislo: string): pchar;
+    var   pch : pchar;
+          hd  : Thead_ICAO;
+          p   : pchar;
+    begin
+      hd:= hd_QGO;
+      pch:= StrPasNew(   icao_STD + hd + cislo
+                       + icao_ARR
+                     );
+
+      p:= code_QGO_stav(QGO);
+      pch:= StrNCopy (pch, p,true,true);
+
+      pch:= StrNPCopy(pch, icao_ARR, true,true);
+      p:= code_QGO_qgo(QGO^.TQGO,QGO^.TQGOc,QGO^.TQGO_);
+      pch:= StrNCopy (pch, p,true,true);
+
+      pch:= StrNPCopy(pch, icao_ARR, true,true);
+      p:= code_QGO_qgo(QGO^.MQGO,QGO^.MQGOc,QGO^.MQGO_);
+      pch:= StrNCopy (pch, p,true,true);
+
+      pch:= StrNPCopy(pch,  icao_ARR
+                          + code_QGO_19(QGO,true)
+                          + icao_END,
+                      true,true
+                     );
+
+      code_l4_QGO_:= pch
+    end;
+
+
+ function  decode_l4_QGO_ (data: pchars; size: TNETdlz; QGO: PQGO): string;
+    var    p : pchar;
+           k : int;
+           res : string;
+    begin
+      decode_l4_QGO_:= '';
+      fillchar(QGO^,sizeof(QGO^),0);
+      frame_l4_pkt(data,size, res);
+
+      k:= get_str_items(data,size,[icao_ARR]);
+      k:= Maximum(4,N(k-7));
+      p:= get_strs0(data,size, 2,k, [icao_ARR]);
+      decode_QGO_stav(pchars(p),strlen(p), QGO);
+      strdispose(p);
+      inc(k);
+
+      p:= get_strs0(data,size, k,k+2, [icao_ARR]);
+      decode_QGO_qgo(pchars(p),strlen(p), QGO^.TQGO,QGO^.TQGOc,QGO^.TQGO_);
+      strdispose(p);
+      inc(k,3);
+
+      p:= get_strs0(data,size, k,k+2, [icao_ARR]);
+      decode_QGO_qgo(pchars(p),strlen(p), QGO^.MQGO,QGO^.MQGOc,QGO^.MQGO_);
+      strdispose(p);
+      inc(k,3);
+
+      decode_QGO_19 (get_str(data,size,k,[icao_ARR],sizeof(string)-1),QGO)
+    end;
+
+
+ { ---------------------
+   kodovanie pre prenos
+   ---------------------
+ }
+
+ procedure code_QGO(QGO: PQGO; var pkt: TNETpkt);
+     var   pch : pchar;
+     begin
+       pch:= code_l4_QGO_(QGO,'');
+       new_NETpkt_data (pchars(pch),strlen(pch), pkt.pkt);
+       strdispose(pch)
+     end;
+
+ procedure decode_QGO(const pkt: TNETpkt; QGO: PQGO);
+     begin
+       decode_l4_QGO_ (pkt.pkt.data,pkt.pkt.dlz,QGO);
+       {format_QGO(QGO);}
+       {$IFDEF NET}
+         rec_data(pkt.ods, QGO^.rec)
+       {$ENDIF}
+     end;
+
+ (*
+ procedure code_QGO_mess(QGO: PQGO; var pkt: TNETpkt);
+     var   s: string;
+     begin
+       s:=    icao_STD + decode_code_to_hd(pkt.head.typ)
+            + icao_ARR + codekey_QGO(QGO)
+            + icao_END;
+       new_NETpkt_data (@s[1],length(s), pkt.pkt)
+     end;
+
+ procedure decode_QGO_mess(const pkt: TNETpkt; QGO: PQGO);
+     var   s: string;
+           i: int;
+     begin
+       s:= get_str(pkt.pkt.data,pkt.pkt.dlz,1,[icao_STD,icao_END],sizeof(s)-1);
+       i:= pos(icao_ARR,s);  { odfiltrovanie hlavicky }
+       if i>0 then s:= copy(s,i+1,length(s)-i);
+       decodekey_QGO(s,QGO)
+     end;
+ *)
+
+
+ { ---------------------
+   kodovanie pre DB
+   ---------------------
+ }
+
+ {$I _QGO_DB.cod}
+
+ procedure codeDB_QGO (QGO: PQGO; buff: PDB_buff; desc: PDB_desc);
+     begin
+       if desc^.attr and DBbin <> 0 then _codeDBB_QGO(QGO,buff,desc)
+       else if desc^.attr and DBtxt = 0 then _codeDB0_QGO(QGO,buff,desc)
+       else _codeDBT_QGO(QGO,buff,desc)
+     end;
+
+ procedure decodeDB_QGO(buff: PDB_buff; QGO: PQGO; desc: PDB_desc);
+     begin
+       fillchar(QGO^,sizeof(QGO^),0);
+       if desc^.attr and DBbin <> 0 then _decodeDBB_QGO(buff,QGO,desc)
+       else if desc^.attr and DBtxt = 0 then _decodeDB0_QGO(buff,QGO,desc)
+       else _decodeDBT_QGO (buff,QGO,desc);
+     end;
+
+
+ { ---------------------
+   kluc
+   ---------------------
+ }
+
+ function codekey_QGO(QGO: PQGO): string;
+    begin
+      codekey_QGO:=   mtks_rus_to_lat(upstring(
+                                   format_s(_mairbase(QGO^.kod))
+                      + icao_ARR + code_l4_date(QGO^.date)
+                     {+ icao_ARR + code_l4_datums(QGO^.dap)}
+                      ))
+    end;
+
+ procedure decodekey_QGO(key: string; QGO: PQGO);
+     begin
+       fillchar(QGO^,sizeof(QGO^),0);
+       QGO^.kod:= getstr(key,1,[icao_ARR]);
+       decode_l4_date(getstr(key,2,[icao_ARR]),QGO^.date);
+       {decode_l4_datum(getstr(s,3,[icao_ARR]),QGO^.dap);}
+     end;
+
+
+ function codekey_QGO_RPL(QGO: PQGO): string; far;
+    begin
+      codekey_QGO_RPL:=   codekey_QGO(QGO) + icao_ARR
+                        + code_l4_datums(QGO^.dap)
+    end;
+
+ procedure decodekey_QGO_RPL(s: string; QGO: PQGO); far;
+     begin
+       decodekey_QGO(s,QGO);
+       decode_l4_datum(getstr(s,3,[icao_ARR]),QGO^.dap)
+     end;

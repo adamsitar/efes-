@@ -1,0 +1,165 @@
+  function O_L4_FDP.send_CPLc(var FPLc: DcFPL): bool;
+     var   FPL : PFPL4;
+     begin
+       new_FPL4_(nil,FPL);
+       send_CPLc:= _code_CPLc(FPLc,FPL^) and send_CPL(FPL^,''{codekey_FPLC(@FPLc)},spr_FPLC);
+       disp_FPL4_(FPL)
+     end;
+
+
+  function O_L4_FDP._code_CPLc(var FPLc: DcFPL; var FPL: DFPL4): bool;
+     var   s : string;
+           i : int;
+           v : word;
+     begin
+       fillchar(FPL,sizeof(FPL),0);
+
+       with FPLc do
+         begin
+
+           FPL._7 := code_l4_7(idn,ssr_,ssr);
+
+           { 8 pravidla a typ letu...
+           } FPL._8 := code_l4_8(_8a,_8b, _l4444m);
+
+           { 9 typ ...
+           } FPL._9 := code_l4_9(typ,true);
+
+           { 10 com ...
+           } FPL._10:= code_l4_10(com_,ssr_);
+
+           FPL._13:= code_l4_13a(start.kod,false);
+           FPL._16:= code_l4_16a(prist.kod,false);
+
+           {if (start_.h<>0) or (start_.m<>0) then
+              begin
+                FPL._13:= FPL._13+TimeToStr(start.h,start.m,'');
+                if (prist.h<>0) or (prist.m<>0) then
+                   begin
+                     TimeFromSec(Abs(TimeToSec(prist.h,prist.m,0)-TimeToSec(start.h,start.m,0)),hh,mm,ss);
+                     FPL._16:= FPL._16+TimeToStr(hh,mm,'');
+                   end;
+              end;}
+
+           if bodov>0 then with trat[0] do FPL._14:= kod+icao_NXT+TimeToStr(h,m,'')+code_l4_vys_(vys,vysOB,FL_from_alt,false)
+           else with start do FPL._14:= kod+icao_NXT+TimeToStr(h,m,'')+code_l4_vys_(vys,vysOB,FL_from_alt,false);
+
+           FPL._15:= StrPasNew(code_l4_rych_vys (rych,rych_, vys,vysOB, FL_from_alt,false));
+
+           if bodov>0 then
+              begin
+                v:= vys;
+                for i:= 0 to bodov-1 do
+                  begin
+                    s:= trat[i].kod;
+                    if v<>trat[i].vys then
+                       begin
+                         v:= trat[i].vys;
+                         s:= s + icao_NXT + code_l4_rych_vys (rych,rych_, v, vysOB, FL_from_alt,false)
+                       end;
+                    s:= icao_NXIT + s;
+                    if (i>0) then
+                       begin
+                         if _dct_points then s:= icao_NXIT + rte_DCT + s;
+                       end;
+                    FPL._15:= StrNPCopy(FPL._15,s,true,true)
+                  end
+              end;
+
+           s:= cut_(inf);
+           if s<>'' then s:= rmk_STS + icao_NXT + s;
+           FPL._18:= strpasnew(l4_format_s_(s,RMK_0))
+         end;
+       _code_CPLc:= true
+     end;
+
+
+{ תתתתתתתתתתתתתתתתתת
+   ESTc
+  תתתתתתתתתתתתתתתתתת
+}
+  function O_L4_FDP.send_ESTc(var FPLc: DcFPL): bool;
+     var   FPL : PFPL4;
+     begin
+       new_FPL4_(nil,FPL);
+       send_ESTc:= _code_ESTc(FPLc,FPL^) and send_EST(FPL^,codekey_FPLC(@FPLc),spr_FPLC);
+       disp_FPL4_(FPL)
+     end;
+
+
+{ Zakomentovane polia sa v sprave EST podla ICAO nenachadzaju
+}
+  function O_L4_FDP._code_ESTc(var FPLc: DcFPL; var FPL: DFPL4): bool;
+     var   hh,mm,ss : byte;
+           s,t,u    : string;
+           i        : int;
+           vys_     : char;
+     begin
+       fillchar(FPL,sizeof(FPL),0);
+
+       with FPLc do
+         begin
+
+           FPL._7 := code_l4_7(idn,ssr_,ssr);
+
+           (*{ 8 pravidla a typ letu...
+           } _8 := code_l4_8(_8a,_8b, _l4444m);
+
+           { 9 typ ...
+           } _9 := code_l4_9(_assign_9c_as8643(typ),true);
+
+           { 10 com ...
+           } _10:= code_l4_10(com_,ssr_);*)
+
+           FPL._13:= code_l4_13a(start.kod,false);
+           FPL._16:= code_l4_16a(prist.kod,false);
+
+           {if (start.h<>prist.h) or (start.m<>prist.m) then
+              begin
+                _13:= _13+TimeToStr(start.h,start.m,'');
+                TimeFromSec(Abs(TimeToSec(prist.h,prist.m,0)-TimeToSec(start.h,start.m,0)),hh,mm,ss);
+                _16:= _16+TimeToStr(hh,mm,'');
+              end;}
+
+           if bodov>0 then with trat[0] do FPL._14:= kod+icao_NXT+TimeToStr(h,m,'')+code_l4_vys_(vys,vysOB,FL_from_alt,false)
+           else with start do FPL._14:= kod+icao_NXT+TimeToStr(h,m,'')+code_l4_vys_(vys,vysOB,FL_from_alt,false);
+
+           {if bodov>0 then
+              begin
+                with trat[0] do _15:= StrNPCopy(_15,code_l4_bod(kod, vys,altS, FL_from_alt,false, h,m),true,true);
+                for i:= 1 to bodov-1 do with trat[i] do
+                    _15:= StrNPCopy(_15,icao_NXIT+code_l4_bod(kod, vys,altS, FL_from_alt,false, h,m),true,true);
+              end;
+
+           s:= cut_(inf);
+           if s<>'' then s:= rmk_STS + icao_NXT + s;
+           _18:= strpasnew(l4_format_s_(s,RMK_0))}
+         end;
+       _code_ESTc:= true
+     end;
+
+
+ {$IFNDEF FPLM_DISABLED}
+
+  function O_L4_FDP._code_ESTm(var FPLm: DmFPL; var FPL: DFPL4): bool;
+     begin
+       _code_ESTm:= _code_FPLm(FPLm,FPL)
+     end;
+
+  function O_L4_FDP.send_ESTm(var FPLm: DmFPL): bool;
+     var   FPL : PFPL4;
+     begin
+       new_FPL4_(nil,FPL);
+       send_ESTm:= _code_FPLm(FPLm,FPL^) and send_EST(FPL^,codekey_FPLM(@FPLm),spr_FPLM);
+       disp_FPL4_(FPL)
+     end;
+
+
+  function O_L4_FDP.send_ARRm(var FPLm: DmFPL): bool;
+     var   FPL : PFPL4;
+     begin
+       new_FPL4_(nil,FPL);
+       send_ARRm:= _code_FPLm(FPLm,FPL^) and send_ARR(FPL^,codekey_FPLM(@FPLm),spr_FPLM);
+       disp_FPL4_(FPL)
+     end;
+ {$ENDIF}

@@ -1,0 +1,118 @@
+{$IFDEF PRN_SERVER}
+
+  function print_cFPL(FPL: PDcFPL): bool;
+     var   FPLi : DcFPL;
+           i,j, _b1,_bn : int;
+           bod : TsBod;
+
+     begin
+       FPLi:= FPL^;
+       {$IFDEF SECTORS}
+         with FPLi do
+           begin
+             if (T1<>0) and (Tn<>0) then
+                begin
+                  fillchar(trat,sizeof(trat),0);
+                  _b1:= B1; _bn:= Bn;
+                  trat[0]:= FPL^.trat[_b1]; bodov:= 1;
+                  for i:= _b1+1 to _bn-1 do
+                    begin
+                    { B1..Bn urcuje trat medzi prvym a poslednym bodom
+                    }
+                      if FPL^.trat[i].ind>=0 then _OBindBi (FPL^.trat[i].ind,OB,bod);
+                      if (FPL^.trat[i].ind<0) or v_sektore(bod.x,bod.y, FPL^.trat[i].vys,vysOB, 0,0,0,vysOB) then
+                         begin
+                           trat[bodov]:= FPL^.trat[i];
+                           inc(bodov)
+                         end
+                    end;
+                  if _b1<_bn then begin trat[bodov]:= FPL^.trat[_bn]; inc(bodov) end
+                end;
+
+            {_b1:= B1; _bn:= Bn;
+             bodov:= _bn-_b1+1;
+             if not S_P_ROUTE then
+                while (bodov<strip_max_bod_p) and (_bn<FPL^.bodov-1) do
+                  begin
+                    inc(_bn); inc(bodov)
+                  end;
+             for i:= _b1 to _bn do trat[i-_b1]:= FPL^.trat[i]
+             }
+           end;
+       {$ENDIF}
+       send_cFPL(@FPLi, STRIPPRNaddress, false);
+       print_cFPL:= true
+     end;
+
+{$ELSE}
+
+  function print_cFPL(FPL: PDcFPL): bool;
+     var   s   : array[0..15] of string;
+           t   : string;
+           i,j : int;
+           v : word; v_,v_a : char;
+           b   : bool;
+     begin
+       with FPL^ do
+         begin
+           (*s[0]:= _LF+_LSi+#10+_CE;
+           s[1]:= _PRN_TAB + '('+_TS+_MS + cut_(idn)++'/'+format_s(ssr)
+                                         +  '+_ME+_TE+
+                                         +'-'+format_s(typ)
+                                         +'-'+code_l4_rych (rych,rych_)
+                                         +'-'+format_s(start.kod)+TimeToStr(start.h,start.m,'')
+                                         +' '+format_s(prist.kod)+TimeToStr(prist.h,prist.m,'')
+                                         +'-'+alt_to_str(vys,'',' '{vys_a},in_FL,false);
+           if vys1<>0 then   s[1]:= s[1] +' '+alt_to_str(vys1,'',vys1_a,in_FL,false);
+           s[1]:=                   s[1] +_LF;
+
+           j:= 2;
+           s[j]:= _PRN_TAB+' ';
+           for i:= 0 to bodov do
+             begin
+               s[j]:= s[j]+Trat[i].kod+'/'+TimeToStr(Trat[i].h,Trat[i].m,':');
+               if (Trat[i].vys<>vys) {or (Trat[i].vys_a<>vys_a)} then
+                  s[j]:= s[j]+'/'+alt_to_str(Trat[i].vys,'',Trat[i].vys_a,in_FL,false);
+               s[j]:= s[j]+' ';
+               if length(s[j])>50 then
+                  begin
+                    s[j]:= s[j]+_LF;
+                    inc(j);
+                    s[j]:= _PRN_TAB+' '
+                  end;
+             end;
+
+           s[j]:= s[j]+')'+_LF;
+           s[j+1]:= _LF
+           inc(j,2);
+           *)
+           s[0]:= _PRN_TAB + icao_STD + code_7_FPLC(FPL) + icao_ARR + code_l4_8(_8a,_8b, true);
+           s[1]:= _PRN_TAB + icao_ARR + code_l4_9(typ,true) + icao_ARR + code_l4_10(com_,ssr_);
+           s[2]:= _PRN_TAB + icao_ARR + code_l4_13(start.kod, start.h,start.m, start_.h,start_.m, true)
+                           + icao_ARR + code_14_FPLC(FPL);
+
+           s[3]:= _PRN_TAB + icao_ARR + code_l4_rych_vys(rych,rych_,vys,vysOB,0,false);
+           j:= 3; v:= vys; v_:= vysOB; v_a:= ' ';
+           for i:= 0 to bodov-1 do with trat[i] do
+             begin
+               t:= icao_NXIT + code_l4_bod_(kod, h,m, vys,vysOB,vysab, v,v_,v_a);
+               if length(s[j]+t)>80 then
+                 begin
+                   inc(j);
+                   s[j]:= _PRN_TAB
+                 end;
+               s[j]:= s[j] + t
+             end;
+           inc(j);
+           s[j]:= _PRN_TAB + icao_ARR + code_16_FPLC(FPL);
+           inc(j);
+           s[j]:= _PRN_TAB + icao_ARR + code_18_FPLC(FPL)+icao_END;
+           inc(j);
+         end;
+
+       b:= print_strs(PortNo,@s,j);
+       if b then for i:= 0 to 0 do print_str(PortNo,kbNL);
+       print_cFPL:= b
+     end;
+
+{$ENDIF}

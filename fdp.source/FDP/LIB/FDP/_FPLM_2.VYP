@@ -1,0 +1,47 @@
+{ ----------------------------
+  identifikacia
+  ----------------------------
+}
+
+ function _identifikacia_mimoletiskoveho_letu (FPL: PDmFPL): bool;
+    begin
+      _identifikacia_mimoletiskoveho_letu:=  eq_airbase(copy(FPL^.idn,1,2)+'0',FPL^.start.kod)
+    end;
+
+ function _identifikacia_letu_do_tsa (FPL: PDmFPL): bool;
+    begin
+      _identifikacia_letu_do_tsa:= delchar(FPL^.idn,setCisl_)=rmk_INX_
+    end;
+
+ function _let_do_TSA (FPL: PDmFPL): bool;
+    begin
+      _let_do_tsa:=     is_mFPL(FPL)
+                    and _identifikacia_letu_do_tsa(FPL)
+                    and _let_do_priestoru(FPL)
+    end;
+
+
+ function _posledne_cislo_letu_do_tsa (FPL,FPLp: PDmFPL): bool; far;
+    var   cislo,cislop : char;
+    begin
+      _posledne_cislo_letu_do_tsa:= false;
+      cislo := FPL^.idn_;  FPL^.idn_:= ' ';
+      cislop:= FPLp^.idn_; FPLp^.idn_:= ' ';
+      if eq_mFPL (FPL, FPLp) and (cislo<cislop) then cislo:= cislop;
+      FPL^.idn_ := cislo;
+      FPLp^.idn_:= cislop
+    end;
+
+ function _prirad_dalsie_cislo_letu_do_tsa (FPL: PDmFPL): char;
+    var   cislo,cislop : char;
+    begin
+      cislop:= FPL^.idn_; FPL^.idn_:= ' ';
+      _find_FPLM(FPL,@_posledne_cislo_letu_do_tsa,'',ext_mFPL);
+      cislo:= FPL^.idn_;
+      FPL^.idn_ := cislop;
+      if cislo = '9' then cislo:= 'A'
+      else if cislo = 'Z' then cislo:= ' '
+      else if cislo in ['1'..'8','A'..'Y'] then cislo:= chr(ord(cislo)+1)
+      else cislo:= '1';
+      _prirad_dalsie_cislo_letu_do_tsa:= cislo
+    end;

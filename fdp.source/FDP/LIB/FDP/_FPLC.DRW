@@ -1,0 +1,780 @@
+ procedure write_BCNi(x,y: int; FPL: PDcFPL; ind: int; var v: word; var v_,v_a: char);
+     var   s: string;
+     begin
+       if (ind<0) or (ind>FPL^.bodov-1) then Exit;
+
+       {$IFDEF SPEA} SetTextStyle(COND8x16,0,0); {$ENDIF}
+       with FPL^ do
+         if (*   ((ind>0) and ((Trat[ind].vys<>Trat[ind-1].vys) or (Trat[ind].vys_a<>Trat[ind-1].vys_a)))
+              or ((ind=0) and ((Trat[ind].vys<>vys) or (Trat[ind].vys_a<>' '{vys_a}))) then
+            *)
+            (Trat[ind].vys<>v) or (vysOB<>v_) or (Trat[ind].vysab<>v_a) then
+            with Trat[ind] do
+              begin
+                outtextxy(x,y+dyt01,kod);
+                SetTextStyle(BIT8x8, 0,0);
+                outtextxy(x,y+dyt02,TimeToStr(h,m,':'));
+                s:= alt_to_str(vys,vysOB,' ',in_FL,alt_VFR_sym);
+                if (vysab<>' ') and (length(s)>vysOB_) then dec(x,2);
+                outtextxy(x,y+dyt03,s);
+                if vysab<>' ' then
+                   begin
+                     x:= x+textwidth(s);
+                     if (length(s)>vysOB_) then dec(x,2);
+                     outtextxy(x,y+dyt03,alt_ab_(vysab))
+                   end
+              end
+         else with Trat[ind] do begin
+                outtextxy(x,y+dy0,kod);
+                outtextxy(x,y+dyt1,TimeToStr(h,m,':'))
+              end;
+
+       v  := FPL^.Trat[ind].vys;
+       v_ := vysOB;
+       v_a:= FPL^.Trat[ind].vysab
+     end;
+
+ procedure swrite_BCNi(var x,dx: int; y: int; FPL: PDcFPL; ind: int; _line: bool; var v: word; var v_,v_a: char; vis: bool);
+     var   cl : byte;
+           s  : string;
+     begin
+       if (ind<0) or (ind>FPL^.bodov-1) then Exit;
+
+       if vis then
+          begin
+            if FPL^.na_bod>ind then cl:= clast
+            else if FPL^.na_bod<ind then cl:= citem
+            else cl:= cnext;
+          end
+       else cl:= clPLAN_HID;
+       if (FPL^.poz>poz_PRIST) or ((FPL^.poz=poz_LETI) and (absTime>FPL^.Trat[FPL^.bodov-1].cas)) then cl:= clast
+       else if (FPL^.poz<=poz_COORDINATED) then cl:= citem;
+       setcolor(cl);
+
+       if (_line) then with FPL^.Trat[ind] do
+          begin
+            {outtextxy(x+dx,y,kod);              inc(dx,43);
+            outtextxy(x+dx,y,TimeToStr(h,m,'')); inc(dx,40)}
+            s:= copy(kod,1,kod_NDB);
+            outtextxy(x+dx,y,s);
+            outtextxy(x+dx+length(s) shl 3 + 3,y,TimeToStr(h,m,''));
+            inc(dx,83)
+          end
+       else begin
+              write_BCNi(x,y, FPL,ind, v,v_,v_a);
+              inc(x,dx)
+            end
+     end;
+
+
+ {
+   urcenie smeru letu pre priradenie podlozky stripu
+ }
+ function _dir_cFPL(FPL: PDcFPL): Ts_dir;
+    var   bres1,bres2: bool;
+          B1,B2: TsBod;
+    begin
+      _dir_cFPL:= dir_no;
+      if not STRIP_DIR then Exit;
+
+     {$IFDEF FL_DIR}
+      if FPL^.smer=dir_cwest then _dir_cFPL:= dir_west
+      else if FPL^.smer=dir_ceast then _dir_cFPL:= dir_east;
+     {$ELSE}
+      if (FPL^.bodov>1) and (FPL^.trat[0].ind>-1) and (FPL^.trat[FPL^.bodov-1].ind>-1) and (OB<>nil) then
+        begin
+          OB^.read(FPL^.trat[0].ind,B1);
+          OB^.read(FPL^.trat[FPL^.bodov-1].ind,B2);
+          if (B1.x < B2.x)
+             then begin if STRIP_DIR_[dir_east] then _dir_cFPL:= dir_east end
+             else begin if STRIP_DIR_[dir_west] then _dir_cFPL:= dir_west end
+        end;
+     {$ENDIF}
+
+     {$IFNDEF VER_3.0}
+       bres1:= (upstring(copy(FPL^.start.kod,1,2))=FIR) or is_OBind(FPL^.start.kod);
+       bres2:= (upstring(copy(FPL^.prist.kod,1,2))=FIR) or is_OBind(FPL^.prist.kod);
+       if bres1 then
+          if bres2 then begin if STRIP_DIR_[dir_in] then _dir_cFPL:= dir_in end
+          else begin if STRIP_DIR_[dir_out] then _dir_cFPL:= dir_out end
+       else if bres2 then begin if STRIP_DIR_[dir_inp] then _dir_cFPL:= dir_inp end
+     {$ENDIF}
+    end;
+
+
+ {
+   hlavicka stripu v mini- a full- tvare sa vypisuje takmer identicky
+ }
+ function  draw_cFPL_header(FPL: PDcFPL; x,y: int; bk: byte; var bg: byte;
+                            is_etd, is_plan: bool; _mini: T_strip;
+                            is_ion,is_line,vis: bool
+                           ): Ts_dir;
+     var   i, dx,dy, y0,y1, y01,y02,y03, yc0,yc1, x_,y_ : int;
+           cl,bgi, indc,cld,cla : byte;
+           bres1,bres2,bres3 : bool;
+           dir : Ts_dir;
+           s   : string;
+
+     procedure draw_przn;
+         var   i,dx: int;
+         begin
+           with FPL^ do
+             begin
+               dx:= textwidth(idn);
+               {$IFDEF ABI_COORDINATION}
+                if przn[p_others] and sp_abi <> 0 then icYes_(x+1+dx,y01,White);
+               {$ENDIF}
+               {$IFDEF FLI_COORDINATION}
+                inc(dx,4);
+                if przn[p_others] and sp_fli <> 0 then
+                   for i:= 0 to bodov-1 do
+                     if _nastaveny_przn_fli(trat[i]) then
+                       begin
+                         icYes_(x+dx,y01,clON);
+                         inc(dx,2);
+                       end;
+               {$ENDIF}
+             end;
+           if vis then setcolor(indc) else setcolor(clPLAN_HID)
+         end;
+
+     begin
+       y0 := y+dy0;  if is_line then inc(y0,dy1l); { 8x16 v hornom riadku  }
+       y1 := y+dy1;  if is_line then y1:= y0; { 8x16 v spodnom riadku }
+       y01:= y+dy01; { 8x8 v hornom riadku   }
+       y02:= y+dy02; { 8x8 v strednom riadku }
+       y03:= y+dy03; { 8x8 v spodnom riadku  }
+       yc0:= y+3;
+       yc1:= y+dy_strip_[is_line]-3;
+
+       with FPL^ do
+         begin
+           bg:= bk;
+           if vis and (pis_STRIP_COR or pis_STRIP_EST) then
+              begin;
+                bg:= _idn_bk(stt=hd_EST,cor_>0, bk);
+                if bk<>bg then FillWin(x+2,y+2,x+dx_header,y+dy_strip_[is_line]-2,bg)
+              end;
+
+           dir:= _dir_cFPL(FPL);
+           draw_cFPL_header:= dir;
+
+           indc:= ccall;
+           if poz in[poz_SEDI,poz_HANGAR] then indc:= cl_HANGAR;
+           {$IFDEF RDP_ACCEPT}
+             if RDP=sector_RDP then indc:= TRG_color[TRG]
+             else indc:= TRG_color[_cor];
+           {$ENDIF}
+           if not vis then indc:= clPLAN_HID;
+
+           with start do
+              begin
+                if poz <= poz_COORDINATED then cld:= cnext
+                else if poz=poz_START {(na_bod=0) and (absTime<Trat[0].cas)} then cld:= clast
+                else cld:= citem
+              end;
+
+           with prist do
+              begin
+                if poz in[poz_SEDI,poz_HANGAR] then cla:= clast
+                else if poz=poz_PRIST {(na_bod<}{=bodov) and (absTime>Trat[na_bod].cas)} then cla:= cnext
+                else cla:= citem;
+              end;
+
+           bgi:= bg;
+           {$IFDEF SECTORS}
+           (*
+            if S_DISPLAY and ((FPL^.sec and s_err)<>0) then with FPL^ do
+              begin
+                {i:= na_bod; while (i<bodov) and (Trat[i].ind>=0) do inc(i);
+                if i<bodov then} bgi:= red
+              end;
+            *)
+           {$ENDIF}
+
+           if (is_line) then
+              begin
+                inc(y01,dy1l);
+                writestr(x+3 ,y01,idn,indc,bgi);
+                if (ssr<>'') or pis_STRIP_10b then
+                   begin
+                     s:= ssr;
+                     if length(s)<=kod_7c_icao then s:= mod_A+s;
+                     outtextxy(x+63,y01,s);
+                   end;
+
+                if miniSTRIP=full_strip then
+                   begin
+                     if vis then setcolor(cld) else setcolor(clPLAN_HID);
+                     outtextxy(x+148,y01,start.kod);
+                     inc(dx, kod_AP shl 3);
+                     if vis then setcolor(cla) else setcolor(clPLAN_HID);
+                     outtextxy(x+183,y01,prist.kod);
+                     _linev(x+145,yc0,yc1, bk);
+                     _linev(x+216,yc0,yc1, bk);
+                   end;
+
+                draw_przn;
+                Exit
+              end;
+
+
+           { 1. stlpec
+           }
+
+           { idn
+             ------
+           }
+            if vis then setcolor(indc) else setcolor(clPLAN_HID);
+            {$IFDEF SPEA} setbkcolor(bg); SetTextStyle(SYS8x20, 0,0); {$ENDIF}
+            {$IFNDEF EDD_20} if inf<>'' then y_:= y01 else y_:= y0;
+            {$ELSE}          y_:= y0;
+            {$ENDIF}
+            writestr (x+3 ,y_,idn,indc,bgi);
+            {$IFDEF SPEA}SetBkColor(bg);{$ENDIF}
+
+
+           { typ
+             ------
+           }
+            if vis then setcolor(citem) else setcolor(clPLAN_HID);
+            {$IFDEF SPEA} SetTextStyle(COND8x16, 0,0); {$ENDIF}
+            outtextxy(x+3,y1,typ);
+
+
+           { inf
+             ------
+           }
+            if inf<>'' then
+               begin
+                 if vis then setcolor(indc) else setcolor(clPLAN_HID);
+                 {$IFDEF SPEA} setbkcolor(bg); SetTextStyle(BIT8x8, 0,0); {$ENDIF}
+                 outtextxy(x+3{$IFDEF SPEA}+2{$ENDIF} ,y02,inf);
+               end;
+
+
+           { 2. stlpec
+           }
+
+           { rych/vys
+             --------
+           }
+            dx:= dx_header-40;
+            {$IFNDEF EDD_20} if _mini<>mini_strip then dy:= y1 else dy:= y+dy03;
+            {$ELSE}          dy:= y1;
+            {$ENDIF}
+
+            if vis then setcolor(citem) else setcolor(clPLAN_HID);
+            {$IFDEF SPEA} SetTextStyle(COND8x16, 0,0); {$ENDIF}
+
+            s:= '';
+            {$IFNDEF EDD_20}
+              if rych<>0 then outtextxy(x+dx,y02,code_l4_rychkmh(rych,rych_, in_km));
+              s:= alt_to_str_(vys,vysOB,{vysab}' ',in_FL,alt_VFR_sym,true);
+              if is_plan then
+                begin
+                 s:= code_l4_8(_8a,_8b, true);
+                 {$IFDEF PVO}
+                   if (rec_cas.h<25) then s:= timetostr(rec_cas.h,rec_cas.m,':') else s:= '';
+                 {$ENDIF}
+                end;
+               outtextxy(x+dx,dy,s);
+            {$ELSE}
+              if rych<>0 then outtextxy(x+dx,dy,code_l4_rychkmh(rych,rych_, in_km));
+            {$ENDIF}
+
+
+           { ssr
+             ------
+           }
+            {$IFNDEF EDD_20} y_:= y+dy01;
+            {$ELSE}          y_:= y0;
+            {$ENDIF}
+            if vis then setcolor(indc) else setcolor(clPLAN_HID);
+            {$IFDEF SPEA} SetTextStyle(SYS8x20, 0,0); {$ENDIF}
+            x_:= x+dx;
+            if (ssr<>'') or pis_STRIP_10b then
+               begin
+                 s:= ssr;
+                 if length(s)<=kod_7c_icao then s:= mod_A+s;
+                 outtextxy(x_,y_,s);
+               end;
+
+            { IFDEF EDD_20}
+             {$IFDEF SPEA} SetTextStyle(BIT8x8, 0,0); {$ENDIF}
+             {if (miniSTRIP>mini_strip) then}
+                begin
+                  if (ssr0<>'') and (ssr0<>ssr) then
+                     begin
+                       s:= ssr0;
+                       if length(s)<=kod_7c_icao then s:= mod_A+s;
+                       writestr(x_,y02,s,indc,bg)
+                     end;
+                end;
+            { ENDIF}
+
+            draw_przn;
+
+            {if vis then setcolor(citem) else setcolor(clPLAN_HID);}
+            dx:= dx_header; if is_plan then inc(dx,2);
+            {$IFDEF SPEA} SetBkColor(bk); SetTextStyle(COND8x16, 0,0); {$ENDIF}
+            _linev(x+dx,yc0,yc1, bk);
+
+
+           { ETD, ETA
+             ---------
+           }
+            bres1:= (start.h<>0) or (start.m<>0);
+            bres3:= (prist.h<>0) or (prist.m<>0);
+            bres2:= false;
+            {$IFNDEF EDD_20} if _mini<>full_strip then dx:= 127 else dx:= 121;
+            {$ELSE}          if _mini<>mini_strip then dx:= 126 else dx:= 124;
+            {$ENDIF}
+            x_:= x+dx;
+            if is_plan then begin dx:= 35; s:= ':' end
+            else begin dx:= 26; s:= '' end;
+            dy:= 0;
+            {$IFDEF BGI}
+             if not is_etd then
+                begin
+                  SetTextStyle(SmallFont, HorizDir,4);
+                  if _mini<>full_strip then dec(x_,11) else dec(x_,4);
+                  dy:= -3;
+                end;
+            {$ENDIF}
+            with start do
+              begin
+                if vis then setcolor(cld) else setcolor(clPLAN_HID);
+                outtextxy(x_,y0+dy,kod);
+                if {(is_plan or (is_etd and (not pis_STRIP_ACK))) and} bres1 then
+                   begin
+                     bres2:= (start_.h<>start.h) or (start_.m<>start.m);
+                     if bres2 then
+                        begin
+                         {$IFDEF SPEA} SetTextStyle(BIT8x8, 0,0); {$ENDIF}
+                          outtextxy(x_+dx,y01+dy, TimeToStr(h,m,s));
+                          outtextxy(x_+dx,y02+dy, TimeToStr(start_.h,start_.m,s));
+                         {$IFDEF SPEA} SetTextStyle(COND8x16, 0,0); {$ENDIF}
+                        end
+                     else outtextxy(x_+dx,y0+dy, TimeToStr(h,m,s))
+                   end
+              end;
+
+            with prist do
+               begin
+                 y1:= y+{$IFDEF SPEA} dy1 {$ELSE} dy0+12 {$ENDIF};
+                 if vis then setcolor(cld) else setcolor(clPLAN_HID);
+                 outtextxy(x_,y1+dy,kod);
+                 if     {(is_plan or (is_etd and (not pis_STRIP_ACK)))
+                    and} (bres3 {and ((start.h<>prist.h) or (start.m<>prist.m))})
+                        then
+                    begin
+                      if bres2 then begin y_:= y03; {$IFDEF SPEA} SetTextStyle(BIT8x8, 0,0) {$ENDIF} end
+                      else begin y_:= y1 end;
+                      outtextxy(x_+dx,y_+dy, TimeToStr(h,m,s));
+                      {$IFDEF SPEA} SetTextStyle(COND8x16, 0,0); {$ENDIF}
+                    end
+               end;
+           {$IFDEF BGI} SetTextStyle(DefaultFont, HorizDir,0); {$ENDIF}
+         end;
+
+       draw_cFPL_header:= dir;
+     end;
+
+
+ { -------------------------
+    vypis civilneho stripu
+   -------------------------
+ }
+
+ procedure strip_cFPL(FPL: PDcFPL; x,y: int; b: bool);
+
+     var   i, dx,dy, x0,dx0, y0,y_1,y1, y01,y02,y03, yc0,yc1, _y1,_y2 : int;
+           _1,_2,_i, _b1,_bn, c, off : int;
+           bres1,bres2 : bool;
+           dir   : Ts_dir;
+           font  : byte;
+           bk,bg,cl : byte;
+
+           lv : word; lv_,lv_a: char; { Pre zobrazenie odlisnej vysky ako predchadzajucej vysky }
+           vis : bool;
+     begin
+       vis:= zobrazeny_plan(FPL^.przn[p_others]);
+
+
+       font:= SPfont;
+       y0  := y+dy0;  { 8x16 v hornom riadku  }
+       y_1 := {$IFDEF SPEA} y+dy1 {$ELSE} y+dy0+12 {$ENDIF};
+       y1  := y+dy1;  { 8x16 v spodnom riadku }
+       y01 := y+dy01; { 8x8 v hornom riadku   }
+       y02 := y+dy02; { 8x8 v strednom riadku }
+       y03 := y+dy03; { 8x8 v spodnom riadku  }
+       yc0:= y+3; yc1:= y+dy_strip_[lineSTRIP]-3; x0:= x;
+
+       dx:= dx_strip_[miniSTRIP]; dx0:= dx;
+       dy:= dy_strip_[lineSTRIP];
+       if vis then bk:= bkPLAN_[b] else bk:= bkPLAN_HID;
+       BGIgraph.button(x,y,x+dx,y+dy, bk, btSmall, btOFF);
+       bk:= bkPLAN_[b];
+
+       with FPL^ do
+         begin
+
+         { IDENTIFIKACIA
+           -----------------------------------
+         } dir:= draw_cFPL_header(FPL,x,y,bk,bg,{$IFNDEF EDD_20}false{$ELSE}true{$ENDIF},false,
+                                  miniSTRIP,ionSTRIP,lineSTRIP,vis
+                                 );
+
+         _b1:= 0; _bn:= bodov-1;
+         {$IFDEF SECTORS}
+           if ((sec and s_is)<>0) and S_ROUTE then
+              begin
+                _b1:= B1; _bn:= Minimum(Bn,bodov-1)
+              end;
+         {$ENDIF}
+
+         if (not lineSTRIP) then
+            begin
+
+             { VYSKA, LAM
+               -------------------------------------------
+             }
+              {$IFDEF EDD_20}
+                if miniSTRIP=full_strip then dx:= 210
+                else if miniSTRIP=short_strip then dx:= 200
+                else dx:= 200;
+                {$IFNDEF SPEA} {if miniSTRIP<>mini_strip then} {$ENDIF}
+                   begin
+                     {$IFDEF SPEA} SetTextStyle(COND8x16, 0,0); {$ENDIF}
+                     if miniSTRIP<>mini_strip then
+                        begin
+                          if pis_STRIP_ACK then dec(dx,40);
+                        end
+                     else dec(dx,44);
+                     if vysH<>0 then begin _y1:= y01; _y2:= y02 end
+                     else begin _y1:= y0; _y2:= y+dyt1 end;
+                     if vys<>0 then writestr(x+dx,_y1, alt_to_str_(vys,vysOB,' ',in_FL,alt_VFR_sym,true), cl_DATA,bk);
+                     if (not lineSTRIP) then
+                        begin
+                          if (vys1<>0) then
+                              writestr(x+dx,_y2, alt_to_str_(vys1,vysOB,vys1_a,in_FL,alt_VFR_sym,true), cl_DATA,bk);
+                          if (vysH<>0) then
+                              writestr(x+dx,y03, alt_to_str_(vysH,vysOB,' ',in_FL,alt_VFR_sym,true), cl_DATA,bk);
+                          if (miniSTRIP<>mini_strip) and pis_STRIP_ACK then
+                             begin
+                               inc(dx,40);
+                               write_ACK(x+dx+9,y,44, bk, rec);
+                               {if pis_STRIP_SSN then WriteStr(x+dx+11,y1+4,TimeToStr(eet.h,eet.m,':'),cl_DISK,bk);}
+                               _linev(x+dx+8,yc0,yc1, bk)
+                             end
+                        end;
+                     if miniSTRIP<>mini_strip then inc(dx,55)
+                     else inc(dx,44)
+                   end
+                {else writestr(x0+70,y02,alt_to_str_(vys,vysOB,' ',in_FL,alt_VFR_sym,true),cl_DATA,bg)};
+              {$ELSE}
+                if miniSTRIP<>full_strip then dx:= 169 else dx:= 156;
+              {$ENDIF}
+
+             inc(x,dx);
+             {$IFNDEF EDD_20} if miniSTRIP=full_strip then inc(dx,15); {$ENDIF}
+             bk:= bkPLAN_[b];
+             _linev(x0+dx-3,yc0,yc1, bk);
+             SetBkColor(bk);
+
+             { TRAT LETU
+               ---------------------------------------
+             }
+               lv:= vys; lv_:= vysOB; lv_a:= ' ';
+               case miniSTRIP of
+
+                 full_strip : begin
+                                { vypisuje len 7 bodov: 1, aktivny+nasledujuce, posledny
+                                }
+                                {$IFNDEF EDD_20} dx:= 43; inc(x,15);
+                                {$ELSE}          dx:= 45;
+                                {$ENDIF}
+                                {if ionSTRIP then off:= 3 else}
+                                off:= 2;
+                                if vis then setcolor(bk+2) else setcolor(clPLAN_HID);
+                                for i:= 1 to strip_max_bod-off do line(x+dx*i,yc0,x+dx*i,yc1);
+                                {$IFNDEF EDD_20} inc(x,2);
+                                {$ELSE}          inc(x,4);
+                                {$ENDIF}
+
+                                swrite_BCNi(x,dx,y, FPL,_b1, false, lv,lv_,lv_a, vis);
+                                { vypis vstupneho + poslednych 7 bodov bez ohladu na aktivny bod }
+                                _1:= N(_bn-(strip_max_bod-1))+1;
+                                _1:= minimum(_1,na_bod);
+                                if _1<=_b1 then _1:= _b1+1;
+                                i:= _1;  c:= 1;
+                                _i:= i; if (_i=_bn) then dec(_i);
+                                while (i<_bn) and (c<strip_max_bod-off) do
+                                  begin
+                                    swrite_BCNi(x,dx,y, FPL,i, false, lv,lv_,lv_a, vis);
+                                    _i:= i; inc(i); inc(c)
+                                  end;
+                                if _i<_bn then swrite_BCNi(x,dx,y, FPL,_bn, false, lv,lv_,lv_a, vis);
+                              end;
+
+                 short_strip: begin
+                                {$IFNDEF EDD_20} dx:= 47
+                                {$ELSE}          dx:= 44
+                                {$ENDIF};
+                                inc(x,2);
+
+                                swrite_BCNi(x,dx,y, FPL,_b1,false, lv,lv_,lv_a, vis);
+                                if      (na_bod<=_b1)  and (_bn>_b1+1)  then i:= _b1+1
+                                else if (na_bod>_b1)   and (na_bod<_bn) then i:= na_bod
+                                else if (na_bod=_bn)   and (_bn-1>_b1)  then i:= _bn-1
+                                else i:= -1;
+                                if i>-1 then swrite_BCNi(x,dx,y, FPL,i,false, lv,lv_,lv_a, vis);
+                                if (i<>_bn) and (_b1<>_bn) and (_bn<bodov) then
+                                   swrite_BCNi(x,dx,y, FPL,_bn,false, lv,lv_,lv_a, vis)
+                              end;
+
+                 mini_strip :  begin
+                                {$IFNDEF EDD_20}
+                                  dx:= 47;
+                                  inc(x,6);
+                                  i:= na_bod;
+                                  {$IFDEF SECTORS}
+                                    if NDB_INP then
+                                       begin
+                                         if S_IN and S_DISPLAY then i:= B1
+                                       end
+                                    else if S_ROUTE then i:= maximum(na_bod,B1);
+                                  {$ENDIF}
+                                  swrite_BCNi(x,dx,y, FPL, i,false, lv,lv_,lv_a, vis);
+                                 { Pri zmene upravit cFPL^.ETO ... }
+                                {$ELSE}
+                                  dx:= 43;
+                                  inc(x,0);
+                                  swrite_BCNi(x,dx,y, FPL,_b1,false, lv,lv_,lv_a, vis);
+                                  if _bn>_b1+1 then swrite_BCNi(x,dx,y, FPL,_bn-1,false, lv,lv_,lv_a, vis)
+                                {$ENDIF}
+                              end
+               end { case }
+            end
+
+         else begin
+                x:= x0; inc(y01,dy1l);
+                if vys<>0 then writestr(x+105,y01, alt_to_str_(vys,vysOB,' ',in_FL,alt_VFR_sym,true), cl_DATA,bk);
+                if miniSTRIP=full_strip then dx:= 229 else dx:= 149;
+                swrite_BCNi(x,dx,y01, FPL,_b1, true, lv,lv_,lv_a, vis);
+                case miniSTRIP of
+                  short_strip :  begin
+                                  if (na_bod>_b1) then i:= na_bod
+                                  else if (_bn>_b1+1) then i:= _bn-1
+                                  else i:= -1;
+                                  if i>-1 then swrite_BCNi(x,dx,y01, FPL,i, true, lv,lv_,lv_a, vis);
+                                end;
+                  full_strip  : begin
+                                  if (na_bod=_b1) and (_bn>_b1+1) then i:= _b1+1
+                                  else if (na_bod>_b1) and (na_bod<_bn-1) then i:= na_bod
+                                  else if (na_bod=_bn-1) and (_bn-2>0) then i:= _bn-2
+                                  else i:= -1;
+                                  if i>-1 then swrite_BCNi(x,dx,y01, FPL,i,true, lv,lv_,lv_a, vis);
+                                  if (_bn>_b1+1) and (i<_bn-1) then swrite_BCNi(x,dx,y01, FPL,_b1-1, true, lv,lv_,lv_a, vis);
+                                end
+                end;
+                _linev(x+103,yc0,yc1, bk);
+                _linev(x+145,yc0,yc1, bk);
+              end;
+
+
+         end; { with }
+
+        {$IFDEF EDD}
+          if dir<>dir_no then strip_frame(x0,y,dx0-3,dy_strip_[lineSTRIP], cl_dir[0,dir],cl_dir[1,dir]);
+        {$ENDIF}
+
+        {$IFDEF SPEA} SetTextStyle(font, 0,0) {$ENDIF}
+       end; { draw_cFPL_strip }
+
+
+ procedure prop_strip_cFPL (FPL: PDcFPL; x,y: int; b: bool);
+     var   _lineSTRIP: bool;
+     begin
+       _lineSTRIP:= lineSTRIP; lineSTRIP:= false;
+       strip_cFPL (FPL, x,y, b);
+       lineSTRIP:= _lineSTRIP
+     end;
+
+
+ { -----------------------------------------
+    vypis civilneho "planu" - celeho stripu
+   -----------------------------------------
+
+ (FPL-ERG9101-IN
+ -TU54/M-S/C
+ -LTBA0310
+ -N0500F310 N048:E350 VG1 RIXEN G1 MATEL R5 TARKA A28 PI DCT SORNA R22 UK
+  R11 IN
+ -UUWW0202 UUEE
+ -EET/LBWR0014 UKFF0022 UKOO0035 UKBB0116 UUWW0137 STS/HOSP REG/RA 85809
+  RMK/PERM NR CA 3462)
+
+ }
+
+ procedure plan_cFPL(FPL: PDcFPL; x,y: int; b: bool);
+     var   i,x0,dx0, dx, y0,y_1,y1, y01,y02,y03, yc0,yc1, y_, _1,_2, _y1,_y2: int;
+           dir   : Ts_dir;
+           font  : byte;
+           bg,bk : byte;
+
+           lv : word; lv_,lv_a: char; { Pre zobrazenie odlisnej vysky ako predchadzajucej vysky }
+
+           vis : bool;
+     begin
+       vis:= zobrazeny_plan(FPL^.przn[p_others]);
+
+       if vis then bk:= bkPLAN_[b] else bk:= bkPLAN_HID;
+
+       font:= SPfont;
+       y0 := y+dy0;  { 8x16 v hornom riadku  }
+       y_1:= {$IFDEF SPEA} y+dy1 {$ELSE} y+dy0+12 {$ENDIF};
+       y1 := y+dy1;  { 8x16 v spodnom riadku }
+       y01:= y+dy01; { 8x8 v hornom riadku   }
+       y02:= y+dy02; { 8x8 v strednom riadku }
+       y03:= y+dy03; { 8x8 v spodnom riadku  }
+       yc0:= y+3; yc1:= y+dy_strip2-3; x0:= x;
+       dx0:= dx_cFPLp;
+
+       if vis then bk:= bkPLAN_[b] else bk:= bkPLAN_HID;
+       BGIgraph.button(x,y,x+dx_cFPLp,y+dy_cFPLp, bk{cstr}, btSmall, btOFF);
+       bk:= bkPLAN_[b];
+
+       dir:= draw_cFPL_header(FPL,x,y,bk,bg,true,true,full_strip,true,false,vis);
+       lv:= FPL^.vys; lv_:= vysOB; lv_a:= ' ';
+
+       with FPL^ do
+         begin
+           dx:= 210;
+          {$IFDEF SPEA} SetTextStyle(COND8x16, 0,0); {$ENDIF}
+           if vis then setcolor(cl_DATA) else setcolor(clPLAN_HID);
+           if vysH<>0 then begin _y1:= y01; _y2:= y02 end
+           else begin _y1:= y0; _y2:= y+dyt1 end;
+           if vys <>0 then outtextxy(x+dx,_y1, alt_to_str_(vys,vysOB,' '{vysab},in_FL,alt_VFR_sym,true));
+           if vys1<>0 then outtextxy(x+dx,_y2,alt_to_str_(vys1,vysOB,vys1_a,in_FL,alt_VFR_sym,true)); { S1100A }
+           if vysH<>0 then outtextxy(x+dx,y03, alt_to_str_(vysH,vysOB,' ',in_FL,alt_VFR_sym,true));
+           _linev(x+dx+51,yc0,yc1, bk);
+
+
+         { ---------------- POLOHA LETU :  ----------------- }
+           x:= x+dx+55;
+
+           setcolor(bk+2);
+           for i:= 1 to strip_max_bod-1 do line(x+47*i,yc0,x+47*i,yc1);
+           inc(x,4);
+
+           dx:= 47;
+           swrite_BCNi(x,dx,y, FPL,0, false, lv,lv_,lv_a, vis);
+           _1:= N(bodov-1-(strip_max_bod-1))+1;
+           _1:= minimum(_1,na_bod);
+           if _1<=0 then _1:= 1;
+           _2:= _1+strip_max_bod-2;
+           if (_2<bodov-1) and (_2>0) then dec(_2);
+           for i:= _1 to _2 do swrite_BCNi(x,dx,y, FPL,i, false, lv,lv_,lv_a, vis);
+           if i<bodov-1 then swrite_BCNi(x,dx,y, FPL,bodov-1, false, lv,lv_,lv_a, vis)
+         end;
+
+        {$IFDEF EDD}
+         if dir<>dir_no then strip_frame(x0,y,dx0-6,dy_strip2, cl_dir[0,dir],cl_dir[1,dir]);
+        {$ENDIF}
+
+        {$IFDEF SPEA} SetTextStyle(font, 0,0) {$ENDIF}
+       end; { plan_cFPL }
+
+
+ {$IFDEF MAPY}
+   procedure draw_cFPLtrgt(p: pointer; x,y: int; var sur: Tsur; maz: bool);
+      begin
+        draw_trgt(PDcFPL(p)^.idn,PDcFPL(p)^.ssr, x,y,sur, maz, cl_cFPL)
+      end;
+ {$ENDIF}
+
+
+  function dxi_cFPL: int;
+     begin
+       dxi_cFPL:= dx_cFPLp
+     end;
+
+  function dyi_cFPL: int;
+     begin
+       dyi_cFPL:= dy_cFPLp
+     end;
+
+
+{$IFNDEF EDD}
+
+  function dx_sc_cFPL: int;
+     begin
+       if pis_STRIP_cFPL then dx_sc_cFPL:= dx_sc_strip(miniSTRIP_cFPL)
+       else dx_sc_cFPL:= dxi_cFPL
+     end;
+
+  function dy_sc_cFPL: int;
+     begin
+       if pis_STRIP_cFPL then dy_sc_cFPL:= dy_sc_strip
+       else dy_sc_cFPL:= dyi_cFPL
+     end;
+
+  procedure sc_cFPL(FPL: PDcFPL; x,y: int; b: bool);
+      var   _miniSTRIP: T_strip;
+      begin
+        if pis_STRIP_cFPL then
+           begin
+             _miniSTRIP:= miniSTRIP;
+             miniSTRIP := _is_mini_strip(miniSTRIP_cFPL);
+             strip_cFPL(FPL, x,y, b);
+             miniSTRIP:= _miniSTRIP
+           end
+        else plan_cFPL(FPL, x,y, b)
+      end;
+
+{$ENDIF}
+
+
+ procedure _info_cFPL(x0,y0,x1,y1: int; FPL: PDcFPL); far;
+     var   _miniSTRIP: T_strip;
+     begin
+       {$IFDEF EDD}
+          plan_cFPL(FPL, x0+(x1-x0-dx_cFPLp) shr 1,y0{+winHEIGHT}, true)
+       {$ELSE}
+         _miniSTRIP:= miniSTRIP;
+         miniSTRIP := _is_mini_strip(miniSTRIP_cFPL);
+         strip_cFPL(FPL, x0+(x1-x0-dx_strip_[miniSTRIP]) shr 1, y0{+winHEIGHT}, true);
+         miniSTRIP:= _miniSTRIP
+       {$ENDIF}
+     end;
+
+ function info_cFPL(FPL: pointer; title: string): bool;
+     begin
+       if title='' then title:= idn_cFPL(FPL);
+       info_cFPL:= Info(title, @_info_cFPL, FPL,
+                        {$IFDEF EDD} dx_cFPLp+20,dy_cFPLp+10,
+                        {$ELSE}      dx_sc_strip(miniSTRIP_cFPL)+50,dy_sc_strip+10,
+                        {$ENDIF}
+                        nil,0
+                       )
+     end;
+
+
+{ ----------------------------
+   vykreslenie polohy ciela
+  ----------------------------
+}
+
+ {$IFDEF MAPY}
+   procedure zobraz_trat_cFPL(FPL: PDcFPL);
+       var   _OBs : POBxys;
+             _bodov : int;
+       begin
+         New(_OBs); fillchar(_OBs^,sizeof(_OBs^),0);
+         decode_c_trat(FPL^.start,FPL^.prist, FPL^.trat, FPL^.bodov, _OBs^,_bodov);
+         zobraz_trat(FPL^.idn, _OBs,_bodov, dx_ZOBRAZ_TRAT,dy_ZOBRAZ_TRAT, cl_zobraz_trat_FPL);
+         Dispose(_OBs)
+       end;
+ {$ENDIF}

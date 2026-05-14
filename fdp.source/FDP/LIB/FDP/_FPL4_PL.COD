@@ -1,0 +1,89 @@
+ { ---------------------
+    prenos
+   ---------------------
+ }
+
+{$IFDEF DATA_BIN}
+  {$I _FPL4_0.cod}
+{$ENDIF}
+
+{ Priklad : (FPL                                     ; pole 3
+             -KA007/A2221                            ; pole 7
+             -IS                                     ; pole 8
+             -B474/H                                 ; pole 9
+             -XW                                     ; pole 10
+             -LKIB1500                               ; pole 13
+             -K0900S1370/S0825 A24 X23 DCT           ; pole 15
+             -LKPR0112                               ; pole 16
+             -TYP/LECI -MACEJKOÙ-DOÙ-SMECA         ; pole 18
+             -NIL                                    ; pole 19
+             -NIL                                    ; pole 5
+             -NIL                                    ; pole 20
+             -DATE/ IN/ OUT/ STT/                    ; pole 19 - rozsirenych FDP informacii
+            )
+}
+
+{$I _FPL4_L4.cod}
+
+ procedure code_FPL4(FPL: PFPL4; var pkt: TNETpkt);
+     var   pch : pchar;
+     begin
+       pch:= code_l4_FPL4_(FPL);
+       new_NETpkt_data (pchars(pch),strlen(pch), pkt.pkt);
+       strdispose(pch)
+     end;
+
+ procedure decode_FPL4(const pkt: TNETpkt; FPL: PFPL4);
+     begin
+       decode_l4_FPL4_ (pkt.pkt.data,pkt.pkt.dlz,FPL);
+       {$IFDEF NET}
+         rec_data(pkt.ods, FPL^.rec)
+       {$ENDIF}
+     end;
+
+
+ { ---------------------
+    DB
+   ---------------------
+ }
+
+ {$I _FPL4_DB.cod}
+
+ procedure codeDB_FPL4(FPL: PFPL4; buff: PDB_buff; head: PDB_head);
+     begin
+       if head^.attr and DBbin <> 0 then _codeDBB_FPL4(FPL,buff,head)
+       {else if head^.attr and DBtxt = 0 then _codeDB0_FPL4(FPL,buff,head)
+       {else _codeDBB_FPL4(FPL,buff,head)}
+     end;
+
+ procedure decodeDB_FPL4(buff: PDB_buff; FPL: PFPL4; head: PDB_head);
+     begin
+       fillchar(FPL^,sizeof(FPL^),0);
+       if head^.attr and DBbin <> 0 then _decodeDBB_FPL4(buff,FPL,head)
+       {else if head^.attr and DBtxt = 0 then _decodeDB0_FPL4(buff,FPL,head)
+       else _decodeDBB_FPL4(buff,FPL,head)};
+       format_FPL4_(FPL)
+     end;
+
+
+ { ---------------------
+    kluc
+   ---------------------
+ }
+
+ function codekey_FPL4(FPL: PFPL4): string;
+    begin
+      if FPL<>nil then codekey_FPL4:= codekey_fpl(idn_FPL4(FPL),decode_l4_13a(FPL^._13),FPL^.date)
+      else codekey_FPL4:= ''
+    end;
+
+ procedure decodekey_FPL4(s: string; FPL: PFPL4);
+     begin
+       fillchar(FPL^,sizeof(FPL^),0);
+       if FPL<>nil then decodekey_fpl(s, FPL^._7,FPL^._13,FPL^.date);
+     end;
+
+ procedure init_key_FPL4(const FPL: DFPL4; var FPLi: DFPL4);
+     begin
+       decodekey_FPL4(codekey_FPL4(@FPL),@FPLi);
+     end;
