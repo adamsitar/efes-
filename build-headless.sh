@@ -30,7 +30,9 @@ rm -f "$LOG_HOST" "$EXE_HOST"
 
 echo "Building target: $TARGET  (folder=\\FDP\\$FOLDER, program=$PROGRAM.PAS)"
 
-dosbox-x -conf "$REPO_ROOT/dosbox-x.conf" -c "E:\\BUILD.BAT $FOLDER $PROGRAM" -exit
+# The conf mounts drives via relative paths, so run from the repo root.
+cd "$REPO_ROOT"
+dosbox-x -conf dosbox-x.conf -c "E:\\BUILD.BAT $FOLDER $PROGRAM" -exit
 
 echo
 echo "--- build-headless.sh: dosbox-x exited ---"
