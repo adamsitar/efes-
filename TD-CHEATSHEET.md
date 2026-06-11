@@ -6,30 +6,35 @@ One fact shapes the whole workflow: **the shipped demo binaries have no debug sy
 
 ## Getting in
 
-From the host, build and swap in the program you want to debug, then launch DOSBox-X:
-
-```
-./build-headless.sh OPL
-cp fdp.demo/idd/OPL.EXE fdp.demo/idd/OPL.EXE.orig    # first time only
-cp fdp.source/FDP/OPL/APP/OPL.EXE fdp.demo/idd/
-./run-x.sh
-```
-
-At the `C:\>` prompt, `D:\` is already on PATH. If this is a fresh demo directory, run the program's BAT once (`OPL.BAT`) so it seeds its data files from `INST\` — the BAT just copies `INST\OPL\*.*` into the working directory and runs the program with no arguments. After that, load the debugger directly:
+On Windows: start `RUN-X.bat` and type at the `C:\>` prompt:
 
 ```
 TD OPL.EXE
 ```
 
-If symbols are present you land in the **Module window** showing Pascal source, with an arrow at the program's first `begin`. If instead you get a CPU/disassembly window and a *"Program has no symbol table"* message, the EXE wasn't built with `/V` — you're probably looking at the shipped binary, not yours.
+That's the whole thing, provided the debug build is the `OPL.EXE` sitting in the demo dir (it is, in a fresh copy of this repo — and `debug-x.sh` keeps it that way on Linux). If you need to refresh it by hand, copy the EXE *and its overlay file* inside DOSBox first: `copy E:\FDP\OPL\APP\OPL.EXE C:\` and `copy E:\FDP\OPL\APP\OPL.OVR C:\` — the two are a matched pair from the same compile, and a fresh EXE on an old OVR dies with *"Overlay manager error (-1)"*. On Linux, `./debug-x.sh OPL` does build-if-needed, copy, and launch in one step.
 
-If TD complains about memory (these EXEs are ~900 KB with symbols), use `TDX OPL.EXE` instead — same debugger, DPMI-hosted, much more room. Ignore `TD286` and `TD386`; they need driver setup that doesn't apply under DOSBox-X.
+One trap: `OPL.BAT`/`EDD.BAT` re-copy the *shipped, symbol-less* EXEs from `INST\` into `C:\` every time they run. If you run the BAT and then `TD OPL.EXE`, you get *"Program has no symbol table"* — not because your build lacks symbols, but because the BAT just replaced it. Re-copy the debug build and it's fine.
+
+A second trap: the demo dir holds one program's *configuration* at a time (this tree is set up for EDD). With the wrong set loaded, the program starts and immediately exits — TD reports *"terminated, exit code 1"*, and `TYPE ERR.LOG` names the reason (EDD without its set: `There is not defined RDP sector`). To load a program's config set: `copy C:\INST\IDD\*.* C:\` for EDD, `copy C:\INST\OPL\*.* C:\` for OPL — then re-copy the debug EXE and OVR pair, since the seed restores the shipped ones. In general: whenever a program dies instantly under TD with a nonzero exit code, read `ERR.LOG` — these programs log their reason for refusing to start. One caution when reading it: the seed plants a 1998-era `ERR.LOG` from the original developer's machine, so trust only lines dated today; when in doubt, delete `ERR.LOG` and reproduce the failure.
+
+If symbols load you land in the **Module window** showing Pascal source, with an arrow at the program's first `begin`. If TD complains about memory (these EXEs are ~900 KB with symbols), try `TD286 OPL.EXE` — the same debugger hosted in extended memory, leaving the conventional 640 KB to the program; if it refuses to start, run `D:\DPMIINST.EXE` once first. Do **not** use `TDX` for these programs: it debugs protected-mode (DPMI) executables only and rejects real-mode EXEs with *"not a protected mode program"*. `TD386` needs a device driver and doesn't apply under DOSBox-X.
 
 To leave the debugger, **Alt+X**. To restart the program from the beginning without leaving, **Ctrl+F2** (Program reset).
 
 ## Finding the sources
 
-The debug info records source paths relative to the directory the program was *compiled* in (`E:\FDP\OPL` for OPL, `E:\FDP\EDD`, `E:\FDP\FDA`, `E:\FDP\S` for the others). Since you run TD from `C:\`, TD can't resolve paths like `..\LIB\UNIT\IO.PAS` on its own and will tell you a module has no source. Fix it once: **Options → Path for source...** and enter the compile directory, e.g. `E:\FDP\OPL`. Then **Options → Save options...** writes a `TDCONFIG.TD` into the current directory so every future session picks it up automatically. (Equivalent one-shot: launch as `TD -sdE:\FDP\OPL OPL.EXE`.)
+The debug info doesn't contain source text — only file references. The build config records the *main program* with an absolute path (`E:\FDP\OPL\APP\OPL.PAS`), so TD always finds it and you start out looking at real Pascal. Units and include files, however, are recorded by bare filename (`IO.PAS`, `AP.INC`) — that's just how BP7 stores them — so to step *into* units TD needs its source path: the list of folders it searches for files by name.
+
+Set it once, inside TD: **Options → Path for source...**, enter
+
+```
+E:\FDP\OPL\APP;L:\UNIT;L:\OOP;L:\NET;L:\L4;L:\FDP;L:\FRM;L:\MNU;L:\ARCH
+```
+
+then **Options → Save options...** (accept the default `TDCONFIG.TD`). TD writes that config into the current directory (`C:\`) and reloads it automatically in every future session — a one-time setup. The `L:` drive is mounted at `E:\FDP\LIB` precisely so this list stays short. `debug-x.sh` also passes the same list via `-sd` switches on every launch, so on Linux even the one-time setup is unnecessary. (The `TDCONFIG.TD` file is an undocumented binary format generated by TD itself, which is why it isn't simply checked into the repo as text.)
+
+If a module ever shows no source anyway, the file's folder isn't in the list — find the file's location under `fdp.source/FDP/`, and add that folder to Path for source.
 
 ## The UI in one paragraph
 
@@ -80,4 +85,4 @@ Two DOSBox-X notes: a click into the window captures the mouse (Ctrl+F10 release
 
 ## When something is off
 
-*"Program has no symbol table"* — the EXE lacks `/V` debug info; rebuild with `./build-headless.sh` and re-swap. *Source lines don't match what executes* — the EXE in `C:\` is older than the sources you're reading; rebuild and re-swap. *"Module not found" / blank module list entries* — source path not set; see "Finding the sources" above. *Out of memory loading* — use `TDX`. *Program is running and won't stop* — Ctrl+Break; if the program is stuck reading the network or a timer loop, a breakpoint placed via Alt+F2 on a routine you know it must pass through is more reliable. And if the debuggee crashes hard enough to wedge the DOS session, just Alt+X out, quit DOSBox-X, and `./run-x.sh` again — the emulator makes crashes cheap.
+*"Program has no symbol table"* — the EXE lacks `/V` debug info; rebuild with `./build-headless.sh` and re-swap. *Source lines don't match what executes* — the EXE in `C:\` is older than the sources you're reading; rebuild and re-swap. *"Module not found" / blank module list entries* — source path not set; see "Finding the sources" above. *Out of memory loading* — use `TD286` (not `TDX`, which only loads protected-mode programs). *"Overlay manager error (-1)" at startup* — the EXE and `.OVR` don't match; copy both from the build dir, they're a pair from the same compile. *Program is running and won't stop* — Ctrl+Break; if the program is stuck reading the network or a timer loop, a breakpoint placed via Alt+F2 on a routine you know it must pass through is more reliable. And if the debuggee crashes hard enough to wedge the DOS session, just Alt+X out, quit DOSBox-X, and `./run-x.sh` again — the emulator makes crashes cheap.

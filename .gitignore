@@ -18,3 +18,7 @@ fdp.source/**/*.[Tt][Pp][Uu]
 fdp.source/**/*.[Ee][Xx][Ee]
 fdp.source/**/*.[Mm][Aa][Pp]
 fdp.source/**/*.[Oo][Vv][Rr]
+
+# Debug-workflow artifacts (created by debug-x.sh / TDBG.BAT / TD itself)
+fdp.demo/idd/*.orig
+fdp.demo/idd/TDCONFIG.TD

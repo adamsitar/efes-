@@ -1,23 +1,12 @@
 #!/usr/bin/env bash
-# Launch DOSBox-X straight into Turbo Debugger with TARGET loaded and
-# source paths set, ready to step (F7/F8). See TD-CHEATSHEET.md.
+# Open TARGET in Turbo Debugger: build if needed, put the debug EXE in the
+# demo dir, launch DOSBox-X running TD on it. See TD-CHEATSHEET.md.
 #
 # Usage:  ./debug-x.sh [TARGET]
 #   TARGET := OPL | EDD | FDA | SERVER   (default: OPL)
 #
-# OPL and EDD are debugged from the demo dir (C:) like OPL.BAT/EDD.BAT run
-# them: the data files are seeded from INST\, then the debug build is
-# copied over the EXE. Order matters — INST\ contains the shipped
-# symbol-less EXEs, so seeding must happen BEFORE the debug build lands
-# (this is also why running OPL.BAT after a manual swap un-swaps it).
-# FDA and SERVER have no demo data, so they are loaded from their build
-# dir on E: instead — good for stepping startup code until they go
-# looking for data files.
-#
-# If TD runs out of memory, use the DPMI variant:  TD=TDX ./debug-x.sh OPL
-#
-# TD reads TDCONFIG.TD from its working directory; inside TD, Options >
-# Save options persists preferences (e.g. display swapping) across runs.
+# If TD runs out of memory, use the extended-memory variant:
+#   TD=TD286 ./debug-x.sh OPL
 
 set -u
 
@@ -25,39 +14,42 @@ TARGET="${1:-OPL}"
 TD_BIN="${TD:-TD}"
 
 case "$TARGET" in
-    OPL)    FOLDER=OPL; INST=OPL ;;
-    EDD)    FOLDER=EDD; INST=IDD ;;
-    FDA)    FOLDER=FDA; INST= ;;
-    SERVER) FOLDER=S;   INST= ;;
+    OPL)    FOLDER=OPL; DEMO=yes ;;
+    EDD)    FOLDER=EDD; DEMO=yes ;;
+    FDA)    FOLDER=FDA; DEMO= ;;   # no demo data: debugged in place on E:
+    SERVER) FOLDER=S;   DEMO= ;;
     *) echo "Unknown target: $TARGET. Valid: OPL, EDD, FDA, SERVER"; exit 1 ;;
 esac
 
 REPO_ROOT="$(cd "$(dirname "$0")" && pwd)"
 cd "$REPO_ROOT"
 
-BUILT_EXE="fdp.source/FDP/$FOLDER/APP/$TARGET.EXE"
+BUILT="fdp.source/FDP/$FOLDER/APP/$TARGET.EXE"
 DEMO_DIR="fdp.demo/idd"
 
-if [[ ! -f "$BUILT_EXE" ]]; then
-    echo "No built $TARGET.EXE - building it first..."
-    ./build-headless.sh "$TARGET"
-    [[ -f "$BUILT_EXE" ]] || { echo "Build failed; not launching TD."; exit 1; }
-fi
+[[ -f "$BUILT" ]] || ./build-headless.sh "$TARGET"
+[[ -f "$BUILT" ]] || { echo "Build failed; not launching TD."; exit 1; }
 
-if [[ -n "$INST" ]]; then
-    if [[ ! -f "$DEMO_DIR/$TARGET.EXE.orig" && -f "$DEMO_DIR/$TARGET.EXE" ]]; then
+# Units and includes are recorded in the debug info by bare filename, so TD
+# needs the list of folders to search for them. L: is mounted at E:\FDP\LIB
+# to keep this under the DOS command-line length limit.
+SD="-sdE:\\FDP\\$FOLDER\\APP -sdL:\\UNIT -sdL:\\OOP -sdL:\\NET -sdL:\\L4"
+SD="$SD -sdL:\\FDP -sdL:\\FRM -sdL:\\MNU -sdL:\\ARCH"
+
+if [[ -n "$DEMO" ]]; then
+    # Debug from C:\ so the program finds its data files. Back up the
+    # shipped EXE once, then put the debug build in its place. (Don't run
+    # OPL.BAT/EDD.BAT afterwards - they restore the shipped EXE from INST\.)
+    if [[ -f "$DEMO_DIR/$TARGET.EXE" && ! -f "$DEMO_DIR/$TARGET.EXE.orig" ]]; then
         cp "$DEMO_DIR/$TARGET.EXE" "$DEMO_DIR/$TARGET.EXE.orig"
-        echo "Backed up shipped $TARGET.EXE to $TARGET.EXE.orig"
     fi
-    echo "Seeding demo data, swapping in debug build, launching TD..."
-    dosbox-x -conf dosbox-x.conf \
-        -c "copy C:\\INST\\$INST\\*.* C:\\ > NUL" \
-        -c "copy E:\\FDP\\$FOLDER\\APP\\$TARGET.EXE C:\\ > NUL" \
-        -c "D:\\$TD_BIN.EXE -sdE:\\FDP\\$FOLDER C:\\$TARGET.EXE"
+    # The programs are overlaid: the EXE and its .OVR are a matched pair
+    # from the same compile. Deploying only the EXE against an older OVR
+    # fails at startup with "Overlay manager error (-1)".
+    cp "$BUILT" "${BUILT%.EXE}.OVR" "$DEMO_DIR/"
+    dosbox-x -conf dosbox-x.conf -c "D:\\$TD_BIN.EXE $SD C:\\$TARGET.EXE"
 else
-    echo "$TARGET has no demo data; debugging in place on E:..."
     dosbox-x -conf dosbox-x.conf \
-        -c "E:" \
-        -c "cd \\FDP\\$FOLDER" \
-        -c "D:\\$TD_BIN.EXE APP\\$TARGET.EXE"
+        -c "E:" -c "cd \\FDP\\$FOLDER\\APP" \
+        -c "D:\\$TD_BIN.EXE $SD $TARGET.EXE"
 fi

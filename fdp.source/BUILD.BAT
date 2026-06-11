@@ -10,4 +10,4 @@ REM   /$Y+  emit symbol-reference (Browser) info
 REM   /$D+ and /$L+ are default-on per BPC -- left implicit
 E:
 cd \FDP\%1
-D:\BPC.EXE APP\%2.PAS /V /GD /$Y+ > E:\COMPILE.LOG
+D:\BPC.EXE E:\FDP\%1\APP\%2.PAS /V /GD /$Y+ > E:\COMPILE.LOG
