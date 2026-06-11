@@ -2,11 +2,11 @@
 # Open TARGET in Turbo Debugger: build if needed, put the debug EXE in the
 # demo dir, launch DOSBox-X running TD on it. See TD-CHEATSHEET.md.
 #
-# Usage:  ./debug-x.sh [TARGET]
+# Usage:  ./utils/debug-x.sh [TARGET]
 #   TARGET := OPL | EDD | FDA | SERVER   (default: OPL)
 #
 # If TD runs out of memory, use the extended-memory variant:
-#   TD=TD286 ./debug-x.sh OPL
+#   TD=TD286 ./utils/debug-x.sh OPL
 
 set -u
 
@@ -21,13 +21,13 @@ case "$TARGET" in
     *) echo "Unknown target: $TARGET. Valid: OPL, EDD, FDA, SERVER"; exit 1 ;;
 esac
 
-REPO_ROOT="$(cd "$(dirname "$0")" && pwd)"
+REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$REPO_ROOT"
 
 BUILT="fdp.source/FDP/$FOLDER/APP/$TARGET.EXE"
 DEMO_DIR="fdp.demo/idd"
 
-[[ -f "$BUILT" ]] || ./build-headless.sh "$TARGET"
+[[ -f "$BUILT" ]] || ./utils/build-headless.sh "$TARGET"
 [[ -f "$BUILT" ]] || { echo "Build failed; not launching TD."; exit 1; }
 
 # Units and includes are recorded in the debug info by bare filename, so TD

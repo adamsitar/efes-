@@ -6,8 +6,8 @@ REM
 REM Flags:
 REM   /V    embed debug symbol table in EXE (required for source-level TD)
 REM   /GD   write a detailed .MAP file (linker map)
-REM   /$Y+  emit symbol-reference (Browser) info
-REM   /$D+ and /$L+ are default-on per BPC -- left implicit
+REM   ($Y browser info deliberately NOT passed: it bloats the symbol-table
+REM    name pool past what real-mode TD can index without corruption)
 E:
 cd \FDP\%1
-D:\BPC.EXE E:\FDP\%1\APP\%2.PAS /V /GD /$Y+ > E:\COMPILE.LOG
+D:\BPC.EXE E:\FDP\%1\APP\%2.PAS /V /GD > E:\COMPILE.LOG

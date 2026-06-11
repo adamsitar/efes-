@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 # Headless BPC build harness under DOSBox-X.
 #
-# Usage:  ./build-headless.sh [TARGET]
+# Usage:  ./utils/build-headless.sh [TARGET]
 #   TARGET := OPL | EDD | FDA | SERVER   (default: OPL)
 #
 # Invokes E:\BUILD.BAT inside DOSBox-X, which redirects compiler output to
-# E:\COMPILE.LOG (= fdp.source/COMPILE.LOG on the host).
+# E:\COMPILE.LOG (= fdp.source/COMPILE.LOG on the host). Runs fully headless
+# (dummy SDL video driver): no window appears.
 
 set -u
 
@@ -20,7 +21,7 @@ case "$TARGET" in
     *) echo "Unknown target: $TARGET. Valid: OPL, EDD, FDA, SERVER"; exit 1 ;;
 esac
 
-REPO_ROOT="$(cd "$(dirname "$0")" && pwd)"
+REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 SRC_DIR="$REPO_ROOT/fdp.source"
 LOG_HOST="$SRC_DIR/COMPILE.LOG"
 EXE_HOST="$SRC_DIR/FDP/$FOLDER/APP/$PROGRAM.EXE"
@@ -32,7 +33,10 @@ echo "Building target: $TARGET  (folder=\\FDP\\$FOLDER, program=$PROGRAM.PAS)"
 
 # The conf mounts drives via relative paths, so run from the repo root.
 cd "$REPO_ROOT"
-dosbox-x -conf dosbox-x.conf -c "E:\\BUILD.BAT $FOLDER $PROGRAM" -exit
+SDL_VIDEODRIVER=dummy timeout -k 5 120 \
+    dosbox-x -conf dosbox-x.conf -c "E:\\BUILD.BAT $FOLDER $PROGRAM" -exit \
+    > /dev/null 2>&1
+[[ $? -eq 124 ]] && echo "WARNING: build session hung; killed after 120 s"
 
 echo
 echo "--- build-headless.sh: dosbox-x exited ---"

@@ -1,5 +1,5 @@
-{$DEFINE DEBUG}
-{ DEFINE DEMO}
+{ DEFINE DEBUG}
+{$DEFINE DEMO}
 
 {$I comp_exe.h}
 

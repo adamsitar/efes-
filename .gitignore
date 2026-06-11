@@ -1,6 +1,9 @@
 # Build harness output
 fdp.source/COMPILE.LOG
 
+# Output captured by utils/dos.sh (E:\AGENT.LOG inside DOSBox)
+fdp.source/AGENT.LOG
+
 # Demo runtime data (mutated whenever any FDP program starts up — IO.PAS:165
 # appends a "System initialized" line, etc.). Tracked by mistake in the
 # initial snapshot; restored once and untracked.
@@ -22,3 +25,10 @@ fdp.source/**/*.[Oo][Vv][Rr]
 # Debug-workflow artifacts (created by debug-x.sh / TDBG.BAT / TD itself)
 fdp.demo/idd/*.orig
 fdp.demo/idd/TDCONFIG.TD
+
+# EDD runtime archive dir (NBSP-prefixed "CMN"), recreated on each run
+fdp.demo/idd/ CMN/
+fdp.demo/idd/ NET/
+
+# BP IDE desktop state (BP.TP is the saved options - keep it tracked)
+fdp.demo/idd/BP.DSK
