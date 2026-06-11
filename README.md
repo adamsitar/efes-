@@ -6,7 +6,7 @@ DOSBox-X mounts four drives, defined in `dosbox-x.conf`: `C:` is the demo workin
 
 ## Working in this repo (humans)
 
-**Start an interactive session** with `./utils/run/run-x.sh` (Linux) or `utils\run\run-x.bat` (Windows). You land at `C:\>`.
+**Start an interactive session** with `./utils/run/run-x.sh` (Linux) or `utils\run\run-x.bat` (Windows). You land at `C:\>`. The demo-day scripts all have Windows twins: `utils\open\bp.bat`, `utils\open\td.bat`, `utils\deploy.bat`, `utils\build-headless.bat`, `utils\kill-dosbox.bat`. One Windows caveat: `dosbox-x.map` was saved by an SDL1 build; if a Windows (SDL2) DOSBox-X ignores it and Ctrl+F9 quits the emulator again, unbind it once on that machine via Main menu → Mapper editor → select the shutdown event → Del → Save.
 
 **Compile** from the host with `./utils/build-headless.sh EDD` (targets: `OPL`, `EDD`, `FDA`, `SERVER`; ~5 s, fully headless), or inside DOSBox with `E:\BUILD.BAT EDD EDD` (SERVER lives in folder `S`). Compiler output lands in `fdp.source/COMPILE.LOG`; the binary in `fdp.source/FDP/<folder>/APP/`. The flags that matter: `/V` embeds the TD symbol table in the EXE (`/GD` does *not* — it only writes a map file). All units compile with `D+,L+` (set in `LIB/FDP/COMP_EXE.H`), so every module is source-debuggable in the IDE. Note that BPC builds and IDE builds write to the *same* output path but differ: BPC embeds the `/V` symbol table (894 KB EXE, what standalone TD needs), while the IDE keeps debug info in its own memory and writes a lean 140 KB EXE.
 
