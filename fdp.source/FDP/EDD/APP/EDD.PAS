@@ -3,7 +3,6 @@
 (* (c) Ales Kosice 1994,95  (ab)                                     *)
 (*-------------------------------------------------------------------*)
 {$I comp.h}
-{$D+,L+}    { local debug info so TD can source-step this module }
 
 program EDD;
 

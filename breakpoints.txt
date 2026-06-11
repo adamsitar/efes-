@@ -1,3 +1,3 @@
-# EDD flow trace example
-E:\FDP\EDD\APP\EDD.PAS 37
-E:\FDP\EDD\APP\EDD.PAS 38
+# Trace example: main entry + sector data loading (library include!)
+E:\FDP\EDD\APP\EDD.PAS 36
+L:\FDP\SECTOR.INC 64

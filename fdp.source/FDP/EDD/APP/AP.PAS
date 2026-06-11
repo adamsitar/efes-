@@ -4,7 +4,6 @@
 (* Supervisor                                                        *)
 (*-------------------------------------------------------------------*)
 {$I comp.h}
-{$D+,L+}    { local debug info so TD can source-step this module }
 
 {$DEFINE EDD}
 
